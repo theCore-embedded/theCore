@@ -19,6 +19,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CXX_NO_EXTRA_WARNINGS}")
 # ./src/stm32f4xx_fmc.c
 
 
+## Qt creator hack
+file(GLOB_RECURSE ALL_SPL_HEADERS *.h)
+add_custom_target(spl_dummy_target SOURCES "${ALL_SPL_HEADERS}")
+
 add_library(spl STATIC
 ./src/stm32f4xx_dbgmcu.c
 ./src/stm32f4xx_cryp_tdes.c
@@ -55,9 +59,6 @@ add_library(spl STATIC
 ./src/stm32f4xx_sai.c
 ./src/stm32f4xx_fsmc.c
 ./src/stm32f4xx_cryp.c
+${ALL_SPL_HEADERS}
 )
 
-
-## Qt creator hack
-file(GLOB_RECURSE ALL_SPL_HEADERS *.h)
-add_custom_target(spl_dummy_target SOURCES "${ALL_SPL_HEADERS}")
