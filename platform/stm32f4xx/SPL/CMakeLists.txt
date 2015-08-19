@@ -56,3 +56,8 @@ add_library(spl STATIC
 ./src/stm32f4xx_fsmc.c
 ./src/stm32f4xx_cryp.c
 )
+
+
+## Qt creator hack
+file(GLOB_RECURSE ALL_SPL_HEADERS *.h)
+add_custom_target(spl_dummy_target SOURCES "${ALL_SPL_HEADERS}")
