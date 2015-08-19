@@ -6,13 +6,6 @@ include_directories(arm)
 # STM32 peripherial library headers itself
 include_directories(inc)
 
-# export includes to other modules
-set(STM32_INCLUDE_DIRS
-"${CMAKE_CURRENT_SOURCE_DIR}/inc/"
-"${CMAKE_CURRENT_SOURCE_DIR}/st/"
-"${CMAKE_CURRENT_SOURCE_DIR}/arm/"
-PARENT_SCOPE)
-
 # override warnings, since library contains a lot of them
 set(CC_NO_EXTRA_WARNINGS "-Wno-pedantic -Wno-all -Wno-extra")
 set(CXX_NO_EXTRA_WARNINGS "-Wno-effc++")
@@ -26,7 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CXX_NO_EXTRA_WARNINGS}")
 # ./src/stm32f4xx_fmc.c
 
 
-add_library(stm32_periph STATIC
+add_library(spl STATIC
 ./src/stm32f4xx_dbgmcu.c
 ./src/stm32f4xx_cryp_tdes.c
 ./src/stm32f4xx_usart.c

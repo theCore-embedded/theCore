@@ -5,8 +5,10 @@ cmake_minimum_required(VERSION 2.8)
 project(mp3player)
 
 # Makefile output for the debug purposes
-set(CMAKE_VERBOSE_MAKEFILE off)
+set(CMAKE_VERBOSE_MAKEFILE on)
 
+
+##########################
 # Useful routines TODO: move all these routines in the separate include
 
 # Registers a project
@@ -17,7 +19,10 @@ function(register_project project_name base_target base_platform)
 
 	include(platform/${base_platform}/compiler/compiler.cmake)
 
+	include_directories(sys)
+
 	add_subdirectory(project/${project_name})
+	add_subdirectory(sys)
 
 	# Make binary from the project object file
 	add_custom_target(${project_name}.bin ALL
@@ -44,9 +49,37 @@ function(register_platform)
 	target_link_libraries(target platform)
 endfunction(register_platform)
 
+# Imports module
+function(import_module current_module imported_module)
+	message(${current_module} " depends on " ${imported_module})
+
+	# Make sure dependencies are correct
+	add_dependencies(${current_module} ${imported_module})
+
+	# Find configuration file and extract path
+
+	file(GLOB_RECURSE module_path ${PROJECT_SOURCE_DIR}/*${imported_module}-config.cmake)
+	get_filename_component(module_dir ${module_path} DIRECTORY)
+	message("Imported module path: " ${module_dir})
+
+	# Find module itself
+	find_package(${imported_module} NO_DEFAULT_PATH PATHS ${module_dir})
+
+	# Set proper includes
+	target_include_directories(${current_module} SYSTEM PRIVATE ${${imported_module}_INCS})
+
+	# Set proper linkage
+	target_link_libraries(${current_module} ${imported_module})
+
+	# Debug
+	#message("Module ${imported_module} includes:\n"  ${${imported_module}_INCS})
+endfunction(import_module)
+
+# EO TODO
+##########################
+
 # Projects to be built
-# add_subdirectory(project/mp3basic)
 register_project(mp3basic mp3basic stm32f4xx)
 
 # For debug purposes only
-#register_project(dummy dummy_target dummy_platform)
+# register_project(dummy dummy_target dummy_platform)
