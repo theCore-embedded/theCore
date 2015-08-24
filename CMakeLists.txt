@@ -65,8 +65,11 @@ function(import_module current_module imported_module)
 	# Find module itself
 	find_package(${imported_module} NO_DEFAULT_PATH PATHS ${module_dir})
 
+	# Set proper definitions
+	add_definitions(${${imported_module}_DEFS})
+
 	# Set proper includes
-	target_include_directories(${current_module} SYSTEM PRIVATE ${${imported_module}_INCS})
+	target_include_directories(${current_module} SYSTEM PUBLIC ${${imported_module}_INCS})
 
 	# Set proper linkage
 	target_link_libraries(${current_module} ${imported_module})
@@ -74,6 +77,12 @@ function(import_module current_module imported_module)
 	# Debug
 	#message("Module ${imported_module} includes:\n"  ${${imported_module}_INCS})
 endfunction(import_module)
+
+# Imports platform
+# TODO
+
+# Imports target
+# TODO
 
 # EO TODO
 ##########################

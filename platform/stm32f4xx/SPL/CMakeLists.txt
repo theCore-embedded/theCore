@@ -61,4 +61,3 @@ add_library(spl STATIC
 ./src/stm32f4xx_cryp.c
 ${ALL_SPL_HEADERS}
 )
-

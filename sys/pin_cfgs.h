@@ -31,6 +31,12 @@ enum class PinNum
 	PIN_7,
 	PIN_8,
 	PIN_9,
+	PIN_10,
+	PIN_11,
+	PIN_12,
+	PIN_13,
+	PIN_14,
+	PIN_15,
 };
 
 // Pin ports
@@ -41,20 +47,22 @@ enum class PinPort
 	PORT_C,
 	PORT_D,
 	PORT_E,
+	PORT_F,
 };
 
 // Type of pin
 enum class PinType {
 	NOPULL,
+	FLOAT,
 	PULL_UP,
 	PULL_DOWN,
 	OPEN_DRAIN
 };
 
-// Pin map
-template< PinPort, PinNum, PinAssignment >
-struct PinsMap;
 
+
+#if 0
+// TODO: is needed?
 // Type is defined by platform
 struct PinDescr;
 
@@ -64,6 +72,12 @@ constexpr PinDescr createPin(const PinPort &port,
 							 const PinAssignment &purpose,
 							 const PinType &type
 							 );
+
+
+
+// Pin map
+template< PinPort, PinNum, PinAssignment >
+struct PinsMap;
 
 // For convenience
 // TODO: beter naming
@@ -81,11 +95,12 @@ struct PinsMap< (port), (pinnum), (purpose)> \
 template <PinPort port, PinNum pin, PinAssignment purpose>
 constexpr const PinDescr& obtainPin(const PinType &type)
 {
-	PinsMap< port, pin, purpose > entry;
+	constexpr PinsMap< port, pin, purpose > entry;
 	entry.type = type;
 
 	return entry;
 }
+#endif
 
 
 

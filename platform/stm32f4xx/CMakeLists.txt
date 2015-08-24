@@ -5,6 +5,10 @@ add_definitions("-DSTM32F40_41xxx")
 
 include_directories(pins)
 
+include_directories(SPL/inc)
+include_directories(SPL/arm)
+include_directories(SPL/st)
+
 # Platform submodules
 add_subdirectory(startup)
 add_subdirectory(pins)
