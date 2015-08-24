@@ -1,7 +1,8 @@
 #ifndef TARGET_PINCONFIG_HPP
 #define TARGET_PINCONFIG_HPP
 
-// TODO: extern 'C' here?
-void initalizePins();
+extern "C" {
+void initializePins();
+}
 
-#endif
+#endif // TARGET_PINCONFIG_HPP

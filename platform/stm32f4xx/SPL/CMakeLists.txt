@@ -18,7 +18,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CXX_NO_EXTRA_WARNINGS}")
 # list of modules not included:
 # ./src/stm32f4xx_fmc.c
 
-
 ## Qt creator hack
 file(GLOB_RECURSE ALL_SPL_HEADERS *.h)
 add_custom_target(spl_dummy_target SOURCES "${ALL_SPL_HEADERS}")
@@ -61,3 +60,5 @@ add_library(spl STATIC
 ./src/stm32f4xx_cryp.c
 ${ALL_SPL_HEADERS}
 )
+
+target_link_libraries(spl startup)

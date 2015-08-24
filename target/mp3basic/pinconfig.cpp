@@ -1,7 +1,20 @@
+#include <cstddef>
 #include "pinconfig.hpp"
 #include "pin_descr.hpp"
 
-void initalizePins()
+extern "C" {
+// HACK - move it somewhere
+void *memcpy(uint8_t *dst, const uint8_t *src, size_t cnt)
+{
+	while (cnt--) {
+		*dst++ = *src++;
+	}
+
+	return dst;
+}
+}
+
+void initializePins()
 {
 	PinDescr toInit[] = {
 		// UART1

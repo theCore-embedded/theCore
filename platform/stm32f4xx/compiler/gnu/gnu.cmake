@@ -17,8 +17,8 @@ set(CC_PLATFORM_FLAGS "-mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sectio
 set(CXX_PLATFORM_FLAGS "-fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # extra flags
-set(CC_EXTRA_FLAGS "-std=c99 -g3")
-set(CXX_EXTRA_FLAGS "-std=c++14 -g3")
+set(CC_EXTRA_FLAGS "-std=c99 -gdwarf-2")
+set(CXX_EXTRA_FLAGS "-std=c++14 -gdwarf-2")
 
 # altogether
 set(CMAKE_C_FLAGS

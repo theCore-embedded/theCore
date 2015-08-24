@@ -1,4 +1,4 @@
-add_library(platform platform.cpp)
+add_library(platform STATIC platform.cpp)
 
 # Make sure appropriate MCU type is chosen
 add_definitions("-DSTM32F40_41xxx")
@@ -17,4 +17,4 @@ add_subdirectory(SPL)
 # TODO: clarify essential libraries
 target_link_libraries(platform startup)
 target_link_libraries(platform pins)
-target_link_libraries(spl)
+target_link_libraries(platform spl)
