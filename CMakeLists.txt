@@ -40,14 +40,14 @@ endfunction(register_project)
 function(register_target)
 	add_subdirectory(${PROJECT_SOURCE_DIR}/target/${BASE_TARGET_NAME} ${CMAKE_CURRENT_BINARY_DIR}/target/)
 	target_link_libraries(${BASE_PROJECT_NAME} target)
-endfunction(register_target)
+endfunction()
 
 # Registers base platform for current target
 # Required to be called from the target module
 function(register_platform)
 	add_subdirectory(${PROJECT_SOURCE_DIR}/platform/${BASE_PLATFORM_NAME} ${CMAKE_CURRENT_BINARY_DIR}/platform/)
 	target_link_libraries(target platform)
-endfunction(register_platform)
+endfunction()
 
 # Imports module
 function(import_module current_module imported_module)
