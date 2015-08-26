@@ -68,14 +68,20 @@ function(import_module current_module imported_module)
 	# Set proper definitions
 	add_definitions(${${imported_module}_DEFS})
 
-	# Set proper includes
-	target_include_directories(${current_module} SYSTEM PUBLIC ${${imported_module}_INCS})
+	# Debug
+	message("Module ${imported_module} includes:\n"  ${${imported_module}_INCS})
+	message("Module ${imported_module} sys includes:\n"  ${${imported_module}_SYS_INCS})
+
+	# Set proper includes and system includes
+	target_include_directories(${current_module}
+	PUBLIC
+	${${imported_module}_INCS})
+	target_include_directories(${current_module}
+	SYSTEM PUBLIC
+	${${imported_module}_SYS_INCS})
 
 	# Set proper linkage
 	target_link_libraries(${current_module} ${imported_module})
-
-	# Debug
-	#message("Module ${imported_module} includes:\n"  ${${imported_module}_INCS})
 endfunction(import_module)
 
 # Imports platform

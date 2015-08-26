@@ -143,7 +143,7 @@ static constexpr uint8_t pickSrc(const PinNum &pin)
 	case PinNum::PIN_15:
 		return GPIO_PinSource15;
 	default:
-		return (uint32_t) -1;
+		return (uint8_t) -1;
 	}
 }
 

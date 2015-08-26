@@ -1,15 +1,18 @@
 #ifndef USART_HANDLER_HPP
 #define USART_HANDLER_HPP
 
-#include <unistd.h>
+
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_rcc.h>
 
+#include <cstdint>
+#include <unistd.h>
+
 // TODO: make it singleton since each HW device must have dedicated driver
 // instance.
-// TODO: think about making driver config (USART_TypeDef)
+// TODO: think about making driver config (USART_TypeDef&)
 // reusable in runtime, not compile time
-template< USART_TypeDef *USARTx >
+template< std::uintptr_t USARTx >
 class UsartHandler
 {
 public:
@@ -31,13 +34,10 @@ public:
 	ssize_t read(uint8_t *data, size_t count);
 
 private:
-	// For convinience
-	using RCC_fn = void (*) (uint32_t RCC_Periph, FunctionalState NewState);
-
 	// Picks proper RCC in compile time
-	constexpr uint32_t pickRCC() const;
+	constexpr auto pickRCC() const;
 	// Picks proper RCC operation function in compile time
-	constexpr RCC_fn pickRCC_fn() const;
+	constexpr auto pickRCC_fn() const;
 
 	// Indicates that USART is ready for use
 	int m_inited = 0;
@@ -48,12 +48,12 @@ private:
 // Interface
 // -----------------------------------------------------------------------------
 
-template< USART_TypeDef *USARTx >
+template< std::uintptr_t USARTx >
 UsartHandler< USARTx >::UsartHandler()
 {
 }
 
-template< USART_TypeDef *USARTx >
+template< std::uintptr_t USARTx >
 UsartHandler< USARTx >::~UsartHandler()
 {
 	// TODO: implement
@@ -62,7 +62,7 @@ UsartHandler< USARTx >::~UsartHandler()
 	}
 }
 
-template< USART_TypeDef *USARTx >
+template< std::uintptr_t USARTx >
 int UsartHandler< USARTx >::init()
 {
 	USART_InitTypeDef initStruct;
@@ -71,12 +71,9 @@ int UsartHandler< USARTx >::init()
 	if (m_inited)
 		return -1;
 
-	// Convinience
-	using CurrentUsart = UsartHandler< USARTx >;
-
 	// Must be optimized at compile time
-	constexpr uint32_t              RCC_Periph = pickRCC();
-	constexpr CurrentUsart::RCC_fn  RCC_fn     = pickRCC_fn();
+	constexpr auto RCC_Periph = pickRCC();
+	constexpr auto RCC_fn     = pickRCC_fn();
 
 	// Enable peripheral clock
 	RCC_fn(RCC_Periph, ENABLE);
@@ -99,7 +96,7 @@ int UsartHandler< USARTx >::init()
 	return 0;
 }
 
-template< USART_TypeDef *USARTx >
+template< std::uintptr_t USARTx >
 int UsartHandler< USARTx >::open()
 {
 	if (!m_inited || m_opened)
@@ -111,7 +108,7 @@ int UsartHandler< USARTx >::open()
 	return 0;
 }
 
-template< USART_TypeDef *USARTx >
+template< std::uintptr_t USARTx >
 ssize_t UsartHandler< USARTx >::read(uint8_t *data, size_t count)
 {
 	if (!m_opened)
@@ -121,7 +118,7 @@ ssize_t UsartHandler< USARTx >::read(uint8_t *data, size_t count)
 	return 0;
 }
 
-template< USART_TypeDef *USARTx >
+template< std::uintptr_t USARTx >
 ssize_t UsartHandler< USARTx >::write(const uint8_t *data, size_t count)
 {
 	if (!m_opened)
@@ -134,8 +131,8 @@ ssize_t UsartHandler< USARTx >::write(const uint8_t *data, size_t count)
 
 // Private members
 // -----------------------------------------------------------------------------
-template< USART_TypeDef *USARTx >
-constexpr uint32_t UsartHandler< USARTx >::pickRCC() const
+template< std::uintptr_t USARTx >
+constexpr auto UsartHandler< USARTx >::pickRCC() const
 {
 	// USART1 and USART6 are on APB2
 	// USART2, USART3, UART4, UART5 are on APB1
@@ -162,18 +159,18 @@ constexpr uint32_t UsartHandler< USARTx >::pickRCC() const
 	}
 }
 
-// God, what is wrong with this language?!
-template< USART_TypeDef *USARTx >
-constexpr typename UsartHandler< USARTx >::RCC_fn UsartHandler< USARTx >::pickRCC_fn() const
+template< std::uintptr_t USARTx >
+constexpr auto UsartHandler< USARTx >::pickRCC_fn() const
 {
 	// USART1 and USART6 are on APB2
 	// USART2, USART3, UART4, UART5 are on APB1
 	// See datasheet for detailed explanations
-	if (USARTx == USART1 || USARTx == USART6) {
+	constexpr USART_TypeDef *usart = (USART_TypeDef *) USARTx;
+	if (usart == USART1 || usart == USART6) {
 		return RCC_APB2PeriphClockCmd;
-	} else if (USARTx == USART2 || USARTx == USART3 ||
-			   USARTx == UART4  || USARTx == USART3 ||
-			   USARTx == UART5) {
+	} else if (usart == USART2 || usart == USART3 ||
+			   usart == UART4  || usart == USART3 ||
+			   usart == UART5) {
 		return RCC_APB1PeriphClockCmd;
 	}
 }

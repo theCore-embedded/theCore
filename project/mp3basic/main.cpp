@@ -1,4 +1,5 @@
-#include "pinconfig.hpp"
+#include <Usart.hpp>
+#include <pinconfig.hpp>
 
 int main()
 {

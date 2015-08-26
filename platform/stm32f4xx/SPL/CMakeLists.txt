@@ -1,10 +1,10 @@
 # common headers provided by STM Electronics
-include_directories(st)
+include_directories(SYSTEM st)
 # common headers provided by ARM
-include_directories(arm)
+include_directories(SYSTEM arm)
 
 # STM32 peripherial library headers itself
-include_directories(inc)
+include_directories(SYSTEM inc)
 
 # override warnings, since library contains a lot of them
 set(CC_NO_EXTRA_WARNINGS "-Wno-pedantic -Wno-all -Wno-extra")
