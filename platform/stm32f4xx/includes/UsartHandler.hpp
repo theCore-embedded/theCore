@@ -35,9 +35,12 @@ public:
 
 private:
 	// Picks proper RCC in compile time
-	constexpr auto pickRCC() const;
+	static constexpr auto pickRCC();
 	// Picks proper RCC operation function in compile time
-	constexpr auto pickRCC_fn() const;
+	static constexpr auto pickRCC_fn();
+	// Converts to proper USART type
+	static constexpr auto pickUSART();
+	//constexpr auto pickUSART(std::uintptr_t usart) const;
 
 	// Indicates that USART is ready for use
 	int m_inited = 0;
@@ -90,7 +93,7 @@ int UsartHandler< USARTx >::init()
 	initStruct.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
 
 	// Init UART
-	USART_Init(USARTx, &initStruct);
+	USART_Init(pickUSART(), &initStruct);
 	m_inited = 1;
 
 	return 0;
@@ -111,56 +114,64 @@ int UsartHandler< USARTx >::open()
 template< std::uintptr_t USARTx >
 ssize_t UsartHandler< USARTx >::read(uint8_t *data, size_t count)
 {
+	// Not used
+
+	if (!count)
+		return 0;
+
 	if (!m_opened)
 		return -1;
 
-	// TODO: implement
-	return 0;
+	while (USART_GetFlagStatus(pickUSART(), USART_FLAG_RXNE) == RESET) { }
+
+	// USART HW buffer is only one byte long
+	*data = USART_ReceiveData(pickUSART());
+
+	return 1;
 }
 
 template< std::uintptr_t USARTx >
 ssize_t UsartHandler< USARTx >::write(const uint8_t *data, size_t count)
 {
+	(void) count;
+
 	if (!m_opened)
 		return -1;
 
-	// TODO: implement
-	return 0;
+	while (USART_GetFlagStatus(pickUSART(), USART_FLAG_TXE) == RESET) { }
+
+	// USART HW buffer is only one byte long
+	USART_SendData(pickUSART(), *data++);
+
+	return 1;
 }
 
 
 // Private members
 // -----------------------------------------------------------------------------
 template< std::uintptr_t USARTx >
-constexpr auto UsartHandler< USARTx >::pickRCC() const
+constexpr auto UsartHandler< USARTx >::pickRCC()
 {
 	// USART1 and USART6 are on APB2
 	// USART2, USART3, UART4, UART5 are on APB1
 	// See datasheet for detailed explanations
-	switch (USARTx) {
-	case USART1:
+	constexpr auto usart = pickUSART();
+	if (usart == USART1)
 		return RCC_APB2Periph_USART1;
-		break;
-	case USART2:
-		return RCC_APB1Periph_USART2, ENABLE;
-		break;
-	case USART3:
-		return RCC_APB1Periph_USART3, ENABLE;
-		break;
-	case UART4:
-		return RCC_APB1Periph_UART4, ENABLE;
-		break;
-	case UART5:
-		return RCC_APB1Periph_USART2, ENABLE;
-		break;
-	case USART6:
-		return RCC_APB2Periph_USART6, ENABLE;
-		break;
-	}
+	if (usart == USART2)
+		return RCC_APB1Periph_USART2;
+	if (usart == USART3)
+		return RCC_APB1Periph_USART3;
+	if (usart == UART4)
+		return RCC_APB1Periph_UART4;
+	if (usart == UART5)
+		return RCC_APB1Periph_USART2;
+	if (usart == USART6)
+		return RCC_APB2Periph_USART6;
 }
 
 template< std::uintptr_t USARTx >
-constexpr auto UsartHandler< USARTx >::pickRCC_fn() const
+constexpr auto UsartHandler< USARTx >::pickRCC_fn()
 {
 	// USART1 and USART6 are on APB2
 	// USART2, USART3, UART4, UART5 are on APB1
@@ -174,5 +185,12 @@ constexpr auto UsartHandler< USARTx >::pickRCC_fn() const
 		return RCC_APB1PeriphClockCmd;
 	}
 }
+
+template< std::uintptr_t USARTx >
+constexpr auto UsartHandler< USARTx >::pickUSART()
+{
+	return (USART_TypeDef *) USARTx;
+}
+
 
 #endif // USART_HANDLER_HPP

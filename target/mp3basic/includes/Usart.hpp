@@ -5,4 +5,5 @@
 #include <cstdint>
 
 using ConsoleDriver = UsartHandler< (std::uintptr_t) USART1 >;
+
 #endif
