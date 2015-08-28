@@ -1,3 +1,4 @@
+// TODO: consider using better name
 #ifndef PLATFORM_PIN_DESCR_HPP
 #define PLATFORM_PIN_DESCR_HPP
 
@@ -20,6 +21,7 @@ struct PinDescr
 	const uint8_t            af;
 
 	// Inits a pin
+	// TODO: move it to the CPP file
 	void init()
 	{
 		GPIO_InitTypeDef initStruct;
@@ -38,10 +40,6 @@ struct PinDescr
 		if (this->mode == GPIO_Mode_AF) {
 			GPIO_PinAFConfig(this->port, this->src, this->af);
 		}
-
-		// TODO: create it
-
-		return;
 	}
 };
 
@@ -60,8 +58,7 @@ static constexpr GPIO_TypeDef *pickPort(const PinPort &port)
 	case PinPort::PORT_E:
 		return GPIOE;
 	default:
-		// TODO: fix to NULL
-		return (GPIO_TypeDef *)0;
+		return nullptr;
 	}
 }
 
@@ -221,13 +218,9 @@ static constexpr uint32_t pickPeriph(const PinPort &port)
 	case PinPort::PORT_E:
 		return RCC_AHB1Periph_GPIOE;
 	default:
-		// TODO: fix to NULL
-		return (uint32_t) -1;
+		return nullptr;
 	}
-
 }
-
-
 
 constexpr PinDescr createPin(const PinPort &port,
 				   const PinNum &pinnum,

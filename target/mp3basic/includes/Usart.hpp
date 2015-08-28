@@ -4,6 +4,6 @@
 #include <UsartHandler.hpp>
 #include <cstdint>
 
-using ConsoleDriver = UsartHandler< (std::uintptr_t) USART1 >;
+using ConsoleDriver = UsartHandler< (std::uintptr_t) USART3 >;
 
 #endif

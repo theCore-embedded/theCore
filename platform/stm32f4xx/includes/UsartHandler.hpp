@@ -1,3 +1,4 @@
+// TODO: use better name for this module
 #ifndef USART_HANDLER_HPP
 #define USART_HANDLER_HPP
 
@@ -106,7 +107,7 @@ int UsartHandler< USARTx >::open()
 		return -1;
 
 	// Enable UART
-	USART_Cmd(USARTx, ENABLE);
+	USART_Cmd(pickUSART(), ENABLE);
 	m_opened = 1;
 	return 0;
 }
@@ -135,13 +136,16 @@ ssize_t UsartHandler< USARTx >::write(const uint8_t *data, size_t count)
 {
 	(void) count;
 
+	if (!count)
+		return 0;
+
 	if (!m_opened)
 		return -1;
 
 	while (USART_GetFlagStatus(pickUSART(), USART_FLAG_TXE) == RESET) { }
 
 	// USART HW buffer is only one byte long
-	USART_SendData(pickUSART(), *data++);
+	USART_SendData(pickUSART(), *data);
 
 	return 1;
 }

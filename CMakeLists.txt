@@ -94,6 +94,8 @@ endfunction(import_module)
 ##########################
 
 # Projects to be built
+# TODO: think about using cmake's project instead of
+# using self-made projects
 register_project(mp3basic mp3basic stm32f4xx)
 
 # For debug purposes only
