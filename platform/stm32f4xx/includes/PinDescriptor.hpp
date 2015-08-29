@@ -199,6 +199,14 @@ static constexpr uint8_t pickAf(const PinAssignment &purpose)
 		return GPIO_AF_USART2;
 	case PinAssignment::UART3:
 		return GPIO_AF_USART3;
+		// TODO: add rest of usarts
+	case PinAssignment::PIN_SPI1:
+		return GPIO_AF_SPI1;
+	case PinAssignment::PIN_SPI2:
+		return GPIO_AF_SPI2;
+	case PinAssignment::PIN_SPI3:
+		return GPIO_AF_SPI3;
+		// TODO: add rest of SPI
 	default:
 		return (uint8_t) -1;
 	}
@@ -218,7 +226,7 @@ static constexpr uint32_t pickPeriph(const PinPort &port)
 	case PinPort::PORT_E:
 		return RCC_AHB1Periph_GPIOE;
 	default:
-		return nullptr;
+		return (uint32_t) -1;
 	}
 }
 

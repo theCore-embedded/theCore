@@ -1,5 +1,6 @@
 #include <Usart.hpp>
 #include <pinconfig.hpp>
+#include <SpiDev.hpp>
 
 int main()
 {
@@ -8,6 +9,8 @@ int main()
 	ConsoleDriver console;
 	console.init();
 	console.open();
+
+	//SpiDev spi;
 
 	uint8_t c;
 
