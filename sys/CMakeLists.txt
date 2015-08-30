@@ -1,2 +1,2 @@
 # Placeholder
-add_library(sys STATIC sys.cpp pin_cfgs.h iodev/iodev.hpp iowrap/iowrap.hpp)
+add_library(sys STATIC sys.cpp spi_cfgs.h pin_cfgs.h iodev/iodev.hpp iowrap/iowrap.hpp)

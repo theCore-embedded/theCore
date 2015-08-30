@@ -1,3 +1,4 @@
+// TODO: better name
 #ifndef SYS_PIN_CFGS_H
 #define SYS_PIN_CFGS_H
 
