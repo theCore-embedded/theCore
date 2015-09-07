@@ -1,6 +1,6 @@
 #include <Usart.hpp>
 #include <pinconfig.hpp>
-#include <SpiDev.hpp>
+#include <spi.hpp>
 
 int main()
 {
@@ -10,7 +10,15 @@ int main()
 	console.init();
 	console.open();
 
-	//SpiDev spi;
+	// NOT TESTED IN HW YET!!!!
+	SpiLCDDriver spi;
+	spi.init();
+	spi.open();
+
+	uint8_t s;
+	spi.read(&s, 1);
+	spi.write(&s, 1);
+	// END OF NOT TESTED
 
 	uint8_t c;
 

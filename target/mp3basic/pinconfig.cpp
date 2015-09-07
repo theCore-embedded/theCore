@@ -18,7 +18,7 @@ void *memcpy(uint8_t *dst, const uint8_t *src, size_t cnt)
 // TODO: mopve it to the target.cpp / target.h module
 void initializePins()
 {
-	PinDescr toInit[] = {
+	constexpr PinDescr toInit[] = {
 		// Console
 		// USART3 TX
 		createPin(PinPort::PORT_D, PinNum::PIN_8, PinAssignment::UART3, PinType::NOPULL),

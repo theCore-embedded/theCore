@@ -17,14 +17,14 @@ enum class SpiMode
 
 enum class SpiCPOL
 {
-	Low,
-	High
+	LOW,
+	HIGH
 };
 
 enum class SpiCPHA
 {
-	FirstEdge,
-	SecondEdge
+	FIRST_EDGE,
+	SECOND_EDGE
 };
 
 enum class SpiNssType

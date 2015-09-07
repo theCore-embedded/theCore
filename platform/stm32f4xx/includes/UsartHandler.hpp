@@ -12,6 +12,7 @@
 // instance.
 // TODO: think about making driver config (USART_TypeDef&)
 // reusable in runtime, not compile time
+// TODO: replace USARTx with generic enumerator
 template< std::uintptr_t USARTx >
 class UsartHandler
 {
