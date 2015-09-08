@@ -1,4 +1,4 @@
-#include <PinDescriptor.hpp>
+#include <pin_descriptor.hpp>
 #include <cstddef>
 #include "pinconfig.hpp"
 

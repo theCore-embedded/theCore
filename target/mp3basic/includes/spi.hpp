@@ -1,7 +1,7 @@
 #ifndef TARGET_SPI_HPP_
 #define TARGET_SPI_HPP_
 
-#include <SpiDev.hpp>
+#include <spi_device.hpp>
 #include <stm32f4xx.h>
 
 // TODO: better name
