@@ -1,1 +1,1 @@
-#include "pin_cfgs.h"
+#include "sys/pin_cfgs.h"

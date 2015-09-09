@@ -1,6 +1,6 @@
-#include <pin_descriptor.hpp>
+#include <platform/pin_descriptor.hpp>
 #include <cstddef>
-#include "pinconfig.hpp"
+#include "target/pinconfig.hpp"
 
 extern "C" {
 // TODO: HACK - move it somewhere

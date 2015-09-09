@@ -1,11 +1,3 @@
-# common headers provided by STM Electronics
-include_directories(SYSTEM st)
-# common headers provided by ARM
-include_directories(SYSTEM arm)
-
-# STM32 peripherial library headers itself
-include_directories(SYSTEM inc)
-
 # override warnings, since library contains a lot of them
 set(CC_NO_EXTRA_WARNINGS "-Wno-pedantic -Wno-all -Wno-extra")
 set(CXX_NO_EXTRA_WARNINGS "-Wno-effc++")
@@ -21,6 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CXX_NO_EXTRA_WARNINGS}")
 ## Qt creator hack
 file(GLOB_RECURSE ALL_SPL_HEADERS *.h)
 add_custom_target(spl_dummy_target SOURCES "${ALL_SPL_HEADERS}")
+## EO hack
 
 add_library(spl STATIC
 ./src/stm32f4xx_dbgmcu.c
@@ -58,7 +51,21 @@ add_library(spl STATIC
 ./src/stm32f4xx_sai.c
 ./src/stm32f4xx_fsmc.c
 ./src/stm32f4xx_cryp.c
-${ALL_SPL_HEADERS}
 )
+
+# TODO:
+# Report a bug.
+# For whatever reason, 'SYSTEM' is working ONLY if path is absolute
+# Why?
+
+# common headers provided by STM Electronics
+target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/inc)
+# STM32 peripherial library headers itself
+target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/st)
+# common headers provided by ARM
+target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/arm)
+
+# Make sure appropriate MCU type is chosen
+target_compile_definitions(spl PUBLIC -DSTM32F40_41xxx)
 
 target_link_libraries(spl startup)

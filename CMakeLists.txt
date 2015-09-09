@@ -1,12 +1,13 @@
 # Might be reviewed
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.3)
+
+# TODO: bug?
 
 # Objvious
 project(mp3player)
 
 # Makefile output for the debug purposes
 set(CMAKE_VERBOSE_MAKEFILE on)
-
 
 ##########################
 # Useful routines TODO: move all these routines in the separate include
@@ -19,9 +20,11 @@ function(register_project project_name base_target base_platform)
 
 	include(platform/${base_platform}/compiler/compiler.cmake)
 
-	include_directories(sys)
+	include_directories(sys/export)
 
 	add_subdirectory(project/${project_name})
+
+	# TODO: find better place for it
 	add_subdirectory(sys)
 
 	# Make binary from the project object file
@@ -33,7 +36,7 @@ function(register_project project_name base_target base_platform)
 
 	set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${Target}.bin)
 
-endfunction(register_project)
+endfunction()
 
 # Registers base target for given project
 # Requied to be called from the project module
@@ -68,21 +71,9 @@ function(import_module current_module imported_module)
 	# Set proper definitions
 	add_definitions(${${imported_module}_DEFS})
 
-	# Debug
-	message("Module ${imported_module} includes:\n"  ${${imported_module}_INCS})
-	message("Module ${imported_module} sys includes:\n"  ${${imported_module}_SYS_INCS})
-
-	# Set proper includes and system includes
-	target_include_directories(${current_module}
-	PUBLIC
-	${${imported_module}_INCS})
-	target_include_directories(${current_module}
-	SYSTEM PUBLIC
-	${${imported_module}_SYS_INCS})
-
 	# Set proper linkage
 	target_link_libraries(${current_module} ${imported_module})
-endfunction(import_module)
+endfunction()
 
 # Imports platform
 # TODO

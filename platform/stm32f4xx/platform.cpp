@@ -1,4 +1,4 @@
-#include <usart_device.hpp>
+#include <platform/usart_device.hpp>
 
 void foo()
 {

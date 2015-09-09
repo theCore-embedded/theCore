@@ -1,6 +1,6 @@
-#include <usart.hpp>
-#include <pinconfig.hpp>
-#include <spi.hpp>
+#include <target/usart.hpp>
+#include <target/spi.hpp>
+#include <target/pinconfig.hpp>
 
 int main()
 {

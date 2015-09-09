@@ -2,7 +2,7 @@
 #ifndef PLATFORM_PIN_DESCR_HPP
 #define PLATFORM_PIN_DESCR_HPP
 
-#include <pin_cfgs.h>
+#include <sys/pin_cfgs.h>
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_rcc.h>
 

@@ -2,7 +2,7 @@
 #define PLATFORM_SPI_DEV_H_
 
 #include <stm32f4xx_spi.h>
-#include <spi_cfgs.h>
+#include <sys/spi_cfgs.h>
 
 
 // TODO: replace SPIx with generic enumerator
