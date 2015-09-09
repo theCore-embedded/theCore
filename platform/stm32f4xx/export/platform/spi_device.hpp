@@ -4,9 +4,8 @@
 #include <stm32f4xx_spi.h>
 #include <sys/spi_cfgs.h>
 
-
 // TODO: replace SPIx with generic enumerator
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 class SpiDev
 {
 public:
@@ -62,7 +61,7 @@ private:
 //------------------------------------------------------------------------------
 // Interface
 
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 SpiDev< SPIx >::SpiDev(SpiDirection   direction,
 					   SpiMode        mode,
 					   SpiCPOL        CPOL,
@@ -86,7 +85,7 @@ SpiDev< SPIx >::SpiDev(SpiDirection   direction,
 {
 }
 
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 SpiDev< SPIx >::~SpiDev()
 {
 	// TODO
@@ -97,12 +96,12 @@ SpiDev< SPIx >::~SpiDev()
 
 
 // TODO: implement, comments
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 int SpiDev< SPIx >::init()
 {
-	constexpr auto SPIbus = pickSPI();
-	auto RCC_Periph = pickRCC();
-	auto RCC_fn = pickRCC_fn();
+	constexpr auto SPIbus            = pickSPI();
+	constexpr auto RCC_Periph        = pickRCC();
+	constexpr auto RCC_fn            = pickRCC_fn();
 
 	RCC_fn(RCC_Periph, ENABLE);
 
@@ -114,31 +113,35 @@ int SpiDev< SPIx >::init()
 }
 
 // TODO: implement, comments
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 int SpiDev< SPIx >::open()
 {
 	if (!m_inited)
 		return -1;
 
-	SPI_Cmd(pickSPI(), ENABLE);
+	constexpr auto spi = pickSPI();
+
+	SPI_Cmd(spi, ENABLE);
 	m_opened = true;
 	return 0;
 }
 
 // TODO: implement, comments
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 int SpiDev< SPIx >::close()
 {
 	if (!m_opened)
 		return -1;
 
-	SPI_Cmd(pickSPI(), DISABLE);
+	constexpr auto spi = pickSPI();
+
+	SPI_Cmd(spi, DISABLE);
 	m_opened = false;
 	return 0;
 }
 
 // TODO: implement, comments
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 ssize_t SpiDev< SPIx >::write(const uint8_t *data, size_t count)
 {
 	if (!m_opened)
@@ -147,17 +150,17 @@ ssize_t SpiDev< SPIx >::write(const uint8_t *data, size_t count)
 	if (!count)
 		return 0;
 
-	constexpr auto SPIbus = pickSPI();
+	constexpr auto spi = pickSPI();
 
-	while (SPI_I2S_GetFlagStatus(SPIbus, SPI_I2S_FLAG_TXE) == RESET) { }
+	while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
 
-	SPI_I2S_SendData(SPIbus, data[0]);
+	SPI_I2S_SendData(spi, data[0]);
 
 	return 1;
 }
 
 // TODO: implement, comments
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 ssize_t SpiDev< SPIx >::read(uint8_t *data, size_t count)
 {
 	if (!m_opened)
@@ -166,11 +169,11 @@ ssize_t SpiDev< SPIx >::read(uint8_t *data, size_t count)
 	if (!count)
 		return 0;
 
-	constexpr auto SPIbus = pickSPI();
+	constexpr auto spi = pickSPI();
 
-	while (SPI_I2S_GetFlagStatus(SPIbus, SPI_I2S_FLAG_RXNE) == RESET) { }
+	while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET) { }
 
-	data[0] = SPI_I2S_ReceiveData(I2S3ext);
+	data[0] = SPI_I2S_ReceiveData(spi);
 
 	return 1;
 }
@@ -179,28 +182,78 @@ ssize_t SpiDev< SPIx >::read(uint8_t *data, size_t count)
 // Private section
 
 // TODO: implement
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickSPI()
 {
-	return (SPI_TypeDef *) SPIx;
+	switch (SPIx) {
+	case SpiDevices::BUS_1:
+		return SPI1;
+	case SpiDevices::BUS_2:
+		return SPI2;
+	case SpiDevices::BUS_3:
+		return SPI3;
+	case SpiDevices::BUS_4:
+		return SPI4;
+	case SpiDevices::BUS_5:
+		return SPI5;
+	case SpiDevices::BUS_6:
+		return SPI6;
+	default:
+		// TODO: clarfy
+		return static_cast< decltype(SPI1) >(nullptr);
+\	}
 }
 
 // TODO: implement
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickRCC()
 {
-	return RCC_APB2Periph_SPI1;
+	// TODO: comments
+	switch (SPIx) {
+	case SpiDevices::BUS_1:
+		return RCC_APB2Periph_SPI1;
+	case SpiDevices::BUS_2:
+		return RCC_APB1Periph_SPI2;
+	case SpiDevices::BUS_3:
+		return RCC_APB1Periph_SPI3;
+	case SpiDevices::BUS_4:
+		return RCC_APB2Periph_SPI4;
+	case SpiDevices::BUS_5:
+		return RCC_APB2Periph_SPI5;
+	case SpiDevices::BUS_6:
+		return RCC_APB2Periph_SPI6;
+	default:
+		// TODO: clarify
+		return static_cast< decltype(RCC_APB2Periph_SPI6) >(-1);
+	}
 }
 
 // TODO: implement
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickRCC_fn()
 {
+	// TODO: comments
+	// Ref. manual, page 234
 	return RCC_APB2PeriphClockCmd;
+
+	// APB1 - SPI3 SPI2
+	// APB2 - SPI5 SPI6 SPI1
+	switch (SPIx) {
+	case SpiDevices::BUS_1:
+	case SpiDevices::BUS_5:
+	case SpiDevices::BUS_6:
+		return RCC_APB1PeriphClockCmd;
+	case SpiDevices::BUS_2:
+	case SpiDevices::BUS_3:
+		return RCC_APB2PeriphClockCmd;
+	default:
+		// TODO: clarify
+		return static_cast< decltype(&RCC_APB2PeriphClockCmd) >(nullptr);
+	}
 }
 
 // TODO: implement
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickDir(SpiDirection direction)
 {
 
@@ -213,12 +266,13 @@ constexpr auto SpiDev< SPIx >::pickDir(SpiDirection direction)
 	case SpiDirection::BIDIR:
 		return SPI_Direction_2Lines_FullDuplex;
 	default:
-		return (uint16_t) -1;
+		// TODO: clarify
+		return static_cast< decltype(SPI_Direction_1Line_Tx) >(-1);
 	}
 }
 
 // TODO: implement
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickMode(SpiMode mode)
 {
 	switch (mode) {
@@ -227,12 +281,13 @@ constexpr auto SpiDev< SPIx >::pickMode(SpiMode mode)
 	case SpiMode::SLAVE:
 		return SPI_Mode_Slave;
 	default:
-		return (uint16_t) -1;
+		// TODO: clarify
+		return static_cast< decltype(SPI_Mode_Slave) >(-1);
 	}
 }
 
 // TODO: implement
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickCPOL(SpiCPOL CPOL)
 {
 	switch (CPOL) {
@@ -241,12 +296,13 @@ constexpr auto SpiDev< SPIx >::pickCPOL(SpiCPOL CPOL)
 	case SpiCPOL::HIGH:
 		return SPI_CPOL_High;
 	default:
-		return (uint16_t) -1;
+		// TODO: clarify
+		return static_cast< decltype(SPI_CPOL_High) >(-1);
 	}
 }
 
 // TODO: implement
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickCPHA(SpiCPHA CPHA)
 {
 	switch (CPHA) {
@@ -256,11 +312,11 @@ constexpr auto SpiDev< SPIx >::pickCPHA(SpiCPHA CPHA)
 		return SPI_CPHA_2Edge;
 	default:
 		// TODO: clarify
-		return (uint16_t) -1;
+		return static_cast< decltype(SPI_CPHA_2Edge) >(-1);
 	}
 }
 
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickNSS(SpiNssType nssType)
 {
 	switch (nssType) {
@@ -270,11 +326,11 @@ constexpr auto SpiDev< SPIx >::pickNSS(SpiNssType nssType)
 		return SPI_NSS_Soft;
 	default:
 		// TODO: clarify
-		return (uint16_t) -1;
+		return static_cast< decltype(SPI_NSS_Soft) >(-1);
 	}
 }
 
-template< std::uintptr_t SPIx >
+template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickFirstBit(SpiBitOrder bitOrder)
 {
 	switch (bitOrder) {
@@ -284,10 +340,8 @@ constexpr auto SpiDev< SPIx >::pickFirstBit(SpiBitOrder bitOrder)
 		return SPI_FirstBit_LSB;
 	default:
 		// TODO: clarify
-		return (uint16_t) -1;
+		return static_cast< decltype(SPI_FirstBit_LSB) >(-1);
 	}
-
-	return SPI_FirstBit_MSB;
 }
 
 

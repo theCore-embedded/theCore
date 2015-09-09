@@ -10,7 +10,7 @@ int main()
 	console.init();
 	console.open();
 
-#if 0
+#if 1
 	// NOT TESTED IN HW YET!!!!
 	SpiLCDDriver spi;
 	spi.init();

@@ -5,7 +5,7 @@
 #include <stm32f4xx.h>
 
 // TODO: better name
-using SpiLCDDriver = SpiDev< (std::uintptr_t) SPI2 >;
+using SpiLCDDriver = SpiDev< SpiDevices::BUS_2 >;
 
 #endif // TARGET_SPI_HPP_
 
