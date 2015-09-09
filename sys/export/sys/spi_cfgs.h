@@ -2,6 +2,19 @@
 #ifndef SYS_SPI_CFGS_H
 #define SYS_SPI_CFGS_H
 
+// Represents distinct peripheral devices
+enum class SpiDevices
+{
+	BUS_1,
+	BUS_2,
+	BUS_3,
+	BUS_4,
+	BUS_5,
+	BUS_6,
+	BUS_7,
+	BUS_8
+};
+
 enum class SpiDirection
 {
 	TX,

@@ -10,6 +10,7 @@ int main()
 	console.init();
 	console.open();
 
+#if 0
 	// NOT TESTED IN HW YET!!!!
 	SpiLCDDriver spi;
 	spi.init();
@@ -19,6 +20,7 @@ int main()
 	spi.read(&s, 1);
 	spi.write(&s, 1);
 	// END OF NOT TESTED
+#endif
 
 	uint8_t c;
 
