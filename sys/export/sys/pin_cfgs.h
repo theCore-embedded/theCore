@@ -60,49 +60,4 @@ enum class PinType {
 	OPEN_DRAIN
 };
 
-
-
-#if 0
-// TODO: is needed?
-// Type is defined by platform
-struct PinDescr;
-
-// Get actual pin, defined by platform
-constexpr PinDescr createPin(const PinPort &port,
-							 const PinNum &pinnum,
-							 const PinAssignment &purpose,
-							 const PinType &type
-							 );
-
-
-
-// Pin map
-template< PinPort, PinNum, PinAssignment >
-struct PinsMap;
-
-// For convenience
-// TODO: beter naming
-#define MAP_ENTRY(port, pinnum, purpose) \
-template<> \
-struct PinsMap< (port), (pinnum), (purpose)> \
-{ \
-	const PinDescr m_pin = \
-	createPin((port), (pinnum), (purpose), PinType::NOPULL); \
-}
-
-
-// Obtains proper pin using pin purpose
-// TODO: extend speed here
-template <PinPort port, PinNum pin, PinAssignment purpose>
-constexpr const PinDescr& obtainPin(const PinType &type)
-{
-	constexpr PinsMap< port, pin, purpose > entry;
-	entry.type = type;
-
-	return entry;
-}
-#endif
-
-
-
 #endif

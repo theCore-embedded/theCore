@@ -1,6 +1,8 @@
 #include <target/usart.hpp>
 #include <target/spi.hpp>
 #include <target/pinconfig.hpp>
+#include <target/gpio.hpp>
+#include <platform/gpio_device.hpp>
 
 int main()
 {
@@ -10,8 +12,8 @@ int main()
 	console.init();
 	console.open();
 
-#if 1
-	// NOT TESTED IN HW YET!!!!
+#if 0
+	// NOT TESTED WITH HW YET!!!!
 	SpiLCDDriver spi;
 	spi.init();
 	spi.open();
@@ -31,10 +33,26 @@ int main()
 		console.read(&c, 1);
 		console.write(&c, 1);
 
-		if (c == '\r') {
+		switch (c) {
+		case '\r':
 			console.write((uint8_t *)"\n", 1);
 			console.write((uint8_t *)"$", 1);
 			console.write((uint8_t *)" ", 1);
+			break;
+		case 'r':
+			LED_Red::toggle();
+			break;
+		case 'g':
+			LED_Green::toggle();
+			break;
+		case 'b':
+			LED_Blue::toggle();
+			break;
+		case 'o':
+			LED_Orange::toggle();
+			break;
+		default:
+			break;
 		}
 	}
 

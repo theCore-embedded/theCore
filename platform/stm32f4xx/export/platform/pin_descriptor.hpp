@@ -7,7 +7,7 @@
 #include <stm32f4xx_rcc.h>
 
 // Pin descriptor, used for pinconfig
-// TODO: constexpr constructor?
+// TODO: constexpr objects/constructor?
 struct PinDescr
 {
 	// TODO: add APB here
@@ -231,6 +231,7 @@ static constexpr uint32_t pickPeriph(const PinPort &port)
 	}
 }
 
+// TODO: make it as a constructor
 constexpr PinDescr createPin(const PinPort &port,
 				   const PinNum &pinnum,
 				   const PinAssignment &purpose,
@@ -249,34 +250,6 @@ constexpr PinDescr createPin(const PinPort &port,
 		pickAf(purpose),
 	};
 }
-
-
-#if 0
-// Possible pin combinations, according to the datasheet
-// TODO: extend
-
-// TODO: is needed?
-// USART1
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_8, PinAssignment::UART1);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_9, PinAssignment::UART1);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_10, PinAssignment::UART1);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_11, PinAssignment::UART1);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_12, PinAssignment::UART1);
-MAP_ENTRY(PinPort::PORT_B, PinNum::PIN_6, PinAssignment::UART1);
-MAP_ENTRY(PinPort::PORT_B, PinNum::PIN_7, PinAssignment::UART1);
-
-// USART2
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_0, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_1, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_2, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_3, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_A, PinNum::PIN_4, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_D, PinNum::PIN_3, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_D, PinNum::PIN_4, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_D, PinNum::PIN_5, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_D, PinNum::PIN_6, PinAssignment::UART2);
-MAP_ENTRY(PinPort::PORT_D, PinNum::PIN_7, PinAssignment::UART2);
-#endif
 
 #endif // PLATFORM_PIN_DESCR_HPP
 
