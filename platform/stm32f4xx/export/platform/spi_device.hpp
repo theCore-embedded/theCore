@@ -1,5 +1,5 @@
-#ifndef PLATFORM_SPI_DEV_H_
-#define PLATFORM_SPI_DEV_H_
+#ifndef PLATFORM_SPI_DEVICE_HPP
+#define PLATFORM_SPI_DEVICE_HPP
 
 #include <stm32f4xx_spi.h>
 #include <sys/spi_cfgs.h>
@@ -201,7 +201,7 @@ constexpr auto SpiDev< SPIx >::pickSPI()
 	default:
 		// TODO: clarfy
 		return static_cast< decltype(SPI1) >(nullptr);
-\	}
+	}
 }
 
 // TODO: implement
@@ -346,4 +346,4 @@ constexpr auto SpiDev< SPIx >::pickFirstBit(SpiBitOrder bitOrder)
 
 
 
-#endif // PLATFORM_SPI_DEV_H_
+#endif // PLATFORM_SPI_DEVICE_H

@@ -7,6 +7,7 @@
 #include <stm32f4xx_rcc.h>
 
 // Pin descriptor, used for pinconfig
+// TODO: constexpr constructor?
 struct PinDescr
 {
 	// TODO: add APB here

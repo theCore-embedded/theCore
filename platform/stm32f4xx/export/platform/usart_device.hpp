@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <unistd.h>
 
+
 // TODO: make it singleton since each HW device must have dedicated driver
 // instance.
 // TODO: think about making driver config (USART_TypeDef&)
