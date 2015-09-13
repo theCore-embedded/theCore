@@ -76,7 +76,7 @@ SpiDev< SPIx >::SpiDev(SpiDirection   direction,
 		 pickCPOL(CPOL),
 		 pickCPHA(CPHA),
 		 pickNSS(nssType),
-		 SPI_BaudRatePrescaler_2, // TODO: clarify
+		 SPI_BaudRatePrescaler_64, // TODO: clarify
 		 pickFirstBit(bitOrder),
 		 7,
 		 }
@@ -99,17 +99,18 @@ SpiDev< SPIx >::~SpiDev()
 template< SpiDevices SPIx >
 int SpiDev< SPIx >::init()
 {
-	constexpr auto SPIbus            = pickSPI();
+	constexpr auto spi               = pickSPI();
 	constexpr auto RCC_Periph        = pickRCC();
 	constexpr auto RCC_fn            = pickRCC_fn();
 
 	RCC_fn(RCC_Periph, ENABLE);
+	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 
 	m_inited = true;
 
-	SPI_Init(SPIbus, &m_initObj);
+	SPI_Init(spi, &m_initObj);
 
-	return -1;
+	return 0;
 }
 
 // TODO: implement, comments
@@ -232,20 +233,17 @@ constexpr auto SpiDev< SPIx >::pickRCC()
 template< SpiDevices SPIx >
 constexpr auto SpiDev< SPIx >::pickRCC_fn()
 {
-	// TODO: comments
-	// Ref. manual, page 234
-	return RCC_APB2PeriphClockCmd;
-
 	// APB1 - SPI3 SPI2
-	// APB2 - SPI5 SPI6 SPI1
+	// APB2 - SPI5 SPI6 SPI1 SPI4
 	switch (SPIx) {
 	case SpiDevices::BUS_1:
 	case SpiDevices::BUS_5:
+	case SpiDevices::BUS_4:
 	case SpiDevices::BUS_6:
-		return RCC_APB1PeriphClockCmd;
+		return RCC_APB2PeriphClockCmd;
 	case SpiDevices::BUS_2:
 	case SpiDevices::BUS_3:
-		return RCC_APB2PeriphClockCmd;
+		return RCC_APB1PeriphClockCmd;
 	default:
 		// TODO: clarify
 		return static_cast< decltype(&RCC_APB2PeriphClockCmd) >(nullptr);

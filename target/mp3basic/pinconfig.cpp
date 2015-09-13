@@ -36,8 +36,9 @@ void initializePins()
 		createPin(PinPort::PORT_D, PinNum::PIN_15, PinAssignment::GPIO_OUT, PinType::NOPULL),
 
 		// Nokia5110 PCD8544
-		// SPI2 NSS
-		createPin(PinPort::PORT_B, PinNum::PIN_12, PinAssignment::PIN_SPI2, PinType::NOPULL),
+		// SPI2 NSS TODO: use SPI_NSSInternalSoftwareConfig for slave management?
+		//createPin(PinPort::PORT_B, PinNum::PIN_12, PinAssignment::PIN_SPI2, PinType::NOPULL),
+		createPin(PinPort::PORT_B, PinNum::PIN_12, PinAssignment::GPIO_OUT, PinType::NOPULL),
 		// SPI2 SCK
 		createPin(PinPort::PORT_B, PinNum::PIN_13, PinAssignment::PIN_SPI2, PinType::NOPULL),
 		// SPI2 MISO
@@ -47,9 +48,12 @@ void initializePins()
 
 		// RESET pin
 		createPin(PinPort::PORT_C, PinNum::PIN_1, PinAssignment::GPIO_OUT, PinType::NOPULL),
-
 		// Data/Instruction selection GPIO
 		createPin(PinPort::PORT_C, PinNum::PIN_2, PinAssignment::GPIO_OUT, PinType::NOPULL),
+		// Light pin
+		// NOT USED. Diodes will shine if LIGHT pin connected to the ground
+		// createPin(PinPort::PORT_C, PinNum::PIN_4, PinAssignment::GPIO_OUT, PinType::NOPULL),
+
 
 	};
 

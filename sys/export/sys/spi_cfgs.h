@@ -28,12 +28,14 @@ enum class SpiMode
 	SLAVE
 };
 
+// Clock polarity
 enum class SpiCPOL
 {
 	LOW,
 	HIGH
 };
 
+// Clock phase
 enum class SpiCPHA
 {
 	FIRST_EDGE,

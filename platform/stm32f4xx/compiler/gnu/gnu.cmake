@@ -10,7 +10,7 @@ set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
 
 # optimization flags
-set(CC_OPT_FLAGS "-O2")
+set(CC_OPT_FLAGS "-O0")
 set(CXX_OPT_FLAGS "${CC_OPT_FLAGS}")
 
 # common flags for current platform
@@ -18,8 +18,8 @@ set(CC_PLATFORM_FLAGS "-mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sectio
 set(CXX_PLATFORM_FLAGS "-fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # extra flags
-set(CC_EXTRA_FLAGS "-std=c99 -gdwarf-2")
-set(CXX_EXTRA_FLAGS "-std=c++14 -gdwarf-2")
+set(CC_EXTRA_FLAGS "-std=c99 -gdwarf-2 -g3")
+set(CXX_EXTRA_FLAGS "-std=c++14 -gdwarf-2 -g3")
 
 # altogether
 set(CMAKE_C_FLAGS
