@@ -9,6 +9,9 @@ project(mp3player)
 # Makefile output for the debug purposes
 set(CMAKE_VERBOSE_MAKEFILE on)
 
+# ASM is crucial
+enable_language(ASM-ATT)
+
 ##########################
 # Useful routines TODO: move all these routines in the separate include
 

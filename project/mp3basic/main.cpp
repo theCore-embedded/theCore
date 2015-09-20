@@ -41,13 +41,12 @@ int main()
 		for (volatile int i = 0; i < 10000; ++i) {};
 	};
 
-	for (size_t i = 0; i < sizeof(static_array); ++i) {
-		console.write((uint8_t *)(static_array + i), 1);
+	bss_stuff = 'A';
 
+	for (size_t i = 0; i < sizeof(static_array); ++i) {
 		// Left here for linker script validation
-		bss_stuff = (int) *(static_array + i);
-		int load = ___data_load;
-		console.write((uint8_t *)(load), 1);
+		console.write((uint8_t *)(static_array + i), 1);
+		console.write((uint8_t *)&bss_stuff, 1);
 	}
 
 	auto _send = [&spi, _delay] (uint8_t byte, uint8_t op) {

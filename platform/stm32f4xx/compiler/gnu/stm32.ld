@@ -19,7 +19,7 @@ MEMORY
 /* This is the actual start point, for ARM it is a
  * reset handler. Defined in main startup file
  */
-ENTRY(irq_reset)
+ENTRY(_start)
 
 SECTIONS
 {
@@ -28,15 +28,29 @@ SECTIONS
 	 * (defined inside main source file) and the text section itself.
 	 */
 
+/*
+	vectors :
+	{
+		KEEP(*(vectors))
+	} > flash
+
+	. = ALIGN(4);
+	
+	handlers :
+	{
+		KEEP(*(handlers))
+	} > flash
+	
 	. = ALIGN(4);
 
-
+	*/
 	.text :
 	{
 		/* Trace a start of the code */
 		___text_start = .;
-		
+	
 		KEEP(*(vectors))
+		KEEP(*(handlers))
 		KEEP(*(.text*))
 
 		. = ALIGN(4);
