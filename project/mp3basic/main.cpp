@@ -3,9 +3,16 @@
 #include <target/pinconfig.hpp>
 #include <target/gpio.hpp>
 
-static char static_array[] =
+static uint8_t static_array[] =
 {
-	'H', 'E', 'L', 'L', 'O', '\n',
+	0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
+	 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
+	 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
+};
+
+static char static_array2[] =
+{
+	'H', 'E', 'L', 'L', '\n',
 };
 
 int main()
@@ -41,7 +48,11 @@ int main()
 
 	for (size_t i = 0; i < sizeof(static_array); ++i) {
 		// Left here for linker script validation
-		console.write((uint8_t *)(static_array + i), 1);
+		console.write((uint8_t *)&static_array[i], 1);
+	}
+
+	for (size_t i = 0; i < sizeof(static_array2); ++i) {
+		console.write((uint8_t *)&static_array2[i], 1);
 	}
 
 	auto _send = [&spi, _delay] (uint8_t byte, uint8_t op) {

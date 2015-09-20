@@ -17,9 +17,10 @@ _start:
 			subs	r2, r1				@ Setup a counter
 			beq		copy_data_end		@ If nothing to do
 copy_data:
+/* TODO: what if r2 == 0 ? */
+			subs	r2, r2, #4			@ Decrement a counter
 			ldr		r3, [r0, r2]		@ Load a word of data from ROM
 			str		r3, [r1, r2]		@ Store it to the RAM
-			subs	r2, r2, #4			@ Decrement a counter
 			bne		copy_data			@ If counter greather than 0
 
 copy_data_end:							@ Prepare for bss zeroing
@@ -29,8 +30,9 @@ copy_data_end:							@ Prepare for bss zeroing
 			beq		clear_bss_end		@ If nothing to do
 			mov		r2, #0				@ Use it as a output buffer
 clear_bss:
-			str		r2, [r0, r1]		@ Store a zero word to the RAM
+/* TODO: what if r1 == 0 ? */
 			subs	r1, r1, #4			@ Decrement a counter
+			str		r2, [r0, r1]		@ Store a zero word to the RAM
 			bne		clear_bss_end		@ If counter greather than 0
 
 clear_bss_end:
