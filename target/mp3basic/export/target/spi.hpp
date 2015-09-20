@@ -1,8 +1,8 @@
 #ifndef TARGET_SPI_HPP_
 #define TARGET_SPI_HPP_
 
-#include <platform/spi_device.hpp>
 #include <stm32f4xx.h>
+#include <platform/spi_device.hpp>
 
 // TODO: better name
 using SpiLCDDriver = SpiDev< SpiDevices::BUS_2 >;

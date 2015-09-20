@@ -4,7 +4,7 @@
 #include <stm32f4xx_spi.h>
 #include <sys/spi_cfgs.h>
 
-// TODO: replace SPIx with generic enumerator
+// TODO: add code that checks if driver is in bidir mode or not
 template< SpiDevices SPIx >
 class SpiDev
 {
@@ -156,6 +156,10 @@ ssize_t SpiDev< SPIx >::write(const uint8_t *data, size_t count)
 	while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
 
 	SPI_I2S_SendData(spi, data[0]);
+
+	// Wait until data will be transmitted
+	while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
+	while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY) == SET) { }
 
 	return 1;
 }

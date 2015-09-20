@@ -8,8 +8,6 @@ static char static_array[] =
 	'H', 'E', 'L', 'L', 'O', '\n',
 };
 
-static int bss_stuff;
-
 int main()
 {
 	initializePins();
@@ -41,12 +39,9 @@ int main()
 		for (volatile int i = 0; i < 10000; ++i) {};
 	};
 
-	bss_stuff = 'A';
-
 	for (size_t i = 0; i < sizeof(static_array); ++i) {
 		// Left here for linker script validation
 		console.write((uint8_t *)(static_array + i), 1);
-		console.write((uint8_t *)&bss_stuff, 1);
 	}
 
 	auto _send = [&spi, _delay] (uint8_t byte, uint8_t op) {
@@ -57,9 +52,7 @@ int main()
 			PCD8544_Mode::reset();
 
 		PCD8544_CS::reset();
-		_delay();
 		spi.write(&byte, 1);
-		_delay();
 		PCD8544_CS::set();
 	};
 
