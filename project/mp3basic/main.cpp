@@ -3,31 +3,58 @@
 #include <target/pinconfig.hpp>
 #include <target/gpio.hpp>
 
+/* For validation */
 static uint8_t static_array[] =
 {
 	0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
-	 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
-	 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
+	0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
+	0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
 };
 
+/* For validation */
 static char static_array2[] =
 {
-	'H', 'E', 'L', 'L', '\n',
+	'H', 'E', 'L', 'L', '\r', '\n',
 };
+
+/* For validation */
+class FooBar
+{
+public:
+	FooBar()
+	{
+		m_console.init();
+		m_console.open();
+		static char another_arr[] = "Vini Vidi Vici\n\r";
+
+		for (size_t i = 0; i < sizeof(another_arr); ++i) {
+			m_console.write((uint8_t *)&another_arr[i], 1);
+		}
+
+		m_console.close();
+	}
+
+private:
+	ConsoleDriver m_console;
+};
+
+FooBar foo;
 
 int main()
 {
-	initializePins();
-
 	ConsoleDriver console;
+
 	console.init();
 	console.open();
+
+	(void) foo;
 
 	uint8_t c;
 
 	PCD8544_CS::set();
 	PCD8544_Reset::set();
 	PCD8544_Mode::set();
+
 
 	console.write((uint8_t *)"$", 1);
 	console.write((uint8_t *)" ", 1);
@@ -46,11 +73,12 @@ int main()
 		for (volatile int i = 0; i < 10000; ++i) {};
 	};
 
+	/* For validation */
 	for (size_t i = 0; i < sizeof(static_array); ++i) {
-		// Left here for linker script validation
-		console.write((uint8_t *)&static_array[i], 1);
+		console.write(&static_array[i], 1);
 	}
 
+	/* For validation */
 	for (size_t i = 0; i < sizeof(static_array2); ++i) {
 		console.write((uint8_t *)&static_array2[i], 1);
 	}

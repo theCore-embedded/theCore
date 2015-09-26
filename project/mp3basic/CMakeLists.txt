@@ -8,3 +8,4 @@ register_target()
 
 # TODO: combine it with register_target()
 import_module(mp3basic target)
+

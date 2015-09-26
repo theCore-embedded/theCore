@@ -19,7 +19,7 @@ MEMORY
 /* This is the actual start point, for ARM it is a
  * reset handler. Defined in main startup file
  */
-ENTRY(_start)
+ENTRY(_resetHandler)
 
 SECTIONS
 {
@@ -28,27 +28,11 @@ SECTIONS
 	 * (defined inside main source file) and the text section itself.
 	 */
 
-/*
-	vectors :
-	{
-		KEEP(*(vectors))
-	} > flash
-
-	. = ALIGN(4);
-	
-	handlers :
-	{
-		KEEP(*(handlers))
-	} > flash
-	
-	. = ALIGN(4);
-
-	*/
 	.text :
 	{
 		/* Trace a start of the code */
 		___text_start = .;
-	
+
 		KEEP(*(vectors))
 		KEEP(*(handlers))
 		KEEP(*(.text*))
@@ -59,6 +43,15 @@ SECTIONS
 		___text_end = .;
 	} > flash
 
+	/* Init array used to store global constructors */
+
+	. = ALIGN(4);
+	.init_array :
+	{
+		___init_array_start = .;
+		KEEP (*(.init_array*))
+		___init_array_end = .;
+	} > flash
 
 	/* Read only data goes to flash */
 	.rodata :
@@ -87,7 +80,6 @@ SECTIONS
 		/* Trace an end of the data */
 		___data_end = .;
 	} > ram 
-
 	/* .bss goes to ram and must be zeroed
 	 * 'manually' when board starts
 	 */
@@ -102,7 +94,5 @@ SECTIONS
 		. = ALIGN(4);
 		/* An end of bss*/
 		___bss_end = .;
-	} > ram 
-
-
+	} > ram
 }

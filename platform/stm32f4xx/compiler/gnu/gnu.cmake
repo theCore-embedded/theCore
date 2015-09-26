@@ -15,7 +15,9 @@ set(CXX_OPT_FLAGS "${CC_OPT_FLAGS}")
 
 # common flags for current platform
 set(CC_PLATFORM_FLAGS "-mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections -fno-common")
-set(CXX_PLATFORM_FLAGS "-fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
+# -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
+# why????
+set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # extra flags
 set(CC_EXTRA_FLAGS "-std=c99 -gdwarf-2 -g3")
@@ -32,8 +34,8 @@ set(CMAKE_CXX_LINK_FLAGS
 "-T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -nostartfiles --gc-sections")
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_C_LINK_EXECUTABLE
-"${CMAKE_C_LINKER} <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+"${CMAKE_C_LINKER} <OBJECTS> <LINK_LIBRARIES> <CMAKE_C_LINK_FLAGS>  -o <TARGET>")
 set(CMAKE_CXX_LINK_EXECUTABLE
-"${CMAKE_CXX_LINKER} <OBJECTS> <CMAKE_CXX_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+"${CMAKE_CXX_LINKER} <OBJECTS>  <LINK_LIBRARIES> <CMAKE_CXX_LINK_FLAGS> -o <TARGET>")
 # TODO: merge these flags with compiler one
 set(CMAKE_ASM-ATT_COMPILER_ARG1 "-mcpu=cortex-m4")

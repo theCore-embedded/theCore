@@ -1,16 +1,17 @@
 /* Note that M4 is capable only of THUMB instrucion set
  * TODO: validate algorithms
  */
-.global		_start						@ The first this that must be executed
+.global		_resetHandler				@ The first this that must be executed
 .section	handlers
 .syntax		unified
 .align		2
 
-.func		_start, _start
-.type		_start, %function
+
+.func		_resetHandler, _resetHandler
+.type		_resetHandler, %function
 .thumb_func
 .align
-_start:
+_resetHandler:
 			ldr		r0, =___data_load	@ Obtain data address in ROM
 			ldr		r1, =___data_start  @ Obtain data start address in RAM
 			ldr		r2, =___data_end	@ Obtain data end address in RAM
@@ -36,9 +37,12 @@ clear_bss:
 			bne		clear_bss_end		@ If counter greather than 0
 
 clear_bss_end:
+			blx		platform_init		@ Initialize a platform
+			blx		target_init			@ Initialize a target
+			blx		static_init			@ Initialize static objects
 			blx		main				@ Allow return, for now
 			b		board_stop			@ Infinite loop if returned
-.size		_start, . - _start
+.size		_resetHandler, . - _resetHandler
 .pool
 .endfunc
 
@@ -48,9 +52,9 @@ board_stop:
 
 
 .section	vectors
-			.align	2
+			.align	2 /* TODO: clarify */
 			.long	0x20006000			@ Initial stack pointer
-			.long	_start				@ Reset handler
+			.long	_resetHandler		@ Reset handler
 			.long	board_stop			@ NMI
 			.long	board_stop			@ Hard fault
 			.long	board_stop			@ Memory management fault
@@ -73,3 +77,5 @@ board_stop:
 	Below is not working, why?
 */
 			@.skip	976, board_stop		@ Rest of IRQ handlers
+
+.end

@@ -116,6 +116,21 @@ int UsartHandler< USARTx >::open()
 }
 
 template< UsartDevices USARTx >
+int UsartHandler< USARTx >::close()
+{
+	if (!m_opened)
+		return -1;
+
+	constexpr auto usart = pickUSART();
+
+	// Disable UART
+	USART_Cmd(usart, DISABLE);
+	m_opened = 0;
+	return 0;
+}
+
+
+template< UsartDevices USARTx >
 ssize_t UsartHandler< USARTx >::read(uint8_t *data, size_t count)
 {
 	if (!count)

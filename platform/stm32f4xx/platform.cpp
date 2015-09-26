@@ -1,5 +1,6 @@
 #include <platform/usart_device.hpp>
 
-void foo()
+// TODO: decide if to make as a class member or not
+extern "C" void platform_init()
 {
 }
