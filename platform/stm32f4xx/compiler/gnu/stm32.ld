@@ -35,7 +35,7 @@ SECTIONS
 
 		KEEP(*(vectors))
 		KEEP(*(handlers))
-		KEEP(*(.text*))
+		*(.text*)
 
 		. = ALIGN(4);
 

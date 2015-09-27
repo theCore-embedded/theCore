@@ -12,6 +12,7 @@
 .thumb_func
 .align
 _resetHandler:
+			cpsid	i					@ Disable interrupts
 			ldr		r0, =___data_load	@ Obtain data address in ROM
 			ldr		r1, =___data_start  @ Obtain data start address in RAM
 			ldr		r2, =___data_end	@ Obtain data end address in RAM
@@ -51,25 +52,28 @@ board_stop:
 
 
 
+/* TODO: assign proper handlers for first 16 interrupts */
 .section	vectors
 			.align	2 /* TODO: clarify */
-			.long	0x20006000			@ Initial stack pointer
-			.long	_resetHandler		@ Reset handler
-			.long	board_stop			@ NMI
-			.long	board_stop			@ Hard fault
-			.long	board_stop			@ Memory management fault
-			.long	board_stop			@ Bus fault
-			.long	board_stop			@ Usage fault
-			.long	0					@ Reserved bytes
-			.long	0					@ Reserved bytes
-			.long	0					@ Reserved bytes
-			.long	0					@ Reserved bytes
-			.long	board_stop			@ SVC handler
-			.long	board_stop			@ Debug monitor
-			.long	0					@ Reserved bytes
-			.long	board_stop			@ PendSV handler
-			.long	board_stop			@ SysTick handler
-
+			.long	0x20006000						@ Initial stack pointer
+			.long	_resetHandler					@ Reset handler
+			.long	board_stop						@ NMI
+			.long	board_stop						@ Hard fault
+			.long	board_stop						@ Memory management fault
+			.long	board_stop						@ Bus fault
+			.long	board_stop						@ Usage fault
+			.long	0								@ Reserved bytes
+			.long	0								@ Reserved bytes
+			.long	0								@ Reserved bytes
+			.long	0								@ Reserved bytes
+			.long	board_stop						@ SVC handler
+			.long	board_stop						@ Debug monitor
+			.long	0								@ Reserved bytes
+			.long	board_stop						@ PendSV handler
+			.long	board_stop						@ SysTick handler
+			.rept	81								@ Repeat ASM statement
+			.long	_ZN11IRQ_Manager3ISREv			@ All other handlers
+			.endr
 			.align
 
 /*

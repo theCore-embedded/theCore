@@ -4,6 +4,8 @@
 #include <platform/usart_device.hpp>
 #include <cstdint>
 
-using ConsoleDriver = UsartHandler< UsartDevices::DEV_3 >;
+using ConsoleDriver = UsartHandler< UsartDevices::DEV_3,
+									UsartMode::IRQ,
+									UsartState::RXP >;
 
 #endif
