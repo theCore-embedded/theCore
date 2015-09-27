@@ -29,6 +29,7 @@ function(register_project project_name base_target base_platform)
 
 	# TODO: find better place for it
 	add_subdirectory(sys)
+	add_subdirectory(dev)
 
 	# Make binary from the project object file
 	add_custom_target(${project_name}.bin ALL

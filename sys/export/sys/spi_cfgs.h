@@ -3,55 +3,55 @@
 #define SYS_SPI_CFGS_H
 
 // Represents distinct peripheral devices
-enum class SpiDevices
+enum class SPI_device
 {
-	BUS_1,
-	BUS_2,
-	BUS_3,
-	BUS_4,
-	BUS_5,
-	BUS_6,
-	BUS_7,
-	BUS_8
+    bus_1,
+    bus_2,
+    bus_3,
+    bus_4,
+    bus_5,
+    bus_6,
+    bus_7,
+    bus_8
 };
 
-enum class SpiDirection
+enum class SPI_direction
 {
-	TX,
-	RX,
-	BIDIR
+    TX,
+    RX,
+    BIDIR
 };
 
-enum class SpiMode
+enum class SPI_mode
 {
-	MASTER,
-	SLAVE
+    master,
+    slave
 };
 
 // Clock polarity
-enum class SpiCPOL
+enum class SPI_CPOL
 {
-	LOW,
-	HIGH
+    low,
+    high
 };
 
 // Clock phase
-enum class SpiCPHA
+enum class SPI_CPHA
 {
-	FIRST_EDGE,
-	SECOND_EDGE
+    first_edge,
+    second_edge
 };
 
-enum class SpiNssType
+enum class SPI_NSS_type
 {
-	HW,
-	SW
+    HW,
+    SW
 };
 
-enum class SpiBitOrder
+enum class SPI_bit_order
 {
-	MSB,
-	LSB
+    MSB,
+    LSB
 };
 
 #endif

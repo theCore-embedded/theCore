@@ -1,6 +1,6 @@
 // TODO: consider using better name
-#ifndef PLATFORM_PIN_DESCR_HPP
-#define PLATFORM_PIN_DESCR_HPP
+#ifndef PLATFORM_pin_DESCR_HPP
+#define PLATFORM_pin_DESCR_HPP
 
 #include <sys/pin_cfgs.h>
 #include <stm32f4xx_gpio.h>
@@ -8,248 +8,248 @@
 
 // Pin descriptor, used for pinconfig
 // TODO: constexpr objects/constructor?
-struct PinDescr
+struct pin_descr
 {
-	// TODO: add APB here
-	GPIO_TypeDef             *port;
-	const uint32_t           pin;
-	const GPIOMode_TypeDef   mode;
-	const GPIOSpeed_TypeDef  speed;
-	const GPIOOType_TypeDef  type;
-	const GPIOPuPd_TypeDef   pupd;
-	const uint32_t           ahb;
-	const uint8_t            src;
-	const uint8_t            af;
+    // TODO: add APB here
+    GPIO_TypeDef             *port;
+    const uint32_t           pin;
+    const GPIOMode_TypeDef   mode;
+    const GPIOSpeed_TypeDef  speed;
+    const GPIOOType_TypeDef  type;
+    const GPIOPuPd_TypeDef   pupd;
+    const uint32_t           ahb;
+    const uint8_t            src;
+    const uint8_t            af;
 
-	// Inits a pin
-	// TODO: move it to the CPP file
-	void init()
-	{
-		GPIO_InitTypeDef initStruct;
+    // Inits a pin
+    // TODO: move it to the CPP file
+    void init() const
+    {
+        GPIO_InitTypeDef init_struct;
 
-		RCC_AHB1PeriphClockCmd(this->ahb, ENABLE);
-		GPIO_StructInit(&initStruct);
+        RCC_AHB1PeriphClockCmd(this->ahb, ENABLE);
+        GPIO_StructInit(&init_struct);
 
-		initStruct.GPIO_Pin    = this->pin;
-		initStruct.GPIO_Mode   = this->mode;
-		initStruct.GPIO_Speed  = this->speed;
-		initStruct.GPIO_OType  = this->type;
-		initStruct.GPIO_PuPd   = this->pupd;
+        init_struct.GPIO_Pin    = this->pin;
+        init_struct.GPIO_Mode   = this->mode;
+        init_struct.GPIO_Speed  = this->speed;
+        init_struct.GPIO_OType  = this->type;
+        init_struct.GPIO_PuPd   = this->pupd;
 
-		GPIO_Init(this->port, &initStruct);
+        GPIO_Init(this->port, &init_struct);
 
-		if (this->mode == GPIO_Mode_AF) {
-			GPIO_PinAFConfig(this->port, this->src, this->af);
-		}
-	}
+        if (this->mode == GPIO_Mode_AF) {
+            GPIO_PinAFConfig(this->port, this->src, this->af);
+        }
+    }
 };
 
 // TODO: implement, comments
-static constexpr GPIO_TypeDef *pickPort(const PinPort &port)
+static constexpr GPIO_TypeDef *pick_port(const pin_port &port)
 {
-	switch (port) {
-	case PinPort::PORT_A:
-		return GPIOA;
-	case PinPort::PORT_B:
-		return GPIOB;
-	case PinPort::PORT_C:
-		return GPIOC;
-	case PinPort::PORT_D:
-		return GPIOD;
-	case PinPort::PORT_E:
-		return GPIOE;
-	default:
-		return nullptr;
-	}
+    switch (port) {
+    case pin_port::port_a:
+        return GPIOA;
+    case pin_port::port_b:
+        return GPIOB;
+    case pin_port::port_c:
+        return GPIOC;
+    case pin_port::port_d:
+        return GPIOD;
+    case pin_port::port_e:
+        return GPIOE;
+    default:
+        return nullptr;
+    }
 }
 
 // TODO: implement, comments
-static constexpr uint32_t pickPin(const PinNum &pin)
+static constexpr uint32_t pick_pin(const pin_number &pin)
 {
-	switch (pin) {
-	case PinNum::PIN_0:
-		return GPIO_Pin_0;
-	case PinNum::PIN_1:
-		return GPIO_Pin_1;
-	case PinNum::PIN_2:
-		return GPIO_Pin_2;
-	case PinNum::PIN_3:
-		return GPIO_Pin_3;
-	case PinNum::PIN_4:
-		return GPIO_Pin_4;
-	case PinNum::PIN_5:
-		return GPIO_Pin_5;
-	case PinNum::PIN_6:
-		return GPIO_Pin_6;
-	case PinNum::PIN_7:
-		return GPIO_Pin_7;
-	case PinNum::PIN_8:
-		return GPIO_Pin_8;
-	case PinNum::PIN_9:
-		return GPIO_Pin_9;
-	case PinNum::PIN_10:
-		return GPIO_Pin_10;
-	case PinNum::PIN_11:
-		return GPIO_Pin_11;
-	case PinNum::PIN_12:
-		return GPIO_Pin_12;
-	case PinNum::PIN_13:
-		return GPIO_Pin_13;
-	case PinNum::PIN_14:
-		return GPIO_Pin_14;
-	case PinNum::PIN_15:
-		return GPIO_Pin_15;
-	default:
-		return (uint32_t) -1;
-	}
+    switch (pin) {
+    case pin_number::pin_0:
+        return GPIO_Pin_0;
+    case pin_number::pin_1:
+        return GPIO_Pin_1;
+    case pin_number::pin_2:
+        return GPIO_Pin_2;
+    case pin_number::pin_3:
+        return GPIO_Pin_3;
+    case pin_number::pin_4:
+        return GPIO_Pin_4;
+    case pin_number::pin_5:
+        return GPIO_Pin_5;
+    case pin_number::pin_6:
+        return GPIO_Pin_6;
+    case pin_number::pin_7:
+        return GPIO_Pin_7;
+    case pin_number::pin_8:
+        return GPIO_Pin_8;
+    case pin_number::pin_9:
+        return GPIO_Pin_9;
+    case pin_number::pin_10:
+        return GPIO_Pin_10;
+    case pin_number::pin_11:
+        return GPIO_Pin_11;
+    case pin_number::pin_12:
+        return GPIO_Pin_12;
+    case pin_number::pin_13:
+        return GPIO_Pin_13;
+    case pin_number::pin_14:
+        return GPIO_Pin_14;
+    case pin_number::pin_15:
+        return GPIO_Pin_15;
+    default:
+        return (uint32_t) -1;
+    }
 }
 
 // TODO: implement, comments
-static constexpr uint8_t pickSrc(const PinNum &pin)
+static constexpr uint8_t pick_source(const pin_number &pin)
 {
-	switch (pin) {
-	case PinNum::PIN_0:
-		return GPIO_PinSource0;
-	case PinNum::PIN_1:
-		return GPIO_PinSource1;
-	case PinNum::PIN_2:
-		return GPIO_PinSource2;
-	case PinNum::PIN_3:
-		return GPIO_PinSource3;
-	case PinNum::PIN_4:
-		return GPIO_PinSource4;
-	case PinNum::PIN_5:
-		return GPIO_PinSource5;
-	case PinNum::PIN_6:
-		return GPIO_PinSource6;
-	case PinNum::PIN_7:
-		return GPIO_PinSource7;
-	case PinNum::PIN_8:
-		return GPIO_PinSource8;
-	case PinNum::PIN_9:
-		return GPIO_PinSource9;
-	case PinNum::PIN_10:
-		return GPIO_PinSource10;
-	case PinNum::PIN_11:
-		return GPIO_PinSource11;
-	case PinNum::PIN_12:
-		return GPIO_PinSource12;
-	case PinNum::PIN_13:
-		return GPIO_PinSource13;
-	case PinNum::PIN_14:
-		return GPIO_PinSource14;
-	case PinNum::PIN_15:
-		return GPIO_PinSource15;
-	default:
-		return (uint8_t) -1;
-	}
+    switch (pin) {
+    case pin_number::pin_0:
+        return GPIO_PinSource0;
+    case pin_number::pin_1:
+        return GPIO_PinSource1;
+    case pin_number::pin_2:
+        return GPIO_PinSource2;
+    case pin_number::pin_3:
+        return GPIO_PinSource3;
+    case pin_number::pin_4:
+        return GPIO_PinSource4;
+    case pin_number::pin_5:
+        return GPIO_PinSource5;
+    case pin_number::pin_6:
+        return GPIO_PinSource6;
+    case pin_number::pin_7:
+        return GPIO_PinSource7;
+    case pin_number::pin_8:
+        return GPIO_PinSource8;
+    case pin_number::pin_9:
+        return GPIO_PinSource9;
+    case pin_number::pin_10:
+        return GPIO_PinSource10;
+    case pin_number::pin_11:
+        return GPIO_PinSource11;
+    case pin_number::pin_12:
+        return GPIO_PinSource12;
+    case pin_number::pin_13:
+        return GPIO_PinSource13;
+    case pin_number::pin_14:
+        return GPIO_PinSource14;
+    case pin_number::pin_15:
+        return GPIO_PinSource15;
+    default:
+        return (uint8_t) -1;
+    }
 }
 
 // TODO: implement, comments
-static constexpr GPIOMode_TypeDef pickMode(const PinAssignment &purpose)
+static constexpr GPIOMode_TypeDef pick_mode(const pin_function &purpose)
 {
-	switch (purpose) {
-	case PinAssignment::GPIO_IN:
-		return GPIO_Mode_IN;
-	case PinAssignment::GPIO_OUT:
-		return GPIO_Mode_OUT;
-	case PinAssignment::ANALOG:
-		return GPIO_Mode_AN;
-	default:
-		return GPIO_Mode_AF;
-	}
+    switch (purpose) {
+    case pin_function::GPIO_in:
+        return GPIO_Mode_IN;
+    case pin_function::GPIO_out:
+        return GPIO_Mode_OUT;
+    case pin_function::analog:
+        return GPIO_Mode_AN;
+    default:
+        return GPIO_Mode_AF;
+    }
 
 }
 
 // TODO: implement, comments
-static constexpr GPIOSpeed_TypeDef pickSpeed()
+static constexpr GPIOSpeed_TypeDef pick_speed()
 {
-	return GPIO_Medium_Speed;
+    return GPIO_Medium_Speed;
 }
 
 // TODO: implement, comments
-static constexpr GPIOOType_TypeDef pickType(const PinType &type)
+static constexpr GPIOOType_TypeDef pick_type(const pin_type &type)
 {
-	if (type == PinType::OPEN_DRAIN) {
-		return GPIO_OType_OD;
-	} else {
-		return GPIO_OType_PP;
-	}
+    if (type == pin_type::open_drain) {
+        return GPIO_OType_OD;
+    } else {
+        return GPIO_OType_PP;
+    }
 }
 
 // TODO: implement, comments
-static constexpr GPIOPuPd_TypeDef pickPullType(const PinType &type)
+static constexpr GPIOPuPd_TypeDef pick_pull_type(const pin_type &type)
 {
-	switch (type) {
-	case PinType::PULL_DOWN:
-		return GPIO_PuPd_DOWN;
-	case PinType::PULL_UP:
-		return GPIO_PuPd_UP;
-	default:
-		return GPIO_PuPd_NOPULL;
-	}
+    switch (type) {
+    case pin_type::pull_down:
+        return GPIO_PuPd_DOWN;
+    case pin_type::pull_up:
+        return GPIO_PuPd_UP;
+    default:
+        return GPIO_PuPd_NOPULL;
+    }
 }
 
 // TODO: implement, comments
-static constexpr uint8_t pickAf(const PinAssignment &purpose)
+static constexpr uint8_t pick_AF(const pin_function &purpose)
 {
-	switch (purpose) {
-	case PinAssignment::UART1:
-		return GPIO_AF_USART1;
-	case PinAssignment::UART2:
-		return GPIO_AF_USART2;
-	case PinAssignment::UART3:
-		return GPIO_AF_USART3;
-		// TODO: add rest of usarts
-	case PinAssignment::PIN_SPI1:
-		return GPIO_AF_SPI1;
-	case PinAssignment::PIN_SPI2:
-		return GPIO_AF_SPI2;
-	case PinAssignment::PIN_SPI3:
-		return GPIO_AF_SPI3;
-		// TODO: add rest of SPI
-	default:
-		return (uint8_t) -1;
-	}
+    switch (purpose) {
+    case pin_function::UART1:
+        return GPIO_AF_USART1;
+    case pin_function::UART2:
+        return GPIO_AF_USART2;
+    case pin_function::UART3:
+        return GPIO_AF_USART3;
+        // TODO: add rest of usarts
+    case pin_function::pin_SPI1:
+        return GPIO_AF_SPI1;
+    case pin_function::pin_SPI2:
+        return GPIO_AF_SPI2;
+    case pin_function::pin_SPI3:
+        return GPIO_AF_SPI3;
+        // TODO: add rest of SPI
+    default:
+        return (uint8_t) -1;
+    }
 }
 
-static constexpr uint32_t pickPeriph(const PinPort &port)
+static constexpr uint32_t pick_periph(const pin_port &port)
 {
-	switch (port) {
-	case PinPort::PORT_A:
-		return RCC_AHB1Periph_GPIOA;
-	case PinPort::PORT_B:
-		return RCC_AHB1Periph_GPIOB;
-	case PinPort::PORT_C:
-		return RCC_AHB1Periph_GPIOC;
-	case PinPort::PORT_D:
-		return RCC_AHB1Periph_GPIOD;
-	case PinPort::PORT_E:
-		return RCC_AHB1Periph_GPIOE;
-	default:
-		return (uint32_t) -1;
-	}
+    switch (port) {
+    case pin_port::port_a:
+        return RCC_AHB1Periph_GPIOA;
+    case pin_port::port_b:
+        return RCC_AHB1Periph_GPIOB;
+    case pin_port::port_c:
+        return RCC_AHB1Periph_GPIOC;
+    case pin_port::port_d:
+        return RCC_AHB1Periph_GPIOD;
+    case pin_port::port_e:
+        return RCC_AHB1Periph_GPIOE;
+    default:
+        return (uint32_t) -1;
+    }
 }
 
 // TODO: make it as a constructor
-constexpr PinDescr createPin(const PinPort &port,
-				   const PinNum &pinnum,
-				   const PinAssignment &purpose,
-				   const PinType &type
-				   )
+constexpr pin_descr create_pin(const pin_port &port,
+                             const pin_number &pin_num,
+                             const pin_function &purpose,
+                             const pin_type &type
+                             )
 {
-	return PinDescr {
-		pickPort(port),
-		pickPin(pinnum),
-		pickMode(purpose),
-		pickSpeed(),
-		pickType(type),
-		pickPullType(type),
-		pickPeriph(port),
-		pickSrc(pinnum),
-		pickAf(purpose),
-	};
+    return pin_descr {
+        pick_port(port),
+                pick_pin(pin_num),
+                pick_mode(purpose),
+                pick_speed(),
+                pick_type(type),
+                pick_pull_type(type),
+                pick_periph(port),
+                pick_source(pin_num),
+                pick_AF(purpose),
+    };
 }
 
-#endif // PLATFORM_PIN_DESCR_HPP
+#endif // PLATFORM_pin_DESCR_HPP
 

@@ -17,470 +17,470 @@
 // instance.
 // TODO: think about making driver config (USART_TypeDef&)
 // reusable in runtime, not compile time
-template< UsartDevices	USARTx,
-		  UsartMode		mode		= UsartMode::POLL,
-		  int32_t		flags		= UsartState::EMPTY >
-class UsartHandler
+template< USART_device	USARTx,
+          USART_mode    mode        = USART_mode::poll,
+          int32_t       flags       = USART_state::EMPTY >
+class USART_dev
 {
-	// Supported only IRQ and POLL modes.
-	static_assert((mode == UsartMode::POLL) ||
-				  (mode == UsartMode::IRQ), "Invalid USART mode used!");
+    // Supported only IRQ and POLL modes.
+    static_assert((mode == USART_mode::poll) ||
+                  (mode == USART_mode::IRQ), "Invalid USART mode used!");
 public:
-	UsartHandler();
-	~UsartHandler();
+    USART_dev();
+    ~USART_dev();
 
-	// Lazy initialization, -1 if error. 0 otherwise
-	int init();
+    // Lazy initialization, -1 if error. 0 otherwise
+    int init();
 
-	// -1 if error, 0 otherwise
-	int open();
-	// -1 if error, 0 otherwise
-	int close();
+    // -1 if error, 0 otherwise
+    int open();
+    // -1 if error, 0 otherwise
+    int close();
 
-	// -1 if error, [0, count] otherwise
-	ssize_t write(const uint8_t *data, size_t count);
+    // -1 if error, [0, count] otherwise
+    ssize_t write(const uint8_t *data, size_t count);
 
-	// -1 if error, [0, count] otherwise
-	ssize_t read(uint8_t *data, size_t count);
+    // -1 if error, [0, count] otherwise
+    ssize_t read(uint8_t *data, size_t count);
 
-	// Queries peripheral status
-	// INVALID if method failed, anything else from UsartState otherwise
-	int32_t getState() const;
+    // Queries peripheral status
+    // INVALID if method failed, anything else from USART_state otherwise
+    int32_t get_state() const;
 
-	// Clears state
-	// If nothing is given then whole state is cleared
-	int clearState(int32_t state);
-	int clearState();
+    // Clears state
+    // If nothing is given then whole state is cleared
+    int clear_state(int32_t state);
+    int clear_state();
 
-	// Set of routines to work with IRQs
-	// -1 if error, 0 otherwise
-	int registerIRQ(const std::function< void() > &handler);
+    // Set of routines to work with IRQs
+    // -1 if error, 0 otherwise
+    int register_IRQ(const std::function< void() > &handler);
 
-	// Completes IRQ for given status bits
-	// If nothing is given then all pending interrupts are dropped
-	// -1 if error, 0 otherwise
-	int completeIRQ(int32_t state);
-	int completeIRQ();
+    // Completes IRQ for given status bits
+    // If nothing is given then all pending interrupts are dropped
+    // -1 if error, 0 otherwise
+    int complete_IRQ(int32_t state);
+    int complete_IRQ();
 
-	// -1 if error, 0 otherwise
-	int deregisterIRQ();
+    // -1 if error, 0 otherwise
+    int deregisterIRQ();
 
 private:
-	// Picks proper RCC at compile time
-	static constexpr auto pickRCC();
-	// Picks proper RCC operation function at compile time
-	static constexpr auto pickRCC_fn();
-	// Picks IRQ number at compile time
-	static constexpr auto pickIRQn();
-	// Converts to proper USART type
-	static constexpr auto pickUSART();
+    // Picks proper RCC at compile time
+    static constexpr auto pick_RCC();
+    // Picks proper RCC operation function at compile time
+    static constexpr auto pick_RCCfn();
+    // Picks IRQ number at compile time
+    static constexpr auto pick_IRQn();
+    // Converts to proper USART type
+    static constexpr auto pick_USART();
 
-	// Convinient method
-	static void initIRQ();
+    // Convinient method
+    static void init_IRQ();
 
-	// Indicates that USART is ready for use
-	int m_inited = 0;
-	// Flag to prevent multiple opening
-	int m_opened = 0;
+    // Indicates that USART is ready for use
+    int m_inited = 0;
+    // Flag to prevent multiple opening
+    int m_opened = 0;
 };
 
 // Interface
 // -----------------------------------------------------------------------------
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-UsartHandler< USARTx, mode, flags >::UsartHandler()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+USART_dev< USARTx, mode, flags >::USART_dev()
 {
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-UsartHandler< USARTx, mode, flags >::~UsartHandler()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+USART_dev< USARTx, mode, flags >::~USART_dev()
 {
-	// TODO: implement
-	if (m_inited) {
-		// TODO
-	}
+    // TODO: implement
+    if (m_inited) {
+        // TODO
+    }
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::init()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::init()
 {
-	USART_InitTypeDef initStruct;
+    USART_InitTypeDef initStruct;
 
-	// TODO: atomic cas?
-	if (m_inited)
-		return -1;
+    // TODO: atomic cas?
+    if (m_inited)
+        return -1;
 
-	// Must be optimized at compile time
-	constexpr auto RCC_Periph = pickRCC();
-	constexpr auto RCC_fn     = pickRCC_fn();
-	constexpr auto usart      = pickUSART();
+    // Must be optimized at compile time
+    constexpr auto RCC_Periph = pick_RCC();
+    constexpr auto RCC_fn     = pick_RCCfn();
+    constexpr auto usart      = pick_USART();
 
-	// Enable peripheral clock
-	RCC_fn(RCC_Periph, ENABLE);
+    // Enable peripheral clock
+    RCC_fn(RCC_Periph, ENABLE);
 
-	// Configure UART
-	// TODO: make configuration values be chosen at compile time
-	initStruct.USART_BaudRate             = 115200;
-	initStruct.USART_WordLength           = USART_WordLength_8b;
-	initStruct.USART_StopBits             = USART_StopBits_1;
-	initStruct.USART_Parity               = USART_Parity_No;
-	initStruct.USART_Mode                 = USART_Mode_Rx | USART_Mode_Tx;
-	initStruct.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
+    // Configure UART
+    // TODO: make configuration values be chosen at compile time
+    initStruct.USART_BaudRate             = 115200;
+    initStruct.USART_WordLength           = USART_WordLength_8b;
+    initStruct.USART_StopBits             = USART_StopBits_1;
+    initStruct.USART_Parity               = USART_Parity_No;
+    initStruct.USART_Mode                 = USART_Mode_Rx | USART_Mode_Tx;
+    initStruct.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
 
-	// Init UART
-	USART_Init(usart, &initStruct);
-	m_inited = 1;
+    // Init UART
+    USART_Init(usart, &initStruct);
+    m_inited = 1;
 
-	// TODO: disable UART interrupts in NVIC
+    // TODO: disable UART interrupts in NVIC
 
-	// TODO: add static assert for supported modes and flags
-	// Intended to be optimized at compile time
+    // TODO: add static assert for supported modes and flags
+    // Intended to be optimized at compile time
 
-	if (mode == UsartMode::IRQ) {
-		initIRQ();
-	}
+    if (mode == USART_mode::IRQ) {
+        init_IRQ();
+    }
 
-	return 0;
+    return 0;
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::open()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::open()
 {
-	if (!m_inited || m_opened)
-		return -1;
+    if (!m_inited || m_opened)
+        return -1;
 
-	constexpr auto usart = pickUSART();
+    constexpr auto usart = pick_USART();
 
-	// Enable UART
-	USART_Cmd(usart, ENABLE);
-	m_opened = 1;
-	return 0;
+    // Enable UART
+    USART_Cmd(usart, ENABLE);
+    m_opened = 1;
+    return 0;
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::close()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::close()
 {
-	if (!m_opened)
-		return -1;
+    if (!m_opened)
+        return -1;
 
-	constexpr auto usart = pickUSART();
+    constexpr auto usart = pick_USART();
 
-	// Disable UART
-	USART_Cmd(usart, DISABLE);
-	m_opened = 0;
-	return 0;
-}
-
-
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-ssize_t UsartHandler< USARTx, mode, flags >::read(uint8_t *data, size_t count)
-{
-	if (!count)
-		return 0;
-
-	if (!m_opened)
-		return -1;
-
-	// TODO: implement support for IRQ mode
-
-	constexpr auto usart = pickUSART();
-
-	while (USART_GetFlagStatus(usart, USART_FLAG_RXNE) == RESET) {
-		if (mode == UsartMode::IRQ) {
-			// Do not wait anything in async mode.
-			return -2;
-		}
-	}
-
-	// USART HW buffer is only one byte long
-	*data = USART_ReceiveData(usart);
-
-	return 1;
-}
-
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-ssize_t UsartHandler< USARTx, mode, flags >::write(const uint8_t *data, size_t count)
-{
-	if (!count)
-		return 0;
-
-	if (!m_opened)
-		return -1;
-
-	// TODO: implement support for IRQ mode
-
-	constexpr auto usart = pickUSART();
-
-	while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET) {
-		if (mode == UsartMode::IRQ) {
-			// Do not wait anything in async mode.
-			return -2;
-		}
-	}
-
-	// USART HW buffer is only one byte long
-	USART_SendData(usart, *data);
-
-	return 1;
-}
-
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int32_t UsartHandler< USARTx, mode, flags >::getState() const
-{
-	constexpr auto usart = pickUSART();
-
-	int32_t status = UsartState::EMPTY;
-
-	if (USART_GetFlagStatus(usart, USART_FLAG_TXE) == SET) {
-		status |= UsartState::TXC;
-	}
-
-	if (USART_GetFlagStatus(usart, USART_FLAG_RXNE) == SET) {
-		status |= UsartState::RXP;
-	}
-
-	if (USART_GetFlagStatus(usart, USART_FLAG_ORE) == SET) {
-		status |= UsartState::ORE;
-	}
-
-	if (USART_GetFlagStatus(usart, USART_FLAG_NE) == SET) {
-		status |= UsartState::NE;
-	}
-
-	if (USART_GetFlagStatus(usart, USART_FLAG_FE) == SET) {
-		status |= UsartState::FE;
-	}
-
-	if (USART_GetFlagStatus(usart, USART_FLAG_PE) == SET) {
-		status |= UsartState::PE;
-	}
-
-	return status;
-}
-
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::clearState(int32_t state)
-{
-	constexpr auto usart = pickUSART();
-
-	// TODO: make sure that state is cleared even if
-	// 'special' software sequence is required.
-	// See 'USART_ClearFlag()'
-	if (state & UsartState::ERROR) {
-		// Clear all errors
-	}
-
-	if (state & UsartState::RXP) {
-		USART_ClearFlag(usart, USART_FLAG_RXNE);
-	}
-
-	if (state & UsartState::TXC) {
-		USART_ClearFlag(usart, USART_FLAG_TC);
-	}
-
-	return 0;
+    // Disable UART
+    USART_Cmd(usart, DISABLE);
+    m_opened = 0;
+    return 0;
 }
 
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::registerIRQ(const std::function< void() > &handler)
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+ssize_t USART_dev< USARTx, mode, flags >::read(uint8_t *data, size_t count)
 {
-	// TODO
-	constexpr auto IRQn = pickIRQn();
-	IRQ_Manager::subscribe(IRQn, handler);
-	IRQ_Manager::unmask(IRQn);
-	return 0;
+    if (!count)
+        return 0;
+
+    if (!m_opened)
+        return -1;
+
+    // TODO: implement support for IRQ mode
+
+    constexpr auto usart = pick_USART();
+
+    while (USART_GetFlagStatus(usart, USART_FLAG_RXNE) == RESET) {
+        if (mode == USART_mode::IRQ) {
+            // Do not wait anything in async mode.
+            return -2;
+        }
+    }
+
+    // USART HW buffer is only one byte long
+    *data = USART_ReceiveData(usart);
+
+    return 1;
+}
+
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+ssize_t USART_dev< USARTx, mode, flags >::write(const uint8_t *data, size_t count)
+{
+    if (!count)
+        return 0;
+
+    if (!m_opened)
+        return -1;
+
+    // TODO: implement support for IRQ mode
+
+    constexpr auto usart = pick_USART();
+
+    while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET) {
+        if (mode == USART_mode::IRQ) {
+            // Do not wait anything in async mode.
+            return -2;
+        }
+    }
+
+    // USART HW buffer is only one byte long
+    USART_SendData(usart, *data);
+
+    return 1;
+}
+
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int32_t USART_dev< USARTx, mode, flags >::get_state() const
+{
+    constexpr auto usart = pick_USART();
+
+    int32_t status = USART_state::EMPTY;
+
+    if (USART_GetFlagStatus(usart, USART_FLAG_TXE) == SET) {
+        status |= USART_state::TXC;
+    }
+
+    if (USART_GetFlagStatus(usart, USART_FLAG_RXNE) == SET) {
+        status |= USART_state::RXP;
+    }
+
+    if (USART_GetFlagStatus(usart, USART_FLAG_ORE) == SET) {
+        status |= USART_state::ORE;
+    }
+
+    if (USART_GetFlagStatus(usart, USART_FLAG_NE) == SET) {
+        status |= USART_state::NE;
+    }
+
+    if (USART_GetFlagStatus(usart, USART_FLAG_FE) == SET) {
+        status |= USART_state::FE;
+    }
+
+    if (USART_GetFlagStatus(usart, USART_FLAG_PE) == SET) {
+        status |= USART_state::PE;
+    }
+
+    return status;
+}
+
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::clear_state(int32_t state)
+{
+    constexpr auto usart = pick_USART();
+
+    // TODO: make sure that state is cleared even if
+    // 'special' software sequence is required.
+    // See 'USART_ClearFlag()'
+    if (state & USART_state::ERROR) {
+        // Clear all errors
+    }
+
+    if (state & USART_state::RXP) {
+        USART_ClearFlag(usart, USART_FLAG_RXNE);
+    }
+
+    if (state & USART_state::TXC) {
+        USART_ClearFlag(usart, USART_FLAG_TC);
+    }
+
+    return 0;
 }
 
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::completeIRQ(int32_t state)
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::register_IRQ(const std::function< void() > &handler)
 {
-	constexpr auto usart = pickUSART();
-	constexpr auto IRQn = pickIRQn();
-
-	// TODO: make sure that state is cleared even if
-	// 'special' software sequence is required.
-	// See 'USART_ClearITPendingBit()'
-
-	if (state & UsartState::ERROR) {
-		// Clear all errors
-	}
-
-	if (state & UsartState::RXP) {
-		USART_ClearITPendingBit(usart, USART_IT_RXNE);
-	}
-
-	if (state & UsartState::TXC) {
-		USART_ClearITPendingBit(usart, USART_IT_TC);
-	}
-
-	IRQ_Manager::clear(IRQn);
-	IRQ_Manager::unmask(IRQn);
-
-	return 0;
-}
-
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::completeIRQ()
-{
-	return this->completeIRQ(UsartState::INVALID);
+    // TODO
+    constexpr auto IRQn = pick_IRQn();
+    IRQ_manager::subscribe(IRQn, handler);
+    IRQ_manager::unmask(IRQn);
+    return 0;
 }
 
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-int UsartHandler< USARTx, mode, flags >::deregisterIRQ()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::complete_IRQ(int32_t state)
 {
-	constexpr auto IRQn = pickIRQn();
-	IRQ_Manager::mask(IRQn);
-	IRQ_Manager::unsubscribe(IRQn);
+    constexpr auto usart = pick_USART();
+    constexpr auto IRQn = pick_IRQn();
 
-	return -1;
+    // TODO: make sure that state is cleared even if
+    // 'special' software sequence is required.
+    // See 'USART_ClearITPendingBit()'
+
+    if (state & USART_state::ERROR) {
+        // Clear all errors
+    }
+
+    if (state & USART_state::RXP) {
+        USART_ClearITPendingBit(usart, USART_IT_RXNE);
+    }
+
+    if (state & USART_state::TXC) {
+        USART_ClearITPendingBit(usart, USART_IT_TC);
+    }
+
+    IRQ_manager::clear(IRQn);
+    IRQ_manager::unmask(IRQn);
+
+    return 0;
+}
+
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::complete_IRQ()
+{
+    return this->complete_IRQ(USART_state::INVALID);
+}
+
+
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::deregisterIRQ()
+{
+    constexpr auto IRQn = pick_IRQn();
+    IRQ_manager::mask(IRQn);
+    IRQ_manager::unsubscribe(IRQn);
+
+    return -1;
 }
 
 // Private members
 // -----------------------------------------------------------------------------
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-constexpr auto UsartHandler< USARTx, mode, flags >::pickRCC()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+constexpr auto USART_dev< USARTx, mode, flags >::pick_RCC()
 {
-	// USART1 and USART6 are on APB2
-	// USART2, USART3, UART4, UART5 are on APB1
-	// See datasheet for detailed explanations
-	// TODO: Switch instead of 'if's
-	constexpr auto usart = pickUSART();
-	if (usart == USART1)
-		return RCC_APB2Periph_USART1;
-	if (usart == USART2)
-		return RCC_APB1Periph_USART2;
-	if (usart == USART3)
-		return RCC_APB1Periph_USART3;
-	if (usart == UART4)
-		return RCC_APB1Periph_UART4;
-	if (usart == UART5)
-		return RCC_APB1Periph_UART5;
-	if (usart == USART6)
-		return RCC_APB2Periph_USART6;
+    // USART1 and USART6 are on APB2
+    // USART2, USART3, UART4, UART5 are on APB1
+    // See datasheet for detailed explanations
+    // TODO: Switch instead of 'if's
+    constexpr auto usart = pick_USART();
+    if (usart == USART1)
+        return RCC_APB2Periph_USART1;
+    if (usart == USART2)
+        return RCC_APB1Periph_USART2;
+    if (usart == USART3)
+        return RCC_APB1Periph_USART3;
+    if (usart == UART4)
+        return RCC_APB1Periph_UART4;
+    if (usart == UART5)
+        return RCC_APB1Periph_UART5;
+    if (usart == USART6)
+        return RCC_APB2Periph_USART6;
 
-	return static_cast< uint32_t >(-1);
+    return static_cast< uint32_t >(-1);
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-constexpr auto UsartHandler< USARTx, mode, flags >::pickRCC_fn()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+constexpr auto USART_dev< USARTx, mode, flags >::pick_RCCfn()
 {
-	// USART1 and USART6 are on APB2
-	// USART2, USART3, UART4, UART5 are on APB1
-	// See datasheet for detailed explanations
-	constexpr USART_TypeDef *usart = pickUSART();
-	// TODO: switch instead of 'if's
-	if (usart == USART1 || usart == USART6) {
-		return RCC_APB2PeriphClockCmd;
-	} else if (usart == USART2 || usart == USART3 ||
-			   usart == UART4  || usart == UART5) {
-		return RCC_APB1PeriphClockCmd;
-	} else {
-		// TODO: clarify
-		return static_cast< decltype(&RCC_APB1PeriphClockCmd) >(nullptr);
-	}
+    // USART1 and USART6 are on APB2
+    // USART2, USART3, UART4, UART5 are on APB1
+    // See datasheet for detailed explanations
+    constexpr USART_TypeDef *usart = pick_USART();
+    // TODO: switch instead of 'if's
+    if (usart == USART1 || usart == USART6) {
+        return RCC_APB2PeriphClockCmd;
+    } else if (usart == USART2 || usart == USART3 ||
+               usart == UART4  || usart == UART5) {
+        return RCC_APB1PeriphClockCmd;
+    } else {
+        // TODO: clarify
+        return static_cast< decltype(&RCC_APB1PeriphClockCmd) >(nullptr);
+    }
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-constexpr auto UsartHandler< USARTx, mode, flags >::pickIRQn()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+constexpr auto USART_dev< USARTx, mode, flags >::pick_IRQn()
 {
-	constexpr auto usart = pickUSART();
+    constexpr auto usart = pick_USART();
 
-	if (usart == USART1) {
-		return USART1_IRQn;
-	} else if (usart == USART2) {
-		return USART2_IRQn;
-	} else if (usart == USART3) {
-		return USART3_IRQn;
-	} else if (usart == UART4) {
-		return UART4_IRQn;
-	} else if (usart == UART5) {
-		return UART5_IRQn;
-	} else if (usart == USART6) {
-		return USART6_IRQn;
-	}
+    if (usart == USART1) {
+        return USART1_IRQn;
+    } else if (usart == USART2) {
+        return USART2_IRQn;
+    } else if (usart == USART3) {
+        return USART3_IRQn;
+    } else if (usart == UART4) {
+        return UART4_IRQn;
+    } else if (usart == UART5) {
+        return UART5_IRQn;
+    } else if (usart == USART6) {
+        return USART6_IRQn;
+    }
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-constexpr auto UsartHandler< USARTx, mode, flags >::pickUSART()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+constexpr auto USART_dev< USARTx, mode, flags >::pick_USART()
 {
-	switch (USARTx) {
-	case UsartDevices::DEV_1:
-		return USART1;
-	case UsartDevices::DEV_2:
-		return USART2;
-	case UsartDevices::DEV_3:
-		return USART3;
-	case UsartDevices::DEV_4:
-		return UART4;
-	case UsartDevices::DEV_5:
-		return UART5;
-	case UsartDevices::DEV_6:
-		return USART6;
-	// TODO: clarify
-	default:
-		return static_cast< decltype(USART1) >(nullptr);
-	};
+    switch (USARTx) {
+    case USART_device::dev_1:
+        return USART1;
+    case USART_device::dev_2:
+        return USART2;
+    case USART_device::dev_3:
+        return USART3;
+    case USART_device::dev_4:
+        return UART4;
+    case USART_device::dev_5:
+        return UART5;
+    case USART_device::dev_6:
+        return USART6;
+        // TODO: clarify
+    default:
+        return static_cast< decltype(USART1) >(nullptr);
+    };
 }
 
-template< UsartDevices USARTx,
-		  UsartMode mode,
-		  int32_t flags >
-void UsartHandler< USARTx, mode, flags >::initIRQ()
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+void USART_dev< USARTx, mode, flags >::init_IRQ()
 {
-	constexpr auto usart = pickUSART();
+    constexpr auto usart = pick_USART();
 
-	if ((flags & UsartState::ERROR)
-			|| (flags & UsartState::FE)
-			|| (flags & UsartState::NE)
-			|| (flags & UsartState::ORE)) {
+    if ((flags & USART_state::ERROR)
+            || (flags & USART_state::FE)
+            || (flags & USART_state::NE)
+            || (flags & USART_state::ORE)) {
 
-		USART_ITConfig(usart, USART_IT_ERR, ENABLE);
-	}
+        USART_ITConfig(usart, USART_IT_ERR, ENABLE);
+    }
 
-	if (flags & UsartState::TXC) {
-		USART_ITConfig(usart, USART_IT_TXE, ENABLE);
-	}
+    if (flags & USART_state::TXC) {
+        USART_ITConfig(usart, USART_IT_TXE, ENABLE);
+    }
 
-	if (flags & UsartState::RXP) {
-		USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
-	}
+    if (flags & USART_state::RXP) {
+        USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
+    }
 }
 
 #endif // USART_HANDLER_HPP

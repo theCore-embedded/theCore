@@ -14,7 +14,8 @@ set(CC_OPT_FLAGS "-O0")
 set(CXX_OPT_FLAGS "${CC_OPT_FLAGS}")
 
 # common flags for current platform
-set(CC_PLATFORM_FLAGS "-mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections -fno-common")
+set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections -fno-common")
+
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
 # why????
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")

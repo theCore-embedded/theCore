@@ -3,61 +3,62 @@
 #define SYS_PIN_CFGS_H
 
 // Pin purpose
-enum class PinAssignment
+enum class pin_function
 {
-	// Basic purposes
-	GPIO_IN,
-	GPIO_OUT,
-	ANALOG,
+    // Basic purposes
+    GPIO_in,
+    GPIO_out,
+    analog,
 
-	// Alternate function purposes
-	PIN_SPI1,
-	PIN_SPI2,
-	PIN_SPI3,
-	UART1,
-	UART2,
-	UART3,
+    // Alternate function purposes
+    pin_SPI1,
+    pin_SPI2,
+    pin_SPI3,
+    UART1,
+    UART2,
+    UART3,
 };
 
 // Pin numbers
-enum class PinNum
+enum class pin_number
 {
-	PIN_0,
-	PIN_1,
-	PIN_2,
-	PIN_3,
-	PIN_4,
-	PIN_5,
-	PIN_6,
-	PIN_7,
-	PIN_8,
-	PIN_9,
-	PIN_10,
-	PIN_11,
-	PIN_12,
-	PIN_13,
-	PIN_14,
-	PIN_15,
+    pin_0,
+    pin_1,
+    pin_2,
+    pin_3,
+    pin_4,
+    pin_5,
+    pin_6,
+    pin_7,
+    pin_8,
+    pin_9,
+    pin_10,
+    pin_11,
+    pin_12,
+    pin_13,
+    pin_14,
+    pin_15,
 };
 
 // Pin ports
-enum class PinPort
+enum class pin_port
 {
-	PORT_A,
-	PORT_B,
-	PORT_C,
-	PORT_D,
-	PORT_E,
-	PORT_F,
+    port_a,
+    port_b,
+    port_c,
+    port_d,
+    port_e,
+    port_f,
 };
 
 // Type of pin
-enum class PinType {
-	NOPULL,
-	FLOAT,
-	PULL_UP,
-	PULL_DOWN,
-	OPEN_DRAIN
+enum class pin_type
+{
+    no_pull,
+    floating,
+    pull_up,
+    pull_down,
+    open_drain
 };
 
 #endif

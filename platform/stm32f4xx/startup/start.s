@@ -72,7 +72,7 @@ board_stop:
 			.long	board_stop						@ PendSV handler
 			.long	board_stop						@ SysTick handler
 			.rept	81								@ Repeat ASM statement
-			.long	_ZN11IRQ_Manager3ISREv			@ All other handlers
+			.long	_ZN11IRQ_manager3ISREv			@ All other handlers
 			.endr
 			.align
 

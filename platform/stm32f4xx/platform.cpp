@@ -2,7 +2,7 @@
 #include <platform/irq_manager.hpp>
 
 // TODO: move it elsewhere
-std::function< void() > IRQ_Manager::m_handlers[82];
+std::function< void() > IRQ_manager::m_handlers[82];
 
 
 // TODO: decide if to make as a class member or not
