@@ -211,7 +211,7 @@ int PCD8544< SPI_dev >::set_point(const point& coord)
     int x = coord.get_x();
     int y = coord.get_y();
 
-    if (x < 0 || y < 0 || x > 83 || y > 48)
+    if (x < 0 || y < 0 || x > 83 || y > 47)
         return -1;
 
     // Calculate a byte offcet
@@ -234,7 +234,7 @@ int PCD8544< SPI_dev >::clear_point(const point& coord)
     int x = coord.get_x();
     int y = coord.get_y();
 
-    if (x < 0 || y < 0 || x >= 84 || y >= 6)
+    if (x < 0 || y < 0 || x > 83 || y > 47)
         return -1;
 
     // Calculate a byte offcet
@@ -268,10 +268,11 @@ int PCD8544< SPI_dev >::clear()
 {
     // TODO: improve error check
     // clear
-    for (unsigned i = 0; i < 6 * 84; ++i) {
-        send(0x0, DC_state::data);
+    for (unsigned i = 0; i < 84; ++i) {
+        for (unsigned j = 0; j < 6; ++j) {
+            m_array[i][j] = 0;
+        }
     }
-
     return 0;
 }
 

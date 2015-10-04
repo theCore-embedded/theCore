@@ -9,38 +9,26 @@
 #include <functional>
 #include <utility>
 
-
-/* For validation */
-static uint8_t static_array[] =
-{
-    0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
-    0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
-    0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
-};
-
-/* For validation */
-static char static_array2[] =
-{
-    'H', 'E', 'L', 'L', '\r', '\n',
-};
+#include "sprite.hpp"
 
 void _delay()
 {
-    for (volatile int i = 0; i < 10000; ++i) {};
+    for (volatile int i = 0; i < 100000; ++i) {};
 }
 
 int main()
 {
-    //dasdasdsadd = 0;
     console_driver console;
 
     // TODO: move it to a better place
     IRQ_manager::init();
 
+
     PCD8544< SPI_LCD_driver > lcd;
     lcd.init();
     lcd.open();
     lcd.clear();
+    lcd.flush();
 
     console.init();
     console.open();
@@ -50,19 +38,12 @@ int main()
     console.write((uint8_t *)"$", 1);
     console.write((uint8_t *)" ", 1);
 
-    /* For validation */
-    for (size_t i = 0; i < sizeof(static_array); ++i) {
-        console.write(&static_array[i], 1);
-    }
-
-    /* For validation */
-    for (size_t i = 0; i < sizeof(static_array2); ++i) {
-        console.write((uint8_t *)&static_array2[i], 1);
-    }
-
     for (;;) {
         console.read(&c, 1);
-        console.write(&c, 1);
+
+        if (c != '\033') { // Escape sequence
+            console.write(&c, 1);
+        }
 
         switch (c) {
         case '\r':
@@ -82,23 +63,44 @@ int main()
         case 'o':
             LED_Orange::toggle();
             break;
-        case 'l': // LCD op
+        case '\033': // LCD op
+            console.read(&c, 1); // Skip '['
+            console.read(&c, 1);
 
-            static int d = 0;
-            for (int i = 0; i < 48; ++i) {
-                point p{i + d, i};
-                lcd.set_point(p);
+            // Displacements
+            static int vertical = 8;
+            static int horisontal = 20;
+
+            switch (c) {
+            case 'A':
+                vertical -= 2;
+                break;
+            case 'B':
+                vertical += 2;
+                break;
+            case 'C':
+                horisontal += 2;
+                break;
+            case 'D':
+                horisontal -= 2;
+                break;
+
             }
 
-            d++;
-            lcd.flush();
+            lcd.clear();
 
-            _delay();
+            for (size_t i = 0; i < gimp_image.width; ++i) {
+                for (size_t j = 0; j < gimp_image.height; ++j) {
+                    size_t idx = (j * gimp_image.width + i) * 4;
 
-            for (int i = 0; i < 48; ++i) {
-                point p{i + d, i};
-                lcd.set_point(p);
+                    if (gimp_image.pixel_data[idx + 3]) {
+                        point p{static_cast< int > ((i + horisontal) % 84),
+                                    static_cast< int > ((j + vertical)) & 0x3f};
+                        lcd.set_point(p);
+                    }
+                }
             }
+
             lcd.flush();
 
             break;

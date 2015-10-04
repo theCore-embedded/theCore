@@ -76,7 +76,7 @@ SPI_dev< SPIx >::SPI_dev(SPI_direction   direction,
          pickCPOL(CPOL),
          pickCPHA(CPHA),
          pickNSS(nssType),
-         SPI_BaudRatePrescaler_64, // TODO: clarify
+         SPI_BaudRatePrescaler_8, // TODO: clarify
          pickFirstBit(bitOrder),
          7,
          }
