@@ -24,9 +24,14 @@ static char static_array2[] =
     'H', 'E', 'L', 'L', '\r', '\n',
 };
 
+void _delay()
+{
+    for (volatile int i = 0; i < 10000; ++i) {};
+}
 
 int main()
 {
+    //dasdasdsadd = 0;
     console_driver console;
 
     // TODO: move it to a better place
@@ -78,8 +83,20 @@ int main()
             LED_Orange::toggle();
             break;
         case 'l': // LCD op
+
+            static int d = 0;
             for (int i = 0; i < 48; ++i) {
-                point p{i, i};
+                point p{i + d, i};
+                lcd.set_point(p);
+            }
+
+            d++;
+            lcd.flush();
+
+            _delay();
+
+            for (int i = 0; i < 48; ++i) {
+                point p{i + d, i};
                 lcd.set_point(p);
             }
             lcd.flush();

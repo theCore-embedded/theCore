@@ -35,7 +35,7 @@ clear_bss:
 /* TODO: what if r1 == 0 ? */
 			subs	r1, r1, #4			@ Decrement a counter
 			str		r2, [r0, r1]		@ Store a zero word to the RAM
-			bne		clear_bss_end		@ If counter greather than 0
+			bne		clear_bss			@ If counter greather than 0
 
 clear_bss_end:
 			blx		platform_init		@ Initialize a platform
