@@ -5,7 +5,7 @@
 #include <platform/spi_device.hpp>
 
 // TODO: better name
-using SPI_LCD_driver = SPI_dev< SPI_device::bus_2 >;
+using SPI_LCD_driver = SPI_dev< SPI_device::bus_2, SPI_com_type::poll >;
 
 #endif // TARGET_SPI_HPP_
 

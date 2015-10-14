@@ -19,7 +19,7 @@ private:
 };
 
 
-template< class SPI_dev >
+template< class SPI_dev, SPI_com_type com_type = SPI_com_type::poll >
 class PCD8544
 {
 public:
@@ -117,7 +117,11 @@ private:
     static constexpr uint8_t VOP_mask           = 0b01111111;
 
 
+    // Blocking send
     int send(uint8_t byte, DC_state op);
+
+    // IRQ hander
+    void IRQ_handler();
 
     // TODO: move it somewhere
     void _delay()
@@ -126,13 +130,14 @@ private:
     }
 
     SPI_dev m_device;
+    int32_t m_status; // TODO: update it after interrupt will come
     // TODO: magic numbers
     uint8_t m_array[84][6];
 };
 
 
-template< class SPI_dev >
-PCD8544< SPI_dev >::PCD8544()
+template< class SPI_dev, SPI_com_type com_type >
+PCD8544< SPI_dev, com_type >::PCD8544()
     :m_device{SPI_direction::TX,
               SPI_mode::master,
               SPI_CPOL::high,
@@ -140,6 +145,7 @@ PCD8544< SPI_dev >::PCD8544()
               SPI_NSS_type::SW,
               SPI_bit_order::MSB,
               1000000}
+    ,m_status{0}
     ,m_array{0}
 {
 
@@ -148,14 +154,14 @@ PCD8544< SPI_dev >::PCD8544()
     PCD8544_Mode::set();
 }
 
-template< class SPI_dev >
-PCD8544< SPI_dev >::~PCD8544()
+template< class SPI_dev, SPI_com_type com_type >
+PCD8544< SPI_dev, com_type >::~PCD8544()
 {
     // TODO
 }
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::init()
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::init()
 {
     int rc = m_device.init();
     // RESET
@@ -163,14 +169,26 @@ int PCD8544< SPI_dev >::init()
     _delay();
     PCD8544_Reset::set();
 
+    if (com_type != SPI_com_type::poll && com_type != SPI_com_type::DMA_no_IRQ) {
+        // Catch all IRQs
+        int32_t irqs = -1;
+
+        // Avoid using std::bindn since it usses dynamic memory
+        auto handler = [this]() {
+            this->IRQ_handler();
+        };
+
+        m_device.mask_IRQ(irqs);
+        m_device.register_IRQ(irqs, handler);
+    }
+
     return rc;
 }
 
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::open()
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::open()
 {
-
     int rc = m_device.open();
     // found somewhere in net
 
@@ -196,18 +214,26 @@ int PCD8544< SPI_dev >::open()
 }
 
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::close()
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::close()
 {
     // TODO
     return m_device.close();
 }
 
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::set_point(const point& coord)
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::set_point(const point& coord)
 {
+    if (com_type == SPI_com_type::DMA || com_type == SPI_com_type::DMA_no_IRQ) {
+        if ((m_device.get_status() & SPI_status::BSY)) {
+            // Device not ready, buffer under processing
+            return -2;
+        }
+    }
+
     // TODO: checks
+    // TODO: common parts (see clear_point())
     int x = coord.get_x();
     int y = coord.get_y();
 
@@ -227,10 +253,18 @@ int PCD8544< SPI_dev >::set_point(const point& coord)
 
 }
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::clear_point(const point& coord)
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::clear_point(const point& coord)
 {
+    if (com_type == SPI_com_type::DMA || com_type == SPI_com_type::DMA_no_IRQ) {
+        if ((m_device.get_status() & SPI_status::BSY)) {
+            // Device not ready, buffer under processing
+            return -2;
+        }
+    }
+
     // TODO: checks
+    // TODO: common parts (see set_point())
     int x = coord.get_x();
     int y = coord.get_y();
 
@@ -249,13 +283,34 @@ int PCD8544< SPI_dev >::clear_point(const point& coord)
     return 0;
 }
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::flush()
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::flush()
 {
+    auto status = m_device.get_status();
+
+    if (!(status & SPI_status::TX_RDY) || (status & SPI_status::BSY)) {
+        // Device not ready
+        return -2;
+    }
+
     // TODO: improve error check
-    for (unsigned i = 0; i < 84; ++i) {
-        for (unsigned j = 0; j < 6; ++j) {
-            send(m_array[i][j], DC_state::data);
+    // TODO: improve remainder calculation. What if buffer
+    // was not consumed entirely? May be, catch interrupt and then
+    // send rest of the data.
+
+    // Send whole buffer
+    if (com_type == SPI_com_type::DMA || com_type == SPI_com_type::DMA_no_IRQ) {
+        // Reset device state
+        m_device.clear_status(-1);
+        m_device.clear_IRQ(-1);
+        m_device.unmask_IRQ(-1);
+
+        m_device.write(reinterpret_cast< uint8_t* > (m_array), sizeof(m_array));
+    } else {
+        for (unsigned i = 0; i < 84; ++i) {
+            for (unsigned j = 0; j < 6; ++j) {
+                send(m_array[i][j], DC_state::data);
+            }
         }
     }
 
@@ -263,9 +318,14 @@ int PCD8544< SPI_dev >::flush()
     return 0;
 }
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::clear()
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::clear()
 {
+    if (m_device.get_status() & SPI_status::BSY) {
+        // Device not ready
+        return -2;
+    }
+
     // TODO: improve error check
     // clear
     for (unsigned i = 0; i < 84; ++i) {
@@ -279,20 +339,30 @@ int PCD8544< SPI_dev >::clear()
 //------------------------------------------------------------------------------
 // Private members
 
-template< class SPI_dev >
-int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
+template< class SPI_dev, SPI_com_type com_type >
+int PCD8544< SPI_dev, com_type >::send(uint8_t byte, DC_state op)
 {
-
     if (op == DC_state::data)
         PCD8544_Mode::set();
     else
         PCD8544_Mode::reset();
 
     PCD8544_CS::reset();
+
+    while (m_device.get_status() & SPI_status::BSY) {}
     int rc = m_device.write(&byte, 1);
+
     PCD8544_CS::set();
 
     return rc < 0 ? rc : 0;
 }
+
+template< class SPI_dev, SPI_com_type com_type >
+void PCD8544< SPI_dev, com_type >::IRQ_handler()
+{
+    // Do nothing for now
+    return;
+}
+
 
 #endif

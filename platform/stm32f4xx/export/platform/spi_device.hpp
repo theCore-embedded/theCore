@@ -3,9 +3,10 @@
 
 #include <stm32f4xx_spi.h>
 #include <sys/spi_cfgs.h>
+#include <platform/irq_manager.hpp>
 
 // TODO: add code that checks if driver is in bidir mode or not
-template< SPI_device SPIx >
+template< SPI_device SPIx, SPI_com_type com_type = SPI_com_type::poll >
 class SPI_dev
 {
 public:
@@ -33,6 +34,35 @@ public:
     // -1 if error, [0, count] otherwise
     ssize_t read(uint8_t *data, size_t count);
 
+    // Queries peripheral status
+    // INVALID if method failed, anything else from SPI_state otherwise
+    int32_t get_status() const;
+
+    // Clears state
+    // If nothing is given then whole state is cleared
+    int clear_status(int32_t state);
+
+    // Set of routines to work with IRQs
+    // -1 if error, 0 otherwise
+    int register_IRQ(int32_t status, const std::function< void() > &handler);
+
+    // Get current IRQ status
+    // INVALID if error, 0 otherwise
+    int32_t get_IRQ() const;
+
+    // Masks or unmasks all interrupts, associated with a device
+    // -1 if error, 0 otherwise
+    int mask_IRQ(int32_t irqs);
+    int unmask_IRQ(int32_t irqs);
+
+    // Clears pending IRQs
+    // -1 if error, 0 otherwise
+    int clear_IRQ(int32_t irqs);
+
+    // -1 if error, 0 otherwise
+    int deregister_IRQ(int32_t irqs);
+
+
 private:
     static constexpr auto pick_SPI();
     static constexpr auto pick_RCC();
@@ -44,6 +74,7 @@ private:
     static constexpr auto pickCPHA(SPI_CPHA CPHA);
     static constexpr auto pickNSS(SPI_NSS_type type);
     static constexpr auto pick_bit_order(SPI_bit_order order);
+    static constexpr auto pick_IT();
 
     // Depends on the evironment
     static auto pick_PCLK();
@@ -64,14 +95,14 @@ private:
 //------------------------------------------------------------------------------
 // Interface
 
-template< SPI_device SPIx >
-SPI_dev< SPIx >::SPI_dev(SPI_direction   direction,
-                         SPI_mode        mode,
-                         SPI_CPOL        CPOL,
-                         SPI_CPHA        CPHA,
-                         SPI_NSS_type    nssType,
-                         SPI_bit_order   bitOrder,
-                         uint32_t        clock)
+template< SPI_device SPIx, SPI_com_type com_type >
+SPI_dev< SPIx, com_type >::SPI_dev(SPI_direction   direction,
+                                   SPI_mode        mode,
+                                   SPI_CPOL        CPOL,
+                                   SPI_CPHA        CPHA,
+                                   SPI_NSS_type    nssType,
+                                   SPI_bit_order   bitOrder,
+                                   uint32_t        clock)
     :m_initObj{
          pick_direction(direction),
          pick_mode(mode),
@@ -79,7 +110,7 @@ SPI_dev< SPIx >::SPI_dev(SPI_direction   direction,
          pickCPOL(CPOL),
          pickCPHA(CPHA),
          pickNSS(nssType),
-         SPI_BaudRatePrescaler_8, // TODO: clarify
+         SPI_BaudRatePrescaler_8, // Default value
          pick_bit_order(bitOrder),
          7,
          }
@@ -88,8 +119,8 @@ SPI_dev< SPIx >::SPI_dev(SPI_direction   direction,
 {
 }
 
-template< SPI_device SPIx >
-SPI_dev< SPIx >::~SPI_dev()
+template< SPI_device SPIx, SPI_com_type com_type >
+SPI_dev< SPIx, com_type >::~SPI_dev()
 {
     // TODO
     if (m_inited) {
@@ -99,8 +130,8 @@ SPI_dev< SPIx >::~SPI_dev()
 
 
 // TODO: implement, comments
-template< SPI_device SPIx >
-int SPI_dev< SPIx >::init()
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::init()
 {
     constexpr auto spi               = pick_SPI();
     constexpr auto RCC_Periph        = pick_RCC();
@@ -143,8 +174,8 @@ int SPI_dev< SPIx >::init()
 }
 
 // TODO: implement, comments
-template< SPI_device SPIx >
-int SPI_dev< SPIx >::open()
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::open()
 {
     if (!m_inited)
         return -1;
@@ -157,8 +188,8 @@ int SPI_dev< SPIx >::open()
 }
 
 // TODO: implement, comments
-template< SPI_device SPIx >
-int SPI_dev< SPIx >::close()
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::close()
 {
     if (!m_opened)
         return -1;
@@ -171,8 +202,8 @@ int SPI_dev< SPIx >::close()
 }
 
 // TODO: implement, comments
-template< SPI_device SPIx >
-ssize_t SPI_dev< SPIx >::write(const uint8_t *data, size_t count)
+template< SPI_device SPIx, SPI_com_type com_type >
+ssize_t SPI_dev< SPIx, com_type >::write(const uint8_t *data, size_t count)
 {
     if (!m_opened)
         return -1;
@@ -194,8 +225,8 @@ ssize_t SPI_dev< SPIx >::write(const uint8_t *data, size_t count)
 }
 
 // TODO: implement, comments
-template< SPI_device SPIx >
-ssize_t SPI_dev< SPIx >::read(uint8_t *data, size_t count)
+template< SPI_device SPIx, SPI_com_type com_type >
+ssize_t SPI_dev< SPIx, com_type >::read(uint8_t *data, size_t count)
 {
     if (!m_opened)
         return -1;
@@ -212,12 +243,182 @@ ssize_t SPI_dev< SPIx >::read(uint8_t *data, size_t count)
     return 1;
 }
 
+
+// TODO: implement, comments
+template< SPI_device SPIx, SPI_com_type com_type >
+int32_t SPI_dev< SPIx, com_type >::get_status() const
+{
+    constexpr auto spi = pick_SPI();
+    auto status = spi->SR;
+    auto out_status = SPI_status::EMPTY;
+
+    if (status & SPI_I2S_FLAG_BSY) {
+        out_status |= SPI_status::BSY;
+    }
+
+    if (status & SPI_I2S_FLAG_RXNE) {
+        out_status |= SPI_status::RX_PND;
+    }
+
+    if (status & SPI_I2S_FLAG_TXE) {
+        out_status |= SPI_status::TX_RDY;
+    }
+
+    if (status & (SPI_FLAG_CRCERR | SPI_FLAG_MODF | SPI_I2S_FLAG_OVR | SPI_I2S_FLAG_TIFRFE)) {
+        out_status |= SPI_status::ERROR;
+    }
+
+    // TODO: implement
+#if 0
+    if (com_type::DMA || comm_type::DMA_no_IRQ) {
+
+        out_status |=
+    }
+#endif
+
+    return out_status;
+}
+
+// TODO: implement, comments
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::clear_status(int32_t status)
+{
+    // If device is busy, we can't do anything in this moment
+    constexpr auto spi = pick_SPI();
+    auto in_status = spi->SR;
+
+    if (in_status & SPI_I2S_FLAG_BSY) {
+        return -2;
+    }
+
+    // Skip data in RX buffer
+    if (status & SPI_status::RX_PND) {
+        auto dummy = spi->DR;
+        (void) dummy;
+    }
+
+        // TODO: implement
+#if 0
+        if (com_type::DMA || comm_type::DMA_no_IRQ) {
+        }
+
+#endif
+    return 0;
+}
+
+// TODO: implement, comments
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::register_IRQ(int32_t irqs,
+                                            const std::function< void() > &handler)
+{
+    constexpr auto spi = pick_SPI();
+    // There is one global ISR for all SPI interrupts
+    constexpr auto IRQn = pick_IT();
+
+    IRQ_manager::subscribe(IRQn, handler);
+
+    if (irqs & SPI_irq::ERROR) {
+        SPI_I2S_ITConfig(spi, SPI_I2S_IT_ERR, ENABLE);
+    }
+
+    if (irqs & SPI_irq::TX_RDY) {
+        SPI_I2S_ITConfig(spi, SPI_I2S_IT_TXE, ENABLE);
+    }
+
+    if (irqs & SPI_irq::RX_PND) {
+        SPI_I2S_ITConfig(spi, SPI_I2S_IT_RXNE, ENABLE);
+    }
+
+
+    // TODO: implement
+    if (irqs & SPI_irq::DMA_HT) {
+
+    }
+
+    if (irqs & SPI_irq::DMA_TC) {
+
+    }
+
+
+    return 0;
+}
+
+// TODO: implement, comments
+template< SPI_device SPIx, SPI_com_type com_type >
+int32_t SPI_dev< SPIx, com_type >::get_IRQ() const
+{
+    return this->get_status();
+}
+
+// TODO: implement, comments
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::mask_IRQ(int32_t irqs)
+{
+    // There is one global ISR for all SPI interrupts
+    constexpr auto IRQn = pick_IT();
+
+    // TODO: implement
+    if (irqs & SPI_irq::DMA_HT) {
+        return -1;
+    }
+
+    if (irqs & SPI_irq::DMA_TC) {
+        return -1;
+    }
+
+    return IRQ_manager::mask(IRQn);
+}
+
+// TODO: implement, comments
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::unmask_IRQ(int32_t irqs)
+{
+    // There is one global ISR for all SPI interrupts
+    constexpr auto IRQn = pick_IT();
+
+    // TODO: implement
+    if (irqs & SPI_irq::DMA_HT) {
+        return -1;
+    }
+
+    if (irqs & SPI_irq::DMA_TC) {
+        return -1;
+    }
+
+    return IRQ_manager::unmask(IRQn);
+}
+
+// TODO: implement, comments
+template< SPI_device SPIx, SPI_com_type com_type >
+int SPI_dev< SPIx, com_type >::clear_IRQ(int32_t irqs)
+{
+    // TODO: improve error check
+    (void) irqs;
+
+    // There is one global ISR for all SPI interrupts
+    constexpr auto IRQn = pick_IT();
+
+    // TODO: implement
+    if (irqs & SPI_irq::DMA_HT) {
+        return -1;
+    }
+
+    if (irqs & SPI_irq::DMA_TC) {
+        return -1;
+    }
+
+    this->clear_status(IRQn);
+
+    return IRQ_manager::clear(IRQn);
+}
+
+
 //------------------------------------------------------------------------------
 // Private section
 
 // TODO: implement
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pick_SPI()
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pick_SPI()
 {
     switch (SPIx) {
     case SPI_device::bus_1:
@@ -239,8 +440,8 @@ constexpr auto SPI_dev< SPIx >::pick_SPI()
 }
 
 // TODO: implement
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pick_RCC()
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pick_RCC()
 {
     // TODO: comments
     switch (SPIx) {
@@ -263,8 +464,8 @@ constexpr auto SPI_dev< SPIx >::pick_RCC()
 }
 
 // TODO: implement
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pick_RCC_fn()
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pick_RCC_fn()
 {
     // APB1 - SPI3 SPI2
     // APB2 - SPI5 SPI6 SPI1 SPI4
@@ -284,8 +485,8 @@ constexpr auto SPI_dev< SPIx >::pick_RCC_fn()
 }
 
 // TODO: implement
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pick_direction(SPI_direction direction)
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pick_direction(SPI_direction direction)
 {
 
     // TODO: add default section
@@ -303,8 +504,8 @@ constexpr auto SPI_dev< SPIx >::pick_direction(SPI_direction direction)
 }
 
 // TODO: implement
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pick_mode(SPI_mode mode)
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pick_mode(SPI_mode mode)
 {
     switch (mode) {
     case SPI_mode::master:
@@ -318,8 +519,8 @@ constexpr auto SPI_dev< SPIx >::pick_mode(SPI_mode mode)
 }
 
 // TODO: implement
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickCPOL(SPI_CPOL CPOL)
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pickCPOL(SPI_CPOL CPOL)
 {
     switch (CPOL) {
     case SPI_CPOL::low:
@@ -333,8 +534,8 @@ constexpr auto SPI_dev< SPIx >::pickCPOL(SPI_CPOL CPOL)
 }
 
 // TODO: implement
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickCPHA(SPI_CPHA CPHA)
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pickCPHA(SPI_CPHA CPHA)
 {
     switch (CPHA) {
     case SPI_CPHA::first_edge:
@@ -347,8 +548,8 @@ constexpr auto SPI_dev< SPIx >::pickCPHA(SPI_CPHA CPHA)
     }
 }
 
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickNSS(SPI_NSS_type type)
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pickNSS(SPI_NSS_type type)
 {
     switch (type) {
     case SPI_NSS_type::HW:
@@ -361,9 +562,10 @@ constexpr auto SPI_dev< SPIx >::pickNSS(SPI_NSS_type type)
     }
 }
 
-template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pick_bit_order(SPI_bit_order order)
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pick_bit_order(SPI_bit_order order)
 {
+
     switch (order) {
     case SPI_bit_order::MSB:
         return SPI_FirstBit_MSB;
@@ -373,12 +575,41 @@ constexpr auto SPI_dev< SPIx >::pick_bit_order(SPI_bit_order order)
         // TODO: clarify
         return static_cast< decltype(SPI_FirstBit_LSB) >(-1);
     }
+
+}
+
+template< SPI_device SPIx, SPI_com_type com_type >
+constexpr auto SPI_dev< SPIx, com_type >::pick_IT()
+{
+    switch (SPIx) {
+    case SPI_device::bus_1:
+        return SPI1_IRQn;
+    case SPI_device::bus_2:
+        return SPI2_IRQn;
+    case SPI_device::bus_3:
+        return SPI3_IRQn;
+
+        // TODO: these are not avaliable for target processor.
+        // Need to be protected by ifdefs
+#if 0
+    case SPI_device::bus_4:
+        return SPI4_IRQn;
+    case SPI_device::bus_5:
+        return SPI5_IRQn;
+    case SPI_device::bus_6:
+        return SPI6_IRQn;
+    case SPI_device::bus_7:
+        return SPI7_IRQn;
+#endif
+    default:
+        // TODO: clarify
+        return static_cast< IRQn_Type >(-1);
+    }
 }
 
 
-
-template< SPI_device SPIx >
-auto SPI_dev< SPIx >::pick_PCLK()
+template< SPI_device SPIx, SPI_com_type com_type >
+auto SPI_dev< SPIx, com_type >::pick_PCLK()
 {
     RCC_ClocksTypeDef clkcfg;
     RCC_GetClocksFreq(&clkcfg);
