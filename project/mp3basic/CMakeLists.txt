@@ -7,5 +7,5 @@ add_executable(mp3basic main.cpp)
 register_target()
 
 # TODO: combine it with register_target()
-import_module(mp3basic target)
-import_module(mp3basic pcd8544)
+target_link_libraries(mp3basic target)
+target_link_libraries(mp3basic pcd8544)

@@ -139,7 +139,7 @@ PCD8544< SPI_dev >::PCD8544()
               SPI_CPHA::second_edge,
               SPI_NSS_type::SW,
               SPI_bit_order::MSB,
-              0}
+              1000000}
     ,m_array{0}
 {
 

@@ -41,7 +41,7 @@
   * @{
   */
 
-/** @addtogroup GPIO
+/** @addtogroup GPIO:
   * @{
   */ 
 

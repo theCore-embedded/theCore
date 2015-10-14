@@ -16,7 +16,7 @@ public:
             SPI_CPHA        CPHA      = SPI_CPHA::second_edge,
             SPI_NSS_type    nssType   = SPI_NSS_type::HW,
             SPI_bit_order   bitOrder  = SPI_bit_order::MSB,
-            uint32_t        clock     = 0); // Not used for now. TODO here
+            uint32_t        clock     = 1000);
     ~SPI_dev();
 
     // Lazy initialization, -1 if error. 0 otherwise
@@ -34,20 +34,23 @@ public:
     ssize_t read(uint8_t *data, size_t count);
 
 private:
-    static constexpr auto pickSPI();
-    static constexpr auto pickRCC();
-    static constexpr auto pickRCC_fn();
+    static constexpr auto pick_SPI();
+    static constexpr auto pick_RCC();
+    static constexpr auto pick_RCC_fn();
 
-    static constexpr auto pickDir(SPI_direction direction);
-    static constexpr auto pickMode(SPI_mode mode);
+    static constexpr auto pick_direction(SPI_direction direction);
+    static constexpr auto pick_mode(SPI_mode mode);
     static constexpr auto pickCPOL(SPI_CPOL CPOL);
     static constexpr auto pickCPHA(SPI_CPHA CPHA);
-    static constexpr auto pickNSS(SPI_NSS_type nssType);
-    static constexpr auto pickFirstBit(SPI_bit_order bitOrder);
+    static constexpr auto pickNSS(SPI_NSS_type type);
+    static constexpr auto pick_bit_order(SPI_bit_order order);
+
+    // Depends on the evironment
+    static auto pick_PCLK();
 
     // Init object is required to be non-constant
     // See SPI_Init routine for more info
-    SPI_InitTypeDef m_initObj;
+    SPI_InitTypeDef       m_initObj;
     // TODO: use it!
     const uint32_t        m_clock;
 
@@ -66,21 +69,21 @@ SPI_dev< SPIx >::SPI_dev(SPI_direction   direction,
                          SPI_mode        mode,
                          SPI_CPOL        CPOL,
                          SPI_CPHA        CPHA,
-                         SPI_NSS_type     nssType,
-                         SPI_bit_order    bitOrder,
-                         uint32_t       clock)
+                         SPI_NSS_type    nssType,
+                         SPI_bit_order   bitOrder,
+                         uint32_t        clock)
     :m_initObj{
-         pickDir(direction),
-         pickMode(mode),
+         pick_direction(direction),
+         pick_mode(mode),
          SPI_DataSize_8b, // TODO: carefully configure
          pickCPOL(CPOL),
          pickCPHA(CPHA),
          pickNSS(nssType),
          SPI_BaudRatePrescaler_8, // TODO: clarify
-         pickFirstBit(bitOrder),
+         pick_bit_order(bitOrder),
          7,
          }
-    ,m_clock(clock)
+    ,m_clock{clock}
 
 {
 }
@@ -99,12 +102,38 @@ SPI_dev< SPIx >::~SPI_dev()
 template< SPI_device SPIx >
 int SPI_dev< SPIx >::init()
 {
-    constexpr auto spi               = pickSPI();
-    constexpr auto RCC_Periph        = pickRCC();
-    constexpr auto RCC_fn            = pickRCC_fn();
+    constexpr auto spi               = pick_SPI();
+    constexpr auto RCC_Periph        = pick_RCC();
+    constexpr auto RCC_fn            = pick_RCC_fn();
+
+    // Current clock on corresponding bus
+    auto APB_CLK = pick_PCLK();
+
+    // To calculate closest supported clock:
+    // 1. find
+    uint16_t divider = APB_CLK / m_clock;
+
+    // Prescaler has a range from 2 to 256
+    if (divider < 2) {
+        divider = 2;
+    } else if (divider > 256) {
+        divider = 256;
+    }
+
+    // Divider values maps to prescaler according to binary logarithm in following way:
+    // Div   Log2   Prescaler
+    // 2     1      0   (0b00)
+    // 4     2      1   (0b01)
+    // 8     3      2   (0b10)
+    // 16    4      3   (0b11)
+    // So conversion formula will look like:
+    // prescaler = log2(divider) - 1;
+    // Using clz is more efficient way to do it and covers case when divider is not
+    // power of two value.
+    uint16_t presc = ((32 - 1 - __builtin_clz(divider)) - 1) << 3;
+    m_initObj.SPI_BaudRatePrescaler = presc;
 
     RCC_fn(RCC_Periph, ENABLE);
-    //RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 
     m_inited = true;
 
@@ -120,7 +149,7 @@ int SPI_dev< SPIx >::open()
     if (!m_inited)
         return -1;
 
-    constexpr auto spi = pickSPI();
+    constexpr auto spi = pick_SPI();
 
     SPI_Cmd(spi, ENABLE);
     m_opened = true;
@@ -134,7 +163,7 @@ int SPI_dev< SPIx >::close()
     if (!m_opened)
         return -1;
 
-    constexpr auto spi = pickSPI();
+    constexpr auto spi = pick_SPI();
 
     SPI_Cmd(spi, DISABLE);
     m_opened = false;
@@ -151,7 +180,7 @@ ssize_t SPI_dev< SPIx >::write(const uint8_t *data, size_t count)
     if (!count)
         return 0;
 
-    constexpr auto spi = pickSPI();
+    constexpr auto spi = pick_SPI();
 
     while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
 
@@ -174,7 +203,7 @@ ssize_t SPI_dev< SPIx >::read(uint8_t *data, size_t count)
     if (!count)
         return 0;
 
-    constexpr auto spi = pickSPI();
+    constexpr auto spi = pick_SPI();
 
     while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET) { }
 
@@ -188,7 +217,7 @@ ssize_t SPI_dev< SPIx >::read(uint8_t *data, size_t count)
 
 // TODO: implement
 template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickSPI()
+constexpr auto SPI_dev< SPIx >::pick_SPI()
 {
     switch (SPIx) {
     case SPI_device::bus_1:
@@ -211,7 +240,7 @@ constexpr auto SPI_dev< SPIx >::pickSPI()
 
 // TODO: implement
 template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickRCC()
+constexpr auto SPI_dev< SPIx >::pick_RCC()
 {
     // TODO: comments
     switch (SPIx) {
@@ -235,7 +264,7 @@ constexpr auto SPI_dev< SPIx >::pickRCC()
 
 // TODO: implement
 template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickRCC_fn()
+constexpr auto SPI_dev< SPIx >::pick_RCC_fn()
 {
     // APB1 - SPI3 SPI2
     // APB2 - SPI5 SPI6 SPI1 SPI4
@@ -256,7 +285,7 @@ constexpr auto SPI_dev< SPIx >::pickRCC_fn()
 
 // TODO: implement
 template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickDir(SPI_direction direction)
+constexpr auto SPI_dev< SPIx >::pick_direction(SPI_direction direction)
 {
 
     // TODO: add default section
@@ -275,7 +304,7 @@ constexpr auto SPI_dev< SPIx >::pickDir(SPI_direction direction)
 
 // TODO: implement
 template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickMode(SPI_mode mode)
+constexpr auto SPI_dev< SPIx >::pick_mode(SPI_mode mode)
 {
     switch (mode) {
     case SPI_mode::master:
@@ -319,9 +348,9 @@ constexpr auto SPI_dev< SPIx >::pickCPHA(SPI_CPHA CPHA)
 }
 
 template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickNSS(SPI_NSS_type nssType)
+constexpr auto SPI_dev< SPIx >::pickNSS(SPI_NSS_type type)
 {
-    switch (nssType) {
+    switch (type) {
     case SPI_NSS_type::HW:
         return SPI_NSS_Hard;
     case SPI_NSS_type::SW:
@@ -333,9 +362,9 @@ constexpr auto SPI_dev< SPIx >::pickNSS(SPI_NSS_type nssType)
 }
 
 template< SPI_device SPIx >
-constexpr auto SPI_dev< SPIx >::pickFirstBit(SPI_bit_order bitOrder)
+constexpr auto SPI_dev< SPIx >::pick_bit_order(SPI_bit_order order)
 {
-    switch (bitOrder) {
+    switch (order) {
     case SPI_bit_order::MSB:
         return SPI_FirstBit_MSB;
     case SPI_bit_order::LSB:
@@ -348,4 +377,25 @@ constexpr auto SPI_dev< SPIx >::pickFirstBit(SPI_bit_order bitOrder)
 
 
 
+template< SPI_device SPIx >
+auto SPI_dev< SPIx >::pick_PCLK()
+{
+    RCC_ClocksTypeDef clkcfg;
+    RCC_GetClocksFreq(&clkcfg);
+
+    switch (SPIx) {
+    case SPI_device::bus_1:
+    case SPI_device::bus_5:
+    case SPI_device::bus_4:
+    case SPI_device::bus_6:
+        return clkcfg.PCLK2_Frequency;
+    case SPI_device::bus_2:
+    case SPI_device::bus_3:
+        return clkcfg.PCLK1_Frequency;
+    default:
+        // TODO: clarify
+        return static_cast< decltype(clkcfg.PCLK1_Frequency) >(-1);
+    }
+
+}
 #endif // PLATFORM_SPI_DEVICE_H

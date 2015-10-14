@@ -93,7 +93,7 @@ int main()
                 for (size_t j = 0; j < gimp_image.height; ++j) {
                     size_t idx = (j * gimp_image.width + i) * 4;
 
-                    if (gimp_image.pixel_data[idx + 3]) {
+                    if (gimp_image.pixel_data[idx + 3] > 0x7f) {
                         point p{static_cast< int > ((i + horisontal) % 84),
                                     static_cast< int > ((j + vertical)) & 0x3f};
                         lcd.set_point(p);

@@ -56,40 +56,6 @@ function(register_platform)
 	target_link_libraries(target platform)
 endfunction()
 
-# Imports a module
-# TODO: drop it?
-function(import_module current_module imported_module)
-	message(${current_module} " depends on " ${imported_module})
-
-	# Make sure dependencies are correct
-	add_dependencies(${current_module} ${imported_module})
-
-	# Find configuration file and extract path
-
-	# TODO: use more convinient way to find a module
-	# file(GLOB_RECURSE module_path ${PROJECT_SOURCE_DIR}/*${imported_module}-config.cmake)
-	# get_filename_component(module_dir ${module_path} DIRECTORY)
-	# message("Imported module path: " ${module_dir})
-
-	# TODO: this one not needed at all!
-	# Find module itself
-	# find_package(${imported_module} NO_DEFAULT_PATH PATHS ${module_dir})
-
-	# TODO: easily avoided by using target_definitions() with
-	# PUBLIC option
-	# Set proper definitions
-	# add_definitions(${${imported_module}_DEFS})
-
-	# Set proper linkage
-	target_link_libraries(${current_module} ${imported_module})
-endfunction()
-
-# Imports platform
-# TODO
-
-# Imports target
-# TODO
-
 # EO TODO
 ##########################
 

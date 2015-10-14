@@ -54,4 +54,14 @@ enum class SPI_bit_order
     LSB
 };
 
+
+enum class SPI_io
+{
+    poll,
+    IRQ,
+    DMA,		// Implies IRQ for DMA events
+    DMA_no_IRQ	// DMA without IRQ
+};
+
+
 #endif
