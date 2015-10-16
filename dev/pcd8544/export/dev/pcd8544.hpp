@@ -19,7 +19,7 @@ private:
 };
 
 
-template< class SPI_dev, SPI_com_type com_type = SPI_com_type::poll >
+template< class SPI_dev, SPI_com_type com_type = SPI_com_type::IRQ >
 class PCD8544
 {
 public:
@@ -121,7 +121,7 @@ private:
     int send(uint8_t byte, DC_state op);
 
     // IRQ hander
-    void IRQ_handler();
+    void IRQ_handler(typename SPI_dev::s_t status);
 
     // TODO: move it somewhere
     void _delay()
@@ -129,10 +129,9 @@ private:
         for (volatile int i = 0; i < 10000; ++i) {};
     }
 
-    SPI_dev m_device;
-    int32_t m_status; // TODO: update it after interrupt will come
-    // TODO: magic numbers
-    uint8_t m_array[84][6];
+    SPI_dev                 m_device;
+    typename SPI_dev::s_t   m_status; // TODO: update it after interrupt will come
+    uint8_t                 m_array[84][6];    // TODO: magic numbers
 };
 
 
@@ -171,15 +170,14 @@ int PCD8544< SPI_dev, com_type >::init()
 
     if (com_type != SPI_com_type::poll && com_type != SPI_com_type::DMA_no_IRQ) {
         // Catch all IRQs
-        int32_t irqs = -1;
 
         // Avoid using std::bindn since it usses dynamic memory
-        auto handler = [this]() {
-            this->IRQ_handler();
+        auto handler = [this](typename SPI_dev::s_t status) {
+            this->IRQ_handler(status);
         };
 
-        m_device.mask_IRQ(irqs);
-        m_device.register_IRQ(irqs, handler);
+        m_device.mask_IRQ();
+        m_device.register_IRQ(handler);
     }
 
     return rc;
@@ -226,7 +224,7 @@ template< class SPI_dev, SPI_com_type com_type >
 int PCD8544< SPI_dev, com_type >::set_point(const point& coord)
 {
     if (com_type == SPI_com_type::DMA || com_type == SPI_com_type::DMA_no_IRQ) {
-        if ((m_device.get_status() & SPI_status::BSY)) {
+        if ((m_device.get_status() & SPI_dev::flags::BSY)) {
             // Device not ready, buffer under processing
             return -2;
         }
@@ -257,7 +255,7 @@ template< class SPI_dev, SPI_com_type com_type >
 int PCD8544< SPI_dev, com_type >::clear_point(const point& coord)
 {
     if (com_type == SPI_com_type::DMA || com_type == SPI_com_type::DMA_no_IRQ) {
-        if ((m_device.get_status() & SPI_status::BSY)) {
+        if ((m_device.get_status() & SPI_dev::flags::BSY)) {
             // Device not ready, buffer under processing
             return -2;
         }
@@ -288,7 +286,7 @@ int PCD8544< SPI_dev, com_type >::flush()
 {
     auto status = m_device.get_status();
 
-    if (!(status & SPI_status::TX_RDY) || (status & SPI_status::BSY)) {
+    if (!(status & SPI_dev::flags::TX_RDY) || (status & SPI_dev::flags::BSY)) {
         // Device not ready
         return -2;
     }
@@ -301,9 +299,8 @@ int PCD8544< SPI_dev, com_type >::flush()
     // Send whole buffer
     if (com_type == SPI_com_type::DMA || com_type == SPI_com_type::DMA_no_IRQ) {
         // Reset device state
-        m_device.clear_status(-1);
-        m_device.clear_IRQ(-1);
-        m_device.unmask_IRQ(-1);
+        m_device.clear_IRQ();
+        m_device.unmask_IRQ();
 
         m_device.write(reinterpret_cast< uint8_t* > (m_array), sizeof(m_array));
     } else {
@@ -321,7 +318,7 @@ int PCD8544< SPI_dev, com_type >::flush()
 template< class SPI_dev, SPI_com_type com_type >
 int PCD8544< SPI_dev, com_type >::clear()
 {
-    if (m_device.get_status() & SPI_status::BSY) {
+    if (m_device.get_status() & SPI_dev::flags::BSY) {
         // Device not ready
         return -2;
     }
@@ -349,7 +346,10 @@ int PCD8544< SPI_dev, com_type >::send(uint8_t byte, DC_state op)
 
     PCD8544_CS::reset();
 
-    while (m_device.get_status() & SPI_status::BSY) {}
+    if (com_type == SPI_com_type::IRQ) {
+        while (m_status & SPI_dev::flags::TX_RDY) {}
+    }
+
     int rc = m_device.write(&byte, 1);
 
     PCD8544_CS::set();
@@ -358,9 +358,11 @@ int PCD8544< SPI_dev, com_type >::send(uint8_t byte, DC_state op)
 }
 
 template< class SPI_dev, SPI_com_type com_type >
-void PCD8544< SPI_dev, com_type >::IRQ_handler()
+void PCD8544< SPI_dev, com_type >::IRQ_handler(typename SPI_dev::s_t status)
 {
-    // Do nothing for now
+    (void) status;
+    // Do nothing special for now
+    m_status = status;
     return;
 }
 

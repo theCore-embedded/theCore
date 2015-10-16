@@ -10,7 +10,26 @@ template< SPI_device SPIx, SPI_com_type com_type = SPI_com_type::poll >
 class SPI_dev
 {
 public:
-    // TODO: default values
+
+    // General type to hold status bits
+    using s_t = uint16_t;
+
+    // Status flags, supported by the device
+    struct flags
+    {
+        static constexpr s_t empty  =   0;                      // No state
+        static constexpr s_t ERR    =
+                SPI_FLAG_CRCERR
+                | SPI_FLAG_MODF
+                | SPI_I2S_FLAG_OVR
+                | SPI_I2S_FLAG_TIFRFE;                              // Simple error
+        static constexpr s_t BSY    =   SPI_I2S_FLAG_BSY;      // Device is busy
+        static constexpr s_t TX_RDY =   SPI_I2S_FLAG_TXE;		// Transmit line is ready
+        static constexpr s_t RX_PND =   SPI_I2S_FLAG_RXNE;		// Receive pending
+
+    };
+
+    // TODO: substitude it
     SPI_dev(SPI_direction   direction = SPI_direction::BIDIR,
             SPI_mode        mode      = SPI_mode::master,
             SPI_CPOL        CPOL      = SPI_CPOL::low,
@@ -35,33 +54,30 @@ public:
     ssize_t read(uint8_t *data, size_t count);
 
     // Queries peripheral status
-    // INVALID if method failed, anything else from SPI_state otherwise
-    int32_t get_status() const;
-
-    // Clears state
-    // If nothing is given then whole state is cleared
-    int clear_status(int32_t state);
+    // INVALID if method failed, anything else from flags otherwise
+    auto get_status() const;
 
     // Set of routines to work with IRQs
     // -1 if error, 0 otherwise
-    int register_IRQ(int32_t status, const std::function< void() > &handler);
+    int register_IRQ(const std::function< void(s_t) > &handler);
 
     // Get current IRQ status
     // INVALID if error, 0 otherwise
-    int32_t get_IRQ() const;
+    auto get_IRQ() const;
 
     // Masks or unmasks all interrupts, associated with a device
     // -1 if error, 0 otherwise
-    int mask_IRQ(int32_t irqs);
-    int unmask_IRQ(int32_t irqs);
+    // TODO: drop it?
+    int mask_IRQ();
+    // TODO: merge it with clear_IRQ?
+    int unmask_IRQ();
 
     // Clears pending IRQs
     // -1 if error, 0 otherwise
-    int clear_IRQ(int32_t irqs);
+    int clear_IRQ();
 
     // -1 if error, 0 otherwise
-    int deregister_IRQ(int32_t irqs);
-
+    int deregister_IRQ();
 
 private:
     static constexpr auto pick_SPI();
@@ -82,7 +98,6 @@ private:
     // Init object is required to be non-constant
     // See SPI_Init routine for more info
     SPI_InitTypeDef       m_initObj;
-    // TODO: use it!
     const uint32_t        m_clock;
 
     // TODO: flags instead of two separate fields
@@ -213,13 +228,22 @@ ssize_t SPI_dev< SPIx, com_type >::write(const uint8_t *data, size_t count)
 
     constexpr auto spi = pick_SPI();
 
-    while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
+    if (com_type != SPI_com_type::poll) {
+        if (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET
+                || SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY == SET)) {
+            return -2; // Device busy
+        }
+    } else {
+        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) {}
+    }
 
     SPI_I2S_SendData(spi, data[0]);
 
     // Wait until data will be transmitted
-    while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
-    while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY) == SET) { }
+    if (com_type == SPI_com_type::poll) {
+        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
+        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY) == SET) { }
+    }
 
     return 1;
 }
@@ -236,9 +260,19 @@ ssize_t SPI_dev< SPIx, com_type >::read(uint8_t *data, size_t count)
 
     constexpr auto spi = pick_SPI();
 
-    while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET) { }
+    if (com_type != SPI_com_type::poll) {
+        // TODO: busy not ok, if receive buffer is empty
+        if (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET
+                || SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY == SET)) {
+            return -2; // Device busy
+        }
+    } else {
+        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET) { }
+    }
 
     data[0] = SPI_I2S_ReceiveData(spi);
+
+    // TODO: wait until transaction is over
 
     return 1;
 }
@@ -246,169 +280,71 @@ ssize_t SPI_dev< SPIx, com_type >::read(uint8_t *data, size_t count)
 
 // TODO: implement, comments
 template< SPI_device SPIx, SPI_com_type com_type >
-int32_t SPI_dev< SPIx, com_type >::get_status() const
+auto SPI_dev<SPIx, com_type>::get_status() const
 {
     constexpr auto spi = pick_SPI();
-    auto status = spi->SR;
-    auto out_status = SPI_status::EMPTY;
 
-    if (status & SPI_I2S_FLAG_BSY) {
-        out_status |= SPI_status::BSY;
-    }
-
-    if (status & SPI_I2S_FLAG_RXNE) {
-        out_status |= SPI_status::RX_PND;
-    }
-
-    if (status & SPI_I2S_FLAG_TXE) {
-        out_status |= SPI_status::TX_RDY;
-    }
-
-    if (status & (SPI_FLAG_CRCERR | SPI_FLAG_MODF | SPI_I2S_FLAG_OVR | SPI_I2S_FLAG_TIFRFE)) {
-        out_status |= SPI_status::ERROR;
-    }
-
-    // TODO: implement
-#if 0
-    if (com_type::DMA || comm_type::DMA_no_IRQ) {
-
-        out_status |=
-    }
-#endif
-
-    return out_status;
+    return spi->SR;
 }
 
 // TODO: implement, comments
 template< SPI_device SPIx, SPI_com_type com_type >
-int SPI_dev< SPIx, com_type >::clear_status(int32_t status)
-{
-    // If device is busy, we can't do anything in this moment
-    constexpr auto spi = pick_SPI();
-    auto in_status = spi->SR;
-
-    if (in_status & SPI_I2S_FLAG_BSY) {
-        return -2;
-    }
-
-    // Skip data in RX buffer
-    if (status & SPI_status::RX_PND) {
-        auto dummy = spi->DR;
-        (void) dummy;
-    }
-
-        // TODO: implement
-#if 0
-        if (com_type::DMA || comm_type::DMA_no_IRQ) {
-        }
-
-#endif
-    return 0;
-}
-
-// TODO: implement, comments
-template< SPI_device SPIx, SPI_com_type com_type >
-int SPI_dev< SPIx, com_type >::register_IRQ(int32_t irqs,
-                                            const std::function< void() > &handler)
+int SPI_dev< SPIx, com_type >::register_IRQ(const std::function< void(s_t) > &handler)
 {
     constexpr auto spi = pick_SPI();
     // There is one global ISR for all SPI interrupts
     constexpr auto IRQn = pick_IT();
 
-    IRQ_manager::subscribe(IRQn, handler);
+    auto device_handler = [&handler, &spi]() {
+        s_t status = spi->DR;
+        handler(status);
 
-    if (irqs & SPI_irq::ERROR) {
-        SPI_I2S_ITConfig(spi, SPI_I2S_IT_ERR, ENABLE);
-    }
+        // TODO: apply special software sequence here,
+        // in order to clear passed status
+    };
 
-    if (irqs & SPI_irq::TX_RDY) {
-        SPI_I2S_ITConfig(spi, SPI_I2S_IT_TXE, ENABLE);
-    }
+    // TODO: make it customizable
+    SPI_I2S_ITConfig(spi, SPI_I2S_IT_ERR, ENABLE);
+    SPI_I2S_ITConfig(spi, SPI_I2S_IT_TXE, ENABLE);
+    SPI_I2S_ITConfig(spi, SPI_I2S_IT_RXNE, ENABLE);
 
-    if (irqs & SPI_irq::RX_PND) {
-        SPI_I2S_ITConfig(spi, SPI_I2S_IT_RXNE, ENABLE);
-    }
-
-
-    // TODO: implement
-    if (irqs & SPI_irq::DMA_HT) {
-
-    }
-
-    if (irqs & SPI_irq::DMA_TC) {
-
-    }
-
-
-    return 0;
+    return IRQ_manager::subscribe(IRQn, device_handler);
 }
 
 // TODO: implement, comments
 template< SPI_device SPIx, SPI_com_type com_type >
-int32_t SPI_dev< SPIx, com_type >::get_IRQ() const
+auto SPI_dev< SPIx, com_type >::get_IRQ() const
 {
     return this->get_status();
 }
 
 // TODO: implement, comments
 template< SPI_device SPIx, SPI_com_type com_type >
-int SPI_dev< SPIx, com_type >::mask_IRQ(int32_t irqs)
+int SPI_dev< SPIx, com_type >::mask_IRQ()
 {
     // There is one global ISR for all SPI interrupts
     constexpr auto IRQn = pick_IT();
-
-    // TODO: implement
-    if (irqs & SPI_irq::DMA_HT) {
-        return -1;
-    }
-
-    if (irqs & SPI_irq::DMA_TC) {
-        return -1;
-    }
 
     return IRQ_manager::mask(IRQn);
 }
 
 // TODO: implement, comments
 template< SPI_device SPIx, SPI_com_type com_type >
-int SPI_dev< SPIx, com_type >::unmask_IRQ(int32_t irqs)
+int SPI_dev< SPIx, com_type >::unmask_IRQ()
 {
     // There is one global ISR for all SPI interrupts
     constexpr auto IRQn = pick_IT();
-
-    // TODO: implement
-    if (irqs & SPI_irq::DMA_HT) {
-        return -1;
-    }
-
-    if (irqs & SPI_irq::DMA_TC) {
-        return -1;
-    }
 
     return IRQ_manager::unmask(IRQn);
 }
 
 // TODO: implement, comments
 template< SPI_device SPIx, SPI_com_type com_type >
-int SPI_dev< SPIx, com_type >::clear_IRQ(int32_t irqs)
+int SPI_dev< SPIx, com_type >::clear_IRQ()
 {
     // TODO: improve error check
-    (void) irqs;
-
     // There is one global ISR for all SPI interrupts
     constexpr auto IRQn = pick_IT();
-
-    // TODO: implement
-    if (irqs & SPI_irq::DMA_HT) {
-        return -1;
-    }
-
-    if (irqs & SPI_irq::DMA_TC) {
-        return -1;
-    }
-
-    this->clear_status(IRQn);
-
     return IRQ_manager::clear(IRQn);
 }
 
