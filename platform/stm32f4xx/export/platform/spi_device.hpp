@@ -59,7 +59,7 @@ public:
 
     // Set of routines to work with IRQs
     // -1 if error, 0 otherwise
-    int register_IRQ(const std::function< void(s_t) > &handler);
+    int register_IRQ(const std::function< void() > &handler);
 
     // Get current IRQ status
     // INVALID if error, 0 otherwise
@@ -105,6 +105,9 @@ private:
     bool m_inited = false;
     // Flag to prevent multiple opening
     bool m_opened = false;
+
+    // IRQ handler
+    std::function< void(s_t) > m_handler;
 };
 
 //------------------------------------------------------------------------------
@@ -289,26 +292,18 @@ auto SPI_dev<SPIx, com_type>::get_status() const
 
 // TODO: implement, comments
 template< SPI_device SPIx, SPI_com_type com_type >
-int SPI_dev< SPIx, com_type >::register_IRQ(const std::function< void(s_t) > &handler)
+int SPI_dev< SPIx, com_type >::register_IRQ(const std::function< void()> &handler)
 {
     constexpr auto spi = pick_SPI();
     // There is one global ISR for all SPI interrupts
     constexpr auto IRQn = pick_IT();
-
-    auto device_handler = [&handler, &spi]() {
-        s_t status = spi->DR;
-        handler(status);
-
-        // TODO: apply special software sequence here,
-        // in order to clear passed status
-    };
 
     // TODO: make it customizable
     SPI_I2S_ITConfig(spi, SPI_I2S_IT_ERR, ENABLE);
     SPI_I2S_ITConfig(spi, SPI_I2S_IT_TXE, ENABLE);
     SPI_I2S_ITConfig(spi, SPI_I2S_IT_RXNE, ENABLE);
 
-    return IRQ_manager::subscribe(IRQn, device_handler);
+    return IRQ_manager::subscribe(IRQn, handler);
 }
 
 // TODO: implement, comments

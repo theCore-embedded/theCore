@@ -129,9 +129,9 @@ private:
         for (volatile int i = 0; i < 10000; ++i) {};
     }
 
-    SPI_dev                 m_device;
-    typename SPI_dev::s_t   m_status; // TODO: update it after interrupt will come
-    uint8_t                 m_array[84][6];    // TODO: magic numbers
+    SPI_dev                             m_device;
+    volatile typename SPI_dev::s_t      m_status; // TODO: update it after interrupt will come
+    uint8_t                             m_array[84][6];    // TODO: magic numbers
 };
 
 
@@ -172,8 +172,8 @@ int PCD8544< SPI_dev, com_type >::init()
         // Catch all IRQs
 
         // Avoid using std::bindn since it usses dynamic memory
-        auto handler = [this](typename SPI_dev::s_t status) {
-            this->IRQ_handler(status);
+        auto handler = [this]() {
+            this->IRQ_handler(this->m_device.get_status());
         };
 
         m_device.mask_IRQ();
@@ -299,8 +299,8 @@ int PCD8544< SPI_dev, com_type >::flush()
     // Send whole buffer
     if (com_type == SPI_com_type::DMA || com_type == SPI_com_type::DMA_no_IRQ) {
         // Reset device state
-        m_device.clear_IRQ();
-        m_device.unmask_IRQ();
+        // m_device.clear_IRQ();
+        // m_device.unmask_IRQ();
 
         m_device.write(reinterpret_cast< uint8_t* > (m_array), sizeof(m_array));
     } else {
@@ -347,7 +347,11 @@ int PCD8544< SPI_dev, com_type >::send(uint8_t byte, DC_state op)
     PCD8544_CS::reset();
 
     if (com_type == SPI_com_type::IRQ) {
-        while (m_status & SPI_dev::flags::TX_RDY) {}
+        m_device.mask_IRQ();
+        m_status = 0;
+        m_device.unmask_IRQ();
+
+        while (!(m_status & SPI_dev::flags::TX_RDY)) {}
     }
 
     int rc = m_device.write(&byte, 1);
@@ -360,7 +364,6 @@ int PCD8544< SPI_dev, com_type >::send(uint8_t byte, DC_state op)
 template< class SPI_dev, SPI_com_type com_type >
 void PCD8544< SPI_dev, com_type >::IRQ_handler(typename SPI_dev::s_t status)
 {
-    (void) status;
     // Do nothing special for now
     m_status = status;
     return;
