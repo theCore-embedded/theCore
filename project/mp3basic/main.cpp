@@ -3,6 +3,8 @@
 #include <target/pinconfig.hpp>
 #include <target/gpio.hpp>
 #include <platform/irq_manager.hpp>
+#include <platform/dma_device.hpp>
+
 
 #include <dev/pcd8544.hpp>
 
@@ -21,7 +23,9 @@ int main()
     console_driver console;
 
     // TODO: move it to a better place
-    IRQ_manager::init();
+    IRQ_manager::init();\
+
+    DMA_dev< (std::uintptr_t) DMA1_Stream2, 1 >  dma;
 
 
     PCD8544< SPI_LCD_driver > lcd;

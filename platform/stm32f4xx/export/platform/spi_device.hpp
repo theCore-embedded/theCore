@@ -105,9 +105,6 @@ private:
     bool m_inited = false;
     // Flag to prevent multiple opening
     bool m_opened = false;
-
-    // IRQ handler
-    std::function< void(s_t) > m_handler;
 };
 
 //------------------------------------------------------------------------------
