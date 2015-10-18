@@ -5,6 +5,7 @@
 
 //class DMA_dev;
 
+// TODO: comments
 template< std::uintptr_t DMA_stream, uint32_t channel >
 class DMA_dev
 {
@@ -56,7 +57,7 @@ private:
     // Interrupts
     static constexpr auto pick_IT();
 
-    std::pair< role, uint8_t* > m_origin;
+    std::pair< role, const uint8_t* > m_origin;
     std::pair< role, uint8_t* > m_destination;
     size_t m_origin_size;
     size_t m_destination_size;
@@ -141,8 +142,8 @@ int DMA_dev< DMA_stream, channel >::submit()
             return -1;
         }
 
-        init.DMA_PeripheralBaseAddr = m_origin.second;
-        init.DMA_Memory0BaseAddr = m_destination.second;
+        init.DMA_PeripheralBaseAddr = reinterpret_cast< uint32_t >(m_origin.second);
+        init.DMA_Memory0BaseAddr    = reinterpret_cast< uint32_t >(m_destination.second);
 
         // Assume that transaction forced by destination
         init.DMA_BufferSize = m_destination_size;
@@ -160,11 +161,11 @@ int DMA_dev< DMA_stream, channel >::submit()
             return -1;
         }
 
-        init.DMA_BufferSize = m_origin_size;
-        init.DMA_Memory0BaseAddr = m_origin.second;
-        init.DMA_PeripheralBaseAddr = m_destination.second;
-        init.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-        init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+        init.DMA_BufferSize             = m_origin_size;
+        init.DMA_Memory0BaseAddr        = reinterpret_cast< uint32_t >(m_origin.second);
+        init.DMA_PeripheralBaseAddr     = reinterpret_cast< uint32_t >(m_destination.second);
+        init.DMA_DIR                    = DMA_DIR_MemoryToPeripheral;
+        init.DMA_PeripheralInc          = DMA_PeripheralInc_Disable;
     }
 
     RCC_AHB1PeriphClockCmd(RCC_DMA, ENABLE);
@@ -327,7 +328,7 @@ constexpr auto DMA_dev< DMA_stream, channel >::pick_HT()
     case 7:
         return DMA_FLAG_HTIF7;
     default:
-        return -1; // TODO
+        return 0xfful; // TODO
     }
 
 }
@@ -355,7 +356,7 @@ constexpr auto DMA_dev< DMA_stream, channel >::pick_TC()
     case 7:
         return DMA_FLAG_TCIF7;
     default:
-        return -1; // TODO
+        return 0xfful; // TODO
     }
 }
 

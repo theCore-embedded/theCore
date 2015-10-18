@@ -23,9 +23,20 @@ int main()
     console_driver console;
 
     // TODO: move it to a better place
-    IRQ_manager::init();\
+    IRQ_manager::init();
 
-    DMA_dev< (std::uintptr_t) DMA1_Stream2, 1 >  dma;
+    using Dma = DMA_dev< (std::uintptr_t) DMA2_Stream0, 0 >;
+
+    Dma dma;
+
+    uint8_t ori[] = "Hello, yummmi\n";
+    uint8_t dest[sizeof(ori)] = { 0 };
+
+    dma.set_destination(Dma::role::memory, dest, sizeof(dest));
+    dma.set_origin(Dma::role::memory, ori, sizeof(ori));
+    dma.submit();
+
+    while (!(dma.get_status() & Dma::flags::TC)) { }
 
 
     PCD8544< SPI_LCD_driver > lcd;
@@ -39,8 +50,13 @@ int main()
 
     uint8_t c;
 
+    for (uint i = 0; i < sizeof(dest); ++i)
+        console.write(&dest[i], 1);
+
     console.write((uint8_t *)"$", 1);
     console.write((uint8_t *)" ", 1);
+
+
 
     for (;;) {
         console.read(&c, 1);
