@@ -2,6 +2,7 @@
 #ifndef SYS_SPI_CFGS_H
 #define SYS_SPI_CFGS_H
 
+// TODO: drop it
 // Represents distinct peripheral devices
 enum class SPI_device
 {
@@ -13,45 +14,6 @@ enum class SPI_device
     bus_6,
     bus_7,
     bus_8
-};
-
-enum class SPI_direction
-{
-    TX,
-    RX,
-    BIDIR
-};
-
-enum class SPI_mode
-{
-    master,
-    slave
-};
-
-// Clock polarity
-enum class SPI_CPOL
-{
-    low,
-    high
-};
-
-// Clock phase
-enum class SPI_CPHA
-{
-    first_edge,
-    second_edge
-};
-
-enum class SPI_NSS_type
-{
-    HW,
-    SW
-};
-
-enum class SPI_bit_order
-{
-    MSB,
-    LSB
 };
 
 // SPI communication type
