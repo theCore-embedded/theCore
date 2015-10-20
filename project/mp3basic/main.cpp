@@ -4,8 +4,6 @@
 #include <target/gpio.hpp>
 #include <platform/irq_manager.hpp>
 #include <platform/dma_device.hpp>
-
-
 #include <dev/pcd8544.hpp>
 
 #include <functional>
@@ -13,31 +11,12 @@
 
 #include "sprite.hpp"
 
-void _delay()
-{
-    for (volatile int i = 0; i < 100000; ++i) {};
-}
 
 int main()
 {
-    console_driver console;
-
     // TODO: move it to a better place
     IRQ_manager::init();
-
-    using Dma = DMA_dev< (std::uintptr_t) DMA2_Stream0, 0 >;
-
-    Dma dma;
-
-    uint8_t ori[] = "Hello, yummmi\n";
-    uint8_t dest[sizeof(ori)] = { 0 };
-
-    dma.set_destination(Dma::role::memory, dest, sizeof(dest));
-    dma.set_origin(Dma::role::memory, ori, sizeof(ori));
-    dma.submit();
-
-    while (!(dma.get_status() & Dma::flags::TC)) { }
-
+    uint8_t c;
 
     PCD8544< SPI_LCD_driver > lcd;
     lcd.init();
@@ -45,32 +24,21 @@ int main()
     lcd.clear();
     lcd.flush();
 
-    console.init();
-    console.open();
-
-    uint8_t c;
-
-    for (uint i = 0; i < sizeof(dest); ++i)
-        console.write(&dest[i], 1);
-
-    console.write((uint8_t *)"$", 1);
-    console.write((uint8_t *)" ", 1);
+    console_driver::init();
+    console_driver::open();
 
     int ret = 0;
 
-
     for (;;) {
-        console.read(&c, 1);
+        console_driver::read(&c, 1);
 
         if (c != '\033') { // Escape sequence
-            console.write(&c, 1);
+            console_driver::write(&c, 1);
         }
 
         switch (c) {
         case '\r':
-            console.write((uint8_t *)"\n", 1);
-            console.write((uint8_t *)"$", 1);
-            console.write((uint8_t *)" ", 1);
+            write_string("\n$ ");
             break;
         case 'r':
             LED_Red::toggle();
@@ -85,8 +53,8 @@ int main()
             LED_Orange::toggle();
             break;
         case '\033': // LCD op
-            console.read(&c, 1); // Skip '['
-            console.read(&c, 1);
+            console_driver::read(&c, 1); // Skip '['
+            console_driver::read(&c, 1);
 
             // Displacements
             static int vertical = 8;

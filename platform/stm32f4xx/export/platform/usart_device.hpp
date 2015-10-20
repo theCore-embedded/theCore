@@ -30,40 +30,40 @@ public:
     ~USART_dev();
 
     // Lazy initialization, -1 if error. 0 otherwise
-    int init();
+    static int init();
 
     // -1 if error, 0 otherwise
-    int open();
+    static int open();
     // -1 if error, 0 otherwise
-    int close();
+    static int close();
 
     // -1 if error, [0, count] otherwise
-    ssize_t write(const uint8_t *data, size_t count);
+    static ssize_t write(const uint8_t *data, size_t count);
 
     // -1 if error, [0, count] otherwise
-    ssize_t read(uint8_t *data, size_t count);
+    static ssize_t read(uint8_t *data, size_t count);
 
     // Queries peripheral status
     // INVALID if method failed, anything else from USART_state otherwise
-    int32_t get_state() const;
+    static int32_t get_state();
 
     // Clears state
     // If nothing is given then whole state is cleared
-    int clear_state(int32_t state);
-    int clear_state();
+    static int clear_state(int32_t state);
+    static int clear_state();
 
     // Set of routines to work with IRQs
     // -1 if error, 0 otherwise
-    int register_IRQ(const std::function< void() > &handler);
+    static int register_IRQ(const std::function< void() > &handler);
 
     // Completes IRQ for given status bits
     // If nothing is given then all pending interrupts are dropped
     // -1 if error, 0 otherwise
-    int complete_IRQ(int32_t state);
-    int complete_IRQ();
+    static int complete_IRQ(int32_t state);
+    static int complete_IRQ();
 
     // -1 if error, 0 otherwise
-    int deregisterIRQ();
+    static int deregisterIRQ();
 
 private:
     // Picks proper RCC at compile time
@@ -79,9 +79,9 @@ private:
     static void init_IRQ();
 
     // Indicates that USART is ready for use
-    int m_inited = 0;
+    static int m_inited;
     // Flag to prevent multiple opening
-    int m_opened = 0;
+    static int m_opened;
 };
 
 // Interface
@@ -148,6 +148,17 @@ int USART_dev< USARTx, mode, flags >::init()
 
     return 0;
 }
+
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::m_inited = 0;
+
+template< USART_device USARTx,
+          USART_mode mode,
+          int32_t flags >
+int USART_dev< USARTx, mode, flags >::m_opened = 0;
+
 
 template< USART_device USARTx,
           USART_mode mode,
@@ -225,23 +236,27 @@ ssize_t USART_dev< USARTx, mode, flags >::write(const uint8_t *data, size_t coun
 
     constexpr auto usart = pick_USART();
 
-    while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET) {
-        if (mode == USART_mode::IRQ) {
-            // Do not wait anything in async mode.
-            return -2;
-        }
+    if (mode == USART_mode::IRQ && USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET) {
+        // Do not wait anything in async mode.
+        return -2;
     }
 
-    // USART HW buffer is only one byte long
-    USART_SendData(usart, *data);
+    size_t counter = count;
 
-    return 1;
+
+    while (counter--) {
+        while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET) { }
+        // USART HW buffer is only one byte long
+        USART_SendData(usart, *data++);
+    }
+
+    return count;
 }
 
 template< USART_device USARTx,
           USART_mode mode,
           int32_t flags >
-int32_t USART_dev< USARTx, mode, flags >::get_state() const
+int32_t USART_dev< USARTx, mode, flags >::get_state()
 {
     constexpr auto usart = pick_USART();
 
@@ -348,7 +363,7 @@ template< USART_device USARTx,
           int32_t flags >
 int USART_dev< USARTx, mode, flags >::complete_IRQ()
 {
-    return this->complete_IRQ(USART_state::INVALID);
+    return complete_IRQ(USART_state::INVALID);
 }
 
 
