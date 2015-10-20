@@ -238,7 +238,7 @@ ssize_t SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::write(const uint8_t *data, 
 
     if (SPI_config::m_type != SPI_com_type::poll) {
         if (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET
-                || SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY == SET)) {
+                || SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY) == SET) {
             return -2; // Device busy
         }
     } else {
@@ -268,10 +268,11 @@ ssize_t SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::read(uint8_t *data, size_t 
 
     constexpr auto spi = pick_SPI();
 
+    // TODO: drop it to separate template member!!!
     if (SPI_config::m_type != SPI_com_type::poll) {
         // TODO: busy not ok, if receive buffer is empty
         if (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE) == RESET
-                || SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY == SET)) {
+                || SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_BSY) == SET) {
             return -2; // Device busy
         }
     } else {
