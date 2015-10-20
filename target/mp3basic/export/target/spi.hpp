@@ -7,7 +7,7 @@
 
 using SPI_LCD_config =
 SPI_config<
-SPI_com_type::IRQ,
+SPI_com_type::DMA,
 SPI_Direction_1Line_Tx,
 SPI_Mode_Master,
 SPI_CPOL_High,

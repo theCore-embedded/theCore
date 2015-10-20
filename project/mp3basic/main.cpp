@@ -56,6 +56,7 @@ int main()
     console.write((uint8_t *)"$", 1);
     console.write((uint8_t *)" ", 1);
 
+    int ret = 0;
 
 
     for (;;) {
@@ -107,21 +108,27 @@ int main()
 
             }
 
-            lcd.clear();
+            ret = 0;
 
-            for (size_t i = 0; i < gimp_image.width; ++i) {
-                for (size_t j = 0; j < gimp_image.height; ++j) {
+            if (lcd.clear() < 0)
+                break;
+
+
+            for (size_t i = 0; i < gimp_image.width && ret != -2; ++i) {
+                for (size_t j = 0; j < gimp_image.height && ret != -2; ++j) {
                     size_t idx = (j * gimp_image.width + i) * 4;
 
                     if (gimp_image.pixel_data[idx + 3] > 0x7f) {
                         point p{static_cast< int > ((i + horisontal) % 84),
                                     static_cast< int > ((j + vertical)) & 0x3f};
-                        lcd.set_point(p);
+                        ret = lcd.set_point(p);
                     }
                 }
             }
 
-            lcd.flush();
+            if (ret != -2) {
+                lcd.flush();
+            }
 
             break;
         default:

@@ -4,6 +4,7 @@
 #include <stm32f4xx_spi.h>
 #include <sys/spi_cfgs.h>
 #include <platform/irq_manager.hpp>
+#include <type_traits>
 
 
 // SPI platform configuration class
@@ -54,7 +55,6 @@ public:
     // Type of SPI transaction
     static constexpr SPI_com_type com_type = SPI_config::m_type;
 
-
     // Status flags, supported by the device
     struct flags
     {
@@ -83,10 +83,24 @@ public:
     int close();
 
     // -1 if error, [0, count] otherwise
+    template< SPI_com_type mode = SPI_config::m_type,
+              typename std::enable_if< mode == SPI_com_type::IRQ, int >::type = 0 >
     ssize_t write(const uint8_t *data, size_t count);
 
     // -1 if error, [0, count] otherwise
+    template< SPI_com_type mode = SPI_config::m_type,
+              typename std::enable_if< mode == SPI_com_type::IRQ, int >::type = 0 >
     ssize_t read(uint8_t *data, size_t count);
+
+    // -1 if error, 0 otherwise
+    template< SPI_com_type mode = SPI_config::m_type,
+              typename std::enable_if< mode == SPI_com_type::DMA, int >::type = 0 >
+    int write(DMA_TX &dma);
+
+    // -1 if error, 0 otherwise
+    template< SPI_com_type mode = SPI_config::m_type,
+              typename std::enable_if< mode == SPI_com_type::DMA, int >::type = 0 >
+    int read(DMA_RX &dma);
 
     // Queries peripheral status
     // INVALID if method failed, anything else from flags otherwise
@@ -224,8 +238,11 @@ int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::close()
     return 0;
 }
 
-// TODO: implement, comments
+// IRQ mode --------------------------------------------------------------------
+// God save us all...
 template< SPI_device SPIx, class SPI_config, class DMA_TX, class DMA_RX >
+template< SPI_com_type mode,
+          typename std::enable_if< mode == SPI_com_type::IRQ, int >::type >
 ssize_t SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::write(const uint8_t *data, size_t count)
 {
     if (!m_opened)
@@ -256,8 +273,9 @@ ssize_t SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::write(const uint8_t *data, 
     return 1;
 }
 
-// TODO: implement, comments
 template< SPI_device SPIx, class SPI_config, class DMA_TX, class DMA_RX >
+template< SPI_com_type mode,
+          typename std::enable_if< mode == SPI_com_type::IRQ, int >::type >
 ssize_t SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::read(uint8_t *data, size_t count)
 {
     if (!m_opened)
@@ -284,6 +302,41 @@ ssize_t SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::read(uint8_t *data, size_t 
     // TODO: wait until transaction is over
 
     return 1;
+}
+
+// DMA mode --------------------------------------------------------------------
+
+template< SPI_device SPIx, class SPI_config, class DMA_TX, class DMA_RX >
+template< SPI_com_type mode,
+          typename std::enable_if< mode == SPI_com_type::DMA, int >::type >
+int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::write(DMA_TX &dma)
+{
+    constexpr auto spi = pick_SPI();
+
+    dma.set_destination(DMA_TX::role::periphery,
+                        reinterpret_cast< volatile uint8_t *> (&spi->DR),
+                        1);
+    dma.submit();
+
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx, ENABLE);
+
+    return 0;
+}
+
+template< SPI_device SPIx, class SPI_config, class DMA_TX, class DMA_RX >
+template< SPI_com_type mode,
+          typename std::enable_if< mode == SPI_com_type::DMA, int >::type >
+int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::read(DMA_RX &dma)
+{
+    constexpr auto spi = pick_SPI();
+    dma.set_origin(DMA_RX::role::periphery,
+                   reinterpret_cast< volatile const uint8_t *> (&spi->DR),
+                   1);
+    dma.submit();
+
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx, ENABLE);
+
+    return 0;
 }
 
 
