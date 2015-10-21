@@ -21,8 +21,8 @@ set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m4 -mthumb -fdata-sections -f
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # extra flags
-set(CC_EXTRA_FLAGS "-std=c99 -gdwarf-2 -g3")
-set(CXX_EXTRA_FLAGS "-std=c++14 -gdwarf-2 -g3")
+set(CC_EXTRA_FLAGS "-std=c99 -gdwarf-2 -g3 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp ")
+set(CXX_EXTRA_FLAGS "-std=c++14 -gdwarf-2 -g3 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp ")
 
 # altogether
 set(CMAKE_C_FLAGS
