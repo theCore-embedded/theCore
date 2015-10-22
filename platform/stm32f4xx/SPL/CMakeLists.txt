@@ -58,14 +58,8 @@ add_library(spl STATIC
 # For whatever reason, 'SYSTEM' is working ONLY if path is absolute
 # Why?
 
-# common headers provided by STM Electronics
+# STM32 peripherial library headers
 target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/inc)
-# STM32 peripherial library headers itself
-target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/st)
-# common headers provided by ARM
-target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/arm)
-
-# Make sure appropriate MCU type is chosen
-target_compile_definitions(spl PUBLIC -DSTM32F40_41xxx)
 
 target_link_libraries(spl startup)
+target_link_libraries(spl cmsis)

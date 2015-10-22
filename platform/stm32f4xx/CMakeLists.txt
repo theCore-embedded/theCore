@@ -10,6 +10,7 @@ target_include_directories(platform PUBLIC export)
 # Platform submodules
 add_subdirectory(startup)
 add_subdirectory(SPL)
+add_subdirectory(CMSIS)
 
 # TODO: clarify essential libraries
 target_link_libraries(platform startup)
