@@ -27,31 +27,6 @@ public:
         __enable_irq();
     }
 
-    // Prevent optimizing out an ISR routine
-    __attribute__ ((used)) static void ISR()
-    {
-        volatile int IRQn;
-
-        asm volatile (
-                    "mrs %0, ipsr" : "=r" (IRQn)
-                    );
-
-        // IPSR holds exception numbers starting from 0
-        // Valid IRQ number starts from -15
-        // See Cortex-M4 processors documentation
-        // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/CHDBIBGJ.html
-        IRQn -= 16;
-
-        if (m_handlers[IRQn]) {
-            // TODO: Is it needed?
-            mask(static_cast< IRQn_t >(IRQn));
-            m_handlers[IRQn]();
-            return;
-        }
-
-        for(;;); // Default handler, TODO: change to something more useful
-    }
-
     static int subscribe(IRQn_t IRQn, const std::function< void() > &handler)
     {
         // TODO: error check
@@ -86,6 +61,31 @@ public:
     }
 
 private:
+    // Prevent optimizing out an ISR routine
+    __attribute__ ((used)) static void ISR()
+    {
+        volatile int IRQn;
+
+        asm volatile (
+                    "mrs %0, ipsr" : "=r" (IRQn)
+                    );
+
+        // IPSR holds exception numbers starting from 0
+        // Valid IRQ number starts from -15
+        // See Cortex-M4 processors documentation
+        // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/CHDBIBGJ.html
+        IRQn -= 16;
+
+        if (m_handlers[IRQn]) {
+            // TODO: Is it needed?
+            mask(static_cast< IRQn_t >(IRQn));
+            m_handlers[IRQn]();
+            return;
+        }
+
+        for(;;); // Default handler, TODO: change to something more useful
+    }
+
     // Registered IRQ handlers
     // TODO: magic numbers
     static std::function< void() > m_handlers[82];

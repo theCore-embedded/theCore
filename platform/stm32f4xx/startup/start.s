@@ -66,11 +66,11 @@ board_stop:
 			.long	0								@ Reserved bytes
 			.long	0								@ Reserved bytes
 			.long	0								@ Reserved bytes
-			.long	board_stop						@ SVC handler
+			.long	vPortSVCHandler					@ SVC handler
 			.long	board_stop						@ Debug monitor
 			.long	0								@ Reserved bytes
-			.long	board_stop						@ PendSV handler
-			.long	board_stop						@ SysTick handler
+			.long	xPortPendSVHandler				@ PendSV handler
+			.long	xPortSysTickHandler				@ SysTick handler
 			.rept	81								@ Repeat ASM statement
 			.long	_ZN11IRQ_manager3ISREv			@ All other handlers
 			.endr

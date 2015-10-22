@@ -178,27 +178,26 @@ int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::init()
     auto APB_CLK = pick_PCLK();
 
     // To calculate closest supported clock:
-    // 1. find
-    uint16_t divider = APB_CLK / SPI_config::m_clock;
+    uint16_t quotient = APB_CLK / SPI_config::m_clock;
 
     // Prescaler has a range from 2 to 256
-    if (divider < 2) {
-        divider = 2;
-    } else if (divider > 256) {
-        divider = 256;
+    if (quotient < 2) {
+        quotient = 2;
+    } else if (quotient > 256) {
+        quotient = 256;
     }
 
     // Divider values maps to prescaler according to binary logarithm in following way:
-    // Div   Log2   Prescaler
+    // Quo   Log2   Prescaler
     // 2     1      0   (0b00)
     // 4     2      1   (0b01)
     // 8     3      2   (0b10)
     // 16    4      3   (0b11)
     // So conversion formula will look like:
     // prescaler = log2(divider) - 1;
-    // Using clz is more efficient way to do it and covers case when divider is not
+    // Using clz() is more efficient way to do it and covers case when quotient is not
     // power of two value.
-    uint16_t presc = ((32 - 1 - __builtin_clz(divider)) - 1) << 3;
+    uint16_t presc = ((32 - 1 - __builtin_clz(quotient)) - 1) << 3;
     init_obj.SPI_BaudRatePrescaler = presc;
 
     RCC_fn(RCC_Periph, ENABLE);

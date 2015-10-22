@@ -1,26 +1,16 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-/* Here is a good place to include header files that are required across
-your application. */
-//#include "something.h"
-
-// TODO
-void vAssertCalled(const char *file, int line)
-{
-	(void) file;
-	(void) line;
-	for(;;);
-}
+extern void vAssertCalled(const char *file, int line);
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 0
-#define configCPU_CLOCK_HZ                      60000000
-#define configTICK_RATE_HZ                      250
+#define configCPU_CLOCK_HZ                      1600000
+#define configTICK_RATE_HZ                      100
 #define configMAX_PRIORITIES                    5
 #define configMINIMAL_STACK_SIZE                128
-#define configTOTAL_HEAP_SIZE                   10240
+#define configTOTAL_HEAP_SIZE                   8196
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
@@ -58,7 +48,7 @@ void vAssertCalled(const char *file, int line)
 #define configTIMER_TASK_STACK_DEPTH            configMINIMAL_STACK_SIZE
 
 /* Interrupt nesting behaviour configuration. */
-#define configKERNEL_INTERRUPT_PRIORITY         1//[dependent of processor]
+#define configKERNEL_INTERRUPT_PRIORITY         0//[dependent of processor]
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    5//[dependent on processor and application]
 #define configMAX_API_CALL_INTERRUPT_PRIORITY   5//[dependent on processor and application]
 

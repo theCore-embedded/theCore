@@ -11,6 +11,27 @@
 
 #include "sprite.hpp"
 
+#include <FreeRTOS.h>
+#include <task.h>
+
+
+static void rtos_task0(void *params)
+{
+    (void) params;
+    for (;;) {
+        LED_Red::toggle();
+        vTaskDelay(1000);
+    }
+}
+
+static void rtos_task1(void *params)
+{
+    (void) params;
+    for (;;) {
+        write_string("I am another FreeRTOS task!\r\n");
+        vTaskDelay(1000);
+    }
+}
 
 int main()
 {
@@ -28,6 +49,13 @@ int main()
     console_driver::open();
 
     int ret = 0;
+
+    // Let the fun begin!
+
+    xTaskCreate(rtos_task0, "task1", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+    xTaskCreate(rtos_task1, "task2", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+
+    vTaskStartScheduler();
 
     for (;;) {
         console_driver::read(&c, 1);

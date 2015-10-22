@@ -8,3 +8,4 @@ start.s
 target_link_libraries(startup sys)
 target_link_libraries(startup platform)
 target_link_libraries(startup target)
+target_link_libraries(startup freertos)

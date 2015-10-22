@@ -14,6 +14,13 @@ extern "C" int  __aeabi_atexit(void* object, void (*destroyer)(void*), void* dso
 
 // TODO: decide if to keep this here or not
 
+extern "C" void vAssertCalled(const char *file, int line)
+{
+    (void) file;
+    (void) line;
+    for(;;);
+}
+
 extern "C"
 void * memset(void *s, int c, size_t n)
 {
