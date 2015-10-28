@@ -38,7 +38,8 @@ clear_bss:
 			bne		clear_bss			@ If counter greather than 0
 
 clear_bss_end:
-			blx		platform_init		@ Initialize a platform
+			bl		SystemInit			@ Initialize a system
+			blx		platform_init		@ Initialize a platform // TODO: remove
 			blx		target_init			@ Initialize a target
 			blx		static_init			@ Initialize static objects
 			blx		main				@ Allow return, for now
@@ -48,7 +49,7 @@ clear_bss_end:
 .endfunc
 
 board_stop:
-			b		board_stop			@ Infinite loop if returned
+			b		.					@ Infinite loop if returned
 
 
 

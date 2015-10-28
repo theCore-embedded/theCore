@@ -10,7 +10,7 @@ set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
 
 # optimization flags
-set(CC_OPT_FLAGS "-O0")
+set(CC_OPT_FLAGS "-Os")
 set(CXX_OPT_FLAGS "${CC_OPT_FLAGS}")
 
 # common flags for current platform
