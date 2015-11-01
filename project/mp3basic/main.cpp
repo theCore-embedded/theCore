@@ -28,7 +28,7 @@ static void rtos_task1(void *params)
 {
     (void) params;
 
-    uint8_t c;
+    uint8_t c = 0;
     int ret = 0;
 
     PCD8544< SPI_LCD_driver > lcd;

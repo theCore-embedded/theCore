@@ -1,3 +1,4 @@
+# TODO: use it as general utility rather than platform-dependent file
 # This file includes proper listfiles with respect to the compiler being used
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
