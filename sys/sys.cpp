@@ -22,7 +22,7 @@ extern "C" void vAssertCalled(const char *file, int line)
 }
 
 extern "C"
-void * memset(void *s, int c, size_t n)
+void *memset(void *s, int c, size_t n)
 {
     uint8_t *dest = (uint8_t *) s;
 

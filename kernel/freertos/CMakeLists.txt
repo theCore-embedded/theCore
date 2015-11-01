@@ -1,9 +1,3 @@
-## Qt creator hack
-file(GLOB_RECURSE FREERTOS_dummy_target FreeRTOSConfig.h)
-add_custom_target(FREERTOS_dummy_target SOURCES "FreeRTOSConfig.h")
-## EO hack
-
-
 set(SRC_DIR ./freertos/FreeRTOS/Source/)
 add_library(freertos 
 	./freertos/FreeRTOS/Source/croutine.c
@@ -23,3 +17,4 @@ target_include_directories(freertos PUBLIC
 	./freertos/FreeRTOS/Source/portable/GCC/ARM_CM4F/)
 
 target_link_libraries(freertos sys)
+target_link_libraries(freertos target)
