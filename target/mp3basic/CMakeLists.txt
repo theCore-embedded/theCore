@@ -12,5 +12,10 @@ target_include_directories(target PUBLIC export)
 # TODO: move it to register platform ?
 target_link_libraries(target platform)
 
+# STM32 discovery is running with SMT32F407VG processor
+target_compile_definitions(target PUBLIC -DSTM32F40_41xxx)
+# External oscillator has a 8 MHz out clock
+target_compile_definitions(target PUBLIC -DHSE_VALUE=8000000)
+
 # Register platform as a base for this target
 register_platform()

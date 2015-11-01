@@ -8,7 +8,6 @@ target_include_directories(cmsis SYSTEM PUBLIC ./includes)
 
 # TODO: move this two to the target
 # Make sure appropriate MCU type is chosen
-target_compile_definitions(cmsis PUBLIC -DSTM32F40_41xxx)
-target_compile_definitions(cmsis PUBLIC -DHSE_VALUE=8000000)
+target_link_libraries(cmsis target)
 
 
