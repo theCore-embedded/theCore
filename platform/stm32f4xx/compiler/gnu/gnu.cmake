@@ -10,7 +10,7 @@ set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
 
 # optimization flags
-set(CC_OPT_FLAGS "-O2")
+set(CC_OPT_FLAGS "-Os -flto -fwhole-program ")
 set(CXX_OPT_FLAGS "${CC_OPT_FLAGS}")
 # used in debug mode
 set(CC_NO_OPT_FLAGS "-O0 -g3")
@@ -43,14 +43,15 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CXX_NO_OPT_FLAGS}")
 
 # Linker flags
 set(CMAKE_C_LINK_FLAGS
-"-T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -nostartfiles --gc-sections")
+	"-nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
 set(CMAKE_CXX_LINK_FLAGS
-"-T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -nostartfiles --gc-sections")
+	"-nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_C_LINK_EXECUTABLE
-"${CMAKE_C_LINKER} <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_LIBRARIES>   -o <TARGET>")
+"arm-none-eabi-gcc <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 set(CMAKE_CXX_LINK_EXECUTABLE
-"${CMAKE_CXX_LINKER} <OBJECTS> <CMAKE_CXX_LINK_FLAGS>  <LINK_LIBRARIES> -o <TARGET>")
+"arm-none-eabi-g++ <OBJECTS> <CMAKE_CXX_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 
 # TODO: merge these flags with compiler one
 set(CMAKE_ASM-ATT_COMPILER_ARG1 "-mcpu=cortex-m4")
+
