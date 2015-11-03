@@ -14,7 +14,7 @@ extern "C" int  __aeabi_atexit(void* object, void (*destroyer)(void*), void* dso
 
 // TODO: decide if to keep this here or not
 
-extern "C"
+extern "C" __attribute__((used))
 void * memset(void *s, int c, size_t n)
 {
     uint8_t *dest = (uint8_t *) s;
@@ -26,7 +26,7 @@ void * memset(void *s, int c, size_t n)
     return s;
 }
 
-extern "C"
+extern "C" __attribute__((used))
 // TODO: HACK - move it somewhere
 void *memcpy(void *dst, const void *src, size_t cnt)
 {

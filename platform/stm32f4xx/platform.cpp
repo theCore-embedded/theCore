@@ -6,6 +6,6 @@ std::function< void() > IRQ_manager::m_handlers[82];
 
 
 // TODO: decide if to make as a class member or not
-extern "C" void platform_init()
+extern "C" __attribute__((used)) void platform_init()
 {
 }
