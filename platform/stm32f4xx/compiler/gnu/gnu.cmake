@@ -10,7 +10,7 @@ set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
 
 # optimization flags
-set(CC_OPT_FLAGS "-Os -flto -fwhole-program ")
+set(CC_OPT_FLAGS "-Os -flto=4 ")
 set(CXX_OPT_FLAGS "${CC_OPT_FLAGS}")
 # used in debug mode
 set(CC_NO_OPT_FLAGS "-O0 -g3")
@@ -38,14 +38,14 @@ set(CMAKE_CXX_FLAGS
 # Default flags of the release mode are OK for our builds
 # Default flags of the minimum size mode are OK for our builds
 # Debug mode
-set(CMAKE_C_FLAGS_DEBUG  "${CC_NO_OPT_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CXX_NO_OPT_FLAGS}")
+set(CMAKE_C_FLAGS_DEBUG  "${CC_OPT_FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CXX_OPT_FLAGS}")
 
 # Linker flags
 set(CMAKE_C_LINK_FLAGS
-	"-nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
+	"-fuse-linker-plugin -nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
 set(CMAKE_CXX_LINK_FLAGS
-	"-nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
+	"-fuse-linker-plugin -nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_C_LINK_EXECUTABLE
 "arm-none-eabi-gcc <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
