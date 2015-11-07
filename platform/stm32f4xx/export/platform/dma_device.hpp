@@ -2,6 +2,7 @@
 #define PLATFORM_DMA_DEVICE
 
 #include <stm32f4xx_dma.h>
+#include <functional>
 
 // TODO: comments
 template< std::uintptr_t DMA_stream, uint32_t channel >
@@ -48,21 +49,26 @@ private:
     static constexpr auto pick_stream();
     static constexpr auto pick_stream_no();
     static constexpr auto pick_RCC();
-    //static constexpr auto pick_RCC_fn(); // not needed
     static constexpr auto pick_HT();
     static constexpr auto pick_TC();
     static constexpr auto pick_ERR();
+
     // Interrupts
     static constexpr auto pick_IT();
     static constexpr auto pick_HT_IF();
     static constexpr auto pick_TC_IF();
     static constexpr auto pick_ERR_IF();
 
+    // Enables IRQ right before DMA transaction start
+    int enable_IRQ();
 
     std::pair< role, volatile const uint8_t* > m_origin;
     std::pair< role, volatile uint8_t* > m_destination;
     size_t m_origin_size;
     size_t m_destination_size;
+
+    std::function< void () >    m_handler;
+    s_t                         m_IT_flags;
 };
 
 
@@ -164,18 +170,14 @@ int DMA_dev< DMA_stream, channel >::submit()
             return -1;
         }
 
-        init.DMA_BufferSize             = m_origin_size;
-        init.DMA_Memory0BaseAddr        = reinterpret_cast< uint32_t >(m_origin.second);
-        init.DMA_PeripheralBaseAddr     = reinterpret_cast< uint32_t >(m_destination.second);
-        init.DMA_DIR                    = DMA_DIR_MemoryToPeripheral;
-        init.DMA_PeripheralInc          = DMA_PeripheralInc_Disable;
+        init.DMA_BufferSize          = m_origin_size;
+        init.DMA_Memory0BaseAddr     = reinterpret_cast< uint32_t >(m_origin.second);
+        init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(m_destination.second);
+        init.DMA_DIR                 = DMA_DIR_MemoryToPeripheral;
+        init.DMA_PeripheralInc       = DMA_PeripheralInc_Disable;
     }
 
-    // Clear all flags before we go
-    DMA_ClearFlag(stream, pick_TC() | pick_HT() | pick_ERR());
-
-    // Clear all pending interrupts
-    DMA_ClearITPendingBit(stream, pick_TC_IF() | pick_HT_IF() | pick_ERR_IF());
+    enable_IRQ();
 
     DMA_Init(stream, &init);
     DMA_Cmd(stream, ENABLE);
@@ -204,33 +206,10 @@ int DMA_dev< DMA_stream, channel >::enable_IRQ(
     if (!flags)
         return -1;
 
-    constexpr auto DMA_IT = pick_IT();
-    constexpr auto stream = pick_stream();
+    /* Required to enable IRQ right before DMA start */
+    m_handler = handler;
+    m_IT_flags = flags;
 
-    uint32_t DMA_IT_flags = 0;
-
-    if ((flags & pick_HT()) == pick_HT()) {
-        DMA_IT_flags |= DMA_IT_HT;
-    }
-
-    if ((flags & pick_TC()) == pick_TC()) {
-        DMA_IT_flags |= DMA_IT_TC;
-    }
-
-    if ((flags & pick_ERR()) == pick_ERR()) {
-        DMA_IT_flags |= (DMA_IT_TE | DMA_IT_FE);
-    }
-
-    // Disable all interrupt sources before we go
-    constexpr auto to_clear = DMA_IT_TE | DMA_IT_FE | DMA_IT_TC | DMA_IT_HT;
-
-    DMA_ITConfig(stream, to_clear, DISABLE);
-    DMA_ITConfig(stream, DMA_IT_flags, ENABLE);
-
-    IRQ_manager::mask(DMA_IT);
-    IRQ_manager::clear(DMA_IT);
-    IRQ_manager::subscribe(DMA_IT, handler);
-    IRQ_manager::unmask(DMA_IT);
 
     return 0;
 }
@@ -530,7 +509,46 @@ constexpr auto DMA_dev< DMA_stream, channel >::pick_IT()
         return static_cast< decltype (DMA1_Stream0_IRQn) >(-1);
 }
 
+template< std::uintptr_t DMA_stream, uint32_t channel >
+int DMA_dev< DMA_stream, channel >::enable_IRQ()
+{
+    constexpr auto DMA_IT = pick_IT();
+    constexpr auto stream = pick_stream();
 
+    uint32_t DMA_IT_flags = 0;
+
+    if ((m_IT_flags & pick_HT()) == pick_HT()) {
+        DMA_IT_flags |= DMA_IT_HT;
+    }
+
+    if ((m_IT_flags & pick_TC()) == pick_TC()) {
+        DMA_IT_flags |= DMA_IT_TC;
+    }
+
+    if ((m_IT_flags & pick_ERR()) == pick_ERR()) {
+        DMA_IT_flags |= (DMA_IT_TE | DMA_IT_FE);
+    }
+
+    // Disable all interrupt sources before we go
+    constexpr auto to_disable = DMA_IT_TE | DMA_IT_FE | DMA_IT_TC | DMA_IT_HT;
+
+    DMA_ITConfig(stream, to_disable, DISABLE);
+
+    // Clear all flags
+    DMA_ClearFlag(stream, pick_TC() | pick_HT() | pick_ERR());
+    // Clear all pending interrupts
+    DMA_ClearITPendingBit(stream, pick_TC_IF() | pick_HT_IF() | pick_ERR_IF());
+
+    // Enable all
+    DMA_ITConfig(stream, DMA_IT_flags, ENABLE);
+
+    IRQ_manager::mask(DMA_IT);
+    IRQ_manager::clear(DMA_IT);
+    IRQ_manager::subscribe(DMA_IT, m_handler);
+    IRQ_manager::unmask(DMA_IT);
+
+    return 0;
+}
 
 
 #endif

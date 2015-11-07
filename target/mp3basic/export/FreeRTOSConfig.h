@@ -16,7 +16,7 @@ void __attribute__((used)) vTaskSwitchContext( void );
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
-#define configUSE_MUTEXES                       0
+#define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             0
 #define configUSE_COUNTING_SEMAPHORES           0
 #define configUSE_ALTERNATIVE_API               0 /* Deprecated! */
@@ -49,9 +49,9 @@ void __attribute__((used)) vTaskSwitchContext( void );
 #define configTIMER_TASK_STACK_DEPTH            configMINIMAL_STACK_SIZE
 
 /* Interrupt nesting behaviour configuration. */
-#define configKERNEL_INTERRUPT_PRIORITY         0//[dependent of processor]
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    5//[dependent on processor and application]
-#define configMAX_API_CALL_INTERRUPT_PRIORITY   5//[dependent on processor and application]
+#define configKERNEL_INTERRUPT_PRIORITY         0 //[dependent of processor]
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    5 //[dependent on processor and application]
+#define configMAX_API_CALL_INTERRUPT_PRIORITY   5 //[dependent on processor and application]
 
 /* Define to trap errors during development. */
 #define configASSERT( x )     if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ )

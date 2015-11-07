@@ -1,5 +1,10 @@
 set(SRC_DIR ./freertos/FreeRTOS/Source/)
 
+## Qt creator hack
+file(GLOB_RECURSE ALL_HEADERS "${SRC_DIR}include/*.h")
+add_custom_target(free_rtos_dummy_target SOURCES "${ALL_HEADERS}")
+## EO hack
+
 add_library(freertos 
 	${SRC_DIR}croutine.c
 	${SRC_DIR}event_groups.c

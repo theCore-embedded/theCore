@@ -1,3 +1,4 @@
+// TODO: rename it to SPI_bus. For details see class definition
 #ifndef PLATFORM_SPI_DEVICE_HPP
 #define PLATFORM_SPI_DEVICE_HPP
 
@@ -5,6 +6,58 @@
 #include <sys/spi_cfgs.h>
 #include <platform/irq_manager.hpp>
 #include <type_traits>
+
+// TODO: move this two to special OS abstraction layer
+#include <FreeRTOS.h>
+#include <semphr.h>
+
+// TODO: move it somewhere
+// SPI locking base class, provides a mutex for every bus in the system
+template< SPI_device SPIx >
+class SPI_lock
+{
+    // Locks a bus
+    static void lock();
+    // Unlocks a bus
+    static void unlock();
+
+protected:
+    // Initializes lock on demand
+    static void lock_init();
+
+private:
+    // TODO: replace it with special OS abstractions
+    static SemaphoreHandle_t m_mutex;
+};
+
+// TODO: replace it with special OS abstractions
+template< SPI_device SPIx >
+SemaphoreHandle_t SPI_lock< SPIx >::m_mutex = nullptr;
+
+template< SPI_device SPIx >
+void SPI_lock< SPIx >::lock_init()
+{
+    // TODO: error check
+    if (m_mutex == nullptr) {
+        m_mutex = xSemaphoreCreateMutex();
+    }
+}
+
+template< SPI_device SPIx >
+void SPI_lock< SPIx >::lock()
+{
+    if (m_mutex) {
+        xSemaphoreTake(m_mutex, portMAX_DELAY);
+    }
+}
+
+template< SPI_device SPIx >
+void SPI_lock< SPIx >::unlock()
+{
+    if (m_mutex) {
+        xSemaphoreGive(m_mutex);
+    }
+}
 
 
 // SPI platform configuration class
@@ -37,11 +90,13 @@ struct SPI_config
 
 
 // TODO: add code that checks if driver is in bidir mode or not
-template< SPI_device   SPIx,            // TODO: move it to config
+// TODO: rename it to SPI_bus in order to reflect that this class supports
+// read(), write(), select()
+template< SPI_device   SPIx,            // TODO: move it to config ?
           class        SPI_config,
           class        DMA_TX,
           class        DMA_RX >
-class SPI_dev
+class SPI_dev : public SPI_lock< SPIx >
 {
 public:
 
@@ -166,45 +221,51 @@ SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::~SPI_dev()
 template< SPI_device SPIx, class SPI_config, class DMA_TX, class DMA_RX >
 int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::init()
 {
-    constexpr auto spi               = pick_SPI();
-    constexpr auto RCC_Periph        = pick_RCC();
-    constexpr auto RCC_fn            = pick_RCC_fn();
+    if (!m_inited) {
+        constexpr auto spi               = pick_SPI();
+        constexpr auto RCC_Periph        = pick_RCC();
+        constexpr auto RCC_fn            = pick_RCC_fn();
 
-    // Why it does work in so strange way?
-    constexpr auto init_const_obj = SPI_config::m_init_obj;
-    auto init_obj = init_const_obj;
+        // Init locks so bus can be locked
+        SPI_dev::lock_init();
 
-    // Current clock on corresponding bus
-    auto APB_CLK = pick_PCLK();
+        // Why it does work in so strange way?
+        constexpr auto init_const_obj = SPI_config::m_init_obj;
+        auto init_obj = init_const_obj;
 
-    // To calculate closest supported clock:
-    uint16_t quotient = APB_CLK / SPI_config::m_clock;
+        // Current clock on corresponding bus
+        auto APB_CLK = pick_PCLK();
 
-    // Prescaler has a range from 2 to 256
-    if (quotient < 2) {
-        quotient = 2;
-    } else if (quotient > 256) {
-        quotient = 256;
+        // To calculate closest supported clock:
+        uint16_t quotient = APB_CLK / SPI_config::m_clock;
+
+        // Prescaler has a range from 2 to 256
+        if (quotient < 2) {
+            quotient = 2;
+        } else if (quotient > 256) {
+            quotient = 256;
+        }
+
+        // Divider values maps to prescaler according to
+        // binary logarithm in following way:
+        // Quo   Log2   Prescaler
+        // 2     1      0   (0b00)
+        // 4     2      1   (0b01)
+        // 8     3      2   (0b10)
+        // 16    4      3   (0b11)
+        // So conversion formula will look like:
+        // prescaler = log2(divider) - 1;
+        // Using clz() is more efficient way to do
+        // it and covers case when quotient is not
+        // power of two value.
+        uint16_t presc = ((32 - 1 - __builtin_clz(quotient)) - 1) << 3;
+        init_obj.SPI_BaudRatePrescaler = presc;
+
+        RCC_fn(RCC_Periph, ENABLE);
+        SPI_Init(spi, &init_obj);
+
+        m_inited = true;
     }
-
-    // Divider values maps to prescaler according to binary logarithm in following way:
-    // Quo   Log2   Prescaler
-    // 2     1      0   (0b00)
-    // 4     2      1   (0b01)
-    // 8     3      2   (0b10)
-    // 16    4      3   (0b11)
-    // So conversion formula will look like:
-    // prescaler = log2(divider) - 1;
-    // Using clz() is more efficient way to do it and covers case when quotient is not
-    // power of two value.
-    uint16_t presc = ((32 - 1 - __builtin_clz(quotient)) - 1) << 3;
-    init_obj.SPI_BaudRatePrescaler = presc;
-
-    RCC_fn(RCC_Periph, ENABLE);
-
-    m_inited = true;
-
-    SPI_Init(spi, &init_obj);
 
     return 0;
 }
