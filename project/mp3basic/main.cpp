@@ -20,6 +20,8 @@ static void rtos_task0(void *params)
     (void) params;
     for (;;) {
         LED_Red::toggle();
+        // It should blink at rate 1 Hz,
+        // if not - something wrong with clock setup
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
