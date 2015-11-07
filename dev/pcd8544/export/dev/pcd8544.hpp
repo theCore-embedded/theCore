@@ -366,6 +366,8 @@ template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::IRQ, int >::type >
 int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
 {
+    m_device.lock();
+
     if (op == DC_state::data)
         PCD8544_Mode::set();
     else
@@ -384,6 +386,8 @@ int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
 
     PCD8544_CS::set();
 
+    m_device.unlock();
+
     return rc < 0 ? rc : 0;
 }
 
@@ -392,6 +396,8 @@ template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
 int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
 {
+    m_device.lock();
+
     if (op == DC_state::data)
         PCD8544_Mode::set();
     else
@@ -421,6 +427,8 @@ int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
     m_DMA_status = 0;
 
     PCD8544_CS::set();
+
+    m_device.unlock();
 
     return rc < 0 ? rc : 0;
 }
@@ -454,6 +462,8 @@ template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
 int PCD8544< SPI_dev >::internal_flush()
 {
+    m_device.lock();
+
     PCD8544_Mode::set();
     PCD8544_CS::reset();
 
@@ -482,6 +492,7 @@ int PCD8544< SPI_dev >::internal_flush()
     PCD8544_Mode::reset();
 
     m_DMA_status = 0;
+    m_device.unlock();
 
     return 0;
 }

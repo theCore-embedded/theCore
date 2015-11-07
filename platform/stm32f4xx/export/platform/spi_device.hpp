@@ -11,11 +11,12 @@
 #include <FreeRTOS.h>
 #include <semphr.h>
 
-// TODO: move it somewhere
+// TODO: move to better place
 // SPI locking base class, provides a mutex for every bus in the system
 template< SPI_device SPIx >
 class SPI_lock
 {
+public:
     // Locks a bus
     static void lock();
     // Unlocks a bus
