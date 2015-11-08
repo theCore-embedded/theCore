@@ -1,5 +1,3 @@
-include(CMakeDependentOption)
-
 # Might be reviewed
 cmake_minimum_required(VERSION 3.3)
 
