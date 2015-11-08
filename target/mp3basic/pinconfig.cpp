@@ -22,16 +22,20 @@ void initialize_pins()
         // Blue LD3
         create_pin(pin_port::port_d, pin_number::pin_15, pin_function::GPIO_out, pin_type::no_pull),
 
-        // Nokia5110 PCD8544
-        // SPI2 NSS TODO: use SPI_NSSInternalSoftwareConfig for slave management?
-        //createPin(pin_port::port_b, pin_number::pin_12, pin_function::pin_SPI2, pin_type::no_pull),
-        create_pin(pin_port::port_b, pin_number::pin_12, pin_function::GPIO_out, pin_type::no_pull),
         // SPI2 SCK
         create_pin(pin_port::port_b, pin_number::pin_13, pin_function::pin_SPI2, pin_type::no_pull),
         // SPI2 MISO
         create_pin(pin_port::port_b, pin_number::pin_14, pin_function::pin_SPI2, pin_type::no_pull),
         // SPI2 MOSI
         create_pin(pin_port::port_b, pin_number::pin_15, pin_function::pin_SPI2, pin_type::no_pull),
+
+        // Nokia5110 PCD8544 CS
+        // SPI2 NSS TODO: use SPI_NSSInternalSoftwareConfig for slave management?
+        //createPin(pin_port::port_b, pin_number::pin_12, pin_function::pin_SPI2, pin_type::no_pull),
+        create_pin(pin_port::port_b, pin_number::pin_12, pin_function::GPIO_out, pin_type::no_pull),
+
+        // SDSPI card CS TODO: double check pull\push
+        create_pin(pin_port::port_c, pin_number::pin_8, pin_function::GPIO_out, pin_type::no_pull),
 
         // RESET pin
         create_pin(pin_port::port_c, pin_number::pin_1, pin_function::GPIO_out, pin_type::no_pull),

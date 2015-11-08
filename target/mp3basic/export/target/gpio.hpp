@@ -16,4 +16,7 @@ using PCD8544_Reset = GPIO< pin_port::port_c, pin_number::pin_1 >;
 using PCD8544_Mode  = GPIO< pin_port::port_c, pin_number::pin_2 >;
 using PCD8544_CS    = GPIO< pin_port::port_b, pin_number::pin_12 >;
 
+// SDSPI CS
+using SDSPI_CS      = GPIO< pin_port::port_c, pin_number::pin_8 >;
+
 #endif //TARGET_GPIO_HPP 

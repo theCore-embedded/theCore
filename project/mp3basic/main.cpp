@@ -5,6 +5,7 @@
 #include <platform/irq_manager.hpp>
 #include <platform/dma_device.hpp>
 #include <dev/pcd8544.hpp>
+#include <dev/sdspi.hpp>
 
 #include <functional>
 #include <utility>
@@ -38,6 +39,9 @@ static void rtos_task1(void *params)
     lcd.open();
     lcd.clear();
     lcd.flush();
+
+    SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
+    sdspi.init();
 
     console_driver::init();
     console_driver::open();

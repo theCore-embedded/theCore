@@ -19,6 +19,8 @@ private:
 };
 
 
+// TODO: add GPIO type here, instead of using special names for SPI CS
+// and LCD D/C
 template< class SPI_dev >
 class PCD8544
 {
