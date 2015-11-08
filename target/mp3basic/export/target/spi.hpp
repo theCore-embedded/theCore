@@ -8,13 +8,13 @@
 using SPI_LCD_config =
 SPI_config<
 SPI_com_type::DMA,
-SPI_Direction_1Line_Tx,
+SPI_Direction_2Lines_FullDuplex,
 SPI_Mode_Master,
 SPI_CPOL_High,
 SPI_CPHA_2Edge,
 SPI_NSS_Soft,
 SPI_FirstBit_MSB,
-1000000
+200000
 >;
 
 // TODO: better name

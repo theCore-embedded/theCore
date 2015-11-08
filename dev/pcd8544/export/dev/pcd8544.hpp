@@ -201,10 +201,12 @@ int PCD8544< SPI_dev >::init()
     if (rc < 0)
         return rc;
 
+    m_device.lock();
     // RESET
     PCD8544_Reset::reset();
     _delay();
     PCD8544_Reset::set();
+    m_device.unlock();
 
     return internal_mode_init();
 }
@@ -486,7 +488,6 @@ int PCD8544< SPI_dev >::internal_flush()
     while (!(m_DMA_status & DMA_t::flags::TC)) {}
     while ((m_device.get_status() & SPI_dev::flags::BSY)) { }
 
-    //m_DMA.complete_IRQ(m_DMA_status);
     m_DMA.complete();
 
     // Release the device

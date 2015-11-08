@@ -34,17 +34,20 @@ static void rtos_task1(void *params)
     uint8_t c = 0;
     int ret = 0;
 
+    console_driver::init();
+    console_driver::open();
+
+    SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
+    sdspi.init();
     PCD8544< SPI_LCD_driver > lcd;
     lcd.init();
+
     lcd.open();
     lcd.clear();
     lcd.flush();
 
-    SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
-    sdspi.init();
+    sdspi.open();
 
-    console_driver::init();
-    console_driver::open();
 
 
     for (;;) {

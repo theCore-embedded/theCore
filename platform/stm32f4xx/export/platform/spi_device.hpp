@@ -320,7 +320,7 @@ ssize_t SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::write(const uint8_t *data, 
             return -2; // Device busy
         }
     } else {
-        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) {}
+        while (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_TXE) == RESET) { }
     }
 
     SPI_I2S_SendData(spi, data[0]);
@@ -379,6 +379,7 @@ int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::write(DMA_TX &dma)
                         1);
     dma.submit();
 
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, DISABLE);
     SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx, ENABLE);
 
     return 0;
@@ -390,12 +391,17 @@ template< SPI_com_type mode,
 int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::read(DMA_RX &dma)
 {
     constexpr auto spi = pick_SPI();
+
     dma.set_origin(DMA_RX::role::periphery,
                    reinterpret_cast< volatile const uint8_t *> (&spi->DR),
                    1);
     dma.submit();
 
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, DISABLE);
     SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx, ENABLE);
+
+    /* Force transaction */
+    SPI_I2S_SendData(spi, 0xff);
 
     return 0;
 }
