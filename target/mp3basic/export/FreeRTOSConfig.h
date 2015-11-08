@@ -2,6 +2,7 @@
 #define FREERTOS_CONFIG_H
 
 extern void vAssertCalled(const char *file, int line);
+void __attribute__((used)) vTaskSwitchContext( void );
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0

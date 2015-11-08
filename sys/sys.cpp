@@ -3,6 +3,10 @@
 
 #include "sys/pin_cfgs.h"
 
+extern "C" __attribute__((used))
+void vTaskSwitchContext( void );
+
+
 // TODO: decide if to keep this here or not
 extern "C" int  __aeabi_atexit(void* object, void (*destroyer)(void*), void* dso_handle)
 {
@@ -21,7 +25,7 @@ extern "C" void vAssertCalled(const char *file, int line)
     for(;;);
 }
 
-extern "C"
+extern "C" __attribute__((used))
 void *memset(void *s, int c, size_t n)
 {
     uint8_t *dest = (uint8_t *) s;
