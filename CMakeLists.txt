@@ -1,6 +1,13 @@
+include(CMakeDependentOption)
+
 # Might be reviewed
 cmake_minimum_required(VERSION 3.3)
 
+option(USE_BAR "This is bar" OFF)
+option(USE_ZOT "This is zot" OFF)
+
+CMAKE_DEPENDENT_OPTION(USE_FOO "Use Foo" ON
+                         "USE_BAR;NOT USE_ZOT" OFF)
 # TODO: bug?
 
 # Objvious
