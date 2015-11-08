@@ -10,11 +10,8 @@ set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
 
 # optimization flags
-set(CC_OPT_FLAGS "-O2")
+set(CC_OPT_FLAGS "-Os -flto -fwhole-program ")
 set(CXX_OPT_FLAGS "${CC_OPT_FLAGS}")
-# used in debug mode
-set(CC_NO_OPT_FLAGS "-O0 -g3")
-set(CXX_NO_OPT_FLAGS "${CC_NO_OPT_FLAGS}")
 
 # common flags for current platform
 set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m4 -mthumb -fdata-sections -ffunction-sections -fno-common")
@@ -24,33 +21,23 @@ set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m4 -mthumb -fdata-sections -f
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # extra flags
-set(C_CXX_EXTRA_FLAGS "-gdwarf-2 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp ")
-set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS}")
-set(CXX_EXTRA_FLAGS "-std=c++14 ${C_CXX_EXTRA_FLAGS}")
+set(CC_EXTRA_FLAGS "-std=c99 -gdwarf-2 -g3")
+set(CXX_EXTRA_FLAGS "-std=c++14 -gdwarf-2 -g3")
 
-# Supported modes are normal, release, debug and minimum size
-# Normal mode
+# altogether
 set(CMAKE_C_FLAGS
-"${CMAKE_C_FLAGS} ${CC_PLATFORM_FLAGS} ${CC_WARN_FLAGS} ${CC_EXTRA_FLAGS}")
+"${CMAKE_C_FLAGS} ${CC_PLATFORM_FLAGS} ${CC_OPT_FLAGS} ${CC_WARN_FLAGS} ${CC_EXTRA_FLAGS}")
 set(CMAKE_CXX_FLAGS
-"${CMAKE_CXX_FLAGS} ${CXX_PLATFORM_FLAGS} ${CC_WARN_FLAGS} ${CXX_EXTRA_FLAGS}")
-
-# Default flags of the release mode are OK for our builds
-# Default flags of the minimum size mode are OK for our builds
-# Debug mode
-set(CMAKE_C_FLAGS_DEBUG  "${CC_NO_OPT_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CXX_NO_OPT_FLAGS}")
-
-# Linker flags
+"${CMAKE_CXX_FLAGS} ${CXX_PLATFORM_FLAGS} ${CXX_OPT_FLAGS} ${CC_WARN_FLAGS} ${CXX_EXTRA_FLAGS}")
 set(CMAKE_C_LINK_FLAGS
-"-T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -nostartfiles --gc-sections")
+	"-nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
 set(CMAKE_CXX_LINK_FLAGS
-"-T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -nostartfiles --gc-sections")
+	"-nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_C_LINK_EXECUTABLE
-"${CMAKE_C_LINKER} <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_LIBRARIES>   -o <TARGET>")
+"arm-none-eabi-gcc <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 set(CMAKE_CXX_LINK_EXECUTABLE
-"${CMAKE_CXX_LINKER} <OBJECTS> <CMAKE_CXX_LINK_FLAGS>  <LINK_LIBRARIES> -o <TARGET>")
-
+"arm-none-eabi-g++ <OBJECTS> <CMAKE_CXX_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 # TODO: merge these flags with compiler one
 set(CMAKE_ASM-ATT_COMPILER_ARG1 "-mcpu=cortex-m4")
+
