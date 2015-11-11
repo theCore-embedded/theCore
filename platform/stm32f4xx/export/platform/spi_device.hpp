@@ -7,58 +7,117 @@
 #include <platform/irq_manager.hpp>
 #include <type_traits>
 
-// TODO: move this two to special OS abstraction layer
-#include <FreeRTOS.h>
-#include <semphr.h>
-
-// TODO: move to better place
-// SPI locking base class, provides a mutex for every bus in the system
-template< SPI_device SPIx >
-class SPI_lock
+// TODO: move it to better place
+template< class DMA_TX, class DMA_RX >
+class SPI_XFER
 {
 public:
-    // Locks a bus
-    static void lock();
-    // Unlocks a bus
-    static void unlock();
+    SPI_XFER();
+    ~SPI_XFER();
 
-protected:
-    // Initializes lock on demand
-    static void lock_init();
+    int set_buffers(const uint8_t *tx, uint8_t *rx, size_t size);
+    int set_handler(const std::function< void() >& handler);
+
+    DMA_RX& get_DMA_RX();
+    DMA_TX& get_DMA_TX();
 
 private:
-    // TODO: replace it with special OS abstractions
-    static SemaphoreHandle_t m_mutex;
+    // DMA IRQ handler
+    void IRQ_handler();
+
+    // Handler to trigger after tranfer completition
+    std::function< void() > m_out_handler;
+
+    DMA_RX m_dma_RX;
+    DMA_TX m_dma_TX;
+
+    uint8_t         m_IRQ_counter;
+    uint8_t         m_dummy_RX;
+    const uint8_t   m_dummy_TX = 0xff;
 };
 
-// TODO: replace it with special OS abstractions
-template< SPI_device SPIx >
-SemaphoreHandle_t SPI_lock< SPIx >::m_mutex = nullptr;
-
-template< SPI_device SPIx >
-void SPI_lock< SPIx >::lock_init()
+template< class DMA_TX, class DMA_RX >
+SPI_XFER< DMA_TX, DMA_RX >::SPI_XFER()
+    :m_out_handler{}
+    ,m_dma_RX{}
+    ,m_dma_TX{}
+    ,m_IRQ_counter{0}
+    ,m_dummy_RX{}
 {
-    // TODO: error check
-    if (m_mutex == nullptr) {
-        m_mutex = xSemaphoreCreateMutex();
+
+}
+
+template< class DMA_TX, class DMA_RX >
+SPI_XFER< DMA_TX, DMA_RX >::~SPI_XFER()
+{
+
+}
+
+template< class DMA_TX, class DMA_RX >
+int SPI_XFER< DMA_TX, DMA_RX >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
+{
+    if (tx) {
+        m_dma_TX.set_origin(DMA_TX::role::memory, tx, size, true);
+    } else {
+        m_dma_TX.set_origin(DMA_TX::role::memory, &m_dummy_TX, size, false);
+    }
+
+    if (rx) {
+        m_dma_RX.set_destination(DMA_RX::role::memory, rx, size, true);
+    } else {
+        m_dma_RX.set_destination(DMA_RX::role::memory, &m_dummy_RX, size, false);
+    }
+
+    auto handler = [this]() {
+        this->IRQ_handler();
+    };
+
+    m_dma_TX.enable_IRQ(handler, DMA_TX::flags::TC);
+    m_dma_RX.enable_IRQ(handler, DMA_RX::flags::TC);
+
+    return 0;
+}
+
+template< class DMA_TX, class DMA_RX >
+int SPI_XFER< DMA_TX, DMA_RX >::set_handler(const std::function< void() >& handler)
+{
+    m_out_handler = handler;
+    return 0;
+}
+
+
+template< class DMA_TX, class DMA_RX >
+DMA_TX& SPI_XFER< DMA_TX, DMA_RX >::get_DMA_TX()
+{
+    return m_dma_TX;
+}
+
+
+template< class DMA_TX, class DMA_RX >
+DMA_RX& SPI_XFER< DMA_TX, DMA_RX >::get_DMA_RX()
+{
+    return m_dma_RX;
+}
+
+
+template< class DMA_TX, class DMA_RX >
+void SPI_XFER< DMA_TX, DMA_RX >::IRQ_handler()
+{
+    m_IRQ_counter++;
+
+    // Both interrupts are triggered, it is a time for kicking user handler
+    if (m_IRQ_counter == 2) {
+        m_dma_RX.complete_IRQ(DMA_RX::flags::TC);
+        m_dma_TX.complete_IRQ(DMA_TX::flags::TC);
+        m_dma_RX.complete();
+        m_dma_TX.complete();
+
+        m_out_handler();
+
+        m_IRQ_counter = 0;
     }
 }
 
-template< SPI_device SPIx >
-void SPI_lock< SPIx >::lock()
-{
-    if (m_mutex) {
-        xSemaphoreTake(m_mutex, portMAX_DELAY);
-    }
-}
-
-template< SPI_device SPIx >
-void SPI_lock< SPIx >::unlock()
-{
-    if (m_mutex) {
-        xSemaphoreGive(m_mutex);
-    }
-}
 
 
 // SPI platform configuration class
@@ -107,6 +166,8 @@ public:
     // DMA aliases
     using DMA_TX_t = DMA_TX;
     using DMA_RX_t = DMA_RX;
+
+    using XFER_t = SPI_XFER< DMA_TX, DMA_RX >;
 
     // Type of SPI transaction
     static constexpr SPI_com_type com_type = SPI_config::m_type;
@@ -157,6 +218,12 @@ public:
     template< SPI_com_type mode = SPI_config::m_type,
               typename std::enable_if< mode == SPI_com_type::DMA, int >::type = 0 >
     int read(DMA_RX &dma);
+
+    // -1 if error, 0 otherwise
+    template< SPI_com_type mode = SPI_config::m_type,
+              typename std::enable_if< mode == SPI_com_type::DMA, int >::type = 0 >
+    int xfer(XFER_t &xfer);
+
 
     // Queries peripheral status
     // INVALID if method failed, anything else from flags otherwise
@@ -373,13 +440,22 @@ template< SPI_com_type mode,
 int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::write(DMA_TX &dma)
 {
     constexpr auto spi = pick_SPI();
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx, DISABLE);
+
+#if 0
+    /* Discard any pending data */
+
+    if (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE)) {
+        SPI_I2S_ReceiveData(spi);
+    }
+#endif
 
     dma.set_destination(DMA_TX::role::periphery,
                         reinterpret_cast< volatile uint8_t *> (&spi->DR),
-                        1);
+                        1,
+                        false);
     dma.submit();
 
-    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, DISABLE);
     SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx, ENABLE);
 
     return 0;
@@ -391,17 +467,71 @@ template< SPI_com_type mode,
 int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::read(DMA_RX &dma)
 {
     constexpr auto spi = pick_SPI();
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, DISABLE);
+
+    /* Discard any pending data */
+    if (SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE)) {
+        SPI_I2S_ReceiveData(spi);
+    }
 
     dma.set_origin(DMA_RX::role::periphery,
                    reinterpret_cast< volatile const uint8_t *> (&spi->DR),
-                   1);
-    dma.submit();
+                   1,
+                   false);
 
-    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, DISABLE);
+    // Initialize RX DMA
+    dma.submit();
+    // Enable stream
     SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx, ENABLE);
 
-    /* Force transaction */
-    SPI_I2S_SendData(spi, 0xff);
+    // HACK: Setup dummy DMA, it will drive a transaction
+    // Better solution must be implemented
+    uint8_t dummy = 0xff;
+    DMA_TX dma_dummy;
+
+    auto dummy_handler = [&dma_dummy]() {
+        dma_dummy.complete_IRQ(DMA_TX::flags::TC);
+        dma_dummy.complete();
+    };
+
+    dma_dummy.enable_IRQ(dummy_handler, DMA_TX::flags::TC);
+    dma_dummy.set_origin(DMA_TX::role::memory, &dummy, dma.get_dest_size(), false);
+
+    // Now 'slave (RX)' DMA is ready, and 'master (TX)' should drive a transaction
+    write(dma_dummy);
+
+    return 0;
+}
+
+// -1 if error, 0 otherwise
+template< SPI_device SPIx, class SPI_config, class DMA_TX, class DMA_RX >
+template< SPI_com_type mode,
+          typename std::enable_if< mode == SPI_com_type::DMA, int >::type >
+int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::xfer(XFER_t &xfer)
+{
+    constexpr auto spi = pick_SPI();
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx, DISABLE);
+
+    DMA_TX &dma_tx = xfer.get_DMA_TX();
+    DMA_RX &dma_rx = xfer.get_DMA_RX();
+
+
+    dma_tx.set_destination(DMA_TX::role::periphery,
+                           reinterpret_cast< volatile uint8_t *> (&spi->DR),
+                           1,
+                           false);
+
+
+
+    dma_rx.set_origin(DMA_RX::role::periphery,
+                      reinterpret_cast< volatile const uint8_t *> (&spi->DR),
+                      1,
+                      false);
+
+    dma_tx.submit();
+    dma_rx.submit();
+
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
 
     return 0;
 }

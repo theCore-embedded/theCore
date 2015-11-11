@@ -35,8 +35,19 @@ public:
         periphery   = 1
     };
 
-    int set_origin(role r, volatile const uint8_t* address, size_t size);
-    int set_destination(role r, volatile uint8_t* address, size_t size);
+    int set_origin(role r,
+                   volatile const uint8_t* address,
+                   size_t size,
+                   bool increment = true);
+
+    int set_destination(role r,
+                        volatile uint8_t* address,
+                        size_t size,
+                        bool increment = true);
+
+    // <<<<<<<<<<< MOVE IT OUT OF CLASS SCOPE
+    size_t get_dest_size() const { return m_destination_size; }
+
     auto get_status() const;
 
     int submit();
@@ -64,7 +75,9 @@ private:
 
     std::pair< role, volatile const uint8_t* > m_origin;
     std::pair< role, volatile uint8_t* > m_destination;
+    bool   m_origin_inc;
     size_t m_origin_size;
+    bool   m_destination_inc;
     size_t m_destination_size;
 
     std::function< void () >    m_handler;
@@ -90,24 +103,32 @@ DMA_dev< DMA_stream, channel >::~DMA_dev()
 }
 
 template< std::uintptr_t DMA_stream, uint32_t channel  >
-int DMA_dev< DMA_stream, channel >::set_origin(role r, volatile const uint8_t* address, size_t size)
+int DMA_dev< DMA_stream, channel >::set_origin(role r,
+                                               volatile const uint8_t* address,
+                                               size_t size,
+                                               bool increment)
 {
     if (!address || !size)
         return -1;
 
     m_origin = { r, address };
     m_origin_size = size;
+    m_origin_inc = increment;
     return 0;
 }
 
 template< std::uintptr_t DMA_stream, uint32_t channel  >
-int DMA_dev< DMA_stream, channel >::set_destination(role r, volatile uint8_t* address, size_t size)
+int DMA_dev< DMA_stream, channel >::set_destination(role r,
+                                                    volatile uint8_t* address,
+                                                    size_t size,
+                                                    bool increment)
 {
     if (!address || !size)
         return -1;
 
     m_destination = { r, address };
     m_destination_size = size;
+    m_destination_inc = increment;
     return 0;
 }
 
@@ -142,7 +163,6 @@ int DMA_dev< DMA_stream, channel >::submit()
     DMA_StructInit(&init);
 
     init.DMA_Channel = channel;
-    init.DMA_MemoryInc = DMA_MemoryInc_Enable;
 
     // Encode direction
     if (m_destination.first == role::memory) {
@@ -157,9 +177,15 @@ int DMA_dev< DMA_stream, channel >::submit()
         // Assume that transaction forced by destination
         init.DMA_BufferSize = m_destination_size;
 
+        if (m_destination_inc) {
+            init.DMA_MemoryInc = DMA_MemoryInc_Enable;
+        }
+        if (m_origin_inc) {
+            init.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+        }
+
         if (m_origin.first == role::memory) {
             init.DMA_DIR = DMA_DIR_MemoryToMemory;
-            init.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
         } else {
             init.DMA_DIR = DMA_DIR_PeripheralToMemory;
             init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -170,11 +196,18 @@ int DMA_dev< DMA_stream, channel >::submit()
             return -1;
         }
 
-        init.DMA_BufferSize          = m_origin_size;
-        init.DMA_Memory0BaseAddr     = reinterpret_cast< uint32_t >(m_origin.second);
-        init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(m_destination.second);
-        init.DMA_DIR                 = DMA_DIR_MemoryToPeripheral;
-        init.DMA_PeripheralInc       = DMA_PeripheralInc_Disable;
+        init.DMA_BufferSize         = m_origin_size;
+        init.DMA_Memory0BaseAddr    = reinterpret_cast< uint32_t >(m_origin.second);
+        init.DMA_PeripheralBaseAddr = reinterpret_cast< uint32_t >(m_destination.second);
+        init.DMA_DIR                = DMA_DIR_MemoryToPeripheral;
+
+        if (m_destination_inc) {
+            init.DMA_PeripheralInc  = DMA_PeripheralInc_Enable;
+        }
+        if (m_origin_inc) {
+            init.DMA_MemoryInc      = DMA_MemoryInc_Enable;
+        }
+
     }
 
     enable_IRQ();
@@ -194,6 +227,13 @@ int DMA_dev< DMA_stream, channel >::complete()
     DMA_Cmd(stream, DISABLE);
     IRQ_manager::mask(DMA_IT);
     IRQ_manager::unsubscribe(DMA_IT);
+
+    // Clear all flags
+    DMA_ClearFlag(stream, pick_TC() | pick_HT() | pick_ERR());
+    // Clear all pending interrupts
+    DMA_ClearITPendingBit(stream, pick_TC_IF() | pick_HT_IF() | pick_ERR_IF());
+    // Disable stream completely
+    DMA_DeInit(stream);
 
     return 0;
 }
@@ -533,11 +573,6 @@ int DMA_dev< DMA_stream, channel >::enable_IRQ()
     constexpr auto to_disable = DMA_IT_TE | DMA_IT_FE | DMA_IT_TC | DMA_IT_HT;
 
     DMA_ITConfig(stream, to_disable, DISABLE);
-
-    // Clear all flags
-    DMA_ClearFlag(stream, pick_TC() | pick_HT() | pick_ERR());
-    // Clear all pending interrupts
-    DMA_ClearITPendingBit(stream, pick_TC_IF() | pick_HT_IF() | pick_ERR_IF());
 
     // Enable all
     DMA_ITConfig(stream, DMA_IT_flags, ENABLE);

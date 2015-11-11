@@ -40,11 +40,11 @@ static void rtos_task1(void *params)
     SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
     sdspi.init();
     PCD8544< SPI_LCD_driver > lcd;
-    lcd.init();
+//    lcd.init();
 
-    lcd.open();
-    lcd.clear();
-    lcd.flush();
+//    lcd.open();
+//    lcd.clear();
+//    lcd.flush();
 
     sdspi.open();
 

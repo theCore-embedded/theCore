@@ -2,6 +2,10 @@
 #ifndef SYS_SPI_CFGS_H
 #define SYS_SPI_CFGS_H
 
+// TODO: move this two to special OS abstraction layer
+#include <FreeRTOS.h>
+#include <semphr.h>
+
 // TODO: drop it
 // Represents distinct peripheral devices
 enum class SPI_device
@@ -35,5 +39,56 @@ struct SPI_flags
     const int32_t TX_RDY;		// Transmit line is ready
     const int32_t RX_PND;		// Receive pending
 };
+
+// TODO: move to better place
+// SPI locking base class, provides a mutex for every bus in the system
+template< SPI_device SPIx >
+class SPI_lock
+{
+public:
+    // Locks a bus
+    static void lock();
+    // Unlocks a bus
+    static void unlock();
+
+protected:
+    // Initializes lock on demand
+    static void lock_init();
+
+private:
+    // TODO: replace it with special OS abstractions
+    static SemaphoreHandle_t m_mutex;
+};
+
+// TODO: replace it with special OS abstractions
+template< SPI_device SPIx >
+SemaphoreHandle_t SPI_lock< SPIx >::m_mutex = nullptr;
+
+
+template< SPI_device SPIx >
+void SPI_lock< SPIx >::lock_init()
+{
+    // TODO: error check
+    if (m_mutex == nullptr) {
+        m_mutex = xSemaphoreCreateMutex();
+    }
+}
+
+template< SPI_device SPIx >
+void SPI_lock< SPIx >::lock()
+{
+    if (m_mutex) {
+        xSemaphoreTake(m_mutex, portMAX_DELAY);
+    }
+}
+
+template< SPI_device SPIx >
+void SPI_lock< SPIx >::unlock()
+{
+    if (m_mutex) {
+        xSemaphoreGive(m_mutex);
+    }
+}
+
 
 #endif
