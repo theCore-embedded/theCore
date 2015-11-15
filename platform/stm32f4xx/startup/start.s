@@ -41,7 +41,7 @@ clear_bss_end:
 			bl		SystemInit			@ Initialize a system
 			blx		platform_init		@ Initialize a platform // TODO: remove
 			blx		target_init			@ Initialize a target
-			blx		static_init			@ Initialize static objects
+			blx		early_main			@ Do the last step before entering main routine
 			blx		main				@ Allow return, for now
 			b		board_stop			@ Infinite loop if returned
 .size		_resetHandler, . - _resetHandler

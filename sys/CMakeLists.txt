@@ -8,3 +8,6 @@ add_library(sys STATIC
 			export/iodev/iodev.hpp
 			export/iowrap/iowrap.hpp)
 target_include_directories(sys PUBLIC export)
+
+target_link_libraries(sys libcpp)
+target_link_libraries(sys target)

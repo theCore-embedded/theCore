@@ -19,6 +19,7 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 # ASM is crucial
 enable_language(ASM-ATT)
 
+
 ##########################
 # Useful routines TODO: move all these routines in the separate include
 
@@ -36,8 +37,9 @@ function(register_project project_name base_target base_platform)
 
 	# TODO: find better place for it
 	add_subdirectory(sys)
+	add_subdirectory(lib)
 	add_subdirectory(dev)
-	add_subdirectory(kernel/freertos)
+	add_subdirectory(kernel)
 
 	# Make binary from the project object file
 	add_custom_target(${project_name}.bin ALL
