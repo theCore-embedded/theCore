@@ -2,10 +2,14 @@
 #ifndef PLATFORM_SPI_DEVICE_HPP
 #define PLATFORM_SPI_DEVICE_HPP
 
-#include <stm32f4xx_spi.h>
 #include <sys/spi_cfgs.h>
 #include <platform/irq_manager.hpp>
+
 #include <type_traits>
+#include <sys/types.h>
+
+#include <stm32f4xx_spi.h>
+#include <stm32f4xx_rcc.h>
 
 // TODO: move it to better place
 template< class DMA_TX, class DMA_RX >

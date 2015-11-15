@@ -1,20 +1,17 @@
-#include <target/usart.hpp>
 #include <target/spi.hpp>
 #include <target/pinconfig.hpp>
 #include <target/gpio.hpp>
-#include <platform/irq_manager.hpp>
-#include <platform/dma_device.hpp>
 #include <dev/pcd8544.hpp>
 #include <dev/sdspi.hpp>
 
 #include <functional>
 #include <utility>
 
-#include "sprite.hpp"
-
 #include <FreeRTOS.h>
 #include <task.h>
+#include <ecl/iostream.hpp>
 
+#include "sprite.hpp"
 
 static void rtos_task0(void *params)
 {
@@ -34,11 +31,9 @@ static void rtos_task1(void *params)
     uint8_t c = 0;
     int ret = 0;
 
-    console_driver::init();
-    console_driver::open();
-
     SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
     sdspi.init();
+
     PCD8544< SPI_LCD_driver > lcd;
 //    lcd.init();
 
@@ -49,17 +44,18 @@ static void rtos_task1(void *params)
     sdspi.open();
 
 
+    ecl::cout << "Hello, embedded world!" << ecl::endl;
 
     for (;;) {
-        console_driver::read(&c, 1);
+        ecl::cin >> c;
 
         if (c != '\033') { // Escape sequence
-            console_driver::write(&c, 1);
+            ecl::cout << c;
         }
 
         switch (c) {
         case '\r':
-            write_string("\n$ ");
+            ecl::cout << "\n$ ";
             break;
         case 'r':
             LED_Red::toggle();
@@ -74,8 +70,8 @@ static void rtos_task1(void *params)
             LED_Orange::toggle();
             break;
         case '\033': // LCD op
-            console_driver::read(&c, 1); // Skip '['
-            console_driver::read(&c, 1);
+            ecl::cin >> c;
+            ecl::cin >> c;
 
             // Displacements
             static int vertical = 8;
@@ -94,7 +90,6 @@ static void rtos_task1(void *params)
             case 'D':
                 horisontal -= 2;
                 break;
-
             }
 
             ret = 0;
@@ -128,9 +123,6 @@ static void rtos_task1(void *params)
 
 int main()
 {
-    // TODO: move it to a better place
-    IRQ_manager::init();
-
     // Let the fun begin!
 
     xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
