@@ -28,7 +28,7 @@ static void rtos_task1(void *params)
 {
     (void) params;
 
-    uint8_t c = 0;
+    char c = 0;
     int ret = 0;
 
     SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
