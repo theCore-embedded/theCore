@@ -11,6 +11,8 @@ target_include_directories(target PUBLIC export)
 
 # TODO: move it to register platform ?
 target_link_libraries(target platform)
+target_link_libraries(target libcpp)
+target_link_libraries(target sys)
 
 # STM32 discovery is running with SMT32F407VG processor
 target_compile_definitions(target PUBLIC -DSTM32F40_41xxx)
