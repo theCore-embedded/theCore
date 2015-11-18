@@ -124,10 +124,15 @@ private:
     ssize_t receive(uint8_t *buf, size_t size);
 
     SPI_dev m_spi;
+    bool    m_inited;
+    int     m_opened;
 };
 
 template< class SPI_dev, class GPIO_CS >
 SD_SPI< SPI_dev, GPIO_CS >::SD_SPI()
+    :m_spi{}
+    ,m_inited{0}
+    ,m_opened{0}
 {
 }
 
@@ -139,12 +144,17 @@ SD_SPI< SPI_dev, GPIO_CS >::~SD_SPI()
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::init()
 {
-    m_spi.init();
+    if (!m_inited) {
+        m_spi.init();
 
-    m_spi.lock();
-    GPIO_CS::set();
+        m_spi.lock();
+        GPIO_CS::set();
 
-    m_spi.unlock();
+        m_spi.unlock();
+
+        m_inited = true;
+    }
+
 
     return 0;
 }
@@ -152,58 +162,76 @@ int SD_SPI< SPI_dev, GPIO_CS >::init()
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::open()
 {
-    m_spi.open();
-    m_spi.lock();
-
-    uint8_t buf[100];
-    std::fill_n(buf, sizeof(buf), 0xff);
-    send(buf, sizeof(buf));
-
-    if (software_reset() < 0) {
-        ecl::cout << "Failed to reset a card" << ecl::endl;
-        m_spi.unlock();
+    if (!m_inited) {
         return -1;
     }
 
-    if (check_conditions() < 0) {
-        ecl::cout << "Failed to check conditions" << ecl::endl;
+    if (!m_opened++) {
+        m_spi.open();
+        m_spi.lock();
+
+        uint8_t buf[100];
+        std::fill_n(buf, sizeof(buf), 0xff);
+        send(buf, sizeof(buf));
+
+        if (software_reset() < 0) {
+            ecl::cout << "Failed to reset a card" << ecl::endl;
+            m_spi.unlock();
+            return -1;
+        }
+
+        if (check_conditions() < 0) {
+            ecl::cout << "Failed to check conditions" << ecl::endl;
+            m_spi.unlock();
+            return -2;
+        }
+
+        if (init_process() < 0) {
+            ecl::cout << "Failed to init a card" << ecl::endl;
+            m_spi.unlock();
+            return -3;
+        }
+
+        if (check_OCR() < 0) {
+            ecl::cout << "Failed to check OCR" << ecl::endl;
+            m_spi.unlock();
+            return -4;
+        }
+
+        ecl::cout << "Card initialized successfully" << ecl::endl;
+
         m_spi.unlock();
-        return -2;
     }
-
-    if (init_process() < 0) {
-        ecl::cout << "Failed to init a card" << ecl::endl;
-        m_spi.unlock();
-        return -3;
-    }
-
-    if (check_OCR() < 0) {
-        ecl::cout << "Failed to check OCR" << ecl::endl;
-        m_spi.unlock();
-        return -4;
-    }
-
-    ecl::cout << "Card initialized successfully" << ecl::endl;
-
-    m_spi.unlock();
     return 0;
 }
 
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::close()
 {
-    return -1;
+    if (!--m_opened) {
+        // TODO
+    }
+
+    return 0;
 }
 
 template< class SPI_dev, class GPIO_CS >
 ssize_t SD_SPI< SPI_dev, GPIO_CS >::write(const uint8_t *data, size_t count)
 {
+    if (!m_opened) {
+        return -1;
+    }
+
     return -1;
 }
 
 template< class SPI_dev, class GPIO_CS >
 ssize_t SD_SPI< SPI_dev, GPIO_CS >::read(uint8_t *data, size_t count)
 {
+    if (!m_opened) {
+        return -1;
+    }
+
     return -1;
 }
 
@@ -211,6 +239,10 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::read(uint8_t *data, size_t count)
 template< class SPI_dev, class GPIO_CS >
 off_t SD_SPI< SPI_dev, GPIO_CS >::seek(off_t offset)
 {
+    if (!m_opened) {
+        return -1;
+    }
+
     return -1;
 }
 
@@ -218,6 +250,10 @@ off_t SD_SPI< SPI_dev, GPIO_CS >::seek(off_t offset)
 template< class SPI_dev, class GPIO_CS >
 off_t SD_SPI< SPI_dev, GPIO_CS >::tell() const
 {
+    if (!m_opened) {
+        return -1;
+    }
+
     return -1;
 }
 
