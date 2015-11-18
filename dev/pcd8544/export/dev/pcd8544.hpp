@@ -203,6 +203,7 @@ int PCD8544< SPI_dev >::init()
 
     m_device.lock();
     // RESET
+    PCD8544_CS::set();
     PCD8544_Reset::reset();
     _delay();
     PCD8544_Reset::set();

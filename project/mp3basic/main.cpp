@@ -31,17 +31,19 @@ static void rtos_task1(void *params)
     char c = 0;
     int ret = 0;
 
+    // TODO: order of initialization must be preserved
+    // as soon as default values for GPIO will be introduced
     SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
-    sdspi.init();
-
     PCD8544< SPI_LCD_driver > lcd;
-//    lcd.init();
 
-//    lcd.open();
-//    lcd.clear();
-//    lcd.flush();
-
+    sdspi.init();
     sdspi.open();
+
+    lcd.init();
+    lcd.open();
+    lcd.clear();
+    lcd.flush();
+
 
 
     ecl::cout << "Hello, embedded world!" << ecl::endl;

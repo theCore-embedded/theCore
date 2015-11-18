@@ -110,10 +110,16 @@ private:
     // Sends >= 47 empty clocks to initialize the device
     // int send_init();
 
+    int software_reset();
+    int check_conditions();
+    int init_process();
+    int check_OCR();
+
     // Useful abstractions
     int receive_response(R1 &r);
     int receive_response(R3 &r);
 
+    // Transport layer
     ssize_t send(const uint8_t *buf, size_t size);
     ssize_t receive(uint8_t *buf, size_t size);
 
@@ -149,100 +155,35 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
     m_spi.open();
     m_spi.lock();
 
-    // TODO: place >= 47 clocks in init()
     uint8_t buf[100];
     std::fill_n(buf, sizeof(buf), 0xff);
-
     send(buf, sizeof(buf));
 
-    R1 r1;
-    R3 r3;
-    R7 r7;
-    //int rc;
-
-    CMD0(r1);
-
-    if (r1.response == 0xff) {
-        ecl::cout << "Response wasn't received" << ecl::endl;
-        return -1;
-    } else if (r1.response == 0x1) {
-        ecl::cout << "Response OK" << ecl::endl;
-    } else {
-        ecl::cout << "Response received but indicates error\n" << ecl::endl;
+    if (software_reset() < 0) {
+        ecl::cout << "Failed to reset a card" << ecl::endl;
+        m_spi.unlock();
         return -1;
     }
 
-    CMD8(r7);
-
-    if (r7.r1.response == 0x1) {
-        if (r7.OCR[3] != 0xAA) {
-            ecl::cout << "Check pattern mismatch" << ecl::endl;
-            return -1;
-        }
-
-        if (!r7.OCR[2]) {
-            ecl::cout << "Voltage range not accepted" << ecl::endl;
-            return -1;
-        }
-
-        ecl::cout << "Interface conditions are OK" << ecl::endl;
-    } else {
-        ecl::cout << "Interface conditions are failed to obtain" << ecl::endl;
+    if (check_conditions() < 0) {
+        ecl::cout << "Failed to check conditions" << ecl::endl;
+        m_spi.unlock();
+        return -2;
     }
 
-    r1.response = 0x1;
-    uint8_t tries = 32;
-
-    while (r1.response == 0x1 && tries--) {
-        ACMD41(r1, true);
-
-        if (r1.response & 0xfe) {
-            ecl::cout << "Command failed\n" << ecl::endl;
-            return -1;
-        }
+    if (init_process() < 0) {
+        ecl::cout << "Failed to init a card" << ecl::endl;
+        m_spi.unlock();
+        return -3;
     }
 
-    if (!tries) {
-        ecl::cout << "Card failed to initialize, aborting...";
-        return -1;
+    if (check_OCR() < 0) {
+        ecl::cout << "Failed to check OCR" << ecl::endl;
+        m_spi.unlock();
+        return -4;
     }
 
-    ecl::cout << "Card initialized properly" << ecl::endl;
-
-
-    CMD58(r3);
-
-    if (r3.r1.response == 0x1) {
-        ecl::cout << "CMD58 successed" << ecl::endl;
-
-        if (r3.OCR[3] & 1) {
-            ecl::cout << "Card is powered-up" << ecl::endl;
-            if (r3.OCR[3] & 2) {
-                ecl::cout << "Card is High capacity" << ecl::endl;
-            } else {
-                ecl::cout << "Card is Low capacity" << ecl::endl;
-            }
-        }
-
-#if 0
-        for (uint bit = 15; bit < 24; ++bit) {
-            if (r3.OCR & (1 << bit)) {
-                uint8_t V = (bit - 15) * 2 + 27;
-
-                ecl::cout << "VOL :" << ecl::endl;
-                char intgr = V / 10;
-                char fract = V - intgr * 10;
-
-                char str[] = { (char) (intgr + '0'), '.', (char) (fract + '0'),
-                               '\r', '\n', '\0' };
-
-                write_string(str);
-            }
-        }
-#endif
-    } else {
-        ecl::cout << "CMD58 failed" << ecl::endl;
-    }
+    ecl::cout << "Card initialized successfully" << ecl::endl;
 
     m_spi.unlock();
     return 0;
@@ -326,11 +267,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive(uint8_t *buf, size_t size)
 
 template< class SPI_dev, class GPIO_CS >
 template< typename R >
-int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R              &resp,
-                                         uint8_t        CMD_idx,
-                                         const uint8_t  argument[4],
-                                         uint8_t        crc
-                                         )
+int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t argument[4], uint8_t crc)
 {
     CMD_idx &= 0x3f; // First two bits are reserved TODO: comment
     CMD_idx |= 0x40;
@@ -352,6 +289,8 @@ int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R              &resp,
     return 0;
 }
 
+//------------------------------------------------------------------------------
+
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R1 &r)
 {
@@ -369,7 +308,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R3 &r)
     r.r1.response = 0;
     std::fill_n(r.OCR, sizeof(r.OCR), 0);
 
-   if (receive_response(r.r1) < 0)
+    if (receive_response(r.r1) < 0)
         return -1;
 
     r.r1.response = 1;
@@ -377,6 +316,8 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R3 &r)
 
     return 0;
 }
+
+//------------------------------------------------------------------------------
 
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::CMD0(R1 &r)
@@ -452,7 +393,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::ACMD41(R1 &r, bool HCS)
 
     // Ignore idle bit
     if (r.response & 0xfe) {
-       return 0;
+        return 0;
     }
 
     // TODO: comments
@@ -465,5 +406,111 @@ int SD_SPI< SPI_dev, GPIO_CS >::ACMD41(R1 &r, bool HCS)
 
     return 0;
 }
+
+//------------------------------------------------------------------------------
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::software_reset()
+{
+    R1 r1;
+
+    CMD0(r1);
+
+    if (r1.response == 0x1) {
+        ecl::cout << "Response OK" << ecl::endl;
+        return 0;
+    }
+
+    return -1;
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::check_conditions()
+{
+    R7 r7;
+
+    CMD8(r7);
+
+    if (r7.r1.response == 0x1) {
+        if (r7.OCR[3] != 0xAA) {
+            ecl::cout << "Check pattern mismatch" << ecl::endl;
+            return -1;
+        }
+
+        if (!r7.OCR[2]) {
+            ecl::cout << "Voltage range not accepted" << ecl::endl;
+            return -1;
+        }
+
+        return 0;
+    }
+
+    return -1;
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::init_process()
+{
+    //TODO: comments
+    R1 r1;
+
+    r1.response = 0x1;
+    uint8_t tries = 32;
+
+    while (r1.response == 0x1 && tries--) {
+        ACMD41(r1, true);
+
+        if (r1.response & 0xfe) {
+            return -1;
+        }
+    }
+
+    if (!tries) {
+        return -2;
+    }
+
+    return 0;
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::check_OCR()
+{
+    R3 r3;
+    CMD58(r3);
+
+    // TODO: compare current profile and supported one!
+    // Otherwise we can damage the card
+    if (r3.r1.response == 0x1) {
+        if (r3.OCR[3] & 1) {
+            ecl::cout << "Card is powered-up" << ecl::endl;
+            if (r3.OCR[3] & 2) {
+                ecl::cout << "Card is High capacity" << ecl::endl;
+            } else {
+                ecl::cout << "Card is Low capacity" << ecl::endl;
+            }
+        }
+
+        // Whole byte 2 of OCR contains voltage profiles
+        for (uint8_t bit = 0; bit < 8; ++bit) {
+            if (r3.OCR[2] & (1 << bit)) {
+                uint8_t V = bit + 27;
+                uint intgr = V / 10;
+                uint fract = V - intgr * 10;
+                ecl::cout << "VOLTAGE: ["
+                          << intgr << '.' << fract
+                          << "; +0.1]" << ecl::endl;
+            }
+        }
+
+        // Last bit in byte 1 of OCR contains one voltage profile
+        if (r3.OCR[1] & (1 << 8)) {
+            ecl::cout << "VOLTAGE: [2.7,+0.1]" << ecl::endl;
+        }
+        return 0;
+    }
+
+    return -1;
+}
+
 
 #endif // DEV_SDSPI_H
