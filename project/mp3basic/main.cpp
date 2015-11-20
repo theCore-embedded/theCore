@@ -31,22 +31,35 @@ static void rtos_task1(void *params)
     char c = 0;
     int ret = 0;
 
+    ecl::cout << "\n\nHello, embedded world!" << ecl::endl;
     // TODO: order of initialization must be preserved
     // as soon as default values for GPIO will be introduced
     SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
     PCD8544< SPI_LCD_driver > lcd;
 
     sdspi.init();
-    sdspi.open();
+    ret = sdspi.open();
 
-    lcd.init();
-    lcd.open();
-    lcd.clear();
-    lcd.flush();
+    //lcd.init();
+    //lcd.open();
+    //lcd.clear();
+    //lcd.flush();
 
 
-
-    ecl::cout << "Hello, embedded world!" << ecl::endl;
+    if (!ret) {
+        uint8_t buf[512];
+        if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
+            ecl::cout << "Unable to retrieve buffer" << ecl::endl;
+        } else {
+            ecl::cout << "items: ";
+            for (uint16_t i = 0; i < sizeof(buf); ++i) {
+                ecl::cout << buf[i] << " ";
+                if ((i & 0xf) == 0xf)
+                    ecl::cout << ecl::endl;
+            }
+            ecl::cout << ecl::endl;
+        }
+    }
 
     for (;;) {
         ecl::cin >> c;

@@ -14,7 +14,7 @@ SPI_CPOL_High,
 SPI_CPHA_2Edge,
 SPI_NSS_Soft,
 SPI_FirstBit_MSB,
-200000
+100000
 >;
 
 // TODO: better name

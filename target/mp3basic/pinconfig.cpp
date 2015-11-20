@@ -25,7 +25,7 @@ void initialize_pins()
         // SPI2 SCK
         create_pin(pin_port::port_b, pin_number::pin_13, pin_function::pin_SPI2, pin_type::no_pull),
         // SPI2 MISO
-        create_pin(pin_port::port_b, pin_number::pin_14, pin_function::pin_SPI2, pin_type::no_pull),
+        create_pin(pin_port::port_b, pin_number::pin_14, pin_function::pin_SPI2, pin_type::pull_up),
         // SPI2 MOSI
         create_pin(pin_port::port_b, pin_number::pin_15, pin_function::pin_SPI2, pin_type::no_pull),
 
