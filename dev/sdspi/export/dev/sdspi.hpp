@@ -10,6 +10,8 @@ template< class SPI_dev, class GPIO_CS >
 class SD_SPI
 {
 public:
+    static constexpr size_t block_len = 512;
+
     SD_SPI();
     ~SD_SPI();
 
@@ -103,7 +105,7 @@ private:
     // int CMD12(R1 &r); R1b is required here
 
     // SET_BLOCKLEN             - Change R/W block size.
-    int CMD16(R1 &r, uint32_t block_length);
+    int CMD16(R1 &r);
 
     // READ_SINGLE_BLOCK        - Read a block.
     int CMD17(R1_read &r, uint32_t address);
@@ -133,7 +135,7 @@ private:
 
     // Sends CMD
     template< typename R >
-    int send_CMD(R &resp, uint8_t CMD_idx, const uint8_t argument[4], uint8_t crc = 0);
+    int send_CMD(R &resp, uint8_t CMD_idx, const uint8_t (&argument)[4], uint8_t crc = 0);
 
     // Sends >= 47 empty clocks to initialize the device
     // int send_init();
@@ -141,8 +143,9 @@ private:
     int software_reset();
     int check_conditions();
     int init_process();
-    int check_OCR();\
+    int check_OCR();
     int obtain_card_info();
+    int set_block_length();
 
     ssize_t read_data(uint8_t *buf, size_t size);
 
@@ -203,7 +206,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
         return -1;
     }
 
-    if (!m_opened++) {
+    if (!m_opened) {
         m_spi.open();
         m_spi.lock();
 
@@ -235,12 +238,19 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
             ecl::cout << "Failed to check OCR" << ecl::endl;
             m_spi.unlock();
             return -4;
+        // TODO: magic numbers
         } else if (ret == 1) {
             m_HC = true;
+        // TODO: magic numbers
+        } else if (ret == 2) {
+            if (set_block_length() < 0) {
+                ecl::cout << "Can't set block length" << ecl::endl;
+                return -4;
+            }
         } else {
             ecl::cout << "Unsupported type of card" << ecl::endl;
             m_spi.unlock();
-            return -4;
+            return -5;
         }
 
         ecl::cout << "Card initialized successfully" << ecl::endl;
@@ -248,11 +258,13 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
         if (obtain_card_info() < 0) {
             ecl::cout << "Failed to obtain card info" << ecl::endl;
             m_spi.unlock();
-            return -5;
+            return -6;
         }
 
         m_spi.unlock();
     }
+
+    m_opened++;
     return 0;
 }
 
@@ -283,7 +295,11 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::read(uint8_t *data, size_t count)
         return -1;
     }
 
-    return read_data(data, count);
+    m_spi.lock();
+    int ret = read_data(data, count);
+    m_spi.unlock();
+
+    return ret;
 }
 
 
@@ -354,7 +370,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive(uint8_t *buf, size_t size)
 
 template< class SPI_dev, class GPIO_CS >
 template< typename R >
-int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t argument[4], uint8_t crc)
+int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t (&argument)[4], uint8_t crc)
 {
     CMD_idx &= 0x3f; // First two bits are reserved TODO: comment
     CMD_idx |= 0x40;
@@ -365,15 +381,15 @@ int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t
     const uint8_t to_send[] =
     { CMD_idx, argument[0], argument[1], argument[2], argument[3], crc };
 
-    // Prepare a card
-    const uint8_t dummy = 0xff;
-    send(&dummy, 1);
-
     // Send HCS
     send(to_send, sizeof(to_send));
 
     // Rerieve a result
     receive_response(resp);
+
+    // Complete transaction
+    const uint8_t dummy = 0xff;
+    send(&dummy, 1);
 
     return 0;
 }
@@ -408,7 +424,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R1_read &r)
     if (receive_response(r.r1) < 0)
         return -1;
 
-    uint8_t tries = 16;
+    if (r.r1.response & ~1)
+        return -1;
+
+    uint8_t tries = 64;
 
     do {
         if (receive(&r.token, sizeof(r.token)) < 0)
@@ -466,10 +485,31 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD10(R1_read &r)
     GPIO_CS::reset();
 
     // TODO: comments
-    constexpr uint8_t CMD10_idx = 10;
+    constexpr uint8_t CMD10_idx  = 10;
     constexpr uint8_t arg[4]     = { 0 };
 
     send_CMD(r, CMD10_idx, arg);
+
+    GPIO_CS::set();
+
+    return 0;
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::CMD16(R1 &r)
+{
+    GPIO_CS::reset();
+
+    // TODO: comments
+    constexpr uint8_t CMD16_idx = 16;
+    constexpr uint8_t arg[4]    = {
+        (uint8_t) (block_len >> 24),
+        (uint8_t) (block_len >> 16),
+        (uint8_t) (block_len >> 8),
+        (uint8_t) (block_len),
+    };
+
+    send_CMD(r, CMD16_idx, arg);
 
     GPIO_CS::set();
 
@@ -483,14 +523,14 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD17(R1_read &r, uint32_t address)
 
     // TODO: comments
     constexpr uint8_t CMD17_idx = 17;
-    uint8_t arg[] = {
+    const uint8_t arg[] = {
         (uint8_t) (address >> 24),
         (uint8_t) (address >> 16),
         (uint8_t) (address >> 8),
         (uint8_t) (address),
     };
 
-    send_CMD(r, CMD17_idx, arg, 0xff);
+    send_CMD(r, CMD17_idx, arg);
 
     GPIO_CS::set();
 
@@ -702,6 +742,21 @@ int SD_SPI< SPI_dev, GPIO_CS >::obtain_card_info()
     return -1;
 }
 
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::set_block_length()
+{
+    R1 r1;
+
+    CMD16(r1);
+
+    if (r1.response != 0) {
+        ecl::cout << "Can't get valid response of CMD16: " << r1.response << ecl::endl;
+        return -1;
+    }
+
+    return 0;
+}
+
 
 // Get rid of this hack
 extern "C" {
@@ -719,7 +774,7 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::read_data(uint8_t *buf, size_t size)
     r1_read.size = 512;
     r1_read.data = fallback;
 
-    CMD17(r1_read, 512);
+    CMD17(r1_read, m_offset);
 
     if (r1_read.r1.response != 0) {
         ecl::cout << "Failed to get R1: " << (int) r1_read.r1.response << ecl::endl;

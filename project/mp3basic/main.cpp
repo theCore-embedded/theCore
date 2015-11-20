@@ -45,12 +45,13 @@ static void rtos_task1(void *params)
     //lcd.clear();
     //lcd.flush();
 
-
     if (!ret) {
         uint8_t buf[512];
+
         if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
             ecl::cout << "Unable to retrieve buffer" << ecl::endl;
         } else {
+            ecl::cout << "Read!\n";
             ecl::cout << "items: ";
             for (uint16_t i = 0; i < sizeof(buf); ++i) {
                 ecl::cout << buf[i] << " ";
