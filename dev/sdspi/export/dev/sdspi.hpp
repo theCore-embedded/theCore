@@ -47,6 +47,22 @@ public:
     };
 
 private:
+    // Block length is given without respect to the card type.
+    // If card is Standart Capacity then block length will be set to 512,
+    // ( see set_block_length() ).
+    // If card is High Capacity then block length is fixed to 512 by design.
+    static constexpr size_t block_len = 512;
+
+    // Return types.
+    // Enums ommited, since it should be replaced
+    // with system-wide error flags
+    static constexpr int SD_expired  = -3;  // Event expired
+    static constexpr int SD_SPI_err  = -2;  // SPI returns error
+    static constexpr int SD_err      = -1;  // General error
+    static constexpr int SD_ok       = 0;   // Indicates success
+    static constexpr int SD_type_HC  = 1;   // The card is high capacity
+    static constexpr int SD_type_SC  = 2;   // The card is standart capacity
+
     // R1 response
     struct R1
     {
@@ -119,6 +135,15 @@ private:
     using R7 = R3;
     using argument = std::array< uint8_t, 4 >;
 
+    struct block_buffer
+    {
+        block_buffer() :block{0}, origin{0}, mint{true} { }
+
+        uint8_t block[block_len];     // The block itself
+        size_t  origin;               // The offset from which block was obtained
+        bool    mint;                 // True if there were no writes in buffer
+    };
+
     // http://elm-chan.org/docs/mmc/mmc_e.html
     // SD SPI command set ------------------------------------------------------
 
@@ -185,40 +210,36 @@ private:
     int obtain_card_info();
     int set_block_length();
 
-    ssize_t read_data(uint8_t *buf, size_t size);
+    int populate_block(size_t new_block);
 
     // Useful abstractions
     int receive_response(R1 &r);
     int receive_response(R3 &r);
     int receive_response(R1_read &r);
 
-    // Transport layer
+    // Transport layer TODO: merge these three
     ssize_t send(const uint8_t *buf, size_t size);
     ssize_t receive(uint8_t *buf, size_t size);
     ssize_t send_dummy(size_t size);
 
-    // Block length is given without respect to the card type.
-    // If card is Standart Capacity then block length will be set to 512,
-    // ( see set_block_length() ).
-    // If card is High Capacity then block length is fixed to 512 by design.
-    static constexpr size_t m_block_len = 512;
-
-    // Return types.
-    // Enums ommited, since it should be replaced
-    // with system-wide error flags
-    static constexpr int SD_expired  = -3;  // Event expired
-    static constexpr int SD_SPI_err  = -2;  // SPI returns error
-    static constexpr int SD_err      = -1;  // General error
-    static constexpr int SD_ok       = 0;   // Indicates success
-    static constexpr int SD_type_HC  = 1;   // The card is high capacity
-    static constexpr int SD_type_SC  = 2;   // The card is standart capacity
-
-    SPI_dev  m_spi;     // SPI device
-    bool     m_inited;  // Inited flags
-    bool     m_HC;      // High Capacity flag
-    int      m_opened;  // Opened times counter
-    off_t    m_offset;  // Current offset in units of bytes
+    SPI_dev       m_spi;       // SPI device
+    bool          m_inited;    // Inited flags
+    bool          m_HC;        // High Capacity flag
+    int           m_opened;    // Opened times counter
+    off_t         m_offset;    // Current offset in units of bytes
+    block_buffer  m_block;     // Buffer containing last read\write block
 };
+
+
+template< class SPI_dev, class GPIO_CS >
+constexpr size_t SD_SPI< SPI_dev, GPIO_CS >::block_len;
+
+// TODO: Get rid of this hack
+extern "C" {
+void *memcpy(void *dst, const void *src, size_t cnt);
+}
+
+
 
 template< class SPI_dev, class GPIO_CS >
 SD_SPI< SPI_dev, GPIO_CS >::SD_SPI()
@@ -227,6 +248,7 @@ SD_SPI< SPI_dev, GPIO_CS >::SD_SPI()
     ,m_HC{false}
     ,m_opened{0}
     ,m_offset{0}
+    ,m_block{}
 {
 }
 
@@ -314,6 +336,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
             return -6;
         }
 
+        if (populate_block(m_offset) < 0) {
+            ecl::cout << "Cannot populate initial block" << ecl::endl;
+        }
+
         m_spi.unlock();
     }
 
@@ -348,11 +374,41 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::read(uint8_t *data, size_t count)
         return -1;
     }
 
-    m_spi.lock();
-    int ret = read_data(data, count);
-    m_spi.unlock();
+    size_t left = count;
+    int SD_ret;
 
-    return ret;
+
+    // Intended to be optimized in right shift, sinse
+    // block length is constant and a power of two
+    size_t required_block = m_offset / block_len;
+    size_t offset_in_block = m_offset - required_block * block_len;
+
+    while (left) {
+        if (required_block != m_block.origin) {
+            m_spi.lock();
+            SD_ret = populate_block(required_block);
+            m_spi.unlock();
+
+            if (SD_ret < 0)
+                return SD_ret;
+        }
+
+        size_t to_copy = std::min(block_len - offset_in_block, left);
+        memcpy(data, m_block.block + offset_in_block, to_copy);
+
+        // Advance to next free chunk
+        data += to_copy;
+        left -= to_copy;
+
+        // If needed, next iteration will populate buffer again
+        required_block++;
+        // Next copy will occur within a new block
+        offset_in_block = 0;
+    }
+
+    m_offset += count;
+
+    return count;
 }
 
 
@@ -374,13 +430,13 @@ off_t SD_SPI< SPI_dev, GPIO_CS >::tell() const
         return -1;
     }
 
-    return m_offset * m_block_len;
+    return m_offset;
 }
 
 template< class SPI_dev, class GPIO_CS >
 constexpr size_t SD_SPI< SPI_dev, GPIO_CS >::get_block_length()
 {
-    return m_block_len;
+    return block_len;
 }
 
 // Private methods -------------------------------------------------------------
@@ -665,10 +721,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD16(R1 &r)
     // TODO: comments
     constexpr uint8_t  CMD16_idx = 16;
     constexpr argument arg = {
-        (uint8_t) (m_block_len >> 24),
-        (uint8_t) (m_block_len >> 16),
-        (uint8_t) (m_block_len >> 8),
-        (uint8_t) (m_block_len),
+        (uint8_t) (block_len >> 24),
+        (uint8_t) (block_len >> 16),
+        (uint8_t) (block_len >> 8),
+        (uint8_t) (block_len),
     };
 
     int SD_ret = send_CMD(r, CMD16_idx, arg);
@@ -925,35 +981,27 @@ int SD_SPI< SPI_dev, GPIO_CS >::set_block_length()
 }
 
 
-// Get rid of this hack
-extern "C" {
-void *memcpy(void *dst, const void *src, size_t cnt);
-}
-
 template< class SPI_dev, class GPIO_CS >
-ssize_t SD_SPI< SPI_dev, GPIO_CS >::read_data(uint8_t *buf, size_t size)
+int SD_SPI<SPI_dev, GPIO_CS>::populate_block(size_t new_block)
 {
-    // TODO: optimize it
-    // TODO: modify it with respect to HC\SC type
-    uint8_t fallback[512];
+    // TODO: add support for mint buffer!
+    if (!m_block.mint)
+        return SD_err;
+
     R1_read r1_read;
+    off_t address = m_HC ? new_block * block_len : new_block;
 
-    r1_read.size = 512;
-    r1_read.data = fallback;
+    r1_read.size = block_len;
+    r1_read.data = m_block.block;
 
-    int SD_ret = CMD17(r1_read, m_offset);
+    int SD_ret = CMD17(r1_read, address);
 
-    if (SD_ret < 0) {
-        return SD_ret;
+    if (SD_ret == SD_ok) {
+        m_block.mint = true;
+        m_block.origin = new_block;
     }
 
-    size_t to_copy = std::min(size, r1_read.size);
-    // UND ref. to memmove TODO
-    //std::copy(r1_read.data, r1_read.data + to_copy, buf);
-
-    memcpy(buf, r1_read.data, to_copy);
-    m_offset += to_copy;
-    return to_copy;
+    return SD_ret;
 }
 
 #endif // DEV_SDSPI_H
