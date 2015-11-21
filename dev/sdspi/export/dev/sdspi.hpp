@@ -2,6 +2,8 @@
 #define DEV_SDSPI_HPP
 
 #include <algorithm>
+#include <array>
+
 #include <target/usart.hpp>
 #include <ecl/iostream.hpp>
 
@@ -115,6 +117,7 @@ private:
 
     // Are the same
     using R7 = R3;
+    using argument = std::array< uint8_t, 4 >;
 
     // http://elm-chan.org/docs/mmc/mmc_e.html
     // SD SPI command set ------------------------------------------------------
@@ -171,7 +174,7 @@ private:
 
     // Sends CMD
     template< typename R >
-    int send_CMD(R &resp, uint8_t CMD_idx, const uint8_t (&argument)[4], uint8_t crc = 0);
+    int send_CMD(R &resp, uint8_t CMD_idx, const argument &arg, uint8_t crc = 0);
 
     // Sends >= 47 empty clocks to initialize the device
     int send_init();
@@ -214,7 +217,7 @@ private:
     bool     m_inited;  // Inited flags
     bool     m_HC;      // High Capacity flag
     int      m_opened;  // Opened times counter
-    off_t    m_offset;  // Current offset in units of blocks
+    off_t    m_offset;  // Current offset in units of bytes
 };
 
 template< class SPI_dev, class GPIO_CS >
@@ -467,7 +470,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::send_init()
 
 template< class SPI_dev, class GPIO_CS >
 template< typename R >
-int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t (&argument)[4], uint8_t crc)
+int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const argument &arg, uint8_t crc)
 {
     ssize_t SD_ret;
 
@@ -478,7 +481,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t
 
     // Comand body
     const uint8_t to_send[] =
-    { CMD_idx, argument[0], argument[1], argument[2], argument[3], crc };
+    { CMD_idx, arg[0], arg[1], arg[2], arg[3], crc };
 
     // Send HCS
     SD_ret = send(to_send, sizeof(to_send));
@@ -611,9 +614,9 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD0(R1 &r)
     GPIO_CS::reset();
 
     // TODO: comments
-    constexpr uint8_t CMD0_idx = 0;
-    constexpr uint8_t CMD0_crc = 0x95;
-    constexpr uint8_t arg[4]   = {0};
+    constexpr uint8_t  CMD0_idx = 0;
+    constexpr uint8_t  CMD0_crc = 0x95;
+    constexpr argument arg      = {0};
 
     int SD_ret = send_CMD(r, CMD0_idx, arg, CMD0_crc);
     GPIO_CS::set();
@@ -627,9 +630,9 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD8(R7 &r)
     GPIO_CS::reset();
 
     // TODO: comments
-    constexpr uint8_t CMD8_idx = 8;
-    constexpr uint8_t CMD8_crc = 0x87;
-    constexpr uint8_t arg[]    = { 0, 0, 0x01, 0xaa };
+    constexpr uint8_t   CMD8_idx = 8;
+    constexpr uint8_t   CMD8_crc = 0x87;
+    constexpr argument  arg      = { 0, 0, 0x01, 0xaa };
 
     int SD_ret = send_CMD(r, CMD8_idx, arg, CMD8_crc);
 
@@ -644,8 +647,8 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD10(R1_read &r)
     GPIO_CS::reset();
 
     // TODO: comments
-    constexpr uint8_t CMD10_idx  = 10;
-    constexpr uint8_t arg[4]     = { 0 };
+    constexpr uint8_t   CMD10_idx  = 10;
+    constexpr argument  arg        = { 0 };
 
     int SD_ret = send_CMD(r, CMD10_idx, arg);
 
@@ -660,8 +663,8 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD16(R1 &r)
     GPIO_CS::reset();
 
     // TODO: comments
-    constexpr uint8_t CMD16_idx = 16;
-    constexpr uint8_t arg[4]    = {
+    constexpr uint8_t  CMD16_idx = 16;
+    constexpr argument arg = {
         (uint8_t) (m_block_len >> 24),
         (uint8_t) (m_block_len >> 16),
         (uint8_t) (m_block_len >> 8),
@@ -682,7 +685,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD17(R1_read &r, uint32_t address)
 
     // TODO: comments
     constexpr uint8_t CMD17_idx = 17;
-    const uint8_t arg[] = {
+    const argument arg = {
         (uint8_t) (address >> 24),
         (uint8_t) (address >> 16),
         (uint8_t) (address >> 8),
@@ -704,7 +707,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD55(R1 &r)
 
     // TODO: comments
     constexpr uint8_t CMD55_idx = 55;
-    constexpr uint8_t arg[]     = { 0, 0, 0, 0 };
+    constexpr argument arg      = { 0, 0, 0, 0 };
 
     int SD_ret = send_CMD(r, CMD55_idx, arg);
 
@@ -722,7 +725,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD58(R3 &r)
 
     // TODO: comments
     constexpr uint8_t CMD58_idx = 58;
-    constexpr uint8_t arg[]     = { 0, 0, 0, 0 };
+    constexpr argument arg      = { 0, 0, 0, 0 };
 
     int SD_ret = send_CMD(r, CMD58_idx, arg);
 
@@ -742,7 +745,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::ACMD41(R1 &r, bool HCS)
 
     // TODO: comments
     constexpr uint8_t  CMD41_idx  = 41;
-    const uint8_t      arg[]      = { HCS_byte, 0, 0, 0 };
+    const argument     arg        = { HCS_byte, 0, 0, 0 };
 
     GPIO_CS::reset();
     SD_ret = send_CMD(r, CMD41_idx, arg);
