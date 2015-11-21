@@ -45,9 +45,7 @@ public:
     };
 
 private:
-    using DMA_rx = typename SPI_dev::DMA_RX_t;
-    using DMA_tx = typename SPI_dev::DMA_TX_t;
-
+    // R1 response
     struct R1
     {
         R1()      :response{0} {}
@@ -77,6 +75,7 @@ private:
         static constexpr uint8_t reserved_bit  = 0x80;
     };
 
+    // R3 response
     struct R3
     {
         R3()      :r1{}, OCR{0} {}
@@ -85,6 +84,7 @@ private:
         uint8_t    OCR[4];
     };
 
+    // R1 response plus a data that need to be read
     struct R1_read
     {
         R1_read()  :r1{}, token{0}, data{nullptr}, size{0}, crc{0} {}
@@ -107,20 +107,14 @@ private:
 
     };
 
-    struct R1_CID
-    {
-        R1_CID()  :r1{}, CID{0}, crc{0} {}
-        R1         r1;
-        uint8_t    CID[16];
-        uint16_t   crc;   // Data CRC
-    };
-
+    // R1 response + data that should be written
     struct R1_write
     {
         // TODO
     };
 
-    using R7 = R3; // TODO: clarify
+    // Are the same
+    using R7 = R3;
 
     // http://elm-chan.org/docs/mmc/mmc_e.html
     // SD SPI command set ------------------------------------------------------
@@ -180,8 +174,7 @@ private:
     int send_CMD(R &resp, uint8_t CMD_idx, const uint8_t (&argument)[4], uint8_t crc = 0);
 
     // Sends >= 47 empty clocks to initialize the device
-    // int send_init();
-
+    int send_init();
     int software_reset();
     int check_conditions();
     int init_process();
@@ -199,6 +192,7 @@ private:
     // Transport layer
     ssize_t send(const uint8_t *buf, size_t size);
     ssize_t receive(uint8_t *buf, size_t size);
+    ssize_t send_dummy(size_t size);
 
     // Block length is given without respect to the card type.
     // If card is Standart Capacity then block length will be set to 512,
@@ -267,9 +261,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
         m_spi.open();
         m_spi.lock();
 
-        uint8_t buf[80];
-        std::fill_n(buf, sizeof(buf), 0xff);
-        send(buf, sizeof(buf));
+        if (send_init() < 0) {
+            ecl::cout << "Send init clocks failed" << ecl::endl;
+            return -1;
+        }
 
         if (software_reset() < 0) {
             ecl::cout << "Failed to reset a card" << ecl::endl;
@@ -295,11 +290,9 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
             ecl::cout << "Failed to check OCR" << ecl::endl;
             m_spi.unlock();
             return -4;
-            // TODO: magic numbers
-        } else if (ret == 1) {
+        } else if (ret == SD_type_HC) {
             m_HC = true;
-            // TODO: magic numbers
-        } else if (ret == 2) {
+        } else if (ret == SD_type_SC) {
             if (set_block_length() < 0) {
                 ecl::cout << "Can't set block length" << ecl::endl;
                 return -4;
@@ -428,11 +421,48 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::receive(uint8_t *buf, size_t size)
     if (m_spi.xfer(spi_xfer) < 0)
         return SD_SPI_err;
 
+    // TODO: lock instead of wait
     while (!completed) { }
     while ((m_spi.get_status() & SPI_dev::flags::BSY)) { }
 
     // TODO: verify that all data was transfered
     return size;
+}
+
+template< class SPI_dev, class GPIO_CS >
+ssize_t SD_SPI< SPI_dev, GPIO_CS >::send_dummy(size_t size)
+{
+    volatile bool completed = false;
+
+    auto handler = [&completed]() {
+        completed = true;
+    };
+
+    typename SPI_dev::XFER_t spi_xfer;
+    spi_xfer.set_buffers(nullptr, nullptr, size);
+    spi_xfer.set_handler(handler);
+
+    if (m_spi.xfer(spi_xfer) < 0)
+        return SD_SPI_err;
+
+    // TODO: lock instead of wait
+    while (!completed) { }
+    while ((m_spi.get_status() & SPI_dev::flags::BSY)) { }
+
+    // TODO: verify that all data was transfered
+    return size;
+
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::send_init()
+{
+    /* Initialise card with >= 74 clocks on start */
+    ssize_t ret = send_dummy(80);
+    if (ret < 0)
+        return ret;
+
+    return SD_ok;
 }
 
 template< class SPI_dev, class GPIO_CS >
