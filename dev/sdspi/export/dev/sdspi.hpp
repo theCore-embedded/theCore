@@ -10,8 +10,6 @@ template< class SPI_dev, class GPIO_CS >
 class SD_SPI
 {
 public:
-    static constexpr size_t block_len = 512;
-
     SD_SPI();
     ~SD_SPI();
 
@@ -35,6 +33,17 @@ public:
     // -1 if error, valid offset otherwise
     off_t tell() const;
 
+    // Returns a length of a block
+    constexpr size_t get_block_length();
+
+    // Seek flags
+    enum class seekdir
+    {
+        beg = 0,
+        cur = 1,
+        end = 2
+    };
+
 private:
     using DMA_rx = typename SPI_dev::DMA_RX_t;
     using DMA_tx = typename SPI_dev::DMA_TX_t;
@@ -42,8 +51,30 @@ private:
     struct R1
     {
         R1()      :response{0} {}
-
         uint8_t    response;
+
+        bool ok() const
+        {
+            // If anything set besides idle flags it is an error
+            return received() && !(response & ~idle_state);
+        }
+
+        bool received() const
+        {
+            // Reserved bit indicates a start of R1 response
+            return !(response & reserved_bit);
+        }
+
+        // Flags that can be found in response
+        static constexpr uint8_t idle_state    = 0x01;
+        static constexpr uint8_t erase_reset   = 0x02;
+        static constexpr uint8_t illegal_cmd   = 0x04;
+        static constexpr uint8_t com_crc_err   = 0x08;
+        static constexpr uint8_t erase_seq_err = 0x10;
+        static constexpr uint8_t addr_err      = 0x20;
+        static constexpr uint8_t param_error   = 0x40;
+        // Must be set to 0 in response
+        static constexpr uint8_t reserved_bit  = 0x80;
     };
 
     struct R3
@@ -63,6 +94,17 @@ private:
         uint8_t     *data; // Buffer for data
         size_t      size;  // Size of data
         uint16_t    crc;   // Data CRC
+
+        // Data token that returned in case of success
+        static constexpr uint8_t data_token    = 0xfe;
+
+        // Flags that can be found in error token
+        static constexpr uint8_t err           = 0x01;
+        static constexpr uint8_t CC_err        = 0x02;
+        static constexpr uint8_t ECC_fail      = 0x04;
+        static constexpr uint8_t out_of_range  = 0x08;
+        static constexpr uint8_t card_locked   = 0x10;
+
     };
 
     struct R1_CID
@@ -153,17 +195,32 @@ private:
     int receive_response(R1 &r);
     int receive_response(R3 &r);
     int receive_response(R1_read &r);
-   // int receive_response(R1_CID &r);
 
     // Transport layer
     ssize_t send(const uint8_t *buf, size_t size);
     ssize_t receive(uint8_t *buf, size_t size);
 
+    // Block length is given without respect to the card type.
+    // If card is Standart Capacity then block length will be set to 512,
+    // ( see set_block_length() ).
+    // If card is High Capacity then block length is fixed to 512 by design.
+    static constexpr size_t m_block_len = 512;
+
+    // Return types.
+    // Enums ommited, since it should be replaced
+    // with system-wide error flags
+    static constexpr int SD_expired  = -3;  // Event expired
+    static constexpr int SD_SPI_err  = -2;  // SPI returns error
+    static constexpr int SD_err      = -1;  // General error
+    static constexpr int SD_ok       = 0;   // Indicates success
+    static constexpr int SD_type_HC  = 1;   // The card is high capacity
+    static constexpr int SD_type_SC  = 2;   // The card is standart capacity
+
     SPI_dev  m_spi;     // SPI device
     bool     m_inited;  // Inited flags
     bool     m_HC;      // High Capacity flag
     int      m_opened;  // Opened times counter
-    off_t    m_offset;  // Current offset
+    off_t    m_offset;  // Current offset in units of blocks
 };
 
 template< class SPI_dev, class GPIO_CS >
@@ -238,10 +295,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::open()
             ecl::cout << "Failed to check OCR" << ecl::endl;
             m_spi.unlock();
             return -4;
-        // TODO: magic numbers
+            // TODO: magic numbers
         } else if (ret == 1) {
             m_HC = true;
-        // TODO: magic numbers
+            // TODO: magic numbers
         } else if (ret == 2) {
             if (set_block_length() < 0) {
                 ecl::cout << "Can't set block length" << ecl::endl;
@@ -321,13 +378,19 @@ off_t SD_SPI< SPI_dev, GPIO_CS >::tell() const
         return -1;
     }
 
-    return -1;
+    return m_offset * m_block_len;
+}
+
+template< class SPI_dev, class GPIO_CS >
+constexpr size_t SD_SPI< SPI_dev, GPIO_CS >::get_block_length()
+{
+    return m_block_len;
 }
 
 // Private methods -------------------------------------------------------------
 
 template< class SPI_dev, class GPIO_CS >
-int SD_SPI< SPI_dev, GPIO_CS >::send(const uint8_t *buf, size_t size)
+ssize_t SD_SPI< SPI_dev, GPIO_CS >::send(const uint8_t *buf, size_t size)
 {
     volatile bool completed = false;
 
@@ -338,7 +401,9 @@ int SD_SPI< SPI_dev, GPIO_CS >::send(const uint8_t *buf, size_t size)
     typename SPI_dev::XFER_t spi_xfer;
     spi_xfer.set_buffers(buf, nullptr, size);
     spi_xfer.set_handler(handler);
-    m_spi.xfer(spi_xfer);
+
+    if (m_spi.xfer(spi_xfer) < 0)
+        return SD_SPI_err;
 
     while (!completed) { }
     while ((m_spi.get_status() & SPI_dev::flags::BSY)) { }
@@ -348,7 +413,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::send(const uint8_t *buf, size_t size)
 }
 
 template< class SPI_dev, class GPIO_CS >
-int SD_SPI< SPI_dev, GPIO_CS >::receive(uint8_t *buf, size_t size)
+ssize_t SD_SPI< SPI_dev, GPIO_CS >::receive(uint8_t *buf, size_t size)
 {
     volatile bool completed = false;
 
@@ -359,7 +424,9 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive(uint8_t *buf, size_t size)
     typename SPI_dev::XFER_t spi_xfer;
     spi_xfer.set_buffers(nullptr, buf, size);
     spi_xfer.set_handler(handler);
-    m_spi.xfer(spi_xfer);
+
+    if (m_spi.xfer(spi_xfer) < 0)
+        return SD_SPI_err;
 
     while (!completed) { }
     while ((m_spi.get_status() & SPI_dev::flags::BSY)) { }
@@ -372,6 +439,8 @@ template< class SPI_dev, class GPIO_CS >
 template< typename R >
 int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t (&argument)[4], uint8_t crc)
 {
+    ssize_t SD_ret;
+
     CMD_idx &= 0x3f; // First two bits are reserved TODO: comment
     CMD_idx |= 0x40;
 
@@ -382,16 +451,22 @@ int SD_SPI< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const uint8_t
     { CMD_idx, argument[0], argument[1], argument[2], argument[3], crc };
 
     // Send HCS
-    send(to_send, sizeof(to_send));
+    SD_ret = send(to_send, sizeof(to_send));
+    if (SD_ret < 0) {
+        return SD_ret;
+    }
 
     // Rerieve a result
-    receive_response(resp);
+    SD_ret = receive_response(resp);
+    if (SD_ret < 0) {
+        return SD_ret;
+    }
 
     // Complete transaction
     const uint8_t dummy = 0xff;
-    send(&dummy, 1);
+    SD_ret = send(&dummy, 1);
 
-    return 0;
+    return (SD_ret < 0) ? SD_ret : SD_ok;
 }
 
 //------------------------------------------------------------------------------
@@ -400,48 +475,102 @@ template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R1 &r)
 {
     uint8_t tries = 8;
-    do {
-        receive(&r.response, 1);
-    } while (r.response == 0xff && --tries);
+    int ret;
 
-    return tries ? 0 : -1;
+    do {
+        ret = receive(&r.response, 1);
+        if (ret < 0)
+            return ret;
+
+    } while (!r.received() && --tries);
+
+    if (!r.received()) {
+        ecl::cout << "R1 response wait expired." << ecl::endl;
+    } else if (!r.ok()) {
+        ecl::cout << "R1 error(s) received:" << ecl::endl;
+
+        if (r.response & R1::erase_reset)
+            ecl::cout << "Erase reset error" << ecl::endl;
+        if (r.response & R1::illegal_cmd)
+            ecl::cout << "Illegal command error" << ecl::endl;
+        if (r.response & R1::com_crc_err)
+            ecl::cout << "CRC error" << ecl::endl;
+        if (r.response & R1::erase_seq_err)
+            ecl::cout << "Erase sequnce error" << ecl::endl;
+        if (r.response & R1::addr_err)
+            ecl::cout << "Address error" << ecl::endl;
+        if (r.response & R1::param_error)
+            ecl::cout << "Parameter error" << ecl::endl;
+
+    } else {
+        return SD_ok;
+    }
+
+    return SD_err;
 }
 
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R3 &r)
 {
-    if (receive_response(r.r1) < 0)
-        return -1;
+    int SD_ret = receive_response(r.r1);
+    if (SD_ret < 0)
+        return SD_ret;
 
-    receive((uint8_t *)r.OCR, sizeof(r.OCR));
-
-    return 0;
+    return receive((uint8_t *)r.OCR, sizeof(r.OCR));
 }
 
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R1_read &r)
 {
-    if (receive_response(r.r1) < 0)
-        return -1;
+    int SD_ret;
+    SD_ret = receive_response(r.r1);
+    if (SD_ret < 0)
+        return SD_ret;
 
-    if (r.r1.response & ~1)
-        return -1;
+    // Idle flags shouldn't be set when read opearation is taking place
+    if (r.r1.response & R1::idle_state) {
+        ecl::cout << "Can't retrieve data: idle flag is set" << ecl::endl;
+        return SD_err;
+    }
 
     uint8_t tries = 64;
 
     do {
-        if (receive(&r.token, sizeof(r.token)) < 0)
-            return -2;
+        SD_ret = receive(&r.token, sizeof(r.token));
+        if (SD_ret < 0)
+            return SD_ret;
     } while (r.token == 0xff && --tries);
 
-    if (r.token == 0xfe)
-        if (receive(r.data, r.size) < 0)
-            return -3;
+    // Data token received,
+    if (r.token == R1_read::data_token) {
+        SD_ret = receive(r.data, r.size);
+        if (SD_ret < 0) {
+            return SD_ret;
+        }
+    } else {
+        ecl::cout << "Error token received when reading data:" << ecl::endl;
+        if (r.token & R1_read::err) {
+            ecl::cout << "General error occurs" << ecl::endl;
+        }
+        if (r.token & R1_read::CC_err) {
+            ecl::cout << "CC error" << ecl::endl;
+        }
+        if (r.token & R1_read::ECC_fail) {
+            ecl::cout << "ECC failed" << ecl::endl;
+        }
+        if (r.token & R1_read::out_of_range) {
+            ecl::cout << "Out of range error" << ecl::endl;
+        }
+        if (r.token & R1_read::card_locked) {
+            ecl::cout << "Card locked" << ecl::endl;
+        }
 
-    if (receive((uint8_t *)&r.crc, sizeof(r.crc)) < 0)
-        return -4;
+        return SD_err;
+    }
 
-    return 0;
+    SD_ret = receive((uint8_t *)&r.crc, sizeof(r.crc));
+
+    return SD_ret;
 }
 
 //------------------------------------------------------------------------------
@@ -456,10 +585,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD0(R1 &r)
     constexpr uint8_t CMD0_crc = 0x95;
     constexpr uint8_t arg[4]   = {0};
 
-    send_CMD(r, CMD0_idx, arg, CMD0_crc);
+    int SD_ret = send_CMD(r, CMD0_idx, arg, CMD0_crc);
     GPIO_CS::set();
 
-    return 0;
+    return SD_ret;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -472,11 +601,11 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD8(R7 &r)
     constexpr uint8_t CMD8_crc = 0x87;
     constexpr uint8_t arg[]    = { 0, 0, 0x01, 0xaa };
 
-    send_CMD(r, CMD8_idx, arg, CMD8_crc);
+    int SD_ret = send_CMD(r, CMD8_idx, arg, CMD8_crc);
 
     GPIO_CS::set();
 
-    return 0;
+    return SD_ret;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -488,11 +617,11 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD10(R1_read &r)
     constexpr uint8_t CMD10_idx  = 10;
     constexpr uint8_t arg[4]     = { 0 };
 
-    send_CMD(r, CMD10_idx, arg);
+    int SD_ret = send_CMD(r, CMD10_idx, arg);
 
     GPIO_CS::set();
 
-    return 0;
+    return SD_ret;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -503,17 +632,17 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD16(R1 &r)
     // TODO: comments
     constexpr uint8_t CMD16_idx = 16;
     constexpr uint8_t arg[4]    = {
-        (uint8_t) (block_len >> 24),
-        (uint8_t) (block_len >> 16),
-        (uint8_t) (block_len >> 8),
-        (uint8_t) (block_len),
+        (uint8_t) (m_block_len >> 24),
+        (uint8_t) (m_block_len >> 16),
+        (uint8_t) (m_block_len >> 8),
+        (uint8_t) (m_block_len),
     };
 
-    send_CMD(r, CMD16_idx, arg);
+    int SD_ret = send_CMD(r, CMD16_idx, arg);
 
     GPIO_CS::set();
 
-    return 0;
+    return SD_ret;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -530,11 +659,11 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD17(R1_read &r, uint32_t address)
         (uint8_t) (address),
     };
 
-    send_CMD(r, CMD17_idx, arg);
+    int SD_ret = send_CMD(r, CMD17_idx, arg);
 
     GPIO_CS::set();
 
-    return 0;
+    return SD_ret;
 }
 
 
@@ -547,11 +676,11 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD55(R1 &r)
     constexpr uint8_t CMD55_idx = 55;
     constexpr uint8_t arg[]     = { 0, 0, 0, 0 };
 
-    send_CMD(r, CMD55_idx, arg);
+    int SD_ret = send_CMD(r, CMD55_idx, arg);
 
     GPIO_CS::set();
 
-    return 0;
+    return SD_ret;
 }
 
 
@@ -565,34 +694,31 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD58(R3 &r)
     constexpr uint8_t CMD58_idx = 58;
     constexpr uint8_t arg[]     = { 0, 0, 0, 0 };
 
-    send_CMD(r, CMD58_idx, arg);
+    int SD_ret = send_CMD(r, CMD58_idx, arg);
 
     GPIO_CS::set();
 
-
-    return 0;
+    return SD_ret;
 }
 
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::ACMD41(R1 &r, bool HCS)
 {
     const uint8_t HCS_byte = HCS ? (1 << 6) : 0;
-    CMD55(r);
 
-    // Any bit is error except idle bit
-    if (r.response & 0xfe) {
-        return 0;
-    }
+    int SD_ret = CMD55(r);
+    if (SD_ret < 0)
+        return SD_ret;
 
     // TODO: comments
     constexpr uint8_t  CMD41_idx  = 41;
     const uint8_t      arg[]      = { HCS_byte, 0, 0, 0 };
 
     GPIO_CS::reset();
-    send_CMD(r, CMD41_idx, arg);
+    SD_ret = send_CMD(r, CMD41_idx, arg);
     GPIO_CS::set();
 
-    return 0;
+    return SD_ret;
 }
 
 //------------------------------------------------------------------------------
@@ -602,14 +728,16 @@ int SD_SPI< SPI_dev, GPIO_CS >::software_reset()
 {
     R1 r1;
 
-    CMD0(r1);
+    int SD_ret = CMD0(r1);
+    if (SD_ret < 0)
+        return SD_ret;
 
-    if (r1.response == 0x1) {
-        ecl::cout << "Card is in IDLE state, as expected" << ecl::endl;
-        return 0;
+    if (r1.response & R1::idle_state) {
+        ecl::cout << "Card is in idle state" << ecl::endl;
+        return SD_ok;
     }
 
-    return -1;
+    return SD_err;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -617,23 +745,25 @@ int SD_SPI< SPI_dev, GPIO_CS >::check_conditions()
 {
     R7 r7;
 
-    CMD8(r7);
+    int SD_ret = CMD8(r7);
+    if (SD_ret < 0)
+        return SD_ret;
 
-    if (r7.r1.response == 0x1) {
+    if (r7.r1.response & R1::idle_state) {
         if (r7.OCR[3] != 0xAA) {
             ecl::cout << "Check pattern mismatch" << ecl::endl;
-            return -1;
+            return SD_err;
         }
 
         if (!r7.OCR[2]) {
             ecl::cout << "Voltage range not accepted" << ecl::endl;
-            return -2;
+            return SD_err;
         }
 
-        return 0;
+        return SD_ok;
     }
 
-    return -1;
+    return SD_err;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -641,23 +771,25 @@ int SD_SPI< SPI_dev, GPIO_CS >::init_process()
 {
     //TODO: comments
     R1 r1;
+    int SD_ret;
 
     r1.response = 0x1;
     uint8_t tries = 255;
 
-    while (r1.response == 0x1 && --tries) {
-        ACMD41(r1, true);
+    while ((r1.response & R1::idle_state) && --tries) {
+        SD_ret = ACMD41(r1, true);
 
-        if (r1.response & 0xfe) {
-            return -1;
+        if (SD_ret < 0) {
+            return SD_ret;
         }
     }
 
     if (!tries) {
-        return -2;
+        ecl::cout << "Card wasn't initialized within given period" << ecl::endl;
+        return SD_err;
     }
 
-    return 0;
+    return SD_ok;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -665,7 +797,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::check_OCR()
 {
     R3 r3;
     CMD58(r3);
-    int ret = 0;
+    int SD_ret = 0;
 
     // TODO: compare current profile and supported one!
     // Otherwise we can damage the card
@@ -675,10 +807,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::check_OCR()
             ecl::cout << "Card is powered-up" << ecl::endl;
             if (r3.OCR[0] & (1 << 6)) {
                 ecl::cout << "Card is High capacity" << ecl::endl;
-                ret = 1;
+                SD_ret = SD_type_HC;
             } else {
                 ecl::cout << "Card is Standard capacity" << ecl::endl;
-                ret = 2;
+                SD_ret = SD_type_SC;
             }
         }
 
@@ -699,10 +831,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::check_OCR()
             ecl::cout << "VOLTAGE: [2.7,+0.1]" << ecl::endl;
         }
 
-        return ret;
+        return SD_ret;
     }
 
-    return -1;
+    return SD_err;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -713,9 +845,9 @@ int SD_SPI< SPI_dev, GPIO_CS >::obtain_card_info()
     r1_read.data = cid;
     r1_read.size = sizeof(cid);
 
-    CMD10(r1_read);
+    int SD_ret = CMD10(r1_read);
 
-    if (r1_read.token == 0xfe) {
+    if (SD_ret == SD_ok) {
         ecl::cout << "------------------------------------" << ecl::endl;
         ecl::cout << "Manufacturer ID:       " << cid[0] << ecl::endl;
         ecl::cout << "OEM/Application ID:    " << (char) cid[1]
@@ -736,10 +868,10 @@ int SD_SPI< SPI_dev, GPIO_CS >::obtain_card_info()
 
         ecl::cout << "Date:                  " << month << '.' << year << ecl::endl;
         ecl::cout << "------------------------------------" << ecl::endl;
-        return 0;
+        return SD_ok;
     }
 
-    return -1;
+    return SD_err;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -747,14 +879,16 @@ int SD_SPI< SPI_dev, GPIO_CS >::set_block_length()
 {
     R1 r1;
 
-    CMD16(r1);
+    int SD_ret = CMD16(r1);
+    if (SD_ret < 0)
+        return SD_ret;
 
-    if (r1.response != 0) {
-        ecl::cout << "Can't get valid response of CMD16: " << r1.response << ecl::endl;
-        return -1;
+    if (r1.response & R1::idle_state) {
+        ecl::cout << "Card is in idle state during CMD16" << ecl::endl;
+        SD_ret = SD_err;
     }
 
-    return 0;
+    return SD_ret;
 }
 
 
@@ -774,16 +908,10 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::read_data(uint8_t *buf, size_t size)
     r1_read.size = 512;
     r1_read.data = fallback;
 
-    CMD17(r1_read, m_offset);
+    int SD_ret = CMD17(r1_read, m_offset);
 
-    if (r1_read.r1.response != 0) {
-        ecl::cout << "Failed to get R1: " << (int) r1_read.r1.response << ecl::endl;
-        return -1;
-    }
-
-    if (r1_read.token != 0xfe) {
-        ecl::cout << "Data retrieval fails: " << (int) r1_read.token << ecl::endl;
-        return -2;
+    if (SD_ret < 0) {
+        return SD_ret;
     }
 
     size_t to_copy = std::min(size, r1_read.size);
