@@ -46,9 +46,9 @@ static void rtos_task1(void *params)
     //lcd.flush();
 
     if (!ret) {
-        uint8_t buf[510];
+        uint8_t buf[512];
 
-        for (uint i = 0; i < 2; ++i) {
+        for (uint i = 0; i < 1; ++i) {
             if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
                 ecl::cout << "Unable to retrieve buffer" << ecl::endl;
             } else {
@@ -61,6 +61,27 @@ static void rtos_task1(void *params)
                 ecl::cout << ecl::endl;
             }
         }
+
+        sdspi.seek(510);
+        uint8_t buf2[] = {1, 2, 3, 4, 5, 6};
+        sdspi.write(buf2, sizeof(buf2));
+        sdspi.flush();
+        ecl::cout << "=======================" << ecl::endl;
+
+        sdspi.seek(510);
+
+        if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
+            ecl::cout << "Unable to retrieve buffer" << ecl::endl;
+        } else {
+            ecl::cout << "items: ";
+            for (uint16_t i = 0; i < sizeof(buf); ++i) {
+                ecl::cout << buf[i] << " ";
+                if ((i & 0xf) == 0xf)
+                    ecl::cout << ecl::endl;
+            }
+            ecl::cout << ecl::endl;
+        }
+
     }
 
     for (;;) {

@@ -27,6 +27,8 @@ public:
     ssize_t write(const uint8_t *data, size_t count);
     // -1 if error, [0, count] otherwise
     ssize_t read(uint8_t *data, size_t count);
+    // Flushes buffered data
+    int flush();
 
     // TODO: extend it with SEEK_CUR and SEEK_END
     off_t seek(off_t offset /*, SEEK_SET */);
@@ -157,7 +159,7 @@ private:
     int ACMD23(R1 &r, uint16_t block_count);
 
     // WRITE_BLOCK              - Write a block.
-    int CMD24(R1 &r, uint32_t address, uint8_t *buf, size_t size);
+    int CMD24(R1 &r, uint32_t address);
 
     // WRITE_MULTIPLE_BLOCK     - Write multiple blocks.
     int CMD25(R1 &r, uint32_t address, uint8_t *buf, size_t size);
@@ -181,8 +183,11 @@ private:
     int check_OCR();
     int obtain_card_info();
     int set_block_length();
-
     int populate_block(size_t new_block);
+    int flush_block();
+    int traverse_data(size_t count, const std::function< void(size_t data_offt,
+                                                              size_t blk_offt,
+                                                              size_t amount) >& fn);
 
     // Useful abstractions
     int receive_response(R1 &r);
@@ -201,7 +206,7 @@ private:
     bool          m_inited;    // Inited flags
     bool          m_HC;        // High Capacity flag
     int           m_opened;    // Opened times counter
-    off_t         m_offset;    // Current offset in units of bytes
+    off_t         m_offt;    // Current offset in units of bytes
     block_buffer  m_block;     // Buffer containing last read\write block
 };
 
@@ -222,7 +227,7 @@ SD_SPI< SPI_dev, GPIO_CS >::SD_SPI()
     ,m_inited{false}
     ,m_HC{false}
     ,m_opened{0}
-    ,m_offset{0}
+    ,m_offt{0}
     ,m_block{}
 {
 }
@@ -299,7 +304,17 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::write(const uint8_t *data, size_t count)
         return -1;
     }
 
-    return -1;
+    int SD_ret;
+    auto fn = [data, this](size_t data_offt, size_t blk_offt, size_t to_copy) {
+        memcpy(this->m_block.block + blk_offt, data + data_offt, to_copy);
+        this->m_block.mint = false;
+    };
+
+    SD_ret = traverse_data(count, fn);
+    if (SD_ret < 0)
+        return SD_ret;
+
+    return count;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -309,43 +324,33 @@ ssize_t SD_SPI< SPI_dev, GPIO_CS >::read(uint8_t *data, size_t count)
         return -1;
     }
 
-    size_t left = count;
     int SD_ret;
+    auto fn = [data, this](size_t data_offt, size_t blk_offt, size_t to_copy) {
+        memcpy(data + data_offt, this->m_block.block + blk_offt , to_copy);
+    };
 
-
-    // Intended to be optimized in right shift, sinse
-    // block length is constant and a power of two
-    size_t required_block = m_offset / block_len;
-    size_t offset_in_block = m_offset - required_block * block_len;
-
-    while (left) {
-        if (required_block != m_block.origin) {
-            m_spi.lock();
-            GPIO_CS::reset();
-            SD_ret = populate_block(required_block);
-            GPIO_CS::set();
-            m_spi.unlock();
-
-            if (SD_ret < 0)
-                return SD_ret;
-        }
-
-        size_t to_copy = std::min(block_len - offset_in_block, left);
-        memcpy(data, m_block.block + offset_in_block, to_copy);
-
-        // Advance to next free chunk
-        data += to_copy;
-        left -= to_copy;
-
-        // If needed, next iteration will populate buffer again
-        required_block++;
-        // Next copy will occur within a new block
-        offset_in_block = 0;
-    }
-
-    m_offset += count;
+    SD_ret = traverse_data(count, fn);
+    if (SD_ret < 0)
+        return SD_ret;
 
     return count;
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::flush()
+{
+    int ret = 0;
+
+    m_spi.lock();
+    GPIO_CS::reset();
+
+    if (flush_block() < 0)
+        ret = -1;
+
+    m_spi.unlock();
+    GPIO_CS::set();
+
+    return ret;
 }
 
 
@@ -356,7 +361,8 @@ off_t SD_SPI< SPI_dev, GPIO_CS >::seek(off_t offset)
         return -1;
     }
 
-    return -1;
+    m_offt = offset;
+    return offset;
 }
 
 
@@ -367,7 +373,7 @@ off_t SD_SPI< SPI_dev, GPIO_CS >::tell() const
         return -1;
     }
 
-    return m_offset;
+    return m_offt;
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -549,11 +555,6 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R3 &r)
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::receive_data(uint8_t *buf, size_t size)
 {
-    uint8_t  token;
-    uint16_t crc;
-    uint8_t  tries = 64;
-    int      SD_ret;
-
     // Data token that returned in case of success
     static constexpr uint8_t data_token    = 0xfe;
 
@@ -564,11 +565,21 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive_data(uint8_t *buf, size_t size)
     static constexpr uint8_t out_of_range  = 0x08;
     static constexpr uint8_t card_locked   = 0x10;
 
+    uint8_t  token;
+    uint16_t crc;
+    uint8_t  tries = 64;
+    int      SD_ret;
+
     do {
         SD_ret = SPI_receive(&token, sizeof(token));
         if (SD_ret < 0)
             return SD_ret;
     } while (token == 0xff && --tries);
+
+    if (!tries) {
+        ecl::cout << "Timeout waiting for data token" << ecl::endl;
+        return SD_err;
+    }
 
     // Data token received,
     if (token == data_token) {
@@ -599,6 +610,70 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive_data(uint8_t *buf, size_t size)
     }
 
     return SPI_receive((uint8_t *)&crc, sizeof(crc));
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::send_data(const uint8_t *buf, size_t size)
+{
+    // Data token that must be sent before data chunk
+    static constexpr uint8_t data_token    = 0xfe;
+
+    // Two bits indicating data response
+    static constexpr uint8_t mask          = 0x11;
+    // Flags that can be found in data response
+    static constexpr uint8_t accepted      = 0x05;
+    static constexpr uint8_t CRC_err       = 0x0b;
+    static constexpr uint8_t write_err     = 0x0d;
+
+    static constexpr uint8_t crc           = 0x0;
+
+    uint8_t  data_response;
+    uint8_t  tries = 32;
+    int      SD_ret;
+
+    // Token
+    if ((SD_ret = SPI_send(&data_token, sizeof(data_token))) < 0) {
+        return SD_ret;
+    }
+
+    // Data itself
+    if ((SD_ret = SPI_send(buf, size)) < 0) {
+        return SD_ret;
+    }
+
+    // Dummy CRC
+    if ((SD_ret = SPI_send(&crc, sizeof(crc))) < 0) {
+        return SD_ret;
+    }
+
+    // Wait for data response
+    do {
+        SD_ret = SPI_receive(&data_response, sizeof(data_response));
+        if (SD_ret < 0)
+            return SD_ret;
+    } while (((data_response & mask) != 0x1) && --tries);
+
+    // No error occur, only 4 lower bits matters
+    if ((data_response & 0x0f) == accepted) {
+        // Wait till card is busy
+        do {
+            SD_ret = SPI_receive(&data_response, sizeof(data_response));
+            if (SD_ret < 0)
+                return SD_ret;
+        } while (data_response == 0x0);
+
+        return SD_ok;
+    }
+
+    ecl::cout << "Error in data response " << data_response << ecl::endl;
+    if (data_response & CRC_err) {
+        ecl::cout << "CRC error occurs" << ecl::endl;
+    }
+    if (data_response & write_err) {
+        ecl::cout << "Write error" << ecl::endl;
+    }
+
+    return SD_err;
 }
 
 //------------------------------------------------------------------------------
@@ -661,6 +736,18 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD17(R1 &r, uint32_t address)
     return send_CMD(r, CMD17_idx, arg);
 }
 
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::CMD24(R1 &r, uint32_t address)
+{
+    constexpr uint8_t CMD24_idx = 24;
+    const argument arg = {
+        (uint8_t) (address >> 24),
+        (uint8_t) (address >> 16),
+        (uint8_t) (address >> 8),
+        (uint8_t) (address),
+    };
+    return send_CMD(r, CMD24_idx, arg);
+}
 
 template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::CMD55(R1 &r)
@@ -740,7 +827,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::open_card()
         return SD_ret;
     }
 
-    if ((SD_ret = populate_block(m_offset)) < 0) {
+    if ((SD_ret = populate_block(m_offt)) < 0) {
         ecl::cout << "Cannot populate initial block" << ecl::endl;
     }
 
@@ -918,14 +1005,11 @@ int SD_SPI< SPI_dev, GPIO_CS >::set_block_length()
 
 
 template< class SPI_dev, class GPIO_CS >
-int SD_SPI<SPI_dev, GPIO_CS>::populate_block(size_t new_block)
+int SD_SPI< SPI_dev, GPIO_CS >::populate_block(size_t new_block)
 {
-    // TODO: add support for mint buffer!
-    if (!m_block.mint)
-        return SD_err;
-    int SD_ret;
     R1 r1;
-    off_t address = m_HC ? new_block * block_len : new_block;
+    off_t address = m_HC ? new_block : new_block * block_len;
+    int SD_ret = flush_block();
 
     if ((SD_ret = CMD17(r1, address)) < 0) {
         return SD_ret;
@@ -935,10 +1019,79 @@ int SD_SPI<SPI_dev, GPIO_CS>::populate_block(size_t new_block)
         return SD_ret;
     }
 
-    m_block.mint = true;
     m_block.origin = new_block;
+    return SD_ret;
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::flush_block()
+{
+    int SD_ret;
+    R1 r1;
+
+    if (m_block.mint) {
+        return SD_ok;
+    }
+
+    off_t address = m_HC ? m_block.origin : m_block.origin * block_len;
+
+    if ((SD_ret = CMD24(r1, address)) < 0) {
+        return SD_ret;
+    }
+
+    if ((SD_ret = send_data(m_block.block, block_len)) < 0) {
+        return SD_ret;
+    }
+
+    m_block.mint = true;
+    return SD_ret;
+}
+
+template< class SPI_dev, class GPIO_CS >
+int SD_SPI< SPI_dev, GPIO_CS >::traverse_data(
+        size_t count,
+        const std::function< void (size_t, size_t, size_t) > &fn
+        )
+{
+    size_t left = count;
+    int SD_ret;
+
+    // Intended to be optimized in right shift, sinse
+    // block length is constant and a power of two
+    size_t blk_num = m_offt / block_len;
+    size_t blk_offt = m_offt - blk_num  * block_len;
+    size_t data_offt = 0;
+
+    while (left) {
+        if (blk_num  != m_block.origin) {
+            m_spi.lock();
+            GPIO_CS::reset();
+            SD_ret = populate_block(blk_num);
+            GPIO_CS::set();
+            m_spi.unlock();
+
+            if (SD_ret < 0)
+                return SD_ret;
+        }
+
+        size_t to_copy = std::min(block_len - blk_offt , left);
+        // Copy data
+        fn(data_offt, blk_offt, to_copy);
+
+        // Advance to next free chunk
+        data_offt += to_copy;
+        left -= to_copy;
+
+        // If needed, next iteration will populate buffer again
+        blk_num ++;
+        // Next copy will occur within a new block
+        blk_offt  = 0;
+    }
+
+    m_offt += count;
 
     return SD_ret;
 }
+
 
 #endif // DEV_SDSPI_H
