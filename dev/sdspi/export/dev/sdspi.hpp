@@ -3,9 +3,11 @@
 
 #include <algorithm>
 #include <array>
+#include <string.h>
 
 #include <target/usart.hpp>
 #include <ecl/iostream.hpp>
+#include <ecl/endian.hpp>
 
 // TODO: mention about 8 additional clocks before each command!!!
 template< class SPI_dev, class GPIO_CS >
@@ -49,12 +51,6 @@ public:
     };
 
 private:
-    // Block length is given without respect to the card type.
-    // If card is Standart Capacity then block length will be set to 512,
-    // ( see set_block_length() ).
-    // If card is High Capacity then block length is fixed to 512 by design.
-    static constexpr size_t block_len = 512;
-
     // Return types.
     // Enums ommited, since it should be replaced
     // with system-wide error flags
@@ -101,7 +97,7 @@ private:
         R3()      :r1{}, OCR{0} {}
 
         R1         r1;
-        uint8_t    OCR[4];
+        uint32_t   OCR;
     };
 
     // Are the same
@@ -111,6 +107,12 @@ private:
     struct block_buffer
     {
         block_buffer() :block{0}, origin{0}, mint{true} { }
+
+        // Block length is given without respect to the card type.
+        // If card is Standart Capacity then block length will be set to 512,
+        // ( see set_block_length() ).
+        // If card is High Capacity then block length is fixed to 512 by design.
+        static constexpr size_t block_len = 512;
 
         uint8_t block[block_len];     // The block itself
         size_t  origin;               // The offset from which block was obtained
@@ -211,15 +213,8 @@ private:
 };
 
 
-template< class SPI_dev, class GPIO_CS >
-constexpr size_t SD_SPI< SPI_dev, GPIO_CS >::block_len;
-
-// TODO: Get rid of this hack
-extern "C" {
-void *memcpy(void *dst, const void *src, size_t cnt);
-}
-
-
+//template< class SPI_dev, class GPIO_CS >
+//constexpr size_t SD_SPI< SPI_dev, GPIO_CS >::block_len;
 
 template< class SPI_dev, class GPIO_CS >
 SD_SPI< SPI_dev, GPIO_CS >::SD_SPI()
@@ -379,7 +374,7 @@ off_t SD_SPI< SPI_dev, GPIO_CS >::tell() const
 template< class SPI_dev, class GPIO_CS >
 constexpr size_t SD_SPI< SPI_dev, GPIO_CS >::get_block_length()
 {
-    return block_len;
+    return block_buffer::block_len;
 }
 
 // Private methods -------------------------------------------------------------
@@ -549,7 +544,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::receive_response(R3 &r)
     if (SD_ret < 0)
         return SD_ret;
 
-    return SPI_receive((uint8_t *)r.OCR, sizeof(r.OCR));
+    return SPI_receive((uint8_t *)&r.OCR, sizeof(r.OCR));
 }
 
 template< class SPI_dev, class GPIO_CS >
@@ -713,6 +708,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::CMD16(R1 &r)
 {
     // TODO: comments
     constexpr uint8_t  CMD16_idx = 16;
+    constexpr uint32_t block_len = block_buffer::block_len;
     constexpr argument arg = {
         (uint8_t) (block_len >> 24),
         (uint8_t) (block_len >> 16),
@@ -860,13 +856,15 @@ int SD_SPI< SPI_dev, GPIO_CS >::check_conditions()
     if (SD_ret < 0)
         return SD_ret;
 
+    uint32_t OCR = ecl::BE(r7.OCR);
+
     if (r7.r1.response & R1::idle_state) {
-        if (r7.OCR[3] != 0xAA) {
+        if ((OCR & 0xff) != 0xaa) {
             ecl::cout << "Check pattern mismatch" << ecl::endl;
             return SD_err;
         }
 
-        if (!r7.OCR[2]) {
+        if (!(OCR & 0x100)) {
             ecl::cout << "Voltage range not accepted" << ecl::endl;
             return SD_err;
         }
@@ -910,13 +908,15 @@ int SD_SPI< SPI_dev, GPIO_CS >::check_OCR()
     CMD58(r3);
     int SD_ret = 0;
 
+    uint32_t OCR = ecl::BE(r3.OCR);
+
     // TODO: compare current profile and supported one!
     // Otherwise we can damage the card
     if (!r3.r1.response) {
         // Card sends data (as well as OCR) in BE format
-        if (r3.OCR[0] & (1 << 7)) {
+        if (OCR & (1 << 31)) {
             ecl::cout << "Card is powered-up" << ecl::endl;
-            if (r3.OCR[0] & (1 << 6)) {
+            if (OCR & (1 << 30)) {
                 ecl::cout << "Card is High capacity" << ecl::endl;
                 SD_ret = SD_type_HC;
             } else {
@@ -926,20 +926,15 @@ int SD_SPI< SPI_dev, GPIO_CS >::check_OCR()
         }
 
         // Whole byte 2 of OCR contains voltage profiles
-        for (uint8_t bit = 0; bit < 8; ++bit) {
-            if (r3.OCR[2] & (1 << bit)) {
-                uint8_t V = bit + 27;
+        for (uint8_t bit = 15; bit < 24; ++bit) {
+            if (OCR & (1 << bit)) {
+                uint8_t V = 27 + bit - 15;
                 uint intgr = V / 10;
                 uint fract = V - intgr * 10;
                 ecl::cout << "VOLTAGE: ["
                           << intgr << '.' << fract
                           << "; +0.1]" << ecl::endl;
             }
-        }
-
-        // Last bit in byte 3 of OCR contains one voltage profile
-        if (r3.OCR[3] & (1 << 8)) {
-            ecl::cout << "VOLTAGE: [2.7,+0.1]" << ecl::endl;
         }
 
         return SD_ret;
@@ -1008,14 +1003,14 @@ template< class SPI_dev, class GPIO_CS >
 int SD_SPI< SPI_dev, GPIO_CS >::populate_block(size_t new_block)
 {
     R1 r1;
-    off_t address = m_HC ? new_block : new_block * block_len;
+    off_t address = m_HC ? new_block : new_block * block_buffer::block_len;
     int SD_ret = flush_block();
 
     if ((SD_ret = CMD17(r1, address)) < 0) {
         return SD_ret;
     }
 
-    if ((SD_ret = receive_data(m_block.block, block_len)) < 0) {
+    if ((SD_ret = receive_data(m_block.block, block_buffer::block_len)) < 0) {
         return SD_ret;
     }
 
@@ -1033,13 +1028,13 @@ int SD_SPI< SPI_dev, GPIO_CS >::flush_block()
         return SD_ok;
     }
 
-    off_t address = m_HC ? m_block.origin : m_block.origin * block_len;
+    off_t address = m_HC ? m_block.origin : m_block.origin * block_buffer::block_len;
 
     if ((SD_ret = CMD24(r1, address)) < 0) {
         return SD_ret;
     }
 
-    if ((SD_ret = send_data(m_block.block, block_len)) < 0) {
+    if ((SD_ret = send_data(m_block.block, block_buffer::block_len)) < 0) {
         return SD_ret;
     }
 
@@ -1058,8 +1053,8 @@ int SD_SPI< SPI_dev, GPIO_CS >::traverse_data(
 
     // Intended to be optimized in right shift, sinse
     // block length is constant and a power of two
-    size_t blk_num = m_offt / block_len;
-    size_t blk_offt = m_offt - blk_num  * block_len;
+    size_t blk_num = m_offt / block_buffer::block_len;
+    size_t blk_offt = m_offt - blk_num  * block_buffer::block_len;
     size_t data_offt = 0;
 
     while (left) {
@@ -1074,7 +1069,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::traverse_data(
                 return SD_ret;
         }
 
-        size_t to_copy = std::min(block_len - blk_offt , left);
+        size_t to_copy = std::min(block_buffer::block_len - blk_offt , left);
         // Copy data
         fn(data_offt, blk_offt, to_copy);
 

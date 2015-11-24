@@ -40,10 +40,10 @@ static void rtos_task1(void *params)
     sdspi.init();
     ret = sdspi.open();
 
-    //lcd.init();
-    //lcd.open();
-    //lcd.clear();
-    //lcd.flush();
+    lcd.init();
+    lcd.open();
+    lcd.clear();
+    lcd.flush();
 
     if (!ret) {
         uint8_t buf[512];
