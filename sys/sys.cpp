@@ -9,16 +9,6 @@
 extern "C" __attribute__((used))
 void vTaskSwitchContext( void );
 
-
-// TODO: decide if to keep this here or not
-extern "C" int  __aeabi_atexit(void* object, void (*destroyer)(void*), void* dso_handle)
-{
-	(void) object;
-	(void) destroyer;
-	(void) dso_handle;
-	return 0;
-}
-
 // TODO: decide if to keep this here or not
 
 extern "C" void vAssertCalled(const char *file, int line)
@@ -26,32 +16,6 @@ extern "C" void vAssertCalled(const char *file, int line)
     (void) file;
     (void) line;
     for(;;);
-}
-
-extern "C" __attribute__((used))
-void *memset(void *s, int c, size_t n)
-{
-    uint8_t *dest = (uint8_t *) s;
-
-    while (n--) {
-        *dest++ = c;
-    }
-
-    return s;
-}
-
-extern "C" __attribute__((used))
-// TODO: HACK - move it somewhere
-void *memcpy(void *dst, const void *src, size_t cnt)
-{
-    uint8_t         *d = (uint8_t *)        dst;
-    const uint8_t   *s = (const uint8_t *)  src;
-
-    while (cnt--) {
-        *d++ = *s++;
-    }
-
-    return dst;
 }
 
 namespace ecl {
