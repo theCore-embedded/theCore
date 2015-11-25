@@ -3,6 +3,8 @@
 #include <target/gpio.hpp>
 #include <dev/pcd8544.hpp>
 #include <dev/sdspi.hpp>
+#include <ecl/filehandle.hpp>
+#include <ecl/filesystem.hpp>
 
 #include <functional>
 #include <utility>
@@ -39,6 +41,9 @@ static void rtos_task1(void *params)
 
     sdspi.init();
     ret = sdspi.open();
+
+	ecl::filehandle&& fl = ecl::filesystem< int >::open("asdsad");
+	(void) fl;
 
     lcd.init();
     lcd.open();

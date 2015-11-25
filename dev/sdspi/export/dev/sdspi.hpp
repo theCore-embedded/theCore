@@ -1049,7 +1049,7 @@ int SD_SPI< SPI_dev, GPIO_CS >::traverse_data(
         )
 {
     size_t left = count;
-    int SD_ret;
+	int SD_ret = SD_ok;
 
     // Intended to be optimized in right shift, sinse
     // block length is constant and a power of two
