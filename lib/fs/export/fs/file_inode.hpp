@@ -2,6 +2,7 @@
 #define LIB_FS_FILE_INODE_HPP_
 
 #include <cstddef>
+#include <cstdint>
 #include <sys/types.h>
 
 namespace fs

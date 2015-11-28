@@ -11,9 +11,31 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
-#include <ecl/iostream.hpp>
+#include <ecl/assert.hpp>
+#include <ecl/slab.hpp>
+#include <ecl/memory.hpp>
 
 #include "sprite.hpp"
+
+// allocator test object
+struct dummy
+{
+    dummy() :obj{0xbe} { ecl::cout << "dummy ctor" << ecl::endl; }
+    ~dummy() { ecl::cout << "dummy dtor" << ecl::endl; }
+    uint8_t obj;
+};
+
+uint8_t slab_buf[25];
+ecl::slab< dummy > slab(slab_buf, sizeof(slab_buf));
+ecl::slab_allocator< dummy > allocator(&slab);
+
+// Allocator test itself
+void test_alloc(size_t sz)
+{
+    dummy *ptr = allocator.allocate(sz);
+    ecl::cout << "Sz: " << sz << " ptr: " << (int) ptr << ecl::endl;
+    assert(ptr >= (dummy*)slab_buf && ptr < (dummy*)(slab_buf + sizeof(slab_buf)));
+}
 
 static void rtos_task0(void *params)
 {
@@ -26,6 +48,7 @@ static void rtos_task0(void *params)
     }
 }
 
+
 static void rtos_task1(void *params)
 {
     (void) params;
@@ -36,8 +59,8 @@ static void rtos_task1(void *params)
     ecl::cout << "\n\nHello, embedded world!" << ecl::endl;
     // TODO: order of initialization must be preserved
     // as soon as default values for GPIO will be introduced
-    SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
-    PCD8544< SPI_LCD_driver > lcd;
+    sd_spi< SPI_LCD_driver,  SDSPI_CS > sdspi;
+    pcd8544< SPI_LCD_driver > lcd;
 
     sdspi.init();
     ret = sdspi.open();
@@ -88,6 +111,23 @@ static void rtos_task1(void *params)
         }
 
     }
+
+    ecl::cout << "Starting..." << ecl::endl;
+    ecl::cout << "Sizeof cache: " << sizeof(dummy) << ecl::endl;
+    ecl::cout << "Sizeof slab: " << sizeof(slab_buf) << ecl::endl;
+    ecl::cout << "Alignof cache: " << alignof(dummy) << ecl::endl;
+    ecl::cout << "Slab start " << (int)slab_buf << ecl::endl;
+    ecl::cout << "Slab end " << (int)(slab_buf + sizeof(slab_buf)) << ecl::endl;
+
+    test_alloc(5);
+    test_alloc(1);
+    test_alloc(3);
+    test_alloc(1);
+    test_alloc(1);
+    test_alloc(10);
+    test_alloc(1);
+    // This will trigger assert, since there is no more memory in buffer
+    //test_alloc(1);
 
     for (;;) {
         ecl::cin >> c;
