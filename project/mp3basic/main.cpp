@@ -11,12 +11,15 @@
 #include <task.h>
 #include <ecl/assert.hpp>
 #include <ecl/slab.hpp>
+#include <ecl/memory.hpp>
 
 #include "sprite.hpp"
 
 // allocator test object
 struct dummy
 {
+    dummy() :obj{0xbe} { ecl::cout << "dummy ctor" << ecl::endl; }
+    ~dummy() { ecl::cout << "dummy dtor" << ecl::endl; }
     uint8_t obj;
 };
 
