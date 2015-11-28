@@ -9,7 +9,7 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
-#include <ecl/iostream.hpp>
+#include <ecl/assert.hpp>
 
 #include "sprite.hpp"
 
@@ -83,6 +83,9 @@ static void rtos_task1(void *params)
         }
 
     }
+
+
+    assert(1 < 0);
 
     for (;;) {
         ecl::cin >> c;
