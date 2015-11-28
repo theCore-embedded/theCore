@@ -20,16 +20,16 @@ struct dummy
     uint8_t obj;
 };
 
-uint8_t slab[25];
-ecl::slab_allocator< dummy > allocator(slab, sizeof(slab));
+uint8_t slab_buf[25];
+ecl::slab< dummy > slab(slab_buf, sizeof(slab_buf));
+ecl::slab_allocator< dummy > allocator(&slab);
 
 // Allocator test itself
 void test_alloc(size_t sz)
 {
-    assert(1);
     dummy *ptr = allocator.allocate(sz);
-    ecl::cout << "Ptr: " << (int) ptr << ecl::endl;
-    //assert(ptr >= (dummy*)slab && ptr < (dummy*)(slab + sizeof(slab)));
+    ecl::cout << "Sz: " << sz << " ptr: " << (int) ptr << ecl::endl;
+    assert(ptr >= (dummy*)slab_buf && ptr < (dummy*)(slab_buf + sizeof(slab_buf)));
 }
 
 static void rtos_task0(void *params)
@@ -106,9 +106,10 @@ static void rtos_task1(void *params)
 
     ecl::cout << "Starting..." << ecl::endl;
     ecl::cout << "Sizeof cache: " << sizeof(dummy) << ecl::endl;
+    ecl::cout << "Sizeof slab: " << sizeof(slab_buf) << ecl::endl;
     ecl::cout << "Alignof cache: " << alignof(dummy) << ecl::endl;
-    ecl::cout << "Slab start " << (int)slab << ecl::endl;
-    ecl::cout << "Slab end " << (int)(slab + sizeof(slab)) << ecl::endl;
+    ecl::cout << "Slab start " << (int)slab_buf << ecl::endl;
+    ecl::cout << "Slab end " << (int)(slab_buf + sizeof(slab_buf)) << ecl::endl;
 
     test_alloc(5);
     test_alloc(1);
@@ -117,6 +118,8 @@ static void rtos_task1(void *params)
     test_alloc(1);
     test_alloc(10);
     test_alloc(1);
+    // This will trigger assert, since there is no more memory in buffer
+    //test_alloc(1);
 
     for (;;) {
         ecl::cin >> c;
