@@ -10,8 +10,27 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <ecl/assert.hpp>
+#include <ecl/slab.hpp>
 
 #include "sprite.hpp"
+
+// allocator test object
+struct dummy
+{
+    uint8_t obj;
+};
+
+uint8_t slab[25];
+ecl::slab_allocator< dummy > allocator(slab, sizeof(slab));
+
+// Allocator test itself
+void test_alloc(size_t sz)
+{
+    assert(1);
+    dummy *ptr = allocator.allocate(sz);
+    ecl::cout << "Ptr: " << (int) ptr << ecl::endl;
+    //assert(ptr >= (dummy*)slab && ptr < (dummy*)(slab + sizeof(slab)));
+}
 
 static void rtos_task0(void *params)
 {
@@ -24,6 +43,7 @@ static void rtos_task0(void *params)
     }
 }
 
+
 static void rtos_task1(void *params)
 {
     (void) params;
@@ -34,8 +54,8 @@ static void rtos_task1(void *params)
     ecl::cout << "\n\nHello, embedded world!" << ecl::endl;
     // TODO: order of initialization must be preserved
     // as soon as default values for GPIO will be introduced
-    SD_SPI< SPI_LCD_driver,  SDSPI_CS > sdspi;
-    PCD8544< SPI_LCD_driver > lcd;
+    sd_spi< SPI_LCD_driver,  SDSPI_CS > sdspi;
+    pcd8544< SPI_LCD_driver > lcd;
 
     sdspi.init();
     ret = sdspi.open();
@@ -84,8 +104,19 @@ static void rtos_task1(void *params)
 
     }
 
+    ecl::cout << "Starting..." << ecl::endl;
+    ecl::cout << "Sizeof cache: " << sizeof(dummy) << ecl::endl;
+    ecl::cout << "Alignof cache: " << alignof(dummy) << ecl::endl;
+    ecl::cout << "Slab start " << (int)slab << ecl::endl;
+    ecl::cout << "Slab end " << (int)(slab + sizeof(slab)) << ecl::endl;
 
-    assert(1 < 0);
+    test_alloc(5);
+    test_alloc(1);
+    test_alloc(3);
+    test_alloc(1);
+    test_alloc(1);
+    test_alloc(10);
+    test_alloc(1);
 
     for (;;) {
         ecl::cin >> c;

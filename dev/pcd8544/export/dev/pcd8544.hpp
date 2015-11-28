@@ -22,11 +22,11 @@ private:
 // TODO: add GPIO type here, instead of using special names for SPI CS
 // and LCD D/C
 template< class SPI_dev >
-class PCD8544
+class pcd8544
 {
 public:
-    PCD8544();
-    ~PCD8544();
+    pcd8544();
+    ~pcd8544();
 
     // Lazy initialization, -1 if error. 0 otherwise
     int init();
@@ -175,7 +175,7 @@ private:
 
 
 template< class SPI_dev >
-PCD8544< SPI_dev >::PCD8544()
+pcd8544< SPI_dev >::pcd8544()
     :m_device{}
     ,m_status{0}
     ,m_DMA_status{0}
@@ -189,13 +189,13 @@ PCD8544< SPI_dev >::PCD8544()
 }
 
 template< class SPI_dev >
-PCD8544< SPI_dev >::~PCD8544()
+pcd8544< SPI_dev >::~pcd8544()
 {
     // TODO
 }
 
 template< class SPI_dev >
-int PCD8544< SPI_dev >::init()
+int pcd8544< SPI_dev >::init()
 {
     int rc = m_device.init();
     if (rc < 0)
@@ -214,7 +214,7 @@ int PCD8544< SPI_dev >::init()
 
 
 template< class SPI_dev >
-int PCD8544< SPI_dev >::open()
+int pcd8544< SPI_dev >::open()
 {
     int rc = m_device.open();
     // found somewhere in net
@@ -242,7 +242,7 @@ int PCD8544< SPI_dev >::open()
 
 
 template< class SPI_dev >
-int PCD8544< SPI_dev >::close()
+int pcd8544< SPI_dev >::close()
 {
     // TODO
     return m_device.close();
@@ -250,7 +250,7 @@ int PCD8544< SPI_dev >::close()
 
 
 template< class SPI_dev >
-int PCD8544< SPI_dev >::set_point(const point& coord)
+int pcd8544< SPI_dev >::set_point(const point& coord)
 {
     if ((m_device.get_status() & SPI_dev::flags::BSY)) {
         // Device not ready, buffer under processing
@@ -279,7 +279,7 @@ int PCD8544< SPI_dev >::set_point(const point& coord)
 }
 
 template< class SPI_dev >
-int PCD8544< SPI_dev >::clear_point(const point& coord)
+int pcd8544< SPI_dev >::clear_point(const point& coord)
 {
     if ((m_device.get_status() & SPI_dev::flags::BSY)) {
         // Device not ready, buffer under processing
@@ -307,7 +307,7 @@ int PCD8544< SPI_dev >::clear_point(const point& coord)
 }
 
 template< class SPI_dev >
-int PCD8544< SPI_dev >::flush()
+int pcd8544< SPI_dev >::flush()
 {
     auto status = m_device.get_status();
 
@@ -320,7 +320,7 @@ int PCD8544< SPI_dev >::flush()
 }
 
 template< class SPI_dev >
-int PCD8544< SPI_dev >::clear()
+int pcd8544< SPI_dev >::clear()
 {
     if (m_device.get_status() & SPI_dev::flags::BSY) {
         // Device not ready
@@ -343,7 +343,7 @@ int PCD8544< SPI_dev >::clear()
 template< class SPI_dev >
 template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::IRQ, int >::type >
-int PCD8544< SPI_dev >::internal_mode_init()
+int pcd8544< SPI_dev >::internal_mode_init()
 {
     // Catch all IRQs
 
@@ -361,7 +361,7 @@ int PCD8544< SPI_dev >::internal_mode_init()
 template< class SPI_dev >
 template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
-int PCD8544< SPI_dev >::internal_mode_init()
+int pcd8544< SPI_dev >::internal_mode_init()
 {
     return 0;
 }
@@ -369,7 +369,7 @@ int PCD8544< SPI_dev >::internal_mode_init()
 template< class SPI_dev >
 template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::IRQ, int >::type >
-int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
+int pcd8544< SPI_dev >::send(uint8_t byte, DC_state op)
 {
     m_device.lock();
 
@@ -399,7 +399,7 @@ int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
 template< class SPI_dev >
 template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
-int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
+int pcd8544< SPI_dev >::send(uint8_t byte, DC_state op)
 {
     m_device.lock();
 
@@ -441,7 +441,7 @@ int PCD8544< SPI_dev >::send(uint8_t byte, DC_state op)
 template< class SPI_dev >
 template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::IRQ, int >::type >
-int PCD8544< SPI_dev >::internal_flush()
+int pcd8544< SPI_dev >::internal_flush()
 {
     // TODO: improve error check
     // TODO: improve remainder calculation. What if buffer
@@ -465,7 +465,7 @@ int PCD8544< SPI_dev >::internal_flush()
 template< class SPI_dev >
 template< SPI_com_type mode,
           typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
-int PCD8544< SPI_dev >::internal_flush()
+int pcd8544< SPI_dev >::internal_flush()
 {
     m_device.lock();
 
@@ -502,7 +502,7 @@ int PCD8544< SPI_dev >::internal_flush()
 }
 
 template< class SPI_dev >
-void PCD8544< SPI_dev >::IRQ_handler(SPI_f_t status)
+void pcd8544< SPI_dev >::IRQ_handler(SPI_f_t status)
 {
     // Do nothing special for now
     m_status = status;
@@ -510,7 +510,7 @@ void PCD8544< SPI_dev >::IRQ_handler(SPI_f_t status)
 }
 
 template< class SPI_dev >
-void PCD8544< SPI_dev >::DMA_handler(DMA_f_t status)
+void pcd8544< SPI_dev >::DMA_handler(DMA_f_t status)
 {
     // Do nothing special for now
     m_DMA_status |= status;
