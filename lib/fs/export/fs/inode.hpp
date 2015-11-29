@@ -1,13 +1,12 @@
 #ifndef LIB_FS_INODE_HPP_
 #define LIB_FS_INODE_HPP_
 
-#include "file_inode.hpp"
-#include "dir_inode.hpp"
+#include <ecl/memory.hpp>
 
 namespace fs
 {
 
-class inode : public file_inode, public dir_inode
+class inode
 {
 public:
 	enum class type
@@ -19,9 +18,7 @@ public:
 	inode();
 	virtual ~inode();
 	virtual inode::type type() const = 0;
-
-	// Notify inode about deletition
-	virtual void release() = 0;
+    virtual int open() = 0;
 };
 
 

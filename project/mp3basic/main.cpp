@@ -12,7 +12,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <ecl/assert.hpp>
-#include <ecl/slab.hpp>
+#include <ecl/pool.hpp>
 #include <ecl/memory.hpp>
 
 #include "sprite.hpp"
@@ -22,19 +22,19 @@ struct dummy
 {
     dummy() :obj{0xbe} { ecl::cout << "dummy ctor" << ecl::endl; }
     ~dummy() { ecl::cout << "dummy dtor" << ecl::endl; }
-    uint8_t obj;
+    uint8_t obj[8];
 };
 
-uint8_t slab_buf[25];
-ecl::slab< dummy > slab(slab_buf, sizeof(slab_buf));
-ecl::slab_allocator< dummy > allocator(&slab);
+static ecl::pool< 16, 16 > pool;
+static ecl::pool_allocator< dummy > allocator(&pool);
 
 // Allocator test itself
 void test_alloc(size_t sz)
 {
     dummy *ptr = allocator.allocate(sz);
     ecl::cout << "Sz: " << sz << " ptr: " << (int) ptr << ecl::endl;
-    assert(ptr >= (dummy*)slab_buf && ptr < (dummy*)(slab_buf + sizeof(slab_buf)));
+    assert(ptr != nullptr);
+    assert(!((uintptr_t)ptr % 16)); // Check aligment
 }
 
 static void rtos_task0(void *params)
@@ -113,11 +113,8 @@ static void rtos_task1(void *params)
     }
 
     ecl::cout << "Starting..." << ecl::endl;
-    ecl::cout << "Sizeof cache: " << sizeof(dummy) << ecl::endl;
-    ecl::cout << "Sizeof slab: " << sizeof(slab_buf) << ecl::endl;
-    ecl::cout << "Alignof cache: " << alignof(dummy) << ecl::endl;
-    ecl::cout << "Slab start " << (int)slab_buf << ecl::endl;
-    ecl::cout << "Slab end " << (int)(slab_buf + sizeof(slab_buf)) << ecl::endl;
+    ecl::cout << "Sizeof object: " << sizeof(dummy) << ecl::endl;
+    ecl::cout << "Alignof object: " << alignof(dummy) << ecl::endl;
 
     test_alloc(5);
     test_alloc(1);
@@ -126,8 +123,6 @@ static void rtos_task1(void *params)
     test_alloc(1);
     test_alloc(10);
     test_alloc(1);
-    // This will trigger assert, since there is no more memory in buffer
-    //test_alloc(1);
 
     for (;;) {
         ecl::cin >> c;

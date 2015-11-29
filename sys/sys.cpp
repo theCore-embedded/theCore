@@ -58,6 +58,12 @@ extern "C" void early_main(void)
     IRQ_manager::init();
 }
 
+extern "C" void __cxa_pure_virtual()
+{
+    // Abort
+    for(;;);
+}
+
 namespace std
 {
 void __throw_bad_function_call()
