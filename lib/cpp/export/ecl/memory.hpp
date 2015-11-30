@@ -1,6 +1,8 @@
 #ifndef ECL_MEMORY_HPP_
 #define ECL_MEMORY_HPP_
 
+#include <cstddef>
+
 namespace ecl
 {
 
@@ -31,21 +33,35 @@ public:
     T* get() const;
 
 private:
-    struct aux
+    // The base helper class
+    class aux
     {
+    public:
+        aux()
+            :m_cnt{0} { }
+
         // Gets object
         virtual T* get() = 0;
-        // Destroys payload and aux itself. _Must_ be called to destroy
+        // Increments/decrements/gets the reference counter
+        size_t inc() { return ++m_cnt; }
+        size_t dec() { return --m_cnt; }
+        size_t ref() { return m_cnt;   }
+
+        // Destroys payload and aux itself.
+        // _Must_ be called to destroy whole object
         virtual void destroy() = 0;
+    private:
+        size_t m_cnt;
     };
 
-    // Helper object
+    // Type-erased helper class
     template< class Alloc, class... Args >
     class aux_alloc : public aux
     {
     public:
         aux_alloc(const Alloc &a, Args... args)
-            :m_object{args...}
+            :aux{}
+            ,m_object{args...}
             ,m_alloc{a}
         { }
 
@@ -70,26 +86,15 @@ private:
         Alloc    m_alloc;
     };
 
-    // Pointers are stored in the single-linked circular list
-    shared_ptr *m_next;
     // Helper object
     aux        *m_aux;
-
-    // List traverse helpers
-    shared_ptr* get_next() const;
-    shared_ptr* get_prev() const;
-
-    void set_next(shared_ptr *ptr);
-    void set_prev(shared_ptr *ptr);
 };
-
 
 //------------------------------------------------------------------------------
 
 template< typename T >
 shared_ptr< T >::shared_ptr()
-    :m_next{this}
-    ,m_aux{nullptr}
+    :m_aux{nullptr}
 {
 
 }
@@ -97,33 +102,29 @@ shared_ptr< T >::shared_ptr()
 template< typename T >
 shared_ptr< T >::~shared_ptr()
 {
-    if (unique() && m_aux) {
-        m_aux->destroy();
-    } else {
-        // Unlink me
-        //ecl::cout << "unlink in desc" << ecl::endl;
-        shared_ptr *prev = get_prev();
-        shared_ptr *next = get_next();
-
-        prev->set_next(next);
+    if (m_aux) {
+        if (unique()) {
+            m_aux->destroy();
+        } else {
+            m_aux->dec();
+        }
     }
 }
 
 template< typename T >
 shared_ptr< T >::shared_ptr(shared_ptr &other)
-    :m_next{&other}
-    ,m_aux{other.m_aux}
+    :m_aux{other.m_aux}
 {
-    shared_ptr *prev = other.get_prev();
-    prev->set_next(this);
+
+    if (m_aux)
+        m_aux->inc();
+    // Else do nothing. Copy constructing from empty shared pointer is allowed.
 }
 
 template< typename T >
 shared_ptr< T >::shared_ptr(shared_ptr &&other)
-    :m_next{other.m_next}
-    ,m_aux{other.m_aux}
+    :m_aux{other.m_aux}
 {
-    other.m_next = &other;
     other.m_aux = nullptr;
 }
 
@@ -138,55 +139,25 @@ shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr &other)
                 m_aux = nullptr;
             }
         } else {
-            // Unlink me
-            shared_ptr *prev = get_prev();
-            shared_ptr *next = get_next();
-
-            prev->set_next(next);
+            // If it is not single shrared pointer,
+            // then auxilary object is guaranteed to exist.
+            m_aux->dec();
         }
 
-        // Link me to the new company
-        other.set_prev(this);
-        this->set_next(&other);
         m_aux = other.m_aux;
+
+        // Empty shared pointer assigment can be allowed, too.
+        if (m_aux)
+            m_aux->inc();
     }
 
     return *this;
 }
 
 template< typename T >
-shared_ptr< T >* shared_ptr< T >::get_next() const
-{
-    return this->m_next;
-}
-
-template< typename T >
-shared_ptr< T >* shared_ptr< T >::get_prev() const
-{
-    shared_ptr *cur = this->m_next;
-    while (cur->m_next != this) {
-        cur = cur->m_next;
-    }
-
-    return cur;
-}
-
-template< typename T >
-void shared_ptr< T >::set_next(shared_ptr *ptr)
-{
-    this->m_next = ptr;
-}
-
-template< typename T >
-void shared_ptr< T >::set_prev(shared_ptr *ptr)
-{
-    this->get_prev()->set_next(ptr);
-}
-
-template< typename T >
 bool shared_ptr< T >::unique() const
 {
-    return get_next() == this;
+    return m_aux ? m_aux->ref() == 0 : 0;
 }
 
 template< typename T >
