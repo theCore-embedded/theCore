@@ -126,8 +126,12 @@ static void rtos_task1(void *params)
     test_alloc(1);
 #endif
 
-    auto ptr = ecl::allocate_shared< dummy, decltype(allocator) >(allocator);
-
+    {
+        auto ptr = ecl::allocate_shared< dummy, decltype(allocator) >(allocator);
+        ecl::cout << "Ptr: " << (int) ptr.get() << ecl::endl;
+        ecl::shared_ptr< dummy > other_ptr = ptr;
+        ecl::cout << "Ptr: " << (int) other_ptr.get() << ecl::endl;
+    }
 
     for (;;) {
         ecl::cin >> c;

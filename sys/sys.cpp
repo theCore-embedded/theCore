@@ -18,6 +18,20 @@ extern "C" void vAssertCalled(const char *file, int line)
     for(;;);
 }
 
+// TODO: move it somewhere
+void operator delete(void *)
+{
+    // Abort - delete is forbidden
+    for (;;);
+}
+
+// TODO: move it somewhere
+void operator delete(void *, unsigned int)
+{
+    // Abort - delete is forbidden
+    for (;;);
+}
+
 namespace ecl {
 // TODO: avoid this somehow.
 // See https://isocpp.org/wiki/faq/ctors#static-init-order
@@ -29,7 +43,6 @@ ecl::istream< console_driver >  cin{&cin_device};
 ecl::ostream< console_driver >  cout{&cout_device};
 ecl::ostream< console_driver >  cerr{&cout_device};
 }
-
 
 extern "C" void early_main(void)
 {

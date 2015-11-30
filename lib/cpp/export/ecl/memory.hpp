@@ -33,12 +33,13 @@ public:
 private:
     struct aux
     {
-        // Destroys payload
-        virtual void destroy() = 0;
+        // Gets object
         virtual T* get() = 0;
-        virtual ~aux() { }
+        // Destroys payload and aux itself. _Must_ be called to destroy
+        virtual void destroy() = 0;
     };
 
+    // Helper object
     template< class Alloc, class... Args >
     class aux_alloc : public aux
     {
@@ -48,16 +49,20 @@ private:
             ,m_alloc{a}
         { }
 
-        void destroy() override
+        virtual void destroy() override
         {
             m_object.~T();
-            m_alloc.deallocate(this, 1);
+            auto allocator = m_alloc.template rebind< aux_alloc >();
+            allocator.deallocate(this, 1);
         }
 
         T* get() override
         {
             return &m_object;
         }
+
+        // Cannot be deleted by calling dtor
+        ~aux_alloc() = delete;
 
     private:
         // An object itself
@@ -94,13 +99,20 @@ shared_ptr< T >::~shared_ptr()
 {
     if (unique() && m_aux) {
         m_aux->destroy();
+    } else {
+        // Unlink me
+        //ecl::cout << "unlink in desc" << ecl::endl;
+        shared_ptr *prev = get_prev();
+        shared_ptr *next = get_next();
+
+        prev->set_next(next);
     }
 }
 
 template< typename T >
 shared_ptr< T >::shared_ptr(shared_ptr &other)
-    :m_next(&other)
-    ,m_aux(other.m_aux)
+    :m_next{&other}
+    ,m_aux{other.m_aux}
 {
     shared_ptr *prev = other.get_prev();
     prev->set_next(this);
@@ -108,8 +120,8 @@ shared_ptr< T >::shared_ptr(shared_ptr &other)
 
 template< typename T >
 shared_ptr< T >::shared_ptr(shared_ptr &&other)
-    :m_next(other.m_next)
-    ,m_aux(other.m_aux)
+    :m_next{other.m_next}
+    ,m_aux{other.m_aux}
 {
     other.m_next = &other;
     other.m_aux = nullptr;
@@ -122,7 +134,7 @@ shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr &other)
         if (unique()) {
             // Release the resource
             if (m_aux) {
-                m_aux.destroy();
+                m_aux->destroy();
                 m_aux = nullptr;
             }
         } else {
@@ -185,10 +197,10 @@ T* shared_ptr< T >::get() const
 
 //------------------------------------------------------------------------------
 
-template< typename T, template< typename > Alloc, class... Args >
-shared_ptr< T > allocate_shared(const Alloc< T > &alloc, Args... args)
+template< typename T, class Alloc, class... Args >
+shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
 {
-    using Aux = typename shared_ptr< T >:: template aux_alloc< Alloc<  >, Args... >;
+    using Aux = typename shared_ptr< T >:: template aux_alloc< Alloc, Args... >;
 
     // Rebind an allocator to use with the auxilarity object
     auto allocator = alloc.template rebind< Aux >();
@@ -196,11 +208,11 @@ shared_ptr< T > allocate_shared(const Alloc< T > &alloc, Args... args)
     assert(ptr); // TODO: add here valid check
 
     // Init auxilary object
-    new (ptr) Aux(allocator, args...);
+    new (ptr) Aux{alloc, args...};
 
     // Construct a pointer
     shared_ptr< T > shared;
-    shared.m_aux = reinterpret_cast< Aux* >(ptr);
+    shared.m_aux = ptr;
 
     return shared;
 }
