@@ -116,6 +116,7 @@ static void rtos_task1(void *params)
     ecl::cout << "Sizeof object: " << sizeof(dummy) << ecl::endl;
     ecl::cout << "Alignof object: " << alignof(dummy) << ecl::endl;
 
+#if 0
     test_alloc(5);
     test_alloc(1);
     test_alloc(3);
@@ -123,6 +124,10 @@ static void rtos_task1(void *params)
     test_alloc(1);
     test_alloc(10);
     test_alloc(1);
+#endif
+
+    auto ptr = ecl::allocate_shared< dummy, decltype(allocator) >(allocator);
+
 
     for (;;) {
         ecl::cin >> c;

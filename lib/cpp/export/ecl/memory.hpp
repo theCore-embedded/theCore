@@ -4,91 +4,126 @@
 namespace ecl
 {
 
-template< typename T, class Alloc >
+template< typename T >
+class shared_ptr;
+
+template< typename T, class Alloc, class... Args >
+shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args);
+
+template< typename T >
 class shared_ptr
 {
+    template< typename U, class Alloc, class... Args >
+    friend shared_ptr< U > allocate_shared(const Alloc& alloc, Args... args);
+
 public:
-       //shared_ptr();
-        shared_ptr(T *ptr,  Alloc d);
-        ~shared_ptr();
+    shared_ptr();
+    ~shared_ptr();
 
-        shared_ptr(shared_ptr &other);
-        shared_ptr(shared_ptr &&other);
-        shared_ptr& operator=(shared_ptr &other);
+    shared_ptr(shared_ptr &other);
+    shared_ptr(shared_ptr &&other);
+    shared_ptr& operator=(shared_ptr &other);
 
-        // Returns true if this pointer holds the last remaining node
-        bool unique() const;
+    // Returns true if this pointer holds the last remaining node
+    bool unique() const;
 
-        // Returs a value itself
-        T* get() const;
+    // Returs a value itself
+    T* get() const;
 
 private:
-        // Pointers are stored in the single-linked circular list
-        shared_ptr *m_next;
+    struct aux
+    {
+        // Destroys payload
+        virtual void destroy() = 0;
+        virtual T* get() = 0;
+        virtual ~aux() { }
+    };
+
+    template< class Alloc, class... Args >
+    class aux_alloc : public aux
+    {
+    public:
+        aux_alloc(const Alloc &a, Args... args)
+            :m_object{args...}
+            ,m_alloc{a}
+        { }
+
+        void destroy() override
+        {
+            m_object.~T();
+            m_alloc.deallocate(this, 1);
+        }
+
+        T* get() override
+        {
+            return &m_object;
+        }
+
+    private:
         // An object itself
-        T          *m_object;
-        // Allocator fot he object
-        Alloc      m_alloc;
+        T        m_object;
+        Alloc    m_alloc;
+    };
 
-        // List traverse helpers
-        shared_ptr* get_next() const;
-        shared_ptr* get_prev() const;
+    // Pointers are stored in the single-linked circular list
+    shared_ptr *m_next;
+    // Helper object
+    aux        *m_aux;
 
-        void set_next(shared_ptr *ptr);
-        void set_prev(shared_ptr *ptr);
+    // List traverse helpers
+    shared_ptr* get_next() const;
+    shared_ptr* get_prev() const;
+
+    void set_next(shared_ptr *ptr);
+    void set_prev(shared_ptr *ptr);
 };
 
 
 //------------------------------------------------------------------------------
 
-template< typename T, class Alloc >
-shared_ptr< T, Alloc >::shared_ptr(T *ptr, Alloc alloc)
+template< typename T >
+shared_ptr< T >::shared_ptr()
     :m_next{this}
-    ,m_object{ptr}
-    ,m_alloc{alloc}
+    ,m_aux{nullptr}
 {
 
 }
 
-template< typename T, class Alloc >
-shared_ptr< T, Alloc >::~shared_ptr()
+template< typename T >
+shared_ptr< T >::~shared_ptr()
 {
-    if (unique() && m_object) {
-        m_object->~T();
-        m_alloc.deallocate(m_object, 1);
+    if (unique() && m_aux) {
+        m_aux->destroy();
     }
 }
 
-template< typename T, class Alloc >
-shared_ptr< T, Alloc >::shared_ptr(shared_ptr &other)
+template< typename T >
+shared_ptr< T >::shared_ptr(shared_ptr &other)
     :m_next(&other)
-    ,m_object(other.m_object)
-    ,m_alloc(other.m_alloc)
+    ,m_aux(other.m_aux)
 {
     shared_ptr *prev = other.get_prev();
     prev->set_next(this);
 }
 
-template< typename T, class Alloc >
-shared_ptr< T, Alloc >::shared_ptr(shared_ptr &&other)
+template< typename T >
+shared_ptr< T >::shared_ptr(shared_ptr &&other)
     :m_next(other.m_next)
-    ,m_object(other.m_object)
-    ,m_alloc(other.m_alloc)
+    ,m_aux(other.m_aux)
 {
     other.m_next = &other;
-    other.m_object = nullptr;
+    other.m_aux = nullptr;
 }
 
-template< typename T, class Alloc >
-shared_ptr< T, Alloc >& shared_ptr< T, Alloc >::operator=(shared_ptr &other)
+template< typename T >
+shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr &other)
 {
     if (&other != this) {
         if (unique()) {
             // Release the resource
-            if (m_object) {
-                m_object->~T();
-                m_alloc.deallocate(m_object, 1);
-                m_object = nullptr;
+            if (m_aux) {
+                m_aux.destroy();
+                m_aux = nullptr;
             }
         } else {
             // Unlink me
@@ -101,21 +136,20 @@ shared_ptr< T, Alloc >& shared_ptr< T, Alloc >::operator=(shared_ptr &other)
         // Link me to the new company
         other.set_prev(this);
         this->set_next(&other);
-        m_object = other.m_object;
-        m_alloc  = other.m_alloc;
+        m_aux = other.m_aux;
     }
 
     return *this;
 }
 
-template< typename T, class Alloc >
-shared_ptr< T, Alloc >* shared_ptr< T, Alloc >::get_next() const
+template< typename T >
+shared_ptr< T >* shared_ptr< T >::get_next() const
 {
     return this->m_next;
 }
 
-template< typename T, class Alloc >
-shared_ptr< T, Alloc >* shared_ptr< T, Alloc >::get_prev() const
+template< typename T >
+shared_ptr< T >* shared_ptr< T >::get_prev() const
 {
     shared_ptr *cur = this->m_next;
     while (cur->m_next != this) {
@@ -125,41 +159,50 @@ shared_ptr< T, Alloc >* shared_ptr< T, Alloc >::get_prev() const
     return cur;
 }
 
-template< typename T, class Alloc >
-void shared_ptr< T, Alloc >::set_next(shared_ptr *ptr)
+template< typename T >
+void shared_ptr< T >::set_next(shared_ptr *ptr)
 {
     this->m_next = ptr;
 }
 
-template< typename T, class Alloc >
-void shared_ptr< T, Alloc >::set_prev(shared_ptr *ptr)
+template< typename T >
+void shared_ptr< T >::set_prev(shared_ptr *ptr)
 {
     this->get_prev()->set_next(ptr);
 }
 
-template< typename T, class Alloc >
-bool shared_ptr< T, Alloc >::unique() const
+template< typename T >
+bool shared_ptr< T >::unique() const
 {
     return get_next() == this;
 }
 
-template< typename T, class Alloc >
-T* shared_ptr< T, Alloc >::get() const
+template< typename T >
+T* shared_ptr< T >::get() const
 {
-    return m_object;
+    return m_aux ? m_aux->get() : nullptr;
 }
 
 //------------------------------------------------------------------------------
 
-template< typename T, template< typename > class Alloc, class... Args >
-shared_ptr< T, Alloc< T > > allocate_shared(const Alloc< T >& alloc, Args... args)
+template< typename T, template< typename > Alloc, class... Args >
+shared_ptr< T > allocate_shared(const Alloc< T > &alloc, Args... args)
 {
-    auto allocator = alloc;
-    T *ptr = allocator.allocate(1);
-    assert(ptr); // TODO: add here valid check
-    new (ptr) T{args ...};
+    using Aux = typename shared_ptr< T >:: template aux_alloc< Alloc<  >, Args... >;
 
-    return shared_ptr< T, Alloc< T > >{ptr, alloc};
+    // Rebind an allocator to use with the auxilarity object
+    auto allocator = alloc.template rebind< Aux >();
+    auto *ptr = allocator.allocate(1);
+    assert(ptr); // TODO: add here valid check
+
+    // Init auxilary object
+    new (ptr) Aux(allocator, args...);
+
+    // Construct a pointer
+    shared_ptr< T > shared;
+    shared.m_aux = reinterpret_cast< Aux* >(ptr);
+
+    return shared;
 }
 
 
