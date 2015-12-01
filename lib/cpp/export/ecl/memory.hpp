@@ -6,11 +6,33 @@
 namespace ecl
 {
 
+// The base helper class
+class aux
+{
+public:
+    aux()
+        :m_cnt{0} { }
+
+    // Increments/decrements/gets the reference counter
+    size_t inc() { return ++m_cnt; }
+    size_t dec() { return --m_cnt; }
+    size_t ref() { return m_cnt;   }
+
+    // Destroys payload and aux itself.
+    // _Must_ be called to destroy whole object
+    virtual void destroy() = 0;
+private:
+    size_t m_cnt;
+};
+
 template< typename T >
 class shared_ptr
 {
     template< typename U, class Alloc, class... Args >
     friend shared_ptr< U > allocate_shared(const Alloc& alloc, Args... args);
+
+    template< typename U >
+    friend class shared_ptr;
 
 public:
     shared_ptr();
@@ -19,6 +41,16 @@ public:
     shared_ptr(shared_ptr &other);
     shared_ptr(shared_ptr &&other);
     shared_ptr& operator=(shared_ptr &other);
+
+    // Constructs/assigns pointer from dependent type.
+    // T and U must be in relation, such that
+    // U is subclass of T.
+    template< typename U >
+    shared_ptr(shared_ptr< U > &other);
+
+    template< typename U >
+    shared_ptr& operator=(shared_ptr< U > &other);
+
 
     // Returns true if this pointer holds the last remaining node
     bool unique() const;
@@ -33,27 +65,6 @@ public:
     const T* operator ->() const;
 
 private:
-    // The base helper class
-    class aux
-    {
-    public:
-        aux()
-            :m_cnt{0} { }
-
-        // Gets object
-        virtual T* get() = 0;
-        // Increments/decrements/gets the reference counter
-        size_t inc() { return ++m_cnt; }
-        size_t dec() { return --m_cnt; }
-        size_t ref() { return m_cnt;   }
-
-        // Destroys payload and aux itself.
-        // _Must_ be called to destroy whole object
-        virtual void destroy() = 0;
-    private:
-        size_t m_cnt;
-    };
-
     // Type-erased helper class
     template< class Alloc, class... Args >
     class aux_alloc : public aux
@@ -72,11 +83,6 @@ private:
             allocator.deallocate(this, 1);
         }
 
-        T* get() override
-        {
-            return &m_object;
-        }
-
         // Cannot be deleted by calling dtor
         ~aux_alloc() = delete;
 
@@ -87,7 +93,9 @@ private:
     };
 
     // Helper object
-    aux        *m_aux;
+    aux  *m_aux;
+    // Object itself
+    T    *m_obj;
 };
 
 //------------------------------------------------------------------------------
@@ -114,6 +122,7 @@ shared_ptr< T >::~shared_ptr()
 template< typename T >
 shared_ptr< T >::shared_ptr(shared_ptr &other)
     :m_aux{other.m_aux}
+    ,m_obj{other.m_obj}
 {
 
     if (m_aux)
@@ -124,8 +133,10 @@ shared_ptr< T >::shared_ptr(shared_ptr &other)
 template< typename T >
 shared_ptr< T >::shared_ptr(shared_ptr &&other)
     :m_aux{other.m_aux}
+    ,m_obj{other.m_obj}
 {
     other.m_aux = nullptr;
+    other.m_obj = nullptr;
 }
 
 template< typename T >
@@ -137,6 +148,7 @@ shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr &other)
             if (m_aux) {
                 m_aux->destroy();
                 m_aux = nullptr;
+                m_obj = nullptr;
             }
         } else {
             // If it is not single shrared pointer,
@@ -145,11 +157,52 @@ shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr &other)
         }
 
         m_aux = other.m_aux;
+        m_obj = other.m_obj;
 
         // Empty shared pointer assigment can be allowed, too.
         if (m_aux)
             m_aux->inc();
     }
+
+    return *this;
+}
+
+template< typename T >
+template< typename U >
+shared_ptr< T >::shared_ptr(shared_ptr< U > &other)
+    :m_aux{other.m_aux}
+    ,m_obj{other.m_obj}
+{
+    (void) other;
+
+    if (m_aux)
+        m_aux->inc();
+    // Else do nothing. Copy constructing from empty shared pointer is allowed.
+}
+
+template< typename T >
+template< typename U >
+shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr< U > &other)
+{
+    if (unique()) {
+        // Release the resource
+        if (m_aux) {
+            m_aux->destroy();
+            m_aux = nullptr;
+            m_obj = nullptr;
+        }
+    } else {
+        // If it is not single shrared pointer,
+        // then auxilary object is guaranteed to exist.
+        m_aux->dec();
+    }
+
+    m_aux = other.m_aux;
+    m_obj = other.m_obj;
+
+    // Empty shared pointer assigment can be allowed, too.
+    if (m_aux)
+        m_aux->inc();
 
     return *this;
 }
@@ -163,7 +216,7 @@ bool shared_ptr< T >::unique() const
 template< typename T >
 T* shared_ptr< T >::get() const
 {
-    return m_aux ? m_aux->get() : nullptr;
+    return m_obj;
 }
 
 template< typename T >

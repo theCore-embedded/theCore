@@ -23,6 +23,13 @@ struct dummy
     dummy() :obj{0xbe} { ecl::cout << "dummy ctor" << ecl::endl; }
     ~dummy() { ecl::cout << "dummy dtor" << ecl::endl; }
     uint8_t obj[8];
+
+    virtual void who_am_i() { ecl::cout << "Im dummy\n"; }
+};
+
+struct dummy2 : dummy
+{
+    virtual void who_am_i() { ecl::cout << "Im dummy2\n"; }
 };
 
 static ecl::pool< 16, 16 > pool;
@@ -127,12 +134,19 @@ static void rtos_task1(void *params)
 #endif
 
     {
+#if 1
+        auto ptr1 = ecl::allocate_shared< dummy2, decltype(allocator) >(allocator);
+        ecl::shared_ptr< dummy > another_ptr = ptr1;
+        auto ptr2 = ecl::allocate_shared< dummy2, decltype(allocator) >(allocator);
+        another_ptr = ptr2;
+#endif
         auto ptr = ecl::allocate_shared< dummy, decltype(allocator) >(allocator);
         ecl::cout << "Ptr: " << (int) ptr.get() << ecl::endl;
         ecl::shared_ptr< dummy > other_ptr = ptr;
         ecl::cout << "Ptr: " << (int) other_ptr.get() << ecl::endl;
         ecl::cout << "val: " << other_ptr->obj[0] << ecl::endl;
         ecl::cout << "val2: " << (*other_ptr).obj[0] << ecl::endl;
+        ptr = ptr2;
     }
 
     for (;;) {
