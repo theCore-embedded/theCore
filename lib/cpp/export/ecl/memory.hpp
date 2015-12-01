@@ -2,6 +2,7 @@
 #define ECL_MEMORY_HPP_
 
 #include <cstddef>
+#include <ecl/assert.hpp>
 
 namespace ecl
 {
@@ -33,6 +34,9 @@ class shared_ptr
 
     template< typename U >
     friend class shared_ptr;
+
+    template< typename U, class Alloc >
+    friend struct allocation_size_info;
 
 public:
     shared_ptr();
@@ -103,6 +107,7 @@ private:
 template< typename T >
 shared_ptr< T >::shared_ptr()
     :m_aux{nullptr}
+    ,m_obj{nullptr}
 {
 
 }
@@ -272,6 +277,16 @@ shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
 
     return shared;
 }
+
+// Provides estimation of how much memory will be allocated
+// by shared pointer
+template< typename T, class Alloc >
+struct shared_allocation_size
+{
+    using aux_type = typename shared_ptr< T >::template aux_alloc< T, Alloc >;
+    static constexpr size_t value = sizeof(aux_type);
+};
+
 
 
 }

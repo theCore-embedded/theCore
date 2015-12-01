@@ -5,3 +5,4 @@ add_custom_target(fat_dummy_target SOURCES "${ALL_HEADERS}")
 
 add_library(fat STATIC inode.cpp)
 target_include_directories(fat PUBLIC export)
+target_link_libraries(fat fs)

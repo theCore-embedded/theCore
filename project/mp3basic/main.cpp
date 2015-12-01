@@ -13,7 +13,7 @@
 #include <task.h>
 #include <ecl/assert.hpp>
 #include <ecl/pool.hpp>
-#include <ecl/memory.hpp>
+#include <fs/inode.hpp>
 
 #include "sprite.hpp"
 

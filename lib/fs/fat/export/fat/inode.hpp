@@ -3,34 +3,23 @@
 
 #include <sys/types.h>
 #include <cstdint>
+#include <fs/inode.hpp>
 
 namespace fat
 {
 
-class file_inode
+class file_inode : fs::inode
 {
-	template< class T >
-    friend class FAT;
-
 public:
+    using type = typename fs::inode::type;
+
     file_inode();
-    ~file_inode();
-
-    int open();
-    int close();
-
-	ssize_t read(uint8_t *buf, size_t size);
-	ssize_t write(const uint8_t *buf, size_t size);
-
-	off_t tell() const;
-	int seek(off_t pos);
-
+    virtual ~file_inode() override;
+    virtual type get_type() const override;
+    virtual fs::file_ptr open() override;
 
 private:
-	// Must be constructed by filesystem class
-	// Not intended to be copied or copy-constructed
-    file_inode(const file_inode &) = delete;
-    file_inode& operator=(const file_inode &) = delete;
+    // TBD
 };
 
 }
