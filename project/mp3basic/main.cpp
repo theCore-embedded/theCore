@@ -131,6 +131,8 @@ static void rtos_task1(void *params)
         ecl::cout << "Ptr: " << (int) ptr.get() << ecl::endl;
         ecl::shared_ptr< dummy > other_ptr = ptr;
         ecl::cout << "Ptr: " << (int) other_ptr.get() << ecl::endl;
+        ecl::cout << "val: " << other_ptr->obj[0] << ecl::endl;
+        ecl::cout << "val2: " << (*other_ptr).obj[0] << ecl::endl;
     }
 
     for (;;) {

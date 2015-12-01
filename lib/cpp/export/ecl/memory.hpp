@@ -7,12 +7,6 @@ namespace ecl
 {
 
 template< typename T >
-class shared_ptr;
-
-template< typename T, class Alloc, class... Args >
-shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args);
-
-template< typename T >
 class shared_ptr
 {
     template< typename U, class Alloc, class... Args >
@@ -31,6 +25,12 @@ public:
 
     // Returs a value itself
     T* get() const;
+
+    // Common smart pointer overloads
+    T& operator *();
+    const T& operator*() const;
+    T* operator ->();
+    const T* operator ->() const;
 
 private:
     // The base helper class
@@ -164,6 +164,38 @@ template< typename T >
 T* shared_ptr< T >::get() const
 {
     return m_aux ? m_aux->get() : nullptr;
+}
+
+template< typename T >
+T& shared_ptr< T >::operator *()
+{
+    auto obj = get();
+    assert(obj);
+    return *obj;
+}
+
+template< typename T >
+const T& shared_ptr< T >::operator *() const
+{
+    auto obj = get();
+    assert(obj);
+    return *obj;
+}
+
+template< typename T >
+T* shared_ptr< T >::operator ->()
+{
+    auto obj = get();
+    assert(obj);
+    return obj;
+}
+
+template< typename T >
+const T* shared_ptr< T >::operator ->() const
+{
+    auto obj = get();
+    assert(obj);
+    return obj;
 }
 
 //------------------------------------------------------------------------------
