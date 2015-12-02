@@ -19,7 +19,7 @@ dir_inode::type dir_inode::get_type() const
 
 fs::dir_ptr dir_inode::open_dir()
 {
-    return fs::dir_ptr{};
+    return nullptr;
 }
 
 ssize_t dir_inode::size() const

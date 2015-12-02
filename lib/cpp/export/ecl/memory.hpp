@@ -42,6 +42,7 @@ public:
     shared_ptr();
     ~shared_ptr();
 
+    shared_ptr(std::nullptr_t nullp);
 	shared_ptr(const shared_ptr &other);
     shared_ptr(shared_ptr &&other);
 	shared_ptr& operator=(const shared_ptr &other);
@@ -51,10 +52,8 @@ public:
     // U is subclass of T.
     template< typename U >
     shared_ptr(shared_ptr< U > &other);
-
     template< typename U >
     shared_ptr& operator=(shared_ptr< U > &other);
-
 
     // Returns true if this pointer holds the last remaining node
     bool unique() const;
@@ -122,6 +121,14 @@ shared_ptr< T >::~shared_ptr()
             m_aux->dec();
         }
     }
+}
+
+template< typename T >
+shared_ptr< T >::shared_ptr(std::nullptr_t nullp)
+    :m_aux{nullp}
+    ,m_obj{nullp}
+{
+
 }
 
 template< typename T >
@@ -287,7 +294,35 @@ struct shared_allocation_size
     static constexpr size_t value = sizeof(aux_type);
 };
 
+//------------------------------------------------------------------------------
 
+// Comparsion routines
+
+template< typename T >
+bool operator ==(const shared_ptr< T > &shr, std::nullptr_t nullp)
+{
+    return shr.get() == nullp;
+}
+
+template< typename T >
+bool operator !=(const shared_ptr< T > &shr, std::nullptr_t nullp)
+{
+    return shr.get() == nullp;
+}
+
+template< typename T >
+bool operator ==(const shared_ptr< T > &shr1, const shared_ptr< T > &shr2)
+{
+    return shr1.get() == shr2.get();
+}
+
+template< typename T >
+bool operator !=(const shared_ptr< T > &shr1, const shared_ptr< T > &shr2)
+{
+    return shr1.get() != shr2.get();
+}
+
+//------------------------------------------------------------------------------
 
 }
 
