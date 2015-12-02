@@ -1,5 +1,5 @@
-#ifndef LIB_ECL_FS_FILEHANDLE_HPP_
-#define LIB_ECL_FS_FILEHANDLE_HPP_
+#ifndef FATFS_INODE_HPP_
+#define FATFS_INODE_HPP_
 
 #include <sys/types.h>
 #include <cstdint>
@@ -39,4 +39,4 @@ public:
 };
 
 }
-#endif // LIB_ECL_FS_FILEHANDLE_HPP_
+#endif // FATFS_INODE_HPP_

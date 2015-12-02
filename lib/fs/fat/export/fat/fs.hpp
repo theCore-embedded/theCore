@@ -1,5 +1,5 @@
-#ifndef LIB_ECL_FS_FILESYSTEM_HPP_
-#define LIB_ECL_FS_FILESYSTEM_HPP_
+#ifndef FATFS_FILESYSTEM_HPP_
+#define FATFS_FILESYSTEM_HPP_
 
 #include "inode.hpp"
 #include <fs/inode.hpp>
@@ -29,5 +29,5 @@ private:
 
 }
 
-#endif // LIB_ECL_FS_FILESYSTEM_HPP_
+#endif // FATFS_FILESYSTEM_HPP_
 
