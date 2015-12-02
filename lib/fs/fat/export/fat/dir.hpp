@@ -10,7 +10,7 @@ namespace fat
 class dir : public fs::dir_descriptor
 {
 public:
-    dir();
+    dir(const fs::inode_ptr &node);
     ~dir();
 
     // Next entity in a dir

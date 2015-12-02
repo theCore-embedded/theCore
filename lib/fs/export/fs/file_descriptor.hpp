@@ -4,17 +4,16 @@
 #include <cstddef>
 #include <cstdint>
 #include <sys/types.h>
-#include <ecl/memory.hpp>
+
+#include "types.hpp"
 
 namespace fs
 {
 
-class inode;
-
 class file_descriptor
 {
 public:
-	file_descriptor(const ecl::shared_ptr< inode > &node);
+    file_descriptor(const inode_ptr &node);
 	virtual ~file_descriptor();
 
     virtual ssize_t read(uint8_t *buf, size_t size) = 0;
@@ -24,12 +23,9 @@ public:
 
 protected:
 	// Associated inode
-	ecl::shared_ptr< inode > m_inode;
+    inode_ptr m_inode;
 
 };
-
-// TODO: move it somewhere
-using file_ptr = ecl::shared_ptr< file_descriptor >;
 
 }
 

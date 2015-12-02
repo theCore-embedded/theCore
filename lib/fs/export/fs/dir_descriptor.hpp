@@ -3,27 +3,29 @@
 
 
 #include <ecl/memory.hpp>
+#include "types.hpp"
 
 namespace fs
 {
 
-class inode;
-
 class dir_descriptor
 {
 public:
+    dir_descriptor(const inode_ptr &node);
+    virtual ~dir_descriptor();
+
+
 	// Next entity in a dir
 	// nullptr returned if no more items
-	virtual ecl::shared_ptr< inode > next() = 0;
+    virtual inode_ptr next() = 0;
 	// Rewinds to the start of the dir
 	// -1 if error, 0 otherwise
 	virtual int rewind() = 0;
 
+protected:
+    // Associated inode
+    inode_ptr m_inode;
 };
-
-// TODO: move it somewhere
-using dir_ptr = ecl::shared_ptr< dir_descriptor >;
-
 
 }
 #endif

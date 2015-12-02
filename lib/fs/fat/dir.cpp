@@ -2,7 +2,8 @@
 
 using namespace fat;
 
-dir::dir()
+dir::dir(const fs::inode_ptr &node)
+    :fs::dir_descriptor{node}
 {
 }
 

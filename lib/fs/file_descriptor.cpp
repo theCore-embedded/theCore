@@ -3,7 +3,7 @@
 
 using namespace fs;
 
-file_descriptor::file_descriptor(const ecl::shared_ptr< inode > &node)
+file_descriptor::file_descriptor(const inode_ptr &node)
 	:m_inode(node)
 {
 }
