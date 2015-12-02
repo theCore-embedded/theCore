@@ -3,7 +3,7 @@
 #include <target/gpio.hpp>
 #include <dev/pcd8544.hpp>
 #include <dev/sdspi.hpp>
-#include <fat/inode.hpp>
+#include <fat/file_inode.hpp>
 #include <fat/fs.hpp>
 
 #include <functional>

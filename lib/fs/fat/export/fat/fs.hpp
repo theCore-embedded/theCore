@@ -1,9 +1,8 @@
 #ifndef FATFS_FILESYSTEM_HPP_
 #define FATFS_FILESYSTEM_HPP_
 
-#include "inode.hpp"
-#include <fs/inode.hpp>
 #include <ecl/pool.hpp>
+#include <fs/inode.hpp>
 
 namespace fat
 {

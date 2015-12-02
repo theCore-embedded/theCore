@@ -1,4 +1,6 @@
 #include <fat/fs.hpp>
+#include <fat/file_inode.hpp>
+#include <fat/dir_inode.hpp>
 
 using namespace fat;
 
