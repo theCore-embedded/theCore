@@ -9,10 +9,13 @@
 namespace fs
 {
 
+class inode;
+
 class file_descriptor
 {
 public:
-    virtual ~file_descriptor();
+	file_descriptor(const ecl::shared_ptr< inode > &node);
+	virtual ~file_descriptor();
 
     virtual ssize_t read(uint8_t *buf, size_t size) = 0;
     virtual ssize_t write(const uint8_t *buf, size_t size) = 0;
@@ -20,10 +23,12 @@ public:
     virtual off_t tell() = 0;
 
 protected:
-    // Can be constructed only by descedance
-    file_descriptor();
+	// Associated inode
+	ecl::shared_ptr< inode > m_inode;
+
 };
 
+// TODO: move it somewhere
 using file_ptr = ecl::shared_ptr< file_descriptor >;
 
 }

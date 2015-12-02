@@ -1,6 +1,9 @@
 #ifndef ECL_ISTREAM_HPP
 #define ECL_ISTREAM_HPP
 
+#include <cstddef>
+#include <cstdint>
+
 namespace ecl {
 template< class IO_device >
 class istream

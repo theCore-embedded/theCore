@@ -42,9 +42,9 @@ public:
     shared_ptr();
     ~shared_ptr();
 
-    shared_ptr(shared_ptr &other);
+	shared_ptr(const shared_ptr &other);
     shared_ptr(shared_ptr &&other);
-    shared_ptr& operator=(shared_ptr &other);
+	shared_ptr& operator=(const shared_ptr &other);
 
     // Constructs/assigns pointer from dependent type.
     // T and U must be in relation, such that
@@ -125,7 +125,7 @@ shared_ptr< T >::~shared_ptr()
 }
 
 template< typename T >
-shared_ptr< T >::shared_ptr(shared_ptr &other)
+shared_ptr< T >::shared_ptr(const shared_ptr &other)
     :m_aux{other.m_aux}
     ,m_obj{other.m_obj}
 {
@@ -145,7 +145,7 @@ shared_ptr< T >::shared_ptr(shared_ptr &&other)
 }
 
 template< typename T >
-shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr &other)
+shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
 {
     if (&other != this) {
         if (unique()) {

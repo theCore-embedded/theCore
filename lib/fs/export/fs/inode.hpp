@@ -2,6 +2,7 @@
 #define LIB_FS_INODE_HPP_
 
 #include "file_descriptor.hpp"
+#include "dir_descriptor.hpp"
 
 namespace fs
 {
@@ -18,20 +19,23 @@ public:
 	inode();
 	virtual ~inode();
     virtual inode::type get_type() const = 0;
-    virtual file_ptr open() = 0;
+	// Returns the file descriptor, if this inode represents file.
+	// Meaningless if used on the dir inode.
+	virtual file_ptr open();
+	// If this inode is directory, then it returns the descriptor associated
+	// with this directory. Meaningless if used on file inode.
+	virtual dir_ptr open_dir();
+	// Returns size of a file if a type is file
+	// or number of entries if the type is dir
+	virtual ssize_t size() const = 0;
+	// Gets a name of an entity, returns bytes written
+	virtual ssize_t get_name(const char *buf, size_t buf_sz) const = 0;
 
     /*
      TODO:
      declare move(), copy(), create() and delete() operations
-     */
+	 */
 
-    // Operations with a default implementation
-
-    // Gets a name of an entity
-    virtual int get_name(const char *buf, size_t buf_sz);
-    // Returns size of a file if a type is file
-    // or number of entries if the type is dir
-    virtual size_t size();
     // Returns inode associated with an specific entity of a directory.
     // Meaningless for the file inode.
     // !!!TODO: move it to the dir descriptor!!!!
@@ -39,6 +43,7 @@ public:
 
 };
 
+// TODO: move it somewhere
 using inode_ptr = ecl::shared_ptr< inode >;
 
 

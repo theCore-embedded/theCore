@@ -13,26 +13,17 @@ class petite // TODO: rename it to 'petite_fat'
 {
 public:
     petite();
+    ~petite();
     // Mounts a system and returns the root inode
     fs::inode_ptr mount();
 
 private:
-    // Determine size of allocations
-    using inode_allocator = ecl::pool_allocator< file_inode >;
-    static constexpr size_t inode_blk_sz
-    = ecl::shared_allocation_size< file_inode, inode_allocator >::value;
+    static constexpr size_t get_alloc_blk_size();
 
-//    TODO
-//    using fd_allocator = ecl::pool_allocator< file_descriptor >;
-//    static constexpr size_t fd_blk_sz
-//    = ecl::shared_allocation_size< file_descriptor, fd_allocator >::value;
-
-    // Pool to store inodes
-    ecl::pool< inode_blk_sz, 256 > m_alloc;
-    // Pool to store file descriptors
-    // TODO
-
-    inode_allocator ialloc;
+    // Memory pool where inodes and descriptors will reside
+    ecl::pool< get_alloc_blk_size(), 256 >          m_pool;
+    // Will be rebound each time allocation will occur
+    ecl::pool_allocator< uint8_t >                  m_alloc;
 };
 
 
