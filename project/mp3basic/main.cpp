@@ -14,6 +14,7 @@
 #include <ecl/assert.hpp>
 #include <ecl/pool.hpp>
 #include <fs/inode.hpp>
+#include <tuple>
 
 #include "sprite.hpp"
 
@@ -122,6 +123,8 @@ static void rtos_task1(void *params)
     ecl::cout << "Starting..." << ecl::endl;
     ecl::cout << "Sizeof object: " << sizeof(dummy) << ecl::endl;
     ecl::cout << "Alignof object: " << alignof(dummy) << ecl::endl;
+
+    std::tuple< int, char, dummy > typs{ 10, 20, dummy{} };
 
 #if 0
     test_alloc(5);

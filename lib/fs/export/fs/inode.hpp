@@ -28,19 +28,15 @@ public:
 	// Returns size of a file if a type is file
 	// or number of entries if the type is dir
 	virtual ssize_t size() const = 0;
-	// Gets a name of an entity, returns bytes written
+    // Gets a name of an entity, returns bytes written excluding null character.
+    // If truncation occur then it will return amount bytes that would have
+    // been written if enough space had been avaliable.
 	virtual ssize_t get_name(const char *buf, size_t buf_sz) const = 0;
 
     /*
      TODO:
      declare move(), copy(), create() and delete() operations
 	 */
-
-    // Returns inode associated with an specific entity of a directory.
-    // Meaningless for the file inode.
-    // !!!TODO: move it to the dir descriptor!!!!
-    // virtual ecl::shared_ptr< inode > operator[](size_t idx);
-
 };
 
 // TODO: move it somewhere
