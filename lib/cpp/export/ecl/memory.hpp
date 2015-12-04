@@ -46,6 +46,7 @@ public:
 	shared_ptr(const shared_ptr &other);
     shared_ptr(shared_ptr &&other);
 	shared_ptr& operator=(const shared_ptr &other);
+	explicit operator bool() const;
 
     // Constructs/assigns pointer from dependent type.
     // T and U must be in relation, such that
@@ -263,6 +264,13 @@ const T* shared_ptr< T >::operator ->() const
     return obj;
 }
 
+
+template< typename T >
+shared_ptr< T >::operator bool() const
+{
+	return !!get();
+}
+
 //------------------------------------------------------------------------------
 
 template< typename T, class Alloc, class... Args >
@@ -327,6 +335,7 @@ bool operator !(const shared_ptr< T > &shr)
 {
 	return !shr.get();
 }
+
 
 //------------------------------------------------------------------------------
 

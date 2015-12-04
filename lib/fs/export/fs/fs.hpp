@@ -28,7 +28,7 @@ private:
     {
     public:
         path_iter(const char *path)
-			:path{path}
+            :path{path}
             ,cur{0}
             ,component{0}
         { }
@@ -102,17 +102,17 @@ auto vfs< Fs... >::path_to_inode(const char *path)
     const char *part;
     inode::type type;
 
-    while (part = iter.next(&type)) {
+    while ((part = iter.next(type))) {
         auto next = name_to_inode(root, part);
 
         if (!next) {
             // Such name is not found
-            return nullptr;
+            return inode_ptr{nullptr};
         }
 
         if (next->get_type() != type) {
             // Type mismatch - e.g. requested dir name is a file on a device.
-            return nullptr;
+            return inode_ptr{nullptr};
         }
 
         // Move to the next inode in path
@@ -127,15 +127,23 @@ auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
 {
     assert(cur_dir);
     assert(name);
-	assert(cur_dir->get_type() == inode::type::dir);
+    assert(cur_dir->get_type() == inode::type::dir);
 
-	auto dd = cur_dir->open_dir();
+    auto dd = cur_dir->open_dir();
     char inode_name[16]; // TODO: Clarify size
 
     // Iterate over directory and try to find proper item
     inode_ptr next;
     while (next = dd->next()) {
-        if (next->get_name(inode_name, sizeof(inode_name)) >= sizeof(inode_name)) {
+        ssize_t ret;
+        ret = next->get_name(inode_name, sizeof(inode_name));
+
+        if (ret < 0) {
+            // Error occur
+            return inode_ptr{nullptr};
+        }
+
+        if ((size_t) ret >= sizeof(inode_name)) {
             // Name is too long
             assert(0);
         }
@@ -147,7 +155,7 @@ auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
     }
 
 
-    return nullptr;
+    return inode_ptr{nullptr};
 }
 
 }

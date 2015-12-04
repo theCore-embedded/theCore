@@ -49,6 +49,7 @@ static void rtos_task1(void *params)
 	using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
 
 	fs::vfs< Fat > fs_obj;
+	auto fd = fs_obj.open_file("hello.txt");
 
 
 
