@@ -13,6 +13,7 @@ void *memcpy(void *dst, const void *src, size_t cnt);
 
 int strcmp(const char *str1, const char *str2);
 const char* strchr(const char *str, int character);
+size_t strlen(const char *str);
 
 #ifdef __cplusplus
 }

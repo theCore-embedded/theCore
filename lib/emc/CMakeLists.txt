@@ -11,5 +11,6 @@ memset.c
 memcpy.c
 memmove.c
 strcmp.c
-strchr.c)
+strchr.c
+strlen.c)
 target_include_directories(emc PUBLIC export)

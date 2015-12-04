@@ -3,9 +3,11 @@
 
 #include <ecl/pool.hpp>
 #include <fs/inode.hpp>
-#include <fat/fs.hpp>
-#include <fat/file_inode.hpp>
-#include <fat/dir_inode.hpp>
+
+#include "fat/fs.hpp"
+#include "fat/file_inode.hpp"
+#include "fat/dir_inode.hpp"
+#include "src/pff.h"
 
 namespace fat
 {
@@ -23,15 +25,18 @@ private:
     static constexpr size_t get_alloc_blk_size();
 
     // Memory pool where inodes and descriptors will reside
-    ecl::pool< get_alloc_blk_size(), 256 >          m_pool;
+    ecl::pool< get_alloc_blk_size(), 256 >   m_pool;
     // Will be rebound each time allocation will occur
-    ecl::pool_allocator< uint8_t >                  m_alloc;
+    ecl::pool_allocator< uint8_t >           m_alloc;
+    // Petite FAT object
+    FATFS m_fat;
 };
 
 template< class Block >
 petit< Block >::petit()
 	:m_pool{}
 	,m_alloc{&m_pool}
+    ,m_fat{0}
 {
 
 }
@@ -45,14 +50,15 @@ petit< Block >::~petit()
 template< class Block >
 fs::inode_ptr petit< Block >::mount()
 {
+
 	return fs::inode_ptr{};
 }
 
 template< class Block >
 constexpr size_t petit< Block >::get_alloc_blk_size()
 {
-	// Determine size of allocations.
-	// Maximum size will be used as block size for the pool
+    // Determine a size of allocations.
+    // The maximum size will be used as block size for the pool
 
 	using finode_allocator = ecl::pool_allocator< file_inode >;
 	constexpr size_t finode_blk_sz

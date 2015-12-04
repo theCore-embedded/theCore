@@ -15,5 +15,6 @@ pff/src/diskio.c
 )
 
 target_include_directories(fat PUBLIC export)
+target_include_directories(fat PUBLIC pff)
 target_link_libraries(fat fs)
 target_link_libraries(fat allocators)

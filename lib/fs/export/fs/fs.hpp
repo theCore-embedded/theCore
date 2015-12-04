@@ -24,25 +24,24 @@ public:
 
 
 private:
+    // TODO: convert it to generic-purpose class
     class path_iter
     {
     public:
         path_iter(const char *path)
             :path{path}
+            ,path_len{strlen(path)}
             ,cur{0}
             ,component{0}
-        { }
+        {
+        }
 
         const char* next(inode::type &next_type)
         {
+            size_t len;
             inode::type expected;
 
-            (void) expected;
-            (void) next_type;
-
-            // End of the path
-            // if (cur == len)
-            if (cur == 0)
+            if (cur == path_len)
                 return nullptr;
 
             if (path[cur] == '/') {
@@ -51,27 +50,34 @@ private:
             }
 
             auto p = strchr(path + cur, '/');
+
             if (p) {
+                len = p - (path + cur);
                 // Dir is found in path
-                if ((p - (path + cur)) >= 16) {
+                if (len >= 16) {
                     // Name is too long
                     // TODO: fix it
                     assert(0);
                 } else {
                     std::copy(path + cur, p, component);
+                    component[len] = 0;
                 }
 
+                // Skip following '/'
+                cur += len + 1;
                 expected = inode::type::dir;
-            } else {
-                // Found end of path
-                p = strchr(path + cur, '\0');
 
-                if ((p - (path + cur)) >= 16) {
+            } else {
+                // Found a file
+                len = path_len - cur - 1;
+
+                if (len >= 16) {
                     // Name is too long
                     // TODO: fix it
                     assert(0);
                 } else {
                     std::copy(path + cur, p, component);
+                    component[len] = 0;
                 }
 
                 expected = inode::type::file;
@@ -83,6 +89,7 @@ private:
 
     private:
         const char  *path;
+        size_t      path_len;
         size_t      cur;
         char        component[16]; // TODO: clarify size
     };
