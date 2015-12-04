@@ -8,11 +8,11 @@ namespace fat
 {
 
 template< class Block >
-class petite // TODO: rename it to 'petite_fat'
+class petit // TODO: rename it to 'petite_fat'
 {
 public:
-    petite();
-    ~petite();
+	petit();
+	~petit();
     // Mounts a system and returns the root inode
     fs::inode_ptr mount();
 

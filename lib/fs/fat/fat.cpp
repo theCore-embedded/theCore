@@ -5,7 +5,7 @@
 using namespace fat;
 
 template< class Block >
-petite< Block >::petite()
+petit< Block >::petit()
     :m_pool{}
     ,m_alloc{&m_pool}
 {
@@ -13,19 +13,19 @@ petite< Block >::petite()
 }
 
 template< class Block >
-petite< Block >::~petite()
+petit< Block >::~petit()
 {
 
 }
 
 template< class Block >
-fs::inode_ptr petite< Block >::mount()
+fs::inode_ptr petit< Block >::mount()
 {
 	return fs::inode_ptr{};
 }
 
 template< class Block >
-constexpr size_t petite< Block >::get_alloc_blk_size()
+constexpr size_t petit< Block >::get_alloc_blk_size()
 {
 	// Determine size of allocations.
     // Maximum size will be used as block size for the pool
