@@ -28,7 +28,7 @@ private:
     {
     public:
         path_iter(const char *path)
-            :m_path{path}
+			:path{path}
             ,cur{0}
             ,component{0}
         { }
@@ -79,7 +79,7 @@ file_ptr vfs< Fs... >::open_file(const char *path)
 }
 
 template< class ...Fs >
-file_ptr vfs< Fs... >::open_dir(const char *path)
+dir_ptr vfs< Fs... >::open_dir(const char *path)
 {
     // TODO: use specific mountpoint, instead of root
     return nullptr;
@@ -127,9 +127,9 @@ auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
 {
     assert(cur_dir);
     assert(name);
-    assert(cur_dir->type() == inode::type::dir);
+	assert(cur_dir->get_type() == inode::type::dir);
 
-    auto dd = cur_dir->open();
+	auto dd = cur_dir->open_dir();
     char inode_name[16]; // TODO: Clarify size
 
     // Iterate over directory and try to find proper item
@@ -148,6 +148,8 @@ auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
 
 
     return nullptr;
+}
+
 }
 
 #endif // LIB_FS_FS_HPP_

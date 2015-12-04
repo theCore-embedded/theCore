@@ -6,5 +6,5 @@ file(GLOB_RECURSE ALL_HEADERS *.h)
 add_custom_target(emc_dummy_target SOURCES "${ALL_HEADERS}")
 ## EO hack
 
-add_library(emc STATIC memset.c memcpy.c memmove.c)
+add_library(emc STATIC memset.c memcpy.c memmove.c strcmp.c)
 target_include_directories(emc PUBLIC export)

@@ -10,7 +10,7 @@ template< const char *mount_point, class Fs, typename ...Args >
 class fs_descriptor
 {
 public:
-    constexpr fs_descriptor();
+	constexpr fs_descriptor(Args ...args);
 
     // Mounts a filesystem
     int mount();
@@ -19,7 +19,7 @@ public:
 
     // Holds mount point
     // TODO: use it!
-    static constexpr *m_mount_point = mount_point;
+	static constexpr char *m_mount_point = mount_point;
 
 private:
     Fs           m_fs;
@@ -29,9 +29,9 @@ private:
 
 
 template< const char *mount_point, class Fs, typename ...Args >
-constexpr fs_descriptor< mount_point, Fs, Args... >::fs_descriptor()
-    :m_fs{Args...}
-    ,m_root_inode{}
+constexpr fs_descriptor< mount_point, Fs, Args... >::fs_descriptor(Args ...args)
+	:m_fs{args...}
+	,m_root{}
 {
 
 }

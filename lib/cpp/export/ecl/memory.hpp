@@ -322,6 +322,12 @@ bool operator !=(const shared_ptr< T > &shr1, const shared_ptr< T > &shr2)
     return shr1.get() != shr2.get();
 }
 
+template< typename T >
+bool operator !(const shared_ptr< T > &shr)
+{
+	return !shr.get();
+}
+
 //------------------------------------------------------------------------------
 
 }

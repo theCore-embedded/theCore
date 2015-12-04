@@ -14,36 +14,14 @@
 #include <ecl/assert.hpp>
 #include <ecl/pool.hpp>
 #include <fs/inode.hpp>
+#include <fs/fs_descriptor.hpp>
+#include <fat/fs.hpp>
+#include <fs/fs.hpp>
+
 #include <tuple>
 
 #include "sprite.hpp"
-
-// allocator test object
-struct dummy
-{
-    dummy() :obj{0xbe} { ecl::cout << "dummy ctor" << ecl::endl; }
-    ~dummy() { ecl::cout << "dummy dtor" << ecl::endl; }
-    uint8_t obj[8];
-
-    virtual void who_am_i() { ecl::cout << "Im dummy\n"; }
-};
-
-struct dummy2 : dummy
-{
-    virtual void who_am_i() { ecl::cout << "Im dummy2\n"; }
-};
-
-static ecl::pool< 16, 16 > pool;
-static ecl::pool_allocator< dummy > allocator(&pool);
-
-// Allocator test itself
-void test_alloc(size_t sz)
-{
-    dummy *ptr = allocator.allocate(sz);
-    ecl::cout << "Sz: " << sz << " ptr: " << (int) ptr << ecl::endl;
-    assert(ptr != nullptr);
-    assert(!((uintptr_t)ptr % 16)); // Check aligment
-}
+constexpr const char fat_root[] = "/";
 
 static void rtos_task0(void *params)
 {
@@ -67,90 +45,22 @@ static void rtos_task1(void *params)
     ecl::cout << "\n\nHello, embedded world!" << ecl::endl;
     // TODO: order of initialization must be preserved
     // as soon as default values for GPIO will be introduced
-    sd_spi< SPI_LCD_driver,  SDSPI_CS > sdspi;
-    pcd8544< SPI_LCD_driver > lcd;
+	using Block = sd_spi< SPI_LCD_driver,  SDSPI_CS >;
+	using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
 
-    sdspi.init();
-    ret = sdspi.open();
+	fs::vfs< Fat > fs_obj;
 
-    //ecl::filehandle&& fl = ecl::filesystem< int >::open("asdsad");
-    //(void) fl;
 
-    lcd.init();
-    lcd.open();
+
+	pcd8544< SPI_LCD_driver > lcd;
+#if 0
+	lcd.init();
+	lcd.open();
     lcd.clear();
     lcd.flush();
-
-    if (!ret) {
-        uint8_t buf[512];
-
-        for (uint i = 0; i < 1; ++i) {
-            if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
-                ecl::cout << "Unable to retrieve buffer" << ecl::endl;
-            } else {
-                ecl::cout << "items: ";
-                for (uint16_t i = 0; i < sizeof(buf); ++i) {
-                    ecl::cout << buf[i] << " ";
-                    if ((i & 0xf) == 0xf)
-                        ecl::cout << ecl::endl;
-                }
-                ecl::cout << ecl::endl;
-            }
-        }
-
-        sdspi.seek(510);
-        uint8_t buf2[] = {1, 2, 3, 4, 5, 6};
-        sdspi.write(buf2, sizeof(buf2));
-        sdspi.flush();
-        ecl::cout << "=======================" << ecl::endl;
-
-        sdspi.seek(510);
-
-        if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
-            ecl::cout << "Unable to retrieve buffer" << ecl::endl;
-        } else {
-            ecl::cout << "items: ";
-            for (uint16_t i = 0; i < sizeof(buf); ++i) {
-                ecl::cout << buf[i] << " ";
-                if ((i & 0xf) == 0xf)
-                    ecl::cout << ecl::endl;
-            }
-            ecl::cout << ecl::endl;
-        }
-
-    }
-
-    ecl::cout << "Starting..." << ecl::endl;
-    ecl::cout << "Sizeof object: " << sizeof(dummy) << ecl::endl;
-    ecl::cout << "Alignof object: " << alignof(dummy) << ecl::endl;
-
-    std::tuple< int, char, dummy > typs{ 10, 20, dummy{} };
-
-#if 0
-    test_alloc(5);
-    test_alloc(1);
-    test_alloc(3);
-    test_alloc(1);
-    test_alloc(1);
-    test_alloc(10);
-    test_alloc(1);
 #endif
 
-    {
-#if 1
-        auto ptr1 = ecl::allocate_shared< dummy2, decltype(allocator) >(allocator);
-        ecl::shared_ptr< dummy > another_ptr = ptr1;
-        auto ptr2 = ecl::allocate_shared< dummy2, decltype(allocator) >(allocator);
-        another_ptr = ptr2;
-#endif
-        auto ptr = ecl::allocate_shared< dummy, decltype(allocator) >(allocator);
-        ecl::cout << "Ptr: " << (int) ptr.get() << ecl::endl;
-        ecl::shared_ptr< dummy > other_ptr = ptr;
-        ecl::cout << "Ptr: " << (int) other_ptr.get() << ecl::endl;
-        ecl::cout << "val: " << other_ptr->obj[0] << ecl::endl;
-        ecl::cout << "val2: " << (*other_ptr).obj[0] << ecl::endl;
-        ptr = ptr2;
-    }
+
 
     for (;;) {
         ecl::cin >> c;
