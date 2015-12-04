@@ -9,13 +9,10 @@
 /* Initialize Disk Drive                                                 */
 /*-----------------------------------------------------------------------*/
 
-DSTATUS disk_initialize (void)
+DSTATUS disk_initialize (DISK_TYPE* disk) /* Disk descriptor */
 {
-	DSTATUS stat = 0;
-
-	// Put your code here
-
-	return stat;
+    DSTATUS stat = disk->disk_initialize(disk->disk_obj);
+    return stat;
 }
 
 
@@ -25,21 +22,20 @@ DSTATUS disk_initialize (void)
 /*-----------------------------------------------------------------------*/
 
 DRESULT disk_readp (
-		BYTE* buff,		/* Pointer to the destination object */
-		DWORD sector,	/* Sector number (LBA) */
-		UINT offset,	/* Offset in the sector */
-		UINT count		/* Byte count (bit15:destination) */
-		)
+        DISK_TYPE* disk,/* Disk descriptor */
+        BYTE* buff,		/* Pointer to the destination object */
+        DWORD sector,	/* Sector number (LBA) */
+        UINT offset,	/* Offset in the sector */
+        UINT count		/* Byte count (bit15:destination) */
+        )
 {
-	DRESULT res = 0;
-	(void) buff;
-	(void) sector;
-	(void) offset;
-	(void) count;
+    DRESULT res = disk->disk_readp(disk->disk_obj,
+                                   buff,
+                                   sector,
+                                   offset,
+                                   count);
 
-	// Put your code here
-
-	return res;
+    return res;
 }
 
 
@@ -49,29 +45,31 @@ DRESULT disk_readp (
 /*-----------------------------------------------------------------------*/
 
 DRESULT disk_writep (
-		const BYTE* buff,	/* Pointer to the data to be written, NULL:Initiate/Finalize write operation */
-		DWORD sc			/* Sector number (LBA) or Number of bytes to send */
-		)
+        DISK_TYPE*  disk,    /* Disk descriptor */
+        const BYTE* buff,	/* Pointer to the data to be written, NULL:Initiate/Finalize write operation */
+        DWORD sc			/* Sector number (LBA) or Number of bytes to send */
+        )
 {
-	DRESULT res = 0;
+    DRESULT res = 0;
 
+    (void) disk;
 
-	if (!buff) {
-		if (sc) {
+    if (!buff) {
+        if (sc) {
 
-			// Initiate write process
+            // Initiate write process
 
-		} else {
+        } else {
 
-			// Finalize write process
+            // Finalize write process
 
-		}
-	} else {
+        }
+    } else {
 
-		// Send data to the disk
+        // Send data to the disk
 
-	}
+    }
 
-	return res;
+    return res;
 }
 

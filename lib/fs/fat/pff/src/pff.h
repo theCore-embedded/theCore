@@ -23,6 +23,7 @@ extern "C" {
 
 #include "integer.h"
 #include "pffconf.h"
+#include "diskio.h"
 
 #if _PFATFS != _PFFCONF
 #error Wrong configuration file (pffconf.h).
@@ -34,24 +35,23 @@ extern "C" {
 #define	CLUST	WORD
 #endif
 
-
 /* File system object structure */
 
 typedef struct {
-	BYTE	fs_type;	/* FAT sub type */
-	BYTE	flag;		/* File status flags */
-	BYTE	csize;		/* Number of sectors per cluster */
-	BYTE	pad1;
-	WORD	n_rootdir;	/* Number of root directory entries (0 on FAT32) */
-	CLUST	n_fatent;	/* Number of FAT entries (= number of clusters + 2) */
-	DWORD	fatbase;	/* FAT start sector */
-	DWORD	dirbase;	/* Root directory start sector (Cluster# on FAT32) */
-	DWORD	database;	/* Data start sector */
-	DWORD	fptr;		/* File R/W pointer */
-	DWORD	fsize;		/* File size */
-	CLUST	org_clust;	/* File start cluster */
-	CLUST	curr_clust;	/* File current cluster */
-	DWORD	dsect;		/* File current data sector */
+    BYTE	  fs_type;	/* FAT sub type */
+    BYTE	  flag;		/* File status flags */
+    BYTE	  csize;	/* Number of sectors per cluster */
+    WORD	  n_rootdir;/* Number of root directory entries (0 on FAT32) */
+    CLUST	  n_fatent;	/* Number of FAT entries (= number of clusters + 2) */
+    DWORD	  fatbase;	/* FAT start sector */
+    DWORD	  dirbase;	/* Root directory start sector (Cluster# on FAT32) */
+    DWORD	  database;	/* Data start sector */
+    DWORD	  fptr;		/* File R/W pointer */
+    DWORD	  fsize;	/* File size */
+    CLUST	  org_clust;/* File start cluster */
+    CLUST	  curr_clust;/* File current cluster */
+    DWORD	  dsect;	/* File current data sector */
+    DISK_TYPE disk;     /* Disk descriptor */
 } FATFS;
 
 
@@ -59,11 +59,11 @@ typedef struct {
 /* Directory object structure */
 
 typedef struct {
-	WORD	index;		/* Current read/write index number */
-	BYTE*	fn;			/* Pointer to the SFN (in/out) {file[8],ext[3],status[1]} */
-	CLUST	sclust;		/* Table start cluster (0:Static table) */
-	CLUST	clust;		/* Current cluster */
-	DWORD	sect;		/* Current sector */
+    WORD	index;		/* Current read/write index number */
+    BYTE*	fn;			/* Pointer to the SFN (in/out) {file[8],ext[3],status[1]} */
+    CLUST	sclust;		/* Table start cluster (0:Static table) */
+    CLUST	clust;		/* Current cluster */
+    DWORD	sect;		/* Current sector */
 } DIR;
 
 
@@ -71,11 +71,11 @@ typedef struct {
 /* File status structure */
 
 typedef struct {
-	DWORD	fsize;		/* File size */
-	WORD	fdate;		/* Last modified date */
-	WORD	ftime;		/* Last modified time */
-	BYTE	fattrib;	/* Attribute */
-	char	fname[13];	/* File name */
+    DWORD	fsize;		/* File size */
+    WORD	fdate;		/* Last modified date */
+    WORD	ftime;		/* Last modified time */
+    BYTE	fattrib;	/* Attribute */
+    char	fname[13];	/* File name */
 } FILINFO;
 
 
@@ -83,13 +83,13 @@ typedef struct {
 /* File function return code (FRESULT) */
 
 typedef enum {
-	FR_OK = 0,			/* 0 */
-	FR_DISK_ERR,		/* 1 */
-	FR_NOT_READY,		/* 2 */
-	FR_NO_FILE,			/* 3 */
-	FR_NOT_OPENED,		/* 4 */
-	FR_NOT_ENABLED,		/* 5 */
-	FR_NO_FILESYSTEM	/* 6 */
+    FR_OK = 0,			/* 0 */
+    FR_DISK_ERR,		/* 1 */
+    FR_NOT_READY,		/* 2 */
+    FR_NO_FILE,			/* 3 */
+    FR_NOT_OPENED,		/* 4 */
+    FR_NOT_ENABLED,		/* 5 */
+    FR_NO_FILESYSTEM	/* 6 */
 } FRESULT;
 
 
@@ -98,12 +98,12 @@ typedef enum {
 /* Petit FatFs module application interface                     */
 
 FRESULT pf_mount (FATFS* fs);								/* Mount/Unmount a logical drive */
-FRESULT pf_open (const char* path);							/* Open a file */
-FRESULT pf_read (void* buff, UINT btr, UINT* br);			/* Read data from the open file */
-FRESULT pf_write (const void* buff, UINT btw, UINT* bw);	/* Write data to the open file */
-FRESULT pf_lseek (DWORD ofs);								/* Move file pointer of the open file */
-FRESULT pf_opendir (DIR* dj, const char* path);				/* Open a directory */
-FRESULT pf_readdir (DIR* dj, FILINFO* fno);					/* Read a directory item from the open directory */
+FRESULT pf_open (FATFS* fs, const char* path);				/* Open a file */
+FRESULT pf_read (FATFS* fs, void* buff, UINT btr, UINT* br);/* Read data from the open file */
+FRESULT pf_write (FATFS* fs, const void* buff, UINT btw, UINT* bw);	/* Write data to the open file */
+FRESULT pf_lseek (FATFS* fs, DWORD ofs);					/* Move file pointer of the open file */
+FRESULT pf_opendir (FATFS* fs, DIR* dj, const char* path);	/* Open a directory */
+FRESULT pf_readdir (FATFS* fs, DIR* dj, FILINFO* fno);		/* Read a directory item from the open directory */
 
 
 
