@@ -35,8 +35,50 @@ private:
 
         const char* next(inode::type &next_type)
         {
+            inode::type expected;
+
+            (void) expected;
             (void) next_type;
-            return nullptr;
+
+            // End of the path
+            // if (cur == len)
+            if (cur == 0)
+                return nullptr;
+
+            if (path[cur] == '/') {
+                // Starts with root, skipping...
+                cur++;
+            }
+
+            auto p = strchr(path + cur, '/');
+            if (p) {
+                // Dir is found in path
+                if ((p - (path + cur)) >= 16) {
+                    // Name is too long
+                    // TODO: fix it
+                    assert(0);
+                } else {
+                    std::copy(path + cur, p, component);
+                }
+
+                expected = inode::type::dir;
+            } else {
+                // Found end of path
+                p = strchr(path + cur, '\0');
+
+                if ((p - (path + cur)) >= 16) {
+                    // Name is too long
+                    // TODO: fix it
+                    assert(0);
+                } else {
+                    std::copy(path + cur, p, component);
+                }
+
+                expected = inode::type::file;
+            }
+
+            next_type = expected;
+            return component;
         }
 
     private:
