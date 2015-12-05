@@ -38,6 +38,7 @@ private:
         {
         }
 
+        // Get next path token
         const char* next(inode::type &next_type)
         {
             size_t len;
@@ -96,7 +97,9 @@ private:
         char        component[16]; // TODO: clarify size
     };
 
+    // Resolves path to inode
     auto path_to_inode(const char *path);
+    // Resolves the name of item in current dir to the inode
     auto name_to_inode(inode_ptr cur_dir, const char *name);
 
     std::tuple< Fs... > m_fses;

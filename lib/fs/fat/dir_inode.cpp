@@ -1,8 +1,11 @@
-#include <fat/dir_inode.hpp>
+#include "fat/dir_inode.hpp"
+#include "src/pff.h"
 
 using namespace fat;
 
-dir_inode::dir_inode()
+dir_inode::dir_inode(FATFS *fs, path_ptr path)
+    :m_fs{fs}
+    ,m_path{path}
 {
 
 }

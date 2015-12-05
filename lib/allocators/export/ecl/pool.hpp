@@ -1,5 +1,5 @@
-#ifndef LIB_ALLOC_SLAB_HPP_
-#define LIB_ALLOC_SLAB_HPP_
+#ifndef LIB_ALLOC_POOL_HPP_
+#define LIB_ALLOC_POOL_HPP_
 
 #include <ecl/assert.hpp>
 #include <memory>
@@ -21,10 +21,15 @@ public:
     void deallocate(T *p, size_t n);
 
 protected:
-    // Provided be real pool
+    // Provided by a real pool
+    // Allocates n items each size of obj_size with respect to
+    // align
     virtual uint8_t* real_alloc(size_t n, size_t align, size_t obj_size) = 0;
-    // Provided be real pool
-    virtual void real_dealloc(uint8_t *p, size_t n) = 0;
+    // Provided by a real pool
+    // Deallocates n items each size of obj_size.
+    // 'p' is a pointer to memory area, previously returned by real_alloc
+    // function.
+    virtual void real_dealloc(uint8_t *p, size_t n, size_t obj_size) = 0;
 };
 
 //------------------------------------------------------------------------------
@@ -32,13 +37,21 @@ protected:
 template< typename T >
 T* pool_base::aligned_alloc(size_t n)
 {
-    return reinterpret_cast< T* > (real_alloc(n, alignof(T), sizeof(T)));
+    T *p = reinterpret_cast< T* > (real_alloc(n, alignof(T), sizeof(T)));
+    ecl::cout << "alloc " << n << " x " << sizeof(T) << " = "
+              << n * sizeof(T) << " bytes from " << (int) p
+              << ecl::endl;
+    return p;
 }
 
 template< typename T >
 void pool_base::deallocate(T *p, size_t n)
 {
-    real_dealloc(reinterpret_cast< uint8_t *>(p), n);
+    ecl::cout << "dealloc " << n << " x " << sizeof(T) << " = "
+              << n * sizeof(T) << " bytes from " << (int) p
+              << ecl::endl;
+
+    real_dealloc(reinterpret_cast< uint8_t *>(p), n, sizeof(T));
 }
 
 //------------------------------------------------------------------------------
@@ -60,7 +73,7 @@ public:
 
     // Allocates memory suitable for type T, with respect to its aligment
     uint8_t* real_alloc(size_t n, size_t align, size_t obj_sz) override;
-    void real_dealloc(uint8_t *p, size_t n) override;
+    void real_dealloc(uint8_t *p, size_t n, size_t obj_sz) override;
 
 private:
     static constexpr auto info_blks_sz();
@@ -138,7 +151,7 @@ uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_
 
 
 template< size_t blk_sz, size_t blk_cnt >
-void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n)
+void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n, size_t obj_sz)
 {
     assert(n);
     assert(p); // For now
@@ -150,11 +163,15 @@ void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n)
 
     size_t idx = (p - start) / blk_sz;
     size_t cnt = (end - p)   / blk_sz;
+    // Convert bytes to blocks
+    n = n * obj_sz / blk_sz;
+
     assert(n <= cnt);
 
     while (n) {
-        assert(!is_free(idx));
-        mark(idx + --n, false);
+        size_t to_free = idx + --n;
+        assert(!is_free(to_free));
+        mark(to_free, false);
     }
 }
 
@@ -265,4 +282,4 @@ pool_allocator< U > pool_allocator< T >::rebind() const
 }
 
 
-#endif // LIB_ALLOC_SLAB_HPP_
+#endif // LIB_ALLOC_POOL_HPP_

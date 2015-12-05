@@ -1,16 +1,16 @@
+#include <FreeRTOS.h>
+#include <task.h>
+
 #include <target/spi.hpp>
 #include <target/pinconfig.hpp>
 #include <target/gpio.hpp>
 #include <dev/pcd8544.hpp>
 #include <dev/sdspi.hpp>
-#include <fat/file_inode.hpp>
-#include <fat/fs.hpp>
-
 #include <functional>
 #include <utility>
 
-#include <FreeRTOS.h>
-#include <task.h>
+#include <fat/file_inode.hpp>
+#include <fat/fs.hpp>
 #include <ecl/assert.hpp>
 #include <ecl/pool.hpp>
 #include <fs/inode.hpp>
@@ -21,6 +21,7 @@
 #include <tuple>
 
 #include "sprite.hpp"
+
 constexpr const char fat_root[] = "/";
 using Block = sd_spi< SPI_LCD_driver,  SDSPI_CS >;
 using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
@@ -37,9 +38,6 @@ static void rtos_task0(void *params)
     }
 }
 
-
-
-
 static void rtos_task1(void *params)
 {
     (void) params;
@@ -52,7 +50,7 @@ static void rtos_task1(void *params)
     // as soon as default values for GPIO will be introduced
 
     fs_obj.mount_all();
-//	auto fd = fs_obj.open_file("hello.txt");
+    //auto fd = fs_obj.open_file("hello.txt");
 
 	pcd8544< SPI_LCD_driver > lcd;
 #if 0
@@ -142,9 +140,8 @@ static void rtos_task1(void *params)
 int main()
 {
     // Let the fun begin!
-
     xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
-    xTaskCreate(rtos_task1, "task1", 1024, NULL, tskIDLE_PRIORITY, NULL);
+    xTaskCreate(rtos_task1, "task1", 2048, NULL, tskIDLE_PRIORITY, NULL);
 
     vTaskStartScheduler();
 

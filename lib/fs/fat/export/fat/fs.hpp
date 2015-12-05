@@ -8,6 +8,7 @@
 #include "fat/file_inode.hpp"
 #include "fat/dir_inode.hpp"
 #include "src/pff.h"
+#include "../../path.hpp"
 
 namespace fat
 {
@@ -67,7 +68,7 @@ fs::inode_ptr petit< Block >::mount()
     // Pass block device bindings
     // that will be used by internal fat routines
     m_fat.disk = {
-        (void *) &m_block,
+        reinterpret_cast< void * >(&m_block),
         disk_initialize,
         disk_writep,
         disk_readp
@@ -81,8 +82,13 @@ fs::inode_ptr petit< Block >::mount()
         ecl::cout << "Mount error: " << res << ecl::endl;
     }
 
+    auto path = allocate_path("/", nullptr, m_alloc);
+    ecl::cout << "path: " << path->get_path() << ecl::endl;
+
+    auto iptr = ecl::allocate_shared< dir_inode >(m_alloc, &m_fat, path);
+
     // TODO;
-    return fs::inode_ptr{};
+    return iptr;
 }
 
 template< class Block >
@@ -92,11 +98,11 @@ constexpr size_t petit< Block >::get_alloc_blk_size()
     // The maximum size will be used as block size for the pool
 
     using finode_allocator = ecl::pool_allocator< file_inode >;
-    constexpr size_t finode_blk_sz
+    constexpr uint16_t finode_blk_sz
             = ecl::shared_allocation_size< file_inode, finode_allocator >::value;
 
     using dinode_allocator = ecl::pool_allocator< dir_inode >;
-    constexpr size_t dinode_blk_sz
+    constexpr uint16_t dinode_blk_sz
             = ecl::shared_allocation_size< dir_inode, dinode_allocator >::value;
 
     //	using fd_allocator = ecl::pool_allocator< fs::file_descriptor >;
@@ -110,10 +116,16 @@ constexpr size_t petit< Block >::get_alloc_blk_size()
     //	constexpr size_t max_size = dd_blk_sz > fd_blk_sz ? dd_blk_sz : fd_blk_sz;
     //	max_size = inode_blk_sz > max_size ? max_size : inode_blk_sz;
 
-    constexpr size_t max_size = finode_blk_sz > dinode_blk_sz ?
+    constexpr uint16_t max_size = finode_blk_sz > dinode_blk_sz ?
                 finode_blk_sz : dinode_blk_sz;
 
-    return max_size;
+    if (!(max_size & (max_size - 1)))
+        return max_size;
+
+    // Align to the next power of 2
+    constexpr auto bits_in_int = sizeof(int) * 8;
+    constexpr auto power = bits_in_int - __builtin_clz(max_size);
+    return 1 << power;
 }
 
 template< class Block >

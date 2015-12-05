@@ -10,8 +10,8 @@ void __attribute__((used)) vTaskSwitchContext( void );
 #define configCPU_CLOCK_HZ                      8000000
 #define configTICK_RATE_HZ                      100
 #define configMAX_PRIORITIES                    5
-#define configMINIMAL_STACK_SIZE                128
-#define configTOTAL_HEAP_SIZE                   8196
+#define configMINIMAL_STACK_SIZE                512
+#define configTOTAL_HEAP_SIZE                   16392
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1

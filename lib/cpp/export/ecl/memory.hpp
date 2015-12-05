@@ -22,6 +22,7 @@ public:
     // Destroys payload and aux itself.
     // _Must_ be called to destroy whole object
     virtual void destroy() = 0;
+
 private:
     size_t m_cnt;
 };
@@ -76,8 +77,8 @@ private:
     public:
         aux_alloc(const Alloc &a, Args... args)
             :aux{}
-            ,m_object{args...}
-            ,m_alloc{a}
+            ,m_object(args...)
+            ,m_alloc(a)
         { }
 
         virtual void destroy() override
@@ -90,9 +91,10 @@ private:
         // Cannot be deleted by calling dtor
         ~aux_alloc() = delete;
 
-    private:
         // An object itself
         T        m_object;
+
+    private:
         Alloc    m_alloc;
     };
 
@@ -183,8 +185,8 @@ shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
 template< typename T >
 template< typename U >
 shared_ptr< T >::shared_ptr(shared_ptr< U > &other)
-    :m_aux{other.m_aux}
-    ,m_obj{other.m_obj}
+    :m_aux(other.m_aux)
+    ,m_obj(other.m_obj)
 {
     (void) other;
 
@@ -289,6 +291,7 @@ shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
     // Construct a pointer
     shared_ptr< T > shared;
     shared.m_aux = ptr;
+    shared.m_obj = &ptr->m_object;
 
     return shared;
 }
