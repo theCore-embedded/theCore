@@ -15,6 +15,8 @@ public:
     vfs();
     ~vfs();
 
+    int mount_all();
+
     file_ptr open_file(const char *path);
     dir_ptr  open_dir(const char *path);
 
@@ -110,6 +112,14 @@ vfs< Fs... >::vfs()
 template< class ...Fs >
 vfs< Fs... >::~vfs()
 {
+}
+
+template< class ...Fs >
+int vfs< Fs... >::mount_all()
+{
+    auto &fs = std::get< 0 >(m_fses);
+    fs.mount();
+    return 0;
 }
 
 template< class ...Fs >

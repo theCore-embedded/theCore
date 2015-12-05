@@ -74,7 +74,12 @@ fs::inode_ptr petit< Block >::mount()
     };
 
     // TODO: error check!
-    pf_mount(&m_fat);
+    auto res = pf_mount(&m_fat);
+    if (res == FR_OK) {
+        ecl::cout << "Mounted!" << ecl::endl;
+    } else {
+        ecl::cout << "Mount error: " << res << ecl::endl;
+    }
 
     // TODO;
     return fs::inode_ptr{};
@@ -124,6 +129,8 @@ DSTATUS petit< Block >::disk_initialize(void* disk_obj)
 template< class Block >
 DRESULT petit< Block >::disk_writep(void* disk_obj, const BYTE* buff, DWORD sc)
 {
+    (void) buff;
+    (void) sc;
     Block *device = reinterpret_cast< Block* >(disk_obj);
     assert(device);
 

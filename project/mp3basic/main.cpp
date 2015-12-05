@@ -22,6 +22,9 @@
 
 #include "sprite.hpp"
 constexpr const char fat_root[] = "/";
+using Block = sd_spi< SPI_LCD_driver,  SDSPI_CS >;
+using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
+static fs::vfs< Fat > fs_obj;
 
 static void rtos_task0(void *params)
 {
@@ -35,6 +38,8 @@ static void rtos_task0(void *params)
 }
 
 
+
+
 static void rtos_task1(void *params)
 {
     (void) params;
@@ -45,13 +50,9 @@ static void rtos_task1(void *params)
     ecl::cout << "\n\nHello, embedded world!" << ecl::endl;
     // TODO: order of initialization must be preserved
     // as soon as default values for GPIO will be introduced
-	using Block = sd_spi< SPI_LCD_driver,  SDSPI_CS >;
-	using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
 
-	fs::vfs< Fat > fs_obj;
-	auto fd = fs_obj.open_file("hello.txt");
-
-
+    fs_obj.mount_all();
+//	auto fd = fs_obj.open_file("hello.txt");
 
 	pcd8544< SPI_LCD_driver > lcd;
 #if 0
