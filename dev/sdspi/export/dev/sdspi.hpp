@@ -33,7 +33,8 @@ public:
     int flush();
 
     // TODO: extend it with SEEK_CUR and SEEK_END
-    off_t seek(off_t offset /*, SEEK_SET */);
+    // Seeks to the given position, in bytes
+    int seek(off_t offset /*, SEEK_SET */);
 
     // Tell current position
     // -1 if error, valid offset otherwise
@@ -348,16 +349,16 @@ int sd_spi< SPI_dev, GPIO_CS >::flush()
     return ret;
 }
 
-
+// TODO: change off_t to int
 template< class SPI_dev, class GPIO_CS >
-off_t sd_spi< SPI_dev, GPIO_CS >::seek(off_t offset)
+int sd_spi< SPI_dev, GPIO_CS >::seek(off_t offset)
 {
     if (!m_opened) {
         return -1;
     }
 
     m_offt = offset;
-    return offset;
+    return 0;
 }
 
 

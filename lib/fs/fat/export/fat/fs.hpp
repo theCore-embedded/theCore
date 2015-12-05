@@ -138,6 +138,18 @@ DRESULT petit< Block >::disk_readp(void* disk_obj, BYTE* buff,
     Block *device = reinterpret_cast< Block* >(disk_obj);
     assert(device);
 
+
+    if (buff) {
+        // TODO: is sector size always will be 512 bytes
+        off_t offt = sector * 512 + offser;
+        device->seek(offt);
+        ssize_t read = device->read(buff, count);
+        if (read < 0 || (size_t)read != count) {
+            return RES_ERROR;
+        }
+    }
+
+
     return RES_OK;
 }
 
