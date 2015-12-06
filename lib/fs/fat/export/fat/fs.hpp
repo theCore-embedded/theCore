@@ -4,11 +4,10 @@
 #include <ecl/pool.hpp>
 #include <fs/inode.hpp>
 
-#include "fat/fs.hpp"
+#include "fat/types.hpp"
 #include "fat/file_inode.hpp"
 #include "fat/dir_inode.hpp"
 #include "src/pff.h"
-#include "../../path.hpp"
 
 namespace fat
 {
@@ -34,14 +33,15 @@ private:
                               DWORD sector, UINT offser, UINT count);
 
 
-    // Memory pool where inodes and descriptors will reside
-    ecl::pool< get_alloc_blk_size(), 256 >   m_pool;
-    // Will be rebound each time allocation will occur
-    ecl::pool_allocator< uint8_t >           m_alloc;
+    // TODO: make it configurable, i.e. by moving it to the template arguments
+    // Memory pool where fat objects will reside
+    ecl::pool< get_alloc_blk_size(), 256 > m_pool;
+    // Will be rebound to a proper object type each time allocation will occur
+    allocator   m_alloc;
     // Petite FAT object
-    FATFS m_fat;
+    FATFS       m_fat;
     // Block device on which FAT will operate
-    Block m_block;
+    Block       m_block;
 };
 
 template< class Block >
@@ -82,10 +82,7 @@ fs::inode_ptr petit< Block >::mount()
         ecl::cout << "Mount error: " << res << ecl::endl;
     }
 
-    auto path = allocate_path("/", nullptr, m_alloc);
-    ecl::cout << "path: " << path->get_path() << ecl::endl;
-
-    auto iptr = ecl::allocate_shared< dir_inode >(m_alloc, &m_fat, path);
+    auto iptr = ecl::allocate_shared< dir_inode >(m_alloc, &m_fat, m_alloc);
 
     // TODO;
     return iptr;

@@ -38,6 +38,7 @@ template< typename T >
 T* pool_base::aligned_alloc(size_t n)
 {
     T *p = reinterpret_cast< T* > (real_alloc(n, alignof(T), sizeof(T)));
+
     ecl::cout << "alloc " << n << " x " << sizeof(T) << " = "
               << n * sizeof(T) << " bytes from " << (int) p
               << ecl::endl;
@@ -87,8 +88,10 @@ private:
 
     // Data buffer must be aligned to size of block,
     // this will reduce complexity of calculations.
-    alignas(blk_sz) std::array< uint8_t, data_blks_sz() >   m_data;
-    std::array< uint8_t, info_blks_sz() >                   m_info;
+    // 64 is now maximum alignment supported TODO: clarify
+    alignas((blk_sz > 64) ? 64 : blk_sz)
+    std::array< uint8_t, data_blks_sz() >   m_data;
+    std::array< uint8_t, info_blks_sz() >   m_info;
 };
 
 //------------------------------------------------------------------------------

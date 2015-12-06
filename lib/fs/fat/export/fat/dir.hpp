@@ -4,13 +4,15 @@
 #include <fs/dir_descriptor.hpp>
 #include <fs/inode.hpp>
 
+#include "src/pff.h"
+
 namespace fat
 {
 
 class dir : public fs::dir_descriptor
 {
 public:
-    dir(const fs::inode_ptr &node);
+    dir(const fs::inode_ptr &node, const DIR &fat_dir);
     ~dir();
 
     // Next entity in a dir
@@ -22,6 +24,7 @@ public:
 
 private:
     // TBD
+    DIR    m_fdir;
 };
 
 

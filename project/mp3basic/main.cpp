@@ -50,7 +50,9 @@ static void rtos_task1(void *params)
     // as soon as default values for GPIO will be introduced
 
     fs_obj.mount_all();
-    //auto fd = fs_obj.open_file("hello.txt");
+    {
+        auto fd = fs_obj.open_dir("/");
+    }
 
 	pcd8544< SPI_LCD_driver > lcd;
 #if 0

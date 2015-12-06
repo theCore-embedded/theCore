@@ -6,13 +6,11 @@
 #include <cstdint>
 
 #include "src/pff.h"
+#include "fat/types.hpp"
+#include "../../path.hpp"
 
 namespace fat
 {
-
-// Holds a reference to a path string and manages its deallocation
-class path_handle;
-using path_ptr = ecl::shared_ptr< path_handle >;
 
 
 class dir_inode : public fs::inode
@@ -20,16 +18,30 @@ class dir_inode : public fs::inode
 public:
     using type = typename fs::inode::type;
 
-    dir_inode(FATFS *fs, path_ptr path);
+    // Constructs this inode for given filesystem. Allocator is used for internal
+    // allocations. The 'path' pointer should point to a path to a parent dir.
+    // The name is a name of a dir represented by this inode.
+    // If both name and path are null then this inode represents root node.
+    dir_inode(FATFS *fs, const allocator &alloc,
+              const char *path = nullptr, const char *name = nullptr);
     virtual ~dir_inode();
+
     virtual type get_type() const override;
     virtual fs::dir_ptr open_dir() override;
     virtual ssize_t size() const override;
     virtual ssize_t get_name(const char *buf, size_t buf_sz) const override;
-private:
 
-    FATFS         *m_fs;  // Filesystem object
-    path_ptr      m_path; // Path of this inode
+    int set_weak(fs::inode_ptr *ptr);
+
+private:
+    // Holds a reference to a path string and manages its deallocation
+    allocator  m_alloc; // The allocator to create various objects
+    path_ptr   m_path;  // The path of this inodeho
+    FATFS      *m_fs;   // The filesystem object
+    // Allows to pass this reference to a dir descriptor without increasing
+    // a reference counter to prevent cycle dependency.
+    fs::inode_ptr *my_ptr; // HACK!!!! should be changed to weak_ptr ASAP!
+
 };
 
 }

@@ -38,19 +38,21 @@ private:
         {
         }
 
+
         // Get next path token
         const char* next(inode::type &next_type)
         {
             size_t len;
             inode::type expected;
 
-            if (cur == path_len)
-                return nullptr;
 
-            if (path[cur] == '/') {
-                // Starts with root, skipping...
+            // Find segment start
+            while (path[cur] == '/') {
                 cur++;
             }
+
+            if (cur == path_len)
+                return nullptr;
 
             auto p = strchr(path + cur, '/');
 
@@ -144,7 +146,13 @@ template< class ...Fs >
 dir_ptr vfs< Fs... >::open_dir(const char *path)
 {
     // TODO: use specific mountpoint, instead of root
-    return nullptr;
+    auto node = path_to_inode(path);
+    if (!node || node->get_type() != inode::type::dir) {
+        // Not found :(
+        return nullptr;
+    }
+
+    return node->open_dir();
 }
 
 //------------------------------------------------------------------------------
