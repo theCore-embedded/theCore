@@ -5,8 +5,7 @@ MEMORY
 	 * STM32F4 Series Cortex-M4 programming manual',
 	 * section 2.2 'Memory model'
 	 */
-	rom (rx)     : ORIGIN = 0x00000000, LENGTH = 0x04000 /* 16K */
-	ram (rwx)    : ORIGIN = 0x20000000, LENGTH = 0x2c000 /* 172 K */
+	ram (rwx)    : ORIGIN = 0x20000000, LENGTH = 0x20000 /* 128 K */
 	/* By default, stm32discovery is configured to start booting from flash.
 	 * This behaviour is described in STM32 RM0090, 'Reference manual for
 	 * STM32F405xx/07xx, STM32F415xx/17xx, STM32F42xxx and STM32F43xxx

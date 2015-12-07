@@ -56,7 +56,7 @@ board_stop:
 /* TODO: assign proper handlers for first 16 interrupts */
 .section	vectors
 			.align	2 /* TODO: clarify */
-			.long	0x20006000						@ Initial stack pointer
+			.long   0x20020000
 			.long	_resetHandler					@ Reset handler
 			.long	board_stop						@ NMI
 			.long	board_stop						@ Hard fault
