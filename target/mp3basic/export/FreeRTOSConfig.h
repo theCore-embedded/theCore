@@ -10,8 +10,8 @@ void __attribute__((used)) vTaskSwitchContext( void );
 #define configCPU_CLOCK_HZ                      8000000
 #define configTICK_RATE_HZ                      100
 #define configMAX_PRIORITIES                    5
-#define configMINIMAL_STACK_SIZE                512
-#define configTOTAL_HEAP_SIZE                   16392
+#define configMINIMAL_STACK_SIZE                128
+#define configTOTAL_HEAP_SIZE                   32784
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
@@ -30,7 +30,7 @@ void __attribute__((used)) vTaskSwitchContext( void );
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0
 #define configUSE_TICK_HOOK                     0
-#define configCHECK_FOR_STACK_OVERFLOW          0
+#define configCHECK_FOR_STACK_OVERFLOW          2
 #define configUSE_MALLOC_FAILED_HOOK            0
 
 /* Run time and task stats gathering related definitions. */
@@ -48,10 +48,32 @@ void __attribute__((used)) vTaskSwitchContext( void );
 #define configTIMER_QUEUE_LENGTH                10
 #define configTIMER_TASK_STACK_DEPTH            configMINIMAL_STACK_SIZE
 
+#if 0
 /* Interrupt nesting behaviour configuration. */
-#define configKERNEL_INTERRUPT_PRIORITY         0 //[dependent of processor]
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    5 //[dependent on processor and application]
-#define configMAX_API_CALL_INTERRUPT_PRIORITY   5 //[dependent on processor and application]
+#define configKERNEL_INTERRUPT_PRIORITY         191 //[dependent of processor]
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    255 //[dependent on processor and application]
+#define configMAX_API_CALL_INTERRUPT_PRIORITY   255 //[dependent on processor and application]
+#else
+
+/* Interrupt nesting behaviour configuration. */
+#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY         15
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY    5
+
+#ifdef __NVIC_PRIO_BITS
+    #define configPRIO_BITS       __NVIC_PRIO_BITS
+#else
+    #define configPRIO_BITS       4        /* 15 priority levels */
+#endif
+
+#define configKERNEL_INTERRUPT_PRIORITY \
+    ( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY \
+    ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+#define configMAX_API_CALL_INTERRUPT_PRIORITY \
+    ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+
+#endif
 
 /* Define to trap errors during development. */
 #define configASSERT( x )     if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ )

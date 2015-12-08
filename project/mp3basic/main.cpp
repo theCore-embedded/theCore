@@ -54,10 +54,10 @@ static void rtos_task1(void *params)
         auto fd = fs_obj.open_dir("/");
     }
 
-	pcd8544< SPI_LCD_driver > lcd;
+    pcd8544< SPI_LCD_driver > lcd;
 #if 0
-	lcd.init();
-	lcd.open();
+    lcd.init();
+    lcd.open();
     lcd.clear();
     lcd.flush();
 #endif
@@ -142,8 +142,13 @@ static void rtos_task1(void *params)
 int main()
 {
     // Let the fun begin!
-    xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
-    xTaskCreate(rtos_task1, "task1", 2048, NULL, tskIDLE_PRIORITY, NULL);
+    int ret = xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+    ecl::cout << "\ntask0 ret: " << ret << ecl::endl;
+    assert(ret == pdPASS);
+
+    ret = xTaskCreate(rtos_task1, "task1", 256, NULL, tskIDLE_PRIORITY, NULL);
+    ecl::cout << "task1 ret: " << ret << ecl::endl;;
+    assert(ret == pdPASS);
 
     vTaskStartScheduler();
 

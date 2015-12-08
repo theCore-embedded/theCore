@@ -1,3 +1,6 @@
+#include <FreeRTOS.h>
+#include <task.h>
+
 #include "sys/pin_cfgs.h"
 
 #include <cstdint>
@@ -11,10 +14,19 @@ void vTaskSwitchContext( void );
 
 // TODO: decide if to keep this here or not
 
+extern "C" void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                    signed char *pcTaskName )
+{
+    (void) xTask;
+    ecl::cout << "Stack is overflowed by: " << (char *)pcTaskName << ecl::endl;
+    for(;;);
+}
+
 extern "C" void vAssertCalled(const char *file, int line)
 {
     (void) file;
     (void) line;
+    //ecl::cout << "FreeRTOS assert failed: " << file << ':' << line;
     for(;;);
 }
 

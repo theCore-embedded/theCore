@@ -32,13 +32,18 @@ dir_inode::type dir_inode::get_type() const
 
 fs::dir_ptr dir_inode::open_dir()
 {
+
+    // KILLS STACK!
+#if 0
     DIR fat_dir;
     FRESULT res = pf_opendir(m_fs, &fat_dir, m_path->get_path());
 
     assert(res == FR_OK);
 
     auto ptr = ecl::allocate_shared< dir, decltype(m_alloc) >(m_alloc, *my_ptr, fat_dir);
-    return ptr;
+#endif
+
+    return nullptr;
 }
 
 ssize_t dir_inode::size() const

@@ -12,20 +12,29 @@ class aux
 {
 public:
     aux()
-        :m_cnt{0} { }
+        :m_cnt{0}, m_weak{0} { }
 
     // Increments/decrements/gets the reference counter
     size_t inc() { return ++m_cnt; }
     size_t dec() { return --m_cnt; }
     size_t ref() { return m_cnt;   }
 
-    // Destroys payload and aux itself.
-    // _Must_ be called to destroy whole object
+    // Reference counting for weak references
+    size_t weak_inc() { return ++m_weak; }
+    size_t weak_dec() { return --m_weak; }
+    size_t weak_ref() { return m_weak;   }
+
+    // Destroys aux and deallocates memory if both shared and weak counter is zero.
+    // Destructor of the managed object must not be called here.
+    // _Must_ be called to destroy whole object.
     virtual void destroy() = 0;
 
-private:
+protected:
     size_t m_cnt;
+    size_t m_weak;
 };
+
+//------------------------------------------------------------------------------
 
 template< typename T >
 class shared_ptr
@@ -36,18 +45,21 @@ class shared_ptr
     template< typename U >
     friend class shared_ptr;
 
+    template< typename U >
+    friend class weak_ptr;
+
     template< typename U, class Alloc >
     friend struct allocation_size_info;
 
 public:
     shared_ptr();
-    ~shared_ptr();
+    virtual ~shared_ptr();
 
     shared_ptr(std::nullptr_t nullp);
-	shared_ptr(const shared_ptr &other);
+    shared_ptr(const shared_ptr &other);
     shared_ptr(shared_ptr &&other);
-	shared_ptr& operator=(const shared_ptr &other);
-	explicit operator bool() const;
+    shared_ptr& operator=(const shared_ptr &other);
+    explicit operator bool() const;
 
     // Constructs/assigns pointer from dependent type.
     // T and U must be in relation, such that
@@ -59,6 +71,8 @@ public:
 
     // Returns true if this pointer holds the last remaining node
     bool unique() const;
+    // Returns true if no weak pointers exists that points to the same object
+    bool weak_unique() const;
 
     // Returs a value itself
     T* get() const;
@@ -83,9 +97,14 @@ private:
 
         virtual void destroy() override
         {
-            m_object.~T();
-            auto allocator = m_alloc.template rebind< aux_alloc >();
-            allocator.deallocate(this, 1);
+            // Make sure there is no other references
+            assert(!m_cnt);
+
+            // No more weak references so this object may be deleted
+            if (!m_weak) {
+                auto allocator = m_alloc.template rebind< aux_alloc >();
+                allocator.deallocate(this, 1);
+            }
         }
 
         // Cannot be deleted by calling dtor
@@ -118,7 +137,7 @@ template< typename T >
 shared_ptr< T >::~shared_ptr()
 {
     if (m_aux) {
-        if (unique()) {
+        if (!m_aux->dec()) {
             m_aux->destroy();
         } else {
             m_aux->dec();
@@ -163,10 +182,11 @@ shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
             if (m_aux) {
                 m_aux->destroy();
                 m_aux = nullptr;
+                m_obj->~T();
                 m_obj = nullptr;
             }
         } else {
-            // If it is not single shrared pointer,
+            // If it is not a single shared pointer,
             // then auxilary object is guaranteed to exist.
             m_aux->dec();
         }
@@ -204,6 +224,7 @@ shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr< U > &other)
         if (m_aux) {
             m_aux->destroy();
             m_aux = nullptr;
+            m_obj->~T();
             m_obj = nullptr;
         }
     } else {
@@ -225,7 +246,7 @@ shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr< U > &other)
 template< typename T >
 bool shared_ptr< T >::unique() const
 {
-    return m_aux ? m_aux->ref() == 0 : 0;
+    return m_aux ? m_aux->ref() == 1 : true;
 }
 
 template< typename T >
@@ -270,7 +291,7 @@ const T* shared_ptr< T >::operator ->() const
 template< typename T >
 shared_ptr< T >::operator bool() const
 {
-	return !!get();
+    return !!get();
 }
 
 //------------------------------------------------------------------------------
@@ -291,6 +312,8 @@ shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
     // Construct a pointer
     shared_ptr< T > shared;
     shared.m_aux = ptr;
+    // Now it is owning the resourse
+    shared.m_aux->inc();
     shared.m_obj = &ptr->m_object;
 
     return shared;
@@ -336,11 +359,155 @@ bool operator !=(const shared_ptr< T > &shr1, const shared_ptr< T > &shr2)
 template< typename T >
 bool operator !(const shared_ptr< T > &shr)
 {
-	return !shr.get();
+    return !shr.get();
 }
 
 
 //------------------------------------------------------------------------------
+
+// Weak pointer
+template< typename T >
+class weak_ptr
+{
+public:
+    weak_ptr();
+    virtual ~weak_ptr();
+
+    weak_ptr(const weak_ptr &other);
+    weak_ptr(weak_ptr &&other);
+    weak_ptr(const shared_ptr< T > &other);
+
+    weak_ptr& operator =(weak_ptr other);
+    weak_ptr& operator =(weak_ptr &&other) = default;
+    weak_ptr& operator =(const shared_ptr< T > &other);
+
+    void swap(weak_ptr &other);
+
+    shared_ptr< T > lock() const;
+    bool expired() const;
+    void reset() const;
+
+private:
+    // As for now, this pointer will be valid
+    // until all weak pointers will be destroyed even if managed
+    // object no longer valid.
+    mutable aux *m_aux;
+    mutable T *m_obj;
+};
+
+
+template< typename T >
+weak_ptr< T >::weak_ptr()
+    :m_aux{nullptr}
+    ,m_obj{nullptr}
+{
+}
+
+template< typename T >
+weak_ptr< T >::~weak_ptr()
+{
+    if (expired()) {
+        if (m_aux) {
+            reset();
+        }
+    }
+}
+
+template< typename T >
+weak_ptr< T >::weak_ptr(const weak_ptr &other)
+    :weak_ptr{}
+{
+    if (!other.expired()) {
+        m_obj = other.m_obj;
+        m_aux->weak_inc();
+    }
+}
+
+template< typename T >
+weak_ptr< T >::weak_ptr(weak_ptr &&other)
+    :weak_ptr{}
+{
+    swap(other);
+}
+
+template< typename T >
+weak_ptr< T >::weak_ptr(const shared_ptr<T> &other)
+    :m_aux{other.m_aux}
+    ,m_obj{other.m_obj}
+{
+    if (!expired()) {
+        m_aux->weak_inc();
+    }
+}
+
+template< typename T >
+weak_ptr< T >& weak_ptr< T >::operator =(weak_ptr< T > other)
+{
+    swap(other);
+    return *this;
+}
+
+template< typename T >
+weak_ptr< T >& weak_ptr< T >::operator =(const shared_ptr< T > &other)
+{
+    if (!expired())
+        reset();
+
+    m_aux = other.m_aux;
+    m_obj = other.m_obj;
+
+    if (!expired())
+        m_aux->weak_inc();
+
+    return *this;
+}
+
+template< typename T >
+shared_ptr< T > weak_ptr< T >::lock() const
+{
+    if (expired()) {
+        return nullptr;
+    } else {
+        // Weak counter already incremented
+        m_aux->inc();
+
+        shared_ptr< T > ptr;
+        ptr.m_aux = m_aux;
+        ptr.m_obj = m_obj;
+        return ptr;
+    }
+}
+
+template< typename T >
+bool weak_ptr< T >::expired() const
+{
+    if (!m_aux) {
+        return true;
+    }
+
+    // No more strong references
+    if (m_aux->ref() == 0) {
+        reset();
+        return true;
+    }
+
+    return false;
+}
+
+template< typename T >
+void weak_ptr< T >::reset() const
+{
+    // Valid object is required
+    assert(m_aux);
+    assert(m_obj);
+
+    if (m_aux->dec() == 0) {
+        m_aux->destroy();
+    }
+
+    m_aux = nullptr;
+    m_obj = nullptr;
+}
 
 }
 
