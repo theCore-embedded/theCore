@@ -47,26 +47,42 @@ static void rtos_task1(void *params)
     // as soon as default values for GPIO will be introduced
 
     fs_obj.mount_all();
-    {
-        auto fd = fs_obj.open_dir("/");
+
+    std::function< void(fs::dir_ptr fd, const char *dir) > traverse;
+
+    traverse = [&traverse](fs::dir_ptr fd, const char *dir) -> void {
         if (!fd) {
             ecl::cout << "Not found2!\n";
         }
 
+        int ret = fd->rewind();
+        assert(!ret);
+        ecl::cout << "-------------------------" << ecl::endl;
+        ecl::cout << "\nTraversing " << dir << ecl::endl;
+
         fs::inode_ptr node;
         char buf[16];
-        for (uint i = 0; i < 5; ++i) {
-            ecl::cout << "\nOne more time .... \n\n";
-            ret = fd->rewind();
-            assert(!ret);
 
-            while ((node = fd->next())) {
-                size_t read = node->get_name(buf, sizeof(buf));
-                ecl::cout << "TYPE: -> " << (int) node->get_type() << " READ -> "
-                          << (int) read << " NAME -> " << buf << ecl::endl;
+        while ((node = fd->next())) {
+            size_t read = node->get_name(buf, sizeof(buf));
+            auto type = node->get_type();
+            ecl::cout << "TYPE: -> " << (int) type << " READ -> "
+                      << (int) read << " NAME -> " << buf << ecl::endl;
+
+            if (type == fs::inode::type::dir) {
+                auto dd = node->open_dir();
+                if (dd)
+                    traverse(dd, buf);
             }
         }
-    }
+
+        ecl::cout << "-------------------------" << ecl::endl;
+        return;
+    };
+
+    auto dd = fs_obj.open_dir("/");
+    traverse(dd, "/");
+
 
 
     pcd8544< SPI_LCD_driver > lcd;
@@ -171,9 +187,9 @@ int main()
     assert(ret == pdPASS);
 #endif
 
-//    task_create(rtos_task1, "task0", 128);
-//    task_create(rtos_task1, "task1", 512);
-//    schedule_start();
+    //    task_create(rtos_task1, "task0", 128);
+    //    task_create(rtos_task1, "task1", 512);
+    //    schedule_start();
 
     rtos_task1(nullptr);
 

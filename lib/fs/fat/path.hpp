@@ -62,6 +62,7 @@ const char* path_erased< Alloc >::get_path() const
 
 // Allocates new path. If tail is not null then it will be added to
 // the end of resulting path
+// If trail is set, then trailing '/' will be added
 template< class Alloc >
 path_ptr allocate_path(const char *path, const char *tail, const Alloc &alloc)
 {
@@ -70,15 +71,25 @@ path_ptr allocate_path(const char *path, const char *tail, const Alloc &alloc)
     auto    char_alloc      = alloc.template rebind< char >();
     using   path_container  = path_erased< decltype(char_alloc) >;
     size_t  buf_sz          = strlen(path) + 1;
-    size_t  tail_sz         = tail ? strlen(tail) : 0 + 1;
-    char    *path_buf       = char_alloc.allocate(buf_sz + tail_sz);
+    bool    trailed         = (path[buf_sz - 2] == '/'); // Check if path ends with slash
+    size_t  tail_sz         = (tail ? strlen(tail) : 0) + 1;
+    char    *path_buf       = char_alloc.allocate(buf_sz + tail_sz + !trailed);
 
     assert(path_buf);
 
     std::copy(path, path + buf_sz, path_buf);
+
+    if (!trailed) {
+        // Overwrite null terminator
+        path_buf[buf_sz - 1] = '/';
+        // Advance pointer to prevent tail from overwriting slash
+        buf_sz++;
+    }
+
     if (tail) {
         // Overwrite null terminator
-        std::copy(tail, tail + tail_sz, path_buf + buf_sz - 1);
+        buf_sz--;
+        std::copy(tail, tail + tail_sz, path_buf + buf_sz);
         buf_sz += tail_sz;
     }
 

@@ -47,7 +47,8 @@ ssize_t file_inode::get_name(char *buf, size_t buf_sz) const
         }
     }
 
-    const char *start = path + i;
+    // Skip forward slash
+    const char *start = path + i + 1;
     // Reserve place for null terminator
     size_t to_copy = std::min(buf_sz - 1, path_len - i);
     const char *end = path + i + to_copy;

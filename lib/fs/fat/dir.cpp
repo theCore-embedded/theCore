@@ -33,14 +33,10 @@ fs::inode_ptr dir::next()
     }
 
     if (fno.fattrib & AM_DIR) {
-        size_t len = strlen(fno.fname);
-        // Place '/' character at the end
-        assert(len < sizeof(fno.fname) - 1);
-        fno.fname[len] = '/';
-        fno.fname[len + 1] = 0;
-
         auto ptr = ecl::allocate_shared< dir_inode, decltype(m_alloc) >
                 (m_alloc, m_fs, m_alloc, m_path->get_path(), fno.fname);
+
+        ptr->set_weak(ptr);
 
         return ptr;
     } else {

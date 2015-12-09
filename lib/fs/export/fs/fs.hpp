@@ -54,7 +54,7 @@ private:
             if (cur == path_len)
                 return nullptr;
 
-            auto p = strchr(path + cur, '/');
+            const char *p = strchr(path + cur, '/');
 
             if (p) {
                 len = p - (path + cur);
@@ -69,7 +69,7 @@ private:
                 }
 
                 // Skip following '/'
-                cur += len + 1;
+                cur += len;
                 expected = inode::type::dir;
 
             } else {
@@ -81,7 +81,7 @@ private:
                     // TODO: fix it
                     assert(0);
                 } else {
-                    std::copy(path + cur, p, component);
+                    std::copy(path + cur, path + len, component);
                     component[len] = 0;
                 }
 

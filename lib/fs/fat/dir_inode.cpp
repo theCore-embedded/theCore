@@ -34,7 +34,12 @@ fs::dir_ptr dir_inode::open_dir()
 
     FRESULT res = pf_opendir(m_fs, &fat_dir, m_path->get_path());
     // TODO: graceful error handing
-    assert(res == FR_OK);
+    // assert(res == FR_OK);
+    if (res != FR_OK) {
+        ecl::cout << "Error opening dir: " << m_path->get_path()
+                  << " : " << res << ecl::endl;
+        return nullptr;
+    }
 
     auto inode = my_ptr.lock();
     assert(inode);
@@ -62,13 +67,13 @@ ssize_t dir_inode::get_name(char *buf, size_t buf_sz) const
     const char *start = path;
     const char *end;
 
-    assert(path[path_len - 1] == '/');
+    //assert(path[path_len - 1] == '/');
     end = path + path_len;
 
     // Skip trailing '/'
     for (uint i = path_len - 1; i > 0; --i) {
         if (path[i - 1] == '/') {
-            start = path + i - 1; // Assuming that 'i' is an index of the array
+            start = path + i; // Skipping forward slash
             break;
         }
     }

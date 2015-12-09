@@ -32,9 +32,10 @@ void operator delete(void *, unsigned int)
 #define STACK_CHK_GUARD 0x595e9fbd94fda766
 #endif
 
+__attribute__((used))
 uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
 
-extern "C" __attribute__((noreturn))
+extern "C" __attribute__((noreturn)) __attribute__((used))
 void __stack_chk_fail(void)
 {
     ecl::cout << "Fail!!!" << ecl::endl;
