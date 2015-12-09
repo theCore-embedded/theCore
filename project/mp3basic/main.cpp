@@ -1,6 +1,3 @@
-#include <FreeRTOS.h>
-#include <task.h>
-
 #include <target/spi.hpp>
 #include <target/pinconfig.hpp>
 #include <target/gpio.hpp>
@@ -34,7 +31,7 @@ static void rtos_task0(void *params)
         LED_Red::toggle();
         // It should blink at rate 1 Hz,
         // if not - something wrong with clock setup
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        delay(1000);
     }
 }
 
@@ -52,7 +49,25 @@ static void rtos_task1(void *params)
     fs_obj.mount_all();
     {
         auto fd = fs_obj.open_dir("/");
+        if (!fd) {
+            ecl::cout << "Not found2!\n";
+        }
+
+        fs::inode_ptr node;
+        char buf[16];
+        for (uint i = 0; i < 5; ++i) {
+            ecl::cout << "\nOne more time .... \n\n";
+            ret = fd->rewind();
+            assert(!ret);
+
+            while ((node = fd->next())) {
+                size_t read = node->get_name(buf, sizeof(buf));
+                ecl::cout << "TYPE: -> " << (int) node->get_type() << " READ -> "
+                          << (int) read << " NAME -> " << buf << ecl::endl;
+            }
+        }
     }
+
 
     pcd8544< SPI_LCD_driver > lcd;
 #if 0
@@ -141,16 +156,30 @@ static void rtos_task1(void *params)
 
 int main()
 {
-    // Let the fun begin!
-    int ret = xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+    int ret;
+
+#if 0
+    //     Let the fun begin!
+    ret = xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
     ecl::cout << "\ntask0 ret: " << ret << ecl::endl;
     assert(ret == pdPASS);
+#endif
 
+#if 0
     ret = xTaskCreate(rtos_task1, "task1", 256, NULL, tskIDLE_PRIORITY, NULL);
     ecl::cout << "task1 ret: " << ret << ecl::endl;;
     assert(ret == pdPASS);
+#endif
 
-    vTaskStartScheduler();
+//    task_create(rtos_task1, "task0", 128);
+//    task_create(rtos_task1, "task1", 512);
+//    schedule_start();
+
+    rtos_task1(nullptr);
+
+    (void) ret;
+    (void) rtos_task0;
+    (void) rtos_task1;
 
     return 0;
 }

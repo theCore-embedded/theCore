@@ -11,6 +11,7 @@ namespace fs
 
 
     using inode_ptr = ecl::shared_ptr< inode >;
+    using inode_weak = ecl::weak_ptr< inode >;
     using file_ptr = ecl::shared_ptr< file_descriptor >;
     using dir_ptr = ecl::shared_ptr< dir_descriptor >;
 }

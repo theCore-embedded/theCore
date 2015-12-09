@@ -75,7 +75,7 @@ typedef struct {
     WORD	fdate;		/* Last modified date */
     WORD	ftime;		/* Last modified time */
     BYTE	fattrib;	/* Attribute */
-    char	fname[13];	/* File name */
+    char	fname[14];	/* File name, additional byte for '/' character */
 } FILINFO;
 
 

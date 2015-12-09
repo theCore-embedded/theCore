@@ -83,6 +83,7 @@ fs::inode_ptr petit< Block >::mount()
     }
 
     auto iptr = ecl::allocate_shared< dir_inode >(m_alloc, &m_fat, m_alloc);
+    iptr->set_weak(iptr);
 
     // TODO;
     return iptr;

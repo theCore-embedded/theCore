@@ -138,9 +138,8 @@ shared_ptr< T >::~shared_ptr()
 {
     if (m_aux) {
         if (!m_aux->dec()) {
+            m_obj->~T();
             m_aux->destroy();
-        } else {
-            m_aux->dec();
         }
     }
 }
@@ -177,7 +176,7 @@ template< typename T >
 shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
 {
     if (&other != this) {
-        if (unique()) {
+        if (!m_aux->dec()) {
             // Release the resource
             if (m_aux) {
                 m_aux->destroy();
@@ -407,9 +406,7 @@ template< typename T >
 weak_ptr< T >::~weak_ptr()
 {
     if (expired()) {
-        if (m_aux) {
-            reset();
-        }
+        // Do nothing, already expired...
     }
 }
 
@@ -486,7 +483,7 @@ bool weak_ptr< T >::expired() const
     }
 
     // No more strong references
-    if (m_aux->ref() == 0) {
+    if (!m_aux->ref()) {
         reset();
         return true;
     }
@@ -501,7 +498,7 @@ void weak_ptr< T >::reset() const
     assert(m_aux);
     assert(m_obj);
 
-    if (m_aux->dec() == 0) {
+    if (!m_aux->weak_dec()) {
         m_aux->destroy();
     }
 

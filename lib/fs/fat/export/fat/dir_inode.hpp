@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <fs/inode.hpp>
+#include <fs/types.hpp>
 #include <cstdint>
 
 #include "src/pff.h"
@@ -29,9 +30,9 @@ public:
     virtual type get_type() const override;
     virtual fs::dir_ptr open_dir() override;
     virtual ssize_t size() const override;
-    virtual ssize_t get_name(const char *buf, size_t buf_sz) const override;
+    virtual ssize_t get_name(char *buf, size_t buf_sz) const override;
 
-    int set_weak(fs::inode_ptr *ptr);
+    int set_weak(const fs::inode_ptr &ptr);
 
 private:
     // Holds a reference to a path string and manages its deallocation
@@ -40,8 +41,7 @@ private:
     FATFS      *m_fs;   // The filesystem object
     // Allows to pass this reference to a dir descriptor without increasing
     // a reference counter to prevent cycle dependency.
-    fs::inode_ptr *my_ptr; // HACK!!!! should be changed to weak_ptr ASAP!
-
+    fs::inode_weak my_ptr;
 };
 
 }

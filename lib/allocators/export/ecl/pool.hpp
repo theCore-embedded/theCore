@@ -39,19 +39,22 @@ T* pool_base::aligned_alloc(size_t n)
 {
     T *p = reinterpret_cast< T* > (real_alloc(n, alignof(T), sizeof(T)));
 
+#if 0
     ecl::cout << "alloc " << n << " x " << sizeof(T) << " = "
               << n * sizeof(T) << " bytes from " << (int) p
               << ecl::endl;
+#endif
     return p;
 }
 
 template< typename T >
 void pool_base::deallocate(T *p, size_t n)
 {
+#if 0
     ecl::cout << "dealloc " << n << " x " << sizeof(T) << " = "
               << n * sizeof(T) << " bytes from " << (int) p
               << ecl::endl;
-
+#endif
     real_dealloc(reinterpret_cast< uint8_t *>(p), n, sizeof(T));
 }
 

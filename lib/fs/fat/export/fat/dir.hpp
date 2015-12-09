@@ -5,6 +5,8 @@
 #include <fs/inode.hpp>
 
 #include "src/pff.h"
+#include "fat/types.hpp"
+#include "../../path.hpp"
 
 namespace fat
 {
@@ -12,8 +14,9 @@ namespace fat
 class dir : public fs::dir_descriptor
 {
 public:
-    dir(const fs::inode_ptr &node, const DIR &fat_dir);
-    ~dir();
+    dir(const fs::inode_ptr &node, FATFS *fs, const allocator &alloc,
+        const DIR &fat_dir, fat::path_ptr path);
+    virtual ~dir();
 
     // Next entity in a dir
     // nullptr returned if no more items
@@ -24,7 +27,10 @@ public:
 
 private:
     // TBD
-    DIR    m_fdir;
+    FATFS       *m_fs;
+    allocator   m_alloc;
+    DIR         m_fdir;
+    path_ptr    m_path;
 };
 
 

@@ -31,7 +31,7 @@ public:
     // Gets a name of an entity, returns bytes written excluding null character.
     // If truncation occur then it will return amount bytes that would have
     // been written if enough space had been avaliable.
-	virtual ssize_t get_name(const char *buf, size_t buf_sz) const = 0;
+    virtual ssize_t get_name(char *buf, size_t buf_sz) const = 0;
 
     /*
      TODO:

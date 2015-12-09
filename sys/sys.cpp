@@ -1,6 +1,3 @@
-#include <FreeRTOS.h>
-#include <task.h>
-
 #include "sys/pin_cfgs.h"
 
 #include <cstdint>
@@ -14,22 +11,6 @@ void vTaskSwitchContext( void );
 
 // TODO: decide if to keep this here or not
 
-extern "C" void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                    signed char *pcTaskName )
-{
-    (void) xTask;
-    ecl::cout << "Stack is overflowed by: " << (char *)pcTaskName << ecl::endl;
-    for(;;);
-}
-
-extern "C" void vAssertCalled(const char *file, int line)
-{
-    (void) file;
-    (void) line;
-    //ecl::cout << "FreeRTOS assert failed: " << file << ':' << line;
-    for(;;);
-}
-
 // TODO: move it somewhere
 void operator delete(void *)
 {
@@ -42,6 +23,22 @@ void operator delete(void *, unsigned int)
 {
     // Abort - delete is forbidden
     for (;;);
+}
+
+
+#if UINT32_MAX == UINTPTR_MAX
+#define STACK_CHK_GUARD 0xe2dee396
+#else
+#define STACK_CHK_GUARD 0x595e9fbd94fda766
+#endif
+
+uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
+
+extern "C" __attribute__((noreturn))
+void __stack_chk_fail(void)
+{
+    ecl::cout << "Fail!!!" << ecl::endl;
+    for(;;);
 }
 
 namespace ecl {

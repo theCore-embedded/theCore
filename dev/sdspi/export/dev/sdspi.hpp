@@ -785,7 +785,6 @@ template< class SPI_dev, class GPIO_CS >
 int sd_spi< SPI_dev, GPIO_CS >::open_card()
 {
     int SD_ret;
-    SD_ret = software_reset();
     if ((SD_ret = software_reset()) < 0) {
         ecl::cout << "Failed to reset a card" << ecl::endl;
         return SD_ret;

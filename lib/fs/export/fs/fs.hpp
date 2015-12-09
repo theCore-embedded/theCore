@@ -149,6 +149,7 @@ dir_ptr vfs< Fs... >::open_dir(const char *path)
     auto node = path_to_inode(path);
     if (!node || node->get_type() != inode::type::dir) {
         // Not found :(
+        ecl::cout << "Not found!\n";
         return nullptr;
     }
 

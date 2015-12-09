@@ -11,7 +11,7 @@ namespace fs
 class dir_descriptor
 {
 public:
-    dir_descriptor(const inode_ptr &node);
+    dir_descriptor(const inode_weak &node);
     virtual ~dir_descriptor();
 
 
