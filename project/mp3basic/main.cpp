@@ -23,6 +23,7 @@ constexpr const char fat_root[] = "/";
 using Block = sd_spi< SPI_LCD_driver,  SDSPI_CS >;
 using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
 static fs::vfs< Fat > fs_obj;
+pcd8544< SPI_LCD_driver > lcd;
 
 static void rtos_task0(void *params)
 {
@@ -83,17 +84,10 @@ static void rtos_task1(void *params)
     auto dd = fs_obj.open_dir("/");
     traverse(dd, "/");
 
-
-
-    pcd8544< SPI_LCD_driver > lcd;
-#if 0
     lcd.init();
     lcd.open();
     lcd.clear();
     lcd.flush();
-#endif
-
-
 
     for (;;) {
         ecl::cin >> c;
@@ -179,19 +173,17 @@ int main()
     ret = xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
     ecl::cout << "\ntask0 ret: " << ret << ecl::endl;
     assert(ret == pdPASS);
-#endif
 
-#if 0
     ret = xTaskCreate(rtos_task1, "task1", 256, NULL, tskIDLE_PRIORITY, NULL);
     ecl::cout << "task1 ret: " << ret << ecl::endl;;
     assert(ret == pdPASS);
 #endif
 
-    //    task_create(rtos_task1, "task0", 128);
-    //    task_create(rtos_task1, "task1", 512);
-    //    schedule_start();
+    task_create(rtos_task0, "task0", 128);
+    task_create(rtos_task1, "task1", 512);
+    schedule_start();
 
-    rtos_task1(nullptr);
+    //rtos_task1(nullptr);
 
     (void) ret;
     (void) rtos_task0;
