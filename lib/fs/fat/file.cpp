@@ -5,6 +5,7 @@ using namespace fat;
 file::file(const fs::inode_weak &node, FATFS *fs)
     :fs::file_descriptor{node}
     ,m_fs{fs}
+    ,m_opened{true} // When constructed it is already opened
 {
 }
 
@@ -17,14 +18,16 @@ ssize_t file::read(uint8_t *buf, size_t size)
     assert(buf);
     assert(size); // TODO: for now
 
-    size_t read;
+    if (m_opened) {
+        size_t read;
 
-    FRESULT res = pf_read(m_fs, reinterpret_cast< void* >(buf), size, &read);
+        FRESULT res = pf_read(m_fs, reinterpret_cast< void* >(buf), size, &read);
 
-    if (res != FR_OK)
-        return -1;
+        if (res == FR_OK)
+            return read;
+    }
 
-    return read;
+    return -1;
 }
 
 ssize_t file::write(const uint8_t *buf, size_t size)
@@ -33,14 +36,16 @@ ssize_t file::write(const uint8_t *buf, size_t size)
     assert(size); // TODO: for now
 
 #if _USE_WRITE
-    size_t written;
+    if (m_opened) {
+        size_t written;
 
-    FRESULT res = pf_write(m_fs, reinterpret_cast< const void* >(buf), size, &written);
+        FRESULT res = pf_write(m_fs, reinterpret_cast< const void* >(buf), size, &written);
 
-    if (res != FR_OK)
-        return -1;
+        if (res != FR_OK)
+            return -1;
 
-    return written;
+        return written;
+    }
 #else
     return -1;
 #endif
@@ -68,5 +73,11 @@ off_t file::tell()
 
 int file::close()
 {
+    if (m_opened) {
+        m_opened = false;
+        return 0;
+    }
+
+    // Already closed
     return -1;
 }

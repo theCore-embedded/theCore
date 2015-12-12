@@ -23,6 +23,7 @@ public:
 
 private:
     FATFS *m_fs;
+    bool  m_opened;
 };
 
 }

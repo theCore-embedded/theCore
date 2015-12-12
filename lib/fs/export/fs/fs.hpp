@@ -56,6 +56,7 @@ private:
 
             const char *p = strchr(path + cur, '/');
 
+            // TODO: compact this
             if (p) {
                 len = p - (path + cur);
                 // Dir is found in path
