@@ -32,16 +32,11 @@ public:
     virtual ssize_t size() const override;
     virtual ssize_t get_name(char *buf, size_t buf_sz) const override;
 
-    int set_weak(const fs::inode_ptr &ptr);
-
 private:
     // Holds a reference to a path string and manages its deallocation
     allocator  m_alloc; // The allocator to create various objects
     path_ptr   m_path;  // The path of this inodeho
     FATFS      *m_fs;   // The filesystem object
-    // Allows to pass this reference to a dir descriptor without increasing
-    // a reference counter to prevent cycle dependency.
-    fs::inode_weak my_ptr;
 };
 
 }

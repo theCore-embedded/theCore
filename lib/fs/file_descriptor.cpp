@@ -3,9 +3,12 @@
 
 using namespace fs;
 
-file_descriptor::file_descriptor(const inode_ptr &node)
-	:m_inode(node)
+file_descriptor::file_descriptor(const inode_weak &node)
+    :m_inode(nullptr)
 {
+    assert(!node.expired());
+    m_inode = node.lock();
+    assert(m_inode);
 }
 
 file_descriptor::~file_descriptor()

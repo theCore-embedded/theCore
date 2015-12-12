@@ -5,10 +5,10 @@
 using namespace fat;
 
 dir_inode::dir_inode(FATFS *fs, const allocator &alloc, const char *path, const char *name)
-    :m_alloc(alloc)
+    :fs::inode()
+    ,m_alloc(alloc)
     ,m_path()
     ,m_fs(fs)
-    ,my_ptr(nullptr)
 {
     if (!path && !name) {
         m_path = allocate_path("/", nullptr, m_alloc);
@@ -92,10 +92,3 @@ ssize_t dir_inode::get_name(char *buf, size_t buf_sz) const
     return path_len;
 }
 
-int dir_inode::set_weak(const fs::inode_ptr &ptr)
-{
-    assert(my_ptr.expired());
-    assert(ptr);
-    my_ptr = ptr;
-    return 0;
-}

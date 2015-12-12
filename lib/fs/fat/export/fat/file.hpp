@@ -4,19 +4,25 @@
 #include <fs/file_descriptor.hpp>
 #include <fs/inode.hpp>
 
+#include "src/pff.h"
+
 namespace fat
 {
 
 class file : public fs::file_descriptor
 {
 public:
-    file(const fs::inode_ptr &node);
+    file(const fs::inode_weak &node, FATFS *fs);
     virtual ~file();
 
     virtual ssize_t read(uint8_t *buf, size_t size);
     virtual ssize_t write(const uint8_t *buf, size_t size);
     virtual int seek(off_t offt);
     virtual off_t tell();
+    virtual int close();
+
+private:
+    FATFS *m_fs;
 };
 
 }

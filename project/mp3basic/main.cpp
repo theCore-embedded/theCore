@@ -81,8 +81,21 @@ static void rtos_task1(void *params)
         return;
     };
 
-    auto dd = fs_obj.open_dir("/");
-    traverse(dd, "/");
+#if 0
+    {
+        auto dd = fs_obj.open_dir("/");
+        traverse(dd, "/");
+    }
+#endif
+
+#if 1
+    {
+        auto fd = fs_obj.open_file("/REFS/HEADS/MASTER");
+        assert(fd);
+        fd = fs_obj.open_file("/REFS/HEADS/MASTER");
+        assert(fd);
+    }
+#endif
 
     lcd.init();
     lcd.open();

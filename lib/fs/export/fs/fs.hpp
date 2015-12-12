@@ -73,15 +73,15 @@ private:
                 expected = inode::type::dir;
 
             } else {
-                // Found a file
-                len = path_len - cur - 1;
+                // File is found in the path
+                len = path_len - cur;
 
                 if (len >= 16) {
                     // Name is too long
                     // TODO: fix it
                     assert(0);
                 } else {
-                    std::copy(path + cur, path + len, component);
+                    std::copy(path + cur, path + cur + len, component);
                     component[len] = 0;
                 }
 
@@ -188,6 +188,11 @@ auto vfs< Fs... >::path_to_inode(const char *path)
 
         // Move to the next inode in path
         root = next;
+
+        // If we reached here then last node is a file and its name is
+        // the same as requested.
+        if (next->get_type() == fs::inode::type::file)
+            break;
     }
 
     return root;

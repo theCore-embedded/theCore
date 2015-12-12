@@ -43,6 +43,8 @@ fs::inode_ptr dir::next()
         auto ptr = ecl::allocate_shared< file_inode, decltype(m_alloc) >
                 (m_alloc, m_fs, m_alloc, m_path->get_path(), fno.fname);
 
+        ptr->set_weak(ptr);
+
         return ptr;
     }
 

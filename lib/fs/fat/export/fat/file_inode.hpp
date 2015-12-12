@@ -26,7 +26,7 @@ public:
 
 private:
     // TBD
-    FATFS       *m_fs;
+    FATFS       m_fs;
     path_ptr    m_path;     // Full path to a file
     allocator   m_alloc;    // Allocator for internal use
 

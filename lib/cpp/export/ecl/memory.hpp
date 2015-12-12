@@ -100,8 +100,10 @@ private:
             // Make sure there is no other references
             assert(!m_cnt);
 
+            ecl::cout << "aux not yet destroy" << ecl::endl;
             // No more weak references so this object may be deleted
             if (!m_weak) {
+                ecl::cout << "aux destroy" << ecl::endl;
                 auto allocator = m_alloc.template rebind< aux_alloc >();
                 allocator.deallocate(this, 1);
             }
@@ -137,9 +139,17 @@ template< typename T >
 shared_ptr< T >::~shared_ptr()
 {
     if (m_aux) {
-        if (!m_aux->dec()) {
+        if (unique()) {
+            // Object of T can contain weak reference of the same resourse.
+            // Thus it is prohibited to decrease counter before
+            // object desctruction.
             m_obj->~T();
+            // Now we can complete.
+            m_aux->dec();
             m_aux->destroy();
+            ecl::cout << "shrp dtor" << ecl::endl;
+        } else {
+            m_aux->dec();
         }
     }
 }
@@ -176,18 +186,18 @@ template< typename T >
 shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
 {
     if (&other != this) {
-        if (!m_aux->dec()) {
-            // Release the resource
-            if (m_aux) {
-                m_aux->destroy();
-                m_aux = nullptr;
+        if (m_aux) {
+            if (unique()) {
+                // Release the resource
                 m_obj->~T();
-                m_obj = nullptr;
+                // Object of T can contain weak reference of the same resourse.
+                // Thus it is prohibited to decrease counter before
+                // object desctruction.
+                m_aux->dec();
+                m_aux->destroy();
+            } else {
+                m_aux->dec();
             }
-        } else {
-            // If it is not a single shared pointer,
-            // then auxilary object is guaranteed to exist.
-            m_aux->dec();
         }
 
         m_aux = other.m_aux;
@@ -207,8 +217,6 @@ shared_ptr< T >::shared_ptr(shared_ptr< U > &other)
     :m_aux(other.m_aux)
     ,m_obj(other.m_obj)
 {
-    (void) other;
-
     if (m_aux)
         m_aux->inc();
     // Else do nothing. Copy constructing from empty shared pointer is allowed.
@@ -218,18 +226,18 @@ template< typename T >
 template< typename U >
 shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr< U > &other)
 {
-    if (unique()) {
-        // Release the resource
-        if (m_aux) {
-            m_aux->destroy();
-            m_aux = nullptr;
+    if (m_aux) {
+        if (unique()) {
+            // Release the resource
             m_obj->~T();
-            m_obj = nullptr;
+            // Object of T can contain weak reference of the same resourse.
+            // Thus it is prohibited to decrease counter before
+            // object desctruction.
+            m_aux->dec();
+            m_aux->destroy();
+        } else {
+            m_aux->dec();
         }
-    } else {
-        // If it is not single shrared pointer,
-        // then auxilary object is guaranteed to exist.
-        m_aux->dec();
     }
 
     m_aux = other.m_aux;
@@ -369,7 +377,7 @@ template< typename T >
 class weak_ptr
 {
 public:
-    weak_ptr();
+    constexpr weak_ptr();
     virtual ~weak_ptr();
 
     weak_ptr(const weak_ptr &other);
@@ -396,7 +404,7 @@ private:
 
 
 template< typename T >
-weak_ptr< T >::weak_ptr()
+constexpr weak_ptr< T >::weak_ptr()
     :m_aux{nullptr}
     ,m_obj{nullptr}
 {
@@ -405,9 +413,11 @@ weak_ptr< T >::weak_ptr()
 template< typename T >
 weak_ptr< T >::~weak_ptr()
 {
-    if (expired()) {
-        // Do nothing, already expired...
+    ecl::cout << "weak dtor" << ecl::endl;
+    if (!expired()) {
+        m_aux->weak_dec();
     }
+    // Do nothing here, already expired...
 }
 
 template< typename T >
@@ -416,6 +426,7 @@ weak_ptr< T >::weak_ptr(const weak_ptr &other)
 {
     if (!other.expired()) {
         m_obj = other.m_obj;
+        m_aux = other.m_aux;
         m_aux->weak_inc();
     }
 }
@@ -447,8 +458,11 @@ weak_ptr< T >& weak_ptr< T >::operator =(weak_ptr< T > other)
 template< typename T >
 weak_ptr< T >& weak_ptr< T >::operator =(const shared_ptr< T > &other)
 {
-    if (!expired())
-        reset();
+    if (!expired()) {
+        m_aux->weak_dec();
+        m_aux = nullptr;
+        m_obj = nullptr;
+    }
 
     m_aux = other.m_aux;
     m_obj = other.m_obj;
@@ -457,6 +471,13 @@ weak_ptr< T >& weak_ptr< T >::operator =(const shared_ptr< T > &other)
         m_aux->weak_inc();
 
     return *this;
+}
+
+template< typename T >
+void weak_ptr< T >::swap(weak_ptr< T > &other)
+{
+    std::swap(other.m_aux, this->m_aux);
+    std::swap(other.m_obj, this->m_obj);
 }
 
 template< typename T >
@@ -497,6 +518,8 @@ void weak_ptr< T >::reset() const
     // Valid object is required
     assert(m_aux);
     assert(m_obj);
+    // Must be called only if there are no more strong references
+    assert(!m_aux->ref());
 
     if (!m_aux->weak_dec()) {
         m_aux->destroy();

@@ -94,7 +94,7 @@ constexpr size_t petit< Block >::get_alloc_blk_size()
 {
     // Determine a size of allocations.
     // The maximum size will be used as block size for the pool
-
+#if 0
     using finode_allocator = ecl::pool_allocator< file_inode >;
     constexpr uint16_t finode_blk_sz
             = ecl::shared_allocation_size< file_inode, finode_allocator >::value;
@@ -114,6 +114,7 @@ constexpr size_t petit< Block >::get_alloc_blk_size()
     //	constexpr size_t max_size = dd_blk_sz > fd_blk_sz ? dd_blk_sz : fd_blk_sz;
     //	max_size = inode_blk_sz > max_size ? max_size : inode_blk_sz;
 
+
     constexpr uint16_t max_size = finode_blk_sz > dinode_blk_sz ?
                 finode_blk_sz : dinode_blk_sz;
 
@@ -124,6 +125,9 @@ constexpr size_t petit< Block >::get_alloc_blk_size()
     constexpr auto bits_in_int = sizeof(int) * 8;
     constexpr auto power = bits_in_int - __builtin_clz(max_size);
     return 1 << power;
+#else
+    return alignof(std::max_align_t);
+#endif
 }
 
 template< class Block >

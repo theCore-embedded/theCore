@@ -32,11 +32,18 @@ public:
     // If truncation occur then it will return amount bytes that would have
     // been written if enough space had been avaliable.
     virtual ssize_t get_name(char *buf, size_t buf_sz) const = 0;
+    // Assigns weak reference, so it can pass to descriptors, when they are
+    // created using open() and open_dir() methods.
+    int set_weak(const fs::inode_ptr &ptr);
 
     /*
      TODO:
      declare move(), copy(), create() and delete() operations
 	 */
+protected:
+    // Allows to pass this reference to a dir descriptor without increasing
+    // a reference counter to prevent cycle dependency.
+    fs::inode_weak my_ptr;
 };
 
 // TODO: move it somewhere

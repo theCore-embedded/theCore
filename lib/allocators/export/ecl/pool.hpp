@@ -39,7 +39,7 @@ T* pool_base::aligned_alloc(size_t n)
 {
     T *p = reinterpret_cast< T* > (real_alloc(n, alignof(T), sizeof(T)));
 
-#if 0
+#if 1
     ecl::cout << "alloc " << n << " x " << sizeof(T) << " = "
               << n * sizeof(T) << " bytes from " << (int) p
               << ecl::endl;
@@ -50,7 +50,7 @@ T* pool_base::aligned_alloc(size_t n)
 template< typename T >
 void pool_base::deallocate(T *p, size_t n)
 {
-#if 0
+#if 1
     ecl::cout << "dealloc " << n << " x " << sizeof(T) << " = "
               << n * sizeof(T) << " bytes from " << (int) p
               << ecl::endl;
@@ -88,6 +88,8 @@ private:
     bool is_free(size_t idx) const;
     // Get a pointer of the particular block.
     uint8_t* get_block(size_t idx);
+    // Debug routine
+    void print_stats() const;
 
     // Data buffer must be aligned to size of block,
     // this will reduce complexity of calculations.
@@ -152,6 +154,8 @@ uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_
         return get_block(i);
     }
 
+    print_stats();
+
     return nullptr;
 }
 
@@ -179,6 +183,8 @@ void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n, size_t obj_sz)
         assert(!is_free(to_free));
         mark(to_free, false);
     }
+
+    print_stats();
 }
 
 
@@ -230,6 +236,35 @@ uint8_t *pool< blk_sz, blk_cnt >::get_block(size_t idx)
 {
     assert(idx < blk_cnt);
     return m_data.begin() + idx * blk_sz;
+}
+
+template< size_t blk_sz, size_t blk_cnt >
+void pool< blk_sz, blk_cnt >::print_stats() const
+{
+#if 1
+    // Print memory stats for whole pool
+    size_t i = 0;
+    size_t used = 0;
+    size_t streak = 0;
+    size_t max_streak = 0;
+    for (i = 0; i < blk_cnt; ++i) {
+        if (!is_free(i)) {
+            used++;
+            max_streak = std::min(streak, max_streak);
+            streak = 0;
+        } else {
+            streak++;
+        }
+    }
+
+    ecl::cout << "_________________________" << ecl::endl;
+    ecl::cout << "total blk:\t\t"        << (int) blk_cnt << ecl::endl;
+    ecl::cout << "blk sz:\t\t\t"         << (int) blk_sz << ecl::endl;
+    ecl::cout << "used:\t\t\t"           << (int) used << ecl::endl;
+    ecl::cout << "longest streak:\t\t"   << (int) streak << ecl::endl;
+
+#endif
+
 }
 
 //------------------------------------------------------------------------------
