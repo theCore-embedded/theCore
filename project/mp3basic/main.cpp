@@ -52,9 +52,7 @@ static void rtos_task1(void *params)
     std::function< void(fs::dir_ptr fd, const char *dir) > traverse;
 
     traverse = [&traverse](fs::dir_ptr fd, const char *dir) -> void {
-        if (!fd) {
-            ecl::cout << "Not found2!\n";
-        }
+        assert(fd);
 
         int ret = fd->rewind();
         assert(!ret);
@@ -90,10 +88,27 @@ static void rtos_task1(void *params)
 
 #if 1
     {
-        auto fd = fs_obj.open_file("/REFS/HEADS/MASTER");
-        assert(fd);
-        fd = fs_obj.open_file("/REFS/HEADS/MASTER");
-        assert(fd);
+        auto read_lambda = [](const char *name, size_t amount) {
+            ecl::cout << "\n *** Reading " << name << ecl::endl;
+
+            auto fd = fs_obj.open_file(name);
+            assert(fd);
+
+            char buf[8];
+            ssize_t read = 1;
+
+            while (read && amount--) {
+                read = fd->read((uint8_t*)buf, sizeof(buf) - 1);
+                assert(read >= 0);
+                buf[read] = 0;
+                ecl::cout << buf;
+            }
+
+            ecl::cout << ecl::endl;
+        };
+
+        read_lambda("/MAN/MAKEFILE.IN", 1000);
+        read_lambda("/REFS/HEADS/MASTER", 1000);
     }
 #endif
 
@@ -193,7 +208,7 @@ int main()
 #endif
 
     task_create(rtos_task0, "task0", 128);
-    task_create(rtos_task1, "task1", 512);
+    task_create(rtos_task1, "task1", 600);
     schedule_start();
 
     //rtos_task1(nullptr);

@@ -39,7 +39,7 @@ T* pool_base::aligned_alloc(size_t n)
 {
     T *p = reinterpret_cast< T* > (real_alloc(n, alignof(T), sizeof(T)));
 
-#if 1
+#if 0
     ecl::cout << "alloc " << n << " x " << sizeof(T) << " = "
               << n * sizeof(T) << " bytes from " << (int) p
               << ecl::endl;
@@ -50,7 +50,7 @@ T* pool_base::aligned_alloc(size_t n)
 template< typename T >
 void pool_base::deallocate(T *p, size_t n)
 {
-#if 1
+#if 0
     ecl::cout << "dealloc " << n << " x " << sizeof(T) << " = "
               << n * sizeof(T) << " bytes from " << (int) p
               << ecl::endl;
@@ -241,7 +241,7 @@ uint8_t *pool< blk_sz, blk_cnt >::get_block(size_t idx)
 template< size_t blk_sz, size_t blk_cnt >
 void pool< blk_sz, blk_cnt >::print_stats() const
 {
-#if 1
+#if 0
     // Print memory stats for whole pool
     size_t i = 0;
     size_t used = 0;

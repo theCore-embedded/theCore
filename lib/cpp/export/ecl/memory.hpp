@@ -100,10 +100,8 @@ private:
             // Make sure there is no other references
             assert(!m_cnt);
 
-            ecl::cout << "aux not yet destroy" << ecl::endl;
             // No more weak references so this object may be deleted
             if (!m_weak) {
-                ecl::cout << "aux destroy" << ecl::endl;
                 auto allocator = m_alloc.template rebind< aux_alloc >();
                 allocator.deallocate(this, 1);
             }
@@ -147,7 +145,6 @@ shared_ptr< T >::~shared_ptr()
             // Now we can complete.
             m_aux->dec();
             m_aux->destroy();
-            ecl::cout << "shrp dtor" << ecl::endl;
         } else {
             m_aux->dec();
         }
@@ -413,7 +410,6 @@ constexpr weak_ptr< T >::weak_ptr()
 template< typename T >
 weak_ptr< T >::~weak_ptr()
 {
-    ecl::cout << "weak dtor" << ecl::endl;
     if (!expired()) {
         m_aux->weak_dec();
     }
