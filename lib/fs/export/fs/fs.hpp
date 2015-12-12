@@ -4,6 +4,7 @@
 #include "fs_descriptor.hpp"
 
 #include <tuple>
+#include <ecl/utils.hpp>
 
 namespace fs
 {
@@ -46,7 +47,7 @@ private:
             inode::type expected;
 
 
-            // Find segment start
+            // Find a start of the segment
             while (path[cur] == '/') {
                 cur++;
             }
@@ -86,11 +87,24 @@ private:
                     component[len] = 0;
                 }
 
+                cur += len;
+
                 expected = inode::type::file;
             }
 
             next_type = expected;
             return component;
+        }
+
+        // Obvious
+        size_t get_cur_idx() const
+        {
+            return cur;
+        }
+
+        size_t get_len() const
+        {
+            return path_len;
         }
 
     private:
@@ -100,6 +114,11 @@ private:
         char        component[16]; // TODO: clarify size
     };
 
+    // Get root node by the path to its element.
+    // It changes the path pointer so it will point to the root
+    // of a filesystem.
+    auto get_root_node(const char *&path);
+    // Iterates over tuple
     // Resolves path to inode
     auto path_to_inode(const char *path);
     // Resolves the name of item in current dir to the inode
@@ -123,8 +142,12 @@ vfs< Fs... >::~vfs()
 template< class ...Fs >
 int vfs< Fs... >::mount_all()
 {
-    auto &fs = std::get< 0 >(m_fses);
-    fs.mount();
+    auto mounter = [](auto &fs) {
+         fs.mount();
+    };
+
+    ecl::for_each(m_fses, mounter);
+
     return 0;
 }
 
@@ -160,14 +183,62 @@ dir_ptr vfs< Fs... >::open_dir(const char *path)
 //------------------------------------------------------------------------------
 
 template< class ...Fs >
-auto vfs< Fs... >::path_to_inode(const char *path)
+auto vfs< Fs... >::get_root_node(const char *&path)
 {
     assert(path);
 
-    // TODO: use specific filesystem, instead of 0th fs
-    auto &fs = std::get< 0 >(m_fses);
-    auto root = fs.get_root();
+    inode_ptr root;
+    size_t last_match = 0;
 
+    // Picks most appropriate inode
+    auto fn = [&root, &last_match, path](auto &fs) {
+        constexpr const char *mnt_point = fs.mnt_point;
+
+        // Iterate over two paths, trying to find best match
+
+        auto dummy_type = inode::type::dir;
+        path_iter m{mnt_point};
+        path_iter p{path};
+
+        const char *mnt_seg;
+        const char *path_seg;
+
+        while ((mnt_seg = m.next(dummy_type)) && (path_seg = p.next(dummy_type))) {
+            if (strcmp(mnt_seg, path_seg)) {
+                // Token mismatch
+                break;
+            }
+        }
+
+        // Whole mount path was iterated, meaning that it
+        // can be a possible match
+        if (!mnt_seg) {
+            // An incoming path can contain multiple slashes
+            // thus current index must be taken from it rather than from
+            // a mount point.
+            auto match = p.get_cur_idx();
+
+            // Check if it is a better match.
+            if (match > last_match) {
+                root = fs.get_root();
+                last_match = match;
+            }
+        }
+    };
+
+    ecl::for_each(m_fses, fn);
+
+    // Properly advance a path
+    path += last_match;
+
+    return root;
+}
+
+template< class ...Fs >
+auto vfs< Fs... >::path_to_inode(const char *path)
+{
+    assert(path);
+    auto root = get_root_node(path);
     assert(root);
 
     path_iter iter{path};

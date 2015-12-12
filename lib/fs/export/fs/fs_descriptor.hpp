@@ -19,7 +19,7 @@ public:
 
     // Holds mount point
     // TODO: use it!
-	static constexpr char *m_mount_point = mount_point;
+    static constexpr const char *mnt_point = mount_point;
 
 private:
     Fs           m_fs;

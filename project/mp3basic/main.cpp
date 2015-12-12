@@ -19,7 +19,7 @@
 
 #include "sprite.hpp"
 
-constexpr const char fat_root[] = "/";
+constexpr const char fat_root[] = "/FAT";
 using Block = sd_spi< SPI_LCD_driver,  SDSPI_CS >;
 using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
 static fs::vfs< Fat > fs_obj;
@@ -81,8 +81,8 @@ static void rtos_task1(void *params)
 
 #if 1
     {
-        auto dd = fs_obj.open_dir("/");
-        traverse(dd, "/");
+        auto dd = fs_obj.open_dir("/FAT");
+        traverse(dd, "/FAT");
     }
 #endif
 
@@ -107,8 +107,8 @@ static void rtos_task1(void *params)
             ecl::cout << ecl::endl;
         };
 
-        read_lambda("/MAN/MAKEFILE.IN", 1000);
-        read_lambda("/REFS/HEADS/MASTER", 1000);
+        read_lambda("/FAT/MAN/MAKEFILE.IN", 1000);
+        read_lambda("/FAT/REFS/HEADS/MASTER", 1000);
     }
 #endif
 
