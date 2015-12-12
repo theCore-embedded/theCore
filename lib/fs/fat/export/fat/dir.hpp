@@ -24,6 +24,8 @@ public:
     // Rewinds to the start of the dir
     // -1 if error, 0 otherwise
     virtual int rewind() override;
+    // Closes a dir
+    virtual int close() override;
 
 private:
     // TBD
@@ -31,6 +33,7 @@ private:
     allocator   m_alloc;
     DIR         m_fdir;
     path_ptr    m_path;
+    bool        m_opened;
 };
 
 

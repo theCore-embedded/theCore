@@ -21,6 +21,8 @@ public:
 	// Rewinds to the start of the dir
 	// -1 if error, 0 otherwise
 	virtual int rewind() = 0;
+    // Closes a descriptor
+    virtual int close() = 0;
 
 protected:
     // Associated inode
