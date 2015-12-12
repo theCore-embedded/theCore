@@ -81,7 +81,7 @@ static void rtos_task1(void *params)
         return;
     };
 
-#if 0
+#if 1
     {
         auto dd = fs_obj.open_dir("/");
         traverse(dd, "/");

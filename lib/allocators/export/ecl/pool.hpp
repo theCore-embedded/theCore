@@ -122,7 +122,7 @@ uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_
     size_t i = 0;
     size_t j;
 
-    // Convert a count of objects to a block count
+    // Convert a count of objects to a block count with ceiling.
     n = n * obj_sz / blk_sz + 1;
 
     // Convert count to offset
@@ -173,8 +173,8 @@ void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n, size_t obj_sz)
 
     size_t idx = (p - start) / blk_sz;
     size_t cnt = (end - p)   / blk_sz;
-    // Convert bytes to blocks
-    n = n * obj_sz / blk_sz;
+    // Convert a count of objects to a block count with ceiling.
+    n = n * obj_sz / blk_sz + 1;
 
     assert(n <= cnt);
 
@@ -249,13 +249,18 @@ void pool< blk_sz, blk_cnt >::print_stats() const
     size_t max_streak = 0;
     for (i = 0; i < blk_cnt; ++i) {
         if (!is_free(i)) {
+            ecl::cout << 'x';
             used++;
             max_streak = std::min(streak, max_streak);
             streak = 0;
         } else {
+            ecl::cout << 'o';
             streak++;
         }
     }
+
+    ecl::cout << "\r\n";
+
 
     ecl::cout << "_________________________" << ecl::endl;
     ecl::cout << "total blk:\t\t"        << (int) blk_cnt << ecl::endl;
