@@ -1,3 +1,4 @@
+// TODO: rename it to 'file descriptor'
 #ifndef FATFS_FILE_HPP_
 #define FATFS_FILE_HPP_
 
@@ -17,13 +18,13 @@ public:
 
     virtual ssize_t read(uint8_t *buf, size_t size);
     virtual ssize_t write(const uint8_t *buf, size_t size);
-    virtual int seek(off_t offt);
+    virtual int seek(off_t offt, seekdir way = seekdir::beg);
     virtual off_t tell();
     virtual int close();
 
 private:
     FATFS *m_fs;
-    bool  m_opened;
+    bool  m_opened; // TODO: remove it and use FATFS::flag instead
 };
 
 }

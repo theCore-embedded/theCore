@@ -1,3 +1,4 @@
+// TODO: rename it to 'file descriptor'
 #include "fat/file.hpp"
 
 using namespace fat;
@@ -51,16 +52,36 @@ ssize_t file::write(const uint8_t *buf, size_t size)
 #endif
 }
 
-int file::seek(off_t offt)
+int file::seek(off_t offt, seekdir way)
 {
 #if _USE_LSEEK
-    FRESULT res;
+    if (m_opened) {
+        FRESULT res;
 
-    res = pf_lseek(m_fs, offt);
-    if (res == FR_OK)
-        return 0;
+        off_t top_offt;
+
+        switch (way) {
+        case seekdir::beg:
+            top_offt = offt;
+            break;
+        case seekdir::cur:
+            top_offt = m_fs->fptr + offt;
+            break;
+        case seekdir::end:
+            top_offt = m_fs->fsize + offt;
+            break;
+        default:
+            return -1;
+        }
+
+        res = pf_lseek(m_fs, top_offt);
+        if (res == FR_OK)
+            return 0;
+
+    }
 #else
     (void) offt;
+    (void) way;
 #endif
 
     return -1;
@@ -68,6 +89,11 @@ int file::seek(off_t offt)
 
 off_t file::tell()
 {
+#if _USE_LSEEK
+    if (m_opened) {
+        return m_fs->fptr;
+    }
+#endif
     return -1;
 }
 
