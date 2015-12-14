@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
+## Qt creator hack
+file(GLOB_RECURSE ALL_HEADERS *.hpp *.h)
+add_custom_target(mp3basic_dummy_target SOURCES "${ALL_HEADERS}")
+## EO hack
+
 # Our project sources
 add_executable(mp3basic main.cpp)
 

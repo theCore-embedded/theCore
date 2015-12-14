@@ -15,15 +15,13 @@
 #include <fat/fs.hpp>
 #include <fs/fs.hpp>
 
-#include <tuple>
-
 #include "sprite.hpp"
 
 constexpr const char fat_root[] = "/fat";
-using Block = sd_spi< SPI_LCD_driver,  SDSPI_CS >;
+using Block = sd_spi< SPI_LCD_driver, SDSPI_CS >;
 using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
 static fs::vfs< Fat > fs_obj;
-pcd8544< SPI_LCD_driver > lcd;
+static pcd8544< SPI_LCD_driver > lcd;
 
 static void rtos_task0(void *params)
 {
@@ -79,14 +77,13 @@ static void rtos_task1(void *params)
         return;
     };
 
-#if 1
+    // Directory traversing sample
     {
         auto dd = fs_obj.open_dir("/fat");
         traverse(dd, "/fat");
     }
-#endif
 
-#if 1
+    // Read a file sample
     {
         auto read_lambda = [](const char *name, size_t amount) {
             ecl::cout << "\n *** Reading " << name << ecl::endl;
@@ -110,7 +107,6 @@ static void rtos_task1(void *params)
         read_lambda("/fat/man/makefile.in", 1000);
         read_lambda("/fat/refs/heads/master", 1000);
     }
-#endif
 
     lcd.init();
     lcd.open();
