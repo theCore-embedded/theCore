@@ -12,5 +12,10 @@ memcpy.c
 memmove.c
 strcmp.c
 strchr.c
-strlen.c)
+strlen.c
+isupper.c
+islower.c
+isalpha.c
+tolower.c
+)
 target_include_directories(emc PUBLIC export)

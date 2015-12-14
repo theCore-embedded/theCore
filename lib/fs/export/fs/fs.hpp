@@ -204,7 +204,9 @@ auto vfs< Fs... >::get_root_node(const char *&path)
         const char *path_seg;
 
         while ((mnt_seg = m.next(dummy_type)) && (path_seg = p.next(dummy_type))) {
-            if (strcmp(mnt_seg, path_seg)) {
+            // TODO: most of FSes are case sensitive.
+            // This must be optionally be supported by checking special flags
+            if (strcmpi(mnt_seg, path_seg)) {
                 // Token mismatch
                 break;
             }
@@ -296,7 +298,9 @@ auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
             assert(0);
         }
 
-        if (!strcmp(inode_name, name)) {
+        // TODO: most of FSes are case sensitive.
+        // This must be optionally be supported by checking special flags
+        if (!strcmpi(inode_name, name)) {
             // Item found!
             return next;
         }
