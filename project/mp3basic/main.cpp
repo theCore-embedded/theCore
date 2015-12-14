@@ -3,34 +3,25 @@
 #include <target/gpio.hpp>
 #include <dev/pcd8544.hpp>
 #include <dev/sdspi.hpp>
-
 #include <functional>
 #include <utility>
 
-#include <FreeRTOS.h>
-#include <task.h>
+#include <fat/file_inode.hpp>
+#include <fat/fs.hpp>
 #include <ecl/assert.hpp>
-#include <ecl/slab.hpp>
+#include <ecl/pool.hpp>
+#include <fs/inode.hpp>
+#include <fs/fs_descriptor.hpp>
+#include <fat/fs.hpp>
+#include <fs/fs.hpp>
 
 #include "sprite.hpp"
 
-// allocator test object
-struct dummy
-{
-    uint8_t obj;
-};
-
-uint8_t slab[25];
-ecl::slab_allocator< dummy > allocator(slab, sizeof(slab));
-
-// Allocator test itself
-void test_alloc(size_t sz)
-{
-    assert(1);
-    dummy *ptr = allocator.allocate(sz);
-    ecl::cout << "Ptr: " << (int) ptr << ecl::endl;
-    //assert(ptr >= (dummy*)slab && ptr < (dummy*)(slab + sizeof(slab)));
-}
+constexpr const char fat_root[] = "/fat";
+using Block = sd_spi< SPI_LCD_driver, SDSPI_CS >;
+using Fat   = fs::fs_descriptor< fat_root, fat::petit< Block > >;
+static fs::vfs< Fat > fs_obj;
+static pcd8544< SPI_LCD_driver > lcd;
 
 static void rtos_task0(void *params)
 {
@@ -39,10 +30,9 @@ static void rtos_task0(void *params)
         LED_Red::toggle();
         // It should blink at rate 1 Hz,
         // if not - something wrong with clock setup
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        delay(1000);
     }
 }
-
 
 static void rtos_task1(void *params)
 {
@@ -54,69 +44,74 @@ static void rtos_task1(void *params)
     ecl::cout << "\n\nHello, embedded world!" << ecl::endl;
     // TODO: order of initialization must be preserved
     // as soon as default values for GPIO will be introduced
-    sd_spi< SPI_LCD_driver,  SDSPI_CS > sdspi;
-    pcd8544< SPI_LCD_driver > lcd;
 
-    sdspi.init();
-    ret = sdspi.open();
+    fs_obj.mount_all();
+
+    std::function< void(fs::dir_ptr fd, const char *dir) > traverse;
+
+    traverse = [&traverse](fs::dir_ptr fd, const char *dir) -> void {
+        assert(fd);
+
+        int ret = fd->rewind();
+        assert(!ret);
+        ecl::cout << "-------------------------" << ecl::endl;
+        ecl::cout << "\nTraversing " << dir << ecl::endl;
+
+        fs::inode_ptr node;
+        char buf[16];
+
+        while ((node = fd->next())) {
+            size_t read = node->get_name(buf, sizeof(buf));
+            auto type = node->get_type();
+            ecl::cout << "TYPE: -> " << (int) type << " READ -> "
+                      << (int) read << " NAME -> " << buf << ecl::endl;
+
+            if (type == fs::inode::type::dir) {
+                auto dd = node->open_dir();
+                if (dd)
+                    traverse(dd, buf);
+            }
+        }
+
+        ecl::cout << "-------------------------" << ecl::endl;
+        return;
+    };
+
+    // Directory traversing sample
+    {
+        auto dd = fs_obj.open_dir("/fat");
+        traverse(dd, "/fat");
+    }
+
+    // Read a file sample
+    {
+        auto read_lambda = [](const char *name, size_t amount) {
+            ecl::cout << "\n *** Reading " << name << ecl::endl;
+
+            auto fd = fs_obj.open_file(name);
+            assert(fd);
+
+            char buf[8];
+            ssize_t read = 1;
+
+            while (read && amount--) {
+                read = fd->read((uint8_t*)buf, sizeof(buf) - 1);
+                assert(read >= 0);
+                buf[read] = 0;
+                ecl::cout << buf;
+            }
+
+            ecl::cout << ecl::endl;
+        };
+
+        read_lambda("/fat/man/makefile.in", 1000);
+        read_lambda("/fat/refs/heads/master", 1000);
+    }
 
     lcd.init();
     lcd.open();
     lcd.clear();
     lcd.flush();
-
-    if (!ret) {
-        uint8_t buf[512];
-
-        for (uint i = 0; i < 1; ++i) {
-            if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
-                ecl::cout << "Unable to retrieve buffer" << ecl::endl;
-            } else {
-                ecl::cout << "items: ";
-                for (uint16_t i = 0; i < sizeof(buf); ++i) {
-                    ecl::cout << buf[i] << " ";
-                    if ((i & 0xf) == 0xf)
-                        ecl::cout << ecl::endl;
-                }
-                ecl::cout << ecl::endl;
-            }
-        }
-
-        sdspi.seek(510);
-        uint8_t buf2[] = {1, 2, 3, 4, 5, 6};
-        sdspi.write(buf2, sizeof(buf2));
-        sdspi.flush();
-        ecl::cout << "=======================" << ecl::endl;
-
-        sdspi.seek(510);
-
-        if (sdspi.read(buf, sizeof(buf)) != sizeof(buf)) {
-            ecl::cout << "Unable to retrieve buffer" << ecl::endl;
-        } else {
-            ecl::cout << "items: ";
-            for (uint16_t i = 0; i < sizeof(buf); ++i) {
-                ecl::cout << buf[i] << " ";
-                if ((i & 0xf) == 0xf)
-                    ecl::cout << ecl::endl;
-            }
-            ecl::cout << ecl::endl;
-        }
-
-    }
-
-    ecl::cout << "Starting..." << ecl::endl;
-    ecl::cout << "Sizeof cache: " << sizeof(dummy) << ecl::endl;
-    ecl::cout << "Alignof cache: " << alignof(dummy) << ecl::endl;
-    ecl::cout << "Slab start " << (int)slab << ecl::endl;
-    ecl::cout << "Slab end " << (int)(slab + sizeof(slab)) << ecl::endl;
-
-    test_alloc(5);
-    test_alloc(1);
-    test_alloc(3);
-    test_alloc(1);
-    test_alloc(1);
-    test_alloc(10);
-    test_alloc(1);
 
     for (;;) {
         ecl::cin >> c;
@@ -195,12 +190,28 @@ static void rtos_task1(void *params)
 
 int main()
 {
-    // Let the fun begin!
+    int ret;
 
-    xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
-    xTaskCreate(rtos_task1, "task1", 1024, NULL, tskIDLE_PRIORITY, NULL);
+#if 0
+    //     Let the fun begin!
+    ret = xTaskCreate(rtos_task0, "task0", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+    ecl::cout << "\ntask0 ret: " << ret << ecl::endl;
+    assert(ret == pdPASS);
 
-    vTaskStartScheduler();
+    ret = xTaskCreate(rtos_task1, "task1", 256, NULL, tskIDLE_PRIORITY, NULL);
+    ecl::cout << "task1 ret: " << ret << ecl::endl;;
+    assert(ret == pdPASS);
+#endif
+
+    task_create(rtos_task0, "task0", 128);
+    task_create(rtos_task1, "task1", 600);
+    schedule_start();
+
+    //rtos_task1(nullptr);
+
+    (void) ret;
+    (void) rtos_task0;
+    (void) rtos_task1;
 
     return 0;
 }

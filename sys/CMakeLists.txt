@@ -1,12 +1,11 @@
+## Qt creator hack
+file(GLOB_RECURSE ALL_HEADERS *.hpp *.h)
+add_custom_target(sys_dummy_target SOURCES "${ALL_HEADERS}")
+## EO hack
+
 # Placeholder
-add_library(sys STATIC
-			sys.cpp
-			# TODO: Mark as a hack
-			export/sys/spi_cfgs.h
-			export/sys/usart_cfgs.h
-			export/sys/pin_cfgs.h
-			export/iodev/iodev.hpp
-			export/iowrap/iowrap.hpp)
+add_library(sys STATIC sys.cpp)
+
 target_include_directories(sys PUBLIC export)
 
 target_link_libraries(sys libcpp)

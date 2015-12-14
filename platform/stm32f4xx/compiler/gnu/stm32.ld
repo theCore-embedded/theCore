@@ -55,7 +55,7 @@ SECTIONS
 	/* Read only data goes to flash */
 	.rodata :
 	{
-		*(.rodata*)
+		*(.rodata .rodata.*)
 		. = ALIGN(4);
 	} > flash
 
@@ -72,7 +72,9 @@ SECTIONS
 		/* Trace a start of the data */
 		___data_start = .;
 
-		*(.data*)
+		*(.data);
+		*(.data*);
+		*(*.data);
 
 		. = ALIGN(4);
 

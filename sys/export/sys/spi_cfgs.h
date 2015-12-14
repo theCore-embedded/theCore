@@ -2,9 +2,7 @@
 #ifndef SYS_SPI_CFGS_H
 #define SYS_SPI_CFGS_H
 
-// TODO: move this two to special OS abstraction layer
-#include <FreeRTOS.h>
-#include <semphr.h>
+#include <os.hpp>
 
 // TODO: drop it
 // Represents distinct peripheral devices
@@ -57,36 +55,36 @@ protected:
 
 private:
     // TODO: replace it with special OS abstractions
-    static SemaphoreHandle_t m_mutex;
+    static void *m_handle;
 };
 
 // TODO: replace it with special OS abstractions
 template< SPI_device SPIx >
-SemaphoreHandle_t SPI_lock< SPIx >::m_mutex = nullptr;
+void* SPI_lock< SPIx >::m_handle = nullptr;
 
 
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::lock_init()
 {
     // TODO: error check
-    if (m_mutex == nullptr) {
-        m_mutex = xSemaphoreCreateMutex();
+    if (m_handle == nullptr) {
+        m_handle = semaphore_create();
     }
 }
 
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::lock()
 {
-    if (m_mutex) {
-        xSemaphoreTake(m_mutex, portMAX_DELAY);
+    if (m_handle) {
+        semaphore_take(m_handle);
     }
 }
 
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::unlock()
 {
-    if (m_mutex) {
-        xSemaphoreGive(m_mutex);
+    if (m_handle) {
+        semaphore_give(m_handle);
     }
 }
 

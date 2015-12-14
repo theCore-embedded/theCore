@@ -11,10 +11,34 @@ void vTaskSwitchContext( void );
 
 // TODO: decide if to keep this here or not
 
-extern "C" void vAssertCalled(const char *file, int line)
+// TODO: move it somewhere
+void operator delete(void *)
 {
-    (void) file;
-    (void) line;
+    // Abort - delete is forbidden
+    for (;;);
+}
+
+// TODO: move it somewhere
+void operator delete(void *, unsigned int)
+{
+    // Abort - delete is forbidden
+    for (;;);
+}
+
+
+#if UINT32_MAX == UINTPTR_MAX
+#define STACK_CHK_GUARD 0xe2dee396
+#else
+#define STACK_CHK_GUARD 0x595e9fbd94fda766
+#endif
+
+__attribute__((used))
+uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
+
+extern "C" __attribute__((noreturn)) __attribute__((used))
+void __stack_chk_fail(void)
+{
+    ecl::cout << "Fail!!!" << ecl::endl;
     for(;;);
 }
 
@@ -29,7 +53,6 @@ ecl::istream< console_driver >  cin{&cin_device};
 ecl::ostream< console_driver >  cout{&cout_device};
 ecl::ostream< console_driver >  cerr{&cout_device};
 }
-
 
 extern "C" void early_main(void)
 {
@@ -56,6 +79,12 @@ extern "C" void early_main(void)
 
     // Make sure IRQ is ready
     IRQ_manager::init();
+}
+
+extern "C" void __cxa_pure_virtual()
+{
+    // Abort
+    for(;;);
 }
 
 namespace std

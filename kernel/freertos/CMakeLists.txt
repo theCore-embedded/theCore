@@ -15,12 +15,15 @@ add_library(freertos
 	${SRC_DIR}portable/GCC/ARM_CM4F/port.c
 	${SRC_DIR}portable/GCC/ARM_CM4F/portmacro.h
 	${SRC_DIR}portable/MemMang/heap_1.c
+	os.cpp
 	)
 
-target_include_directories(freertos PUBLIC
-	.
+target_include_directories(freertos PUBLIC .)
+
+target_include_directories(freertos PRIVATE
 	${SRC_DIR}include/
-	${SRC_DIR}portable/GCC/ARM_CM4F/)
+	${SRC_DIR}portable/GCC/ARM_CM4F/
+)
 
 target_link_libraries(freertos sys)
 target_link_libraries(freertos target)
