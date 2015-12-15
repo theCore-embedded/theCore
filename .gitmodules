@@ -1,3 +1,6 @@
 [submodule "kernel/freertos/freertos"]
 	path = kernel/freertos/freertos
 	url = https://github.com/cjlano/freertos.git
+[submodule "hw/kicad/libs/3rd-party/kicad-ESP8266"]
+	path = hw/kicad/libs/3rd-party/kicad-ESP8266
+	url = https://github.com/jdunmire/kicad-ESP8266
