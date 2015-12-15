@@ -9,4 +9,4 @@ add_library(sys STATIC sys.cpp)
 target_include_directories(sys PUBLIC export)
 
 target_link_libraries(sys libcpp)
-target_link_libraries(sys target)
+target_link_libraries(sys ${BASE_TARGET_NAME})

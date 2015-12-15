@@ -8,6 +8,6 @@ target_include_directories(cmsis SYSTEM PUBLIC ./includes)
 
 # TODO: move this two to the target
 # Make sure appropriate MCU type is chosen
-target_link_libraries(cmsis target)
+target_link_libraries(cmsis ${BASE_TARGET_NAME})
 
 
