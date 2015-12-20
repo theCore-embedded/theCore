@@ -49,12 +49,12 @@ $EndDescr
 $Comp
 L ESP-12E U2
 U 1 1 56707908
-P 9450 1950
-F 0 "U2" H 9450 1850 50  0000 C CNN
-F 1 "ESP-12E" H 9450 2050 50  0000 C CNN
-F 2 "ESP8266_local:ESP-12E_with_3d" H 9450 1950 50  0001 C CNN
-F 3 "" H 9450 1950 50  0001 C CNN
-	1    9450 1950
+P 9600 1950
+F 0 "U2" H 9600 1850 50  0000 C CNN
+F 1 "ESP-12E" H 9600 2050 50  0000 C CNN
+F 2 "ESP8266_local:ESP-12E_with_3d" H 9600 1950 50  0001 C CNN
+F 3 "" H 9600 1950 50  0001 C CNN
+	1    9600 1950
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -123,33 +123,33 @@ F 3 "" H 3950 2400 50  0000 C CNN
 	1    3950 2400
 	0    -1   -1   0   
 $EndComp
-Text Label 8300 1650 0    60   ~ 0
+Text Label 8450 1650 0    60   ~ 0
 nRST
-Text Label 10600 1650 2    60   ~ 0
+Text Label 10750 1650 2    60   ~ 0
 TXD0
-Text Label 10600 1750 2    60   ~ 0
+Text Label 10750 1750 2    60   ~ 0
 RXD0
-Text Label 10600 1850 2    60   ~ 0
+Text Label 10750 1850 2    60   ~ 0
 GPIO5
-Text Label 10600 1950 2    60   ~ 0
+Text Label 10750 1950 2    60   ~ 0
 GPIO4
-Text Label 10600 2050 2    60   ~ 0
+Text Label 10750 2050 2    60   ~ 0
 GPIO0
-Text Label 10600 2150 2    60   ~ 0
+Text Label 10750 2150 2    60   ~ 0
 GPIO2
-Text Label 10600 2250 2    60   ~ 0
+Text Label 10750 2250 2    60   ~ 0
 GPIO15
-Text Label 8300 1750 0    60   ~ 0
+Text Label 8450 1750 0    60   ~ 0
 ADC
-Text Label 8300 1850 0    60   ~ 0
+Text Label 8450 1850 0    60   ~ 0
 EN
-Text Label 8300 1950 0    60   ~ 0
+Text Label 8450 1950 0    60   ~ 0
 GPIO16
-Text Label 8300 2050 0    60   ~ 0
+Text Label 8450 2050 0    60   ~ 0
 GPIO14
-Text Label 8300 2150 0    60   ~ 0
+Text Label 8450 2150 0    60   ~ 0
 GPIO12
-Text Label 8300 2250 0    60   ~ 0
+Text Label 8450 2250 0    60   ~ 0
 GPIO13
 Text GLabel 1350 2000 2    60   Input ~ 0
 GND
@@ -170,25 +170,25 @@ Text GLabel 3500 1600 0    60   Input ~ 0
 VCC
 Text GLabel 3500 2400 0    60   Input ~ 0
 GND
-Text GLabel 10350 2350 2    60   Input ~ 0
+Text GLabel 10500 2350 2    60   Input ~ 0
 GND
-Text GLabel 8550 2350 0    60   Input ~ 0
+Text GLabel 8700 2350 0    60   Input ~ 0
 VCC
 Text Notes 800  900  0    178  Italic 0
 Power
-Text Notes 10050 1150 2    178  Italic 0
+Text Notes 10200 1150 2    178  Italic 0
 ESP WIFI
-Text Label 9700 3150 1    60   ~ 0
+Text Label 9850 3150 1    60   ~ 0
 SPI_CLK
-Text Label 9600 3150 1    60   ~ 0
+Text Label 9750 3150 1    60   ~ 0
 SPI_INT
-Text Label 9500 3150 1    60   ~ 0
+Text Label 9650 3150 1    60   ~ 0
 GPIO10
-Text Label 9400 3150 1    60   ~ 0
+Text Label 9550 3150 1    60   ~ 0
 GPIO9
-Text Label 9300 3150 1    60   ~ 0
+Text Label 9450 3150 1    60   ~ 0
 SPI_MISO
-Text Label 9200 3150 1    60   ~ 0
+Text Label 9350 3150 1    60   ~ 0
 SPI_MOSI
 Text GLabel 1000 2600 0    60   Input ~ 0
 VCC
@@ -351,6 +351,228 @@ F 3 "" H 1150 1550 50  0000 C CNN
 $EndComp
 Text GLabel 1350 1700 2    60   Input ~ 0
 5V
+Text GLabel 2800 1850 2    60   Input ~ 0
+VCC
+Text GLabel 2000 1850 0    60   Input ~ 0
+5V
+Text Notes 950  5800 0    178  Italic 0
+Connectors
+$Comp
+L PWR_FLAG #FLG03
+U 1 1 56743148
+P 2400 1250
+F 0 "#FLG03" H 2400 1345 50  0001 C CNN
+F 1 "PWR_FLAG" H 2400 1430 50  0000 C CNN
+F 2 "" H 2400 1250 50  0000 C CNN
+F 3 "" H 2400 1250 50  0000 C CNN
+	1    2400 1250
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR04
+U 1 1 567431DC
+P 2400 1250
+F 0 "#PWR04" H 2400 1100 50  0001 C CNN
+F 1 "+5V" H 2400 1390 50  0000 C CNN
+F 2 "" H 2400 1250 50  0000 C CNN
+F 3 "" H 2400 1250 50  0000 C CNN
+	1    2400 1250
+	-1   0    0    1   
+$EndComp
+$Comp
+L GND #PWR05
+U 1 1 567441FA
+P 1150 2100
+F 0 "#PWR05" H 1150 1850 50  0001 C CNN
+F 1 "GND" H 1150 1950 50  0000 C CNN
+F 2 "" H 1150 2100 50  0000 C CNN
+F 3 "" H 1150 2100 50  0000 C CNN
+	1    1150 2100
+	1    0    0    -1  
+$EndComp
+Text GLabel 2400 2150 3    60   Input ~ 0
+GND
+$Comp
+L C C2
+U 1 1 56749128
+P 4650 2200
+F 0 "C2" V 4800 2150 50  0000 L CNN
+F 1 "100nF" V 4700 1900 50  0000 L CNN
+F 2 "Capacitors_SMD:C_0402" H 4688 2050 50  0001 C CNN
+F 3 "" H 4650 2200 50  0000 C CNN
+	1    4650 2200
+	0    -1   -1   0   
+$EndComp
+Text GLabel 5100 2200 2    60   Input ~ 0
+GND
+$Comp
+L MICRO_SD_HINGE J2
+U 1 1 56772422
+P 6100 6150
+F 0 "J2" H 6150 6200 60  0000 C CNN
+F 1 "MICRO_SD_HINGE" H 6100 6700 60  0000 C CNN
+F 2 "armory_local:MICRO_SD_HINGE_AMP" V 6210 5650 60  0001 C CNN
+F 3 "" V 6210 5650 60  0000 C CNN
+	1    6100 6150
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_01X03 P?
+U 1 1 567741E5
+P 2150 6950
+F 0 "P?" H 2150 7150 50  0000 C CNN
+F 1 "CONN_01X03" V 2250 6950 50  0000 C CNN
+F 2 "" H 2150 6950 50  0000 C CNN
+F 3 "" H 2150 6950 50  0000 C CNN
+	1    2150 6950
+	0    -1   -1   0   
+$EndComp
+Text GLabel 2050 7150 3    60   Input ~ 0
+GND
+Text GLabel 2150 7150 3    60   Input ~ 0
+5V
+Text GLabel 2250 7150 3    60   Input ~ 0
+VCC
+$Comp
+L CONN_01X07 P?
+U 1 1 56774BE0
+P 1350 6300
+F 0 "P?" H 1350 6750 50  0000 C CNN
+F 1 "CONN_01X08" V 1450 6300 50  0000 C CNN
+F 2 "" H 1350 6300 50  0000 C CNN
+F 3 "" H 1350 6300 50  0000 C CNN
+	1    1350 6300
+	1    0    0    -1  
+$EndComp
+Text Label 800  6000 0    60   ~ 0
+nRST
+Text Label 800  6100 0    60   ~ 0
+ADC
+Text Label 800  6200 0    60   ~ 0
+EN
+Text Label 800  6300 0    60   ~ 0
+GPIO16
+Text Label 800  6400 0    60   ~ 0
+GPIO14
+Text Label 800  6500 0    60   ~ 0
+GPIO12
+Text Label 800  6600 0    60   ~ 0
+GPIO13
+$Comp
+L CONN_01X06 P?
+U 1 1 56776832
+P 1500 6950
+F 0 "P?" H 1500 7300 50  0000 C CNN
+F 1 "CONN_01X06" V 1600 6950 50  0000 C CNN
+F 2 "" H 1500 6950 50  0000 C CNN
+F 3 "" H 1500 6950 50  0000 C CNN
+	1    1500 6950
+	0    -1   -1   0   
+$EndComp
+Text Label 1750 7650 1    60   ~ 0
+SPI_CLK
+Text Label 1650 7650 1    60   ~ 0
+SPI_INT
+Text Label 1550 7650 1    60   ~ 0
+GPIO10
+Text Label 1450 7650 1    60   ~ 0
+GPIO9
+Text Label 1350 7650 1    60   ~ 0
+SPI_MISO
+Text Label 1250 7650 1    60   ~ 0
+SPI_MOSI
+$Comp
+L CONN_01X07 P?
+U 1 1 56777A04
+P 1650 6300
+F 0 "P?" H 1650 6750 50  0000 C CNN
+F 1 "CONN_01X08" V 1750 6300 50  0000 C CNN
+F 2 "" H 1650 6300 50  0000 C CNN
+F 3 "" H 1650 6300 50  0000 C CNN
+	1    1650 6300
+	-1   0    0    1   
+$EndComp
+Text Label 2150 6000 2    60   ~ 0
+TXD0
+Text Label 2150 6100 2    60   ~ 0
+RXD0
+Text Label 2150 6200 2    60   ~ 0
+GPIO5
+Text Label 2150 6300 2    60   ~ 0
+GPIO4
+Text Label 2150 6400 2    60   ~ 0
+GPIO0
+Text Label 2150 6500 2    60   ~ 0
+GPIO2
+Text Label 2150 6600 2    60   ~ 0
+GPIO15
+Text Label 3550 5850 0    60   ~ 0
+SD_CS
+Text Label 3550 5950 0    60   ~ 0
+SD_LCD_MOSI
+Text Label 3550 6150 0    60   ~ 0
+SD_LCD_CLK
+Text Label 3550 6350 0    60   ~ 0
+SD_LCD_MISO
+Text GLabel 4550 5100 1    60   Input ~ 0
+VCC
+Text GLabel 5150 6950 3    60   Input ~ 0
+GND
+$Comp
+L R R?
+U 1 1 5677A696
+P 4950 5400
+F 0 "R?" H 5050 5400 50  0000 C CNN
+F 1 "50k" V 4950 5400 50  0000 C CNN
+F 2 "Resistors_SMD:R_1206" V 4880 5400 50  0001 C CNN
+F 3 "" H 4950 5400 50  0000 C CNN
+	1    4950 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 5677AD38
+P 4750 5400
+F 0 "R?" H 4850 5400 50  0000 C CNN
+F 1 "50k" V 4750 5400 50  0000 C CNN
+F 2 "Resistors_SMD:R_1206" V 4680 5400 50  0001 C CNN
+F 3 "" H 4750 5400 50  0000 C CNN
+	1    4750 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 5677AD9D
+P 4350 5400
+F 0 "R?" H 4450 5400 50  0000 C CNN
+F 1 "50k" V 4350 5400 50  0000 C CNN
+F 2 "Resistors_SMD:R_1206" V 4280 5400 50  0001 C CNN
+F 3 "" H 4350 5400 50  0000 C CNN
+	1    4350 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 5677ADFF
+P 5150 5400
+F 0 "R?" H 5250 5400 50  0000 C CNN
+F 1 "50k" V 5150 5400 50  0000 C CNN
+F 2 "Resistors_SMD:R_1206" V 5080 5400 50  0001 C CNN
+F 3 "" H 5150 5400 50  0000 C CNN
+	1    5150 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 5677AE6E
+P 4150 5400
+F 0 "R?" H 4250 5400 50  0000 C CNN
+F 1 "50k" V 4150 5400 50  0000 C CNN
+F 2 "Resistors_SMD:R_1206" V 4080 5400 50  0001 C CNN
+F 3 "" H 4150 5400 50  0000 C CNN
+	1    4150 5400
+	1    0    0    -1  
+$EndComp
 Wire Wire Line
 	3500 2400 3800 2400
 Wire Wire Line
@@ -367,45 +589,45 @@ Wire Wire Line
 	3650 2200 3800 2200
 Connection ~ 3650 2000
 Wire Wire Line
-	8550 1750 8300 1750
+	8700 1750 8450 1750
 Wire Wire Line
-	8550 1850 8300 1850
+	8700 1850 8450 1850
 Wire Wire Line
-	8550 1950 8300 1950
+	8700 1950 8450 1950
 Wire Wire Line
-	8550 2050 8300 2050
+	8700 2050 8450 2050
 Wire Wire Line
-	8550 2150 8300 2150
+	8700 2150 8450 2150
 Wire Wire Line
-	8550 2250 8300 2250
+	8700 2250 8450 2250
 Wire Wire Line
-	10350 1650 10600 1650
+	10500 1650 10750 1650
 Wire Wire Line
-	10350 1750 10600 1750
+	10500 1750 10750 1750
 Wire Wire Line
-	10350 1850 10600 1850
+	10500 1850 10750 1850
 Wire Wire Line
-	10350 1950 10600 1950
+	10500 1950 10750 1950
 Wire Wire Line
-	10350 2050 10600 2050
+	10500 2050 10750 2050
 Wire Wire Line
-	10350 2150 10600 2150
+	10500 2150 10750 2150
 Wire Wire Line
-	10350 2250 10600 2250
+	10500 2250 10750 2250
 Wire Wire Line
-	9200 2850 9200 3150
+	9350 2850 9350 3150
 Wire Wire Line
-	9300 2850 9300 3150
+	9450 2850 9450 3150
 Wire Wire Line
-	9400 2850 9400 3150
+	9550 2850 9550 3150
 Wire Wire Line
-	9500 2850 9500 3150
+	9650 2850 9650 3150
 Wire Wire Line
-	9600 2850 9600 3150
+	9750 2850 9750 3150
 Wire Wire Line
-	9700 2850 9700 3150
+	9850 2850 9850 3150
 Wire Wire Line
-	8550 1650 8300 1650
+	8700 1650 8450 1650
 Wire Wire Line
 	1350 1700 1150 1700
 Wire Wire Line
@@ -456,189 +678,151 @@ Wire Wire Line
 Wire Wire Line
 	3000 4650 3000 4600
 Connection ~ 3000 4600
-Text GLabel 2800 1850 2    60   Input ~ 0
-VCC
-Text GLabel 2000 1850 0    60   Input ~ 0
-5V
-$Comp
-L CONN_01X16 P1
-U 1 1 5673FA29
-P 1750 6900
-F 0 "P1" H 1750 7750 50  0000 C CNN
-F 1 "CONN_01X16" V 1850 6900 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x16" H 1750 6900 50  0001 C CNN
-F 3 "" H 1750 6900 50  0000 C CNN
-	1    1750 6900
-	1    0    0    -1  
-$EndComp
-Text Notes 950  5800 0    178  Italic 0
-Connectors
-$Comp
-L PWR_FLAG #FLG03
-U 1 1 56743148
-P 2400 1250
-F 0 "#FLG03" H 2400 1345 50  0001 C CNN
-F 1 "PWR_FLAG" H 2400 1430 50  0000 C CNN
-F 2 "" H 2400 1250 50  0000 C CNN
-F 3 "" H 2400 1250 50  0000 C CNN
-	1    2400 1250
-	1    0    0    -1  
-$EndComp
-$Comp
-L +5V #PWR04
-U 1 1 567431DC
-P 2400 1250
-F 0 "#PWR04" H 2400 1100 50  0001 C CNN
-F 1 "+5V" H 2400 1390 50  0000 C CNN
-F 2 "" H 2400 1250 50  0000 C CNN
-F 3 "" H 2400 1250 50  0000 C CNN
-	1    2400 1250
-	-1   0    0    1   
-$EndComp
-$Comp
-L GND #PWR05
-U 1 1 567441FA
-P 1150 2100
-F 0 "#PWR05" H 1150 1850 50  0001 C CNN
-F 1 "GND" H 1150 1950 50  0000 C CNN
-F 2 "" H 1150 2100 50  0000 C CNN
-F 3 "" H 1150 2100 50  0000 C CNN
-	1    1150 2100
-	1    0    0    -1  
-$EndComp
-Text GLabel 2400 2150 3    60   Input ~ 0
-GND
-$Comp
-L CONN_01X16 P2
-U 1 1 56746EF2
-P 2100 6900
-F 0 "P2" H 2100 7750 50  0000 C CNN
-F 1 "CONN_01X16" V 2200 6900 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x16" H 2100 6900 50  0001 C CNN
-F 3 "" H 2100 6900 50  0000 C CNN
-	1    2100 6900
-	-1   0    0    -1  
-$EndComp
-Text Label 1100 6150 0    60   ~ 0
-ADC_EX
-Text Label 1100 6250 0    60   ~ 0
-ADC
-Text Label 1100 6450 0    60   ~ 0
-GPIO10
-Text Label 1100 6550 0    60   ~ 0
-GPIO9
-Text Label 1100 6650 0    60   ~ 0
-SPI_INT
-Text Label 1100 6750 0    60   ~ 0
-SPI_MOSI
-Text Label 1100 6850 0    60   ~ 0
-SPI_MISO
-Text Label 1100 6950 0    60   ~ 0
-SPI_CLK
-Text Label 1100 7250 0    60   ~ 0
-EN
-Text Label 1100 7350 0    60   ~ 0
-nRST
-Text GLabel 2700 7550 2    60   Input ~ 0
-GND
-Text GLabel 2700 7650 2    60   Input ~ 0
-VCC
-Wire Wire Line
-	2300 7650 2700 7650
-Wire Wire Line
-	2300 7550 2700 7550
-Text GLabel 1250 7650 0    60   Input ~ 0
-5V
-Wire Wire Line
-	1250 7650 1550 7650
-Text Label 2650 6150 2    60   ~ 0
-GPIO16
-Text Label 2650 6250 2    60   ~ 0
-GPIO5
-Text Label 2650 6350 2    60   ~ 0
-GPIO4
-Text Label 2650 6450 2    60   ~ 0
-GPIO0
-Text Label 2650 6550 2    60   ~ 0
-GPIO2
-Text Label 2650 6850 2    60   ~ 0
-GPIO14
-Text Label 2650 6950 2    60   ~ 0
-GPIO12
-Text Label 2650 7050 2    60   ~ 0
-GPIO13
-Text Label 2650 7150 2    60   ~ 0
-GPIO15
-Wire Wire Line
-	2300 6150 2650 6150
-Wire Wire Line
-	2300 6250 2650 6250
-Wire Wire Line
-	2300 6350 2650 6350
-Text Label 2650 7250 2    60   ~ 0
-RXD0
-Text Label 2650 7350 2    60   ~ 0
-TXD0
-Wire Wire Line
-	2300 7350 2650 7350
-Wire Wire Line
-	2300 6450 2650 6450
-Wire Wire Line
-	2300 6550 2650 6550
-Wire Wire Line
-	2300 6850 2650 6850
-Wire Wire Line
-	2300 6950 2650 6950
-Wire Wire Line
-	2300 7050 2650 7050
-Wire Wire Line
-	2300 7150 2650 7150
-Wire Wire Line
-	1550 6150 1100 6150
-Wire Wire Line
-	1550 6250 1100 6250
-Wire Wire Line
-	1550 6450 1100 6450
-Wire Wire Line
-	1550 6550 1100 6550
-Wire Wire Line
-	1550 6650 1100 6650
-Wire Wire Line
-	1550 6750 1100 6750
-Wire Wire Line
-	1550 6850 1100 6850
-Wire Wire Line
-	1550 6950 1100 6950
-Wire Wire Line
-	1550 7250 1100 7250
-Wire Wire Line
-	1550 7350 1100 7350
-$Comp
-L C C2
-U 1 1 56749128
-P 4650 2200
-F 0 "C2" V 4800 2150 50  0000 L CNN
-F 1 "100nF" V 4700 1900 50  0000 L CNN
-F 2 "Capacitors_SMD:C_0402" H 4688 2050 50  0001 C CNN
-F 3 "" H 4650 2200 50  0000 C CNN
-	1    4650 2200
-	0    -1   -1   0   
-$EndComp
-Text GLabel 5100 2200 2    60   Input ~ 0
-GND
 Wire Wire Line
 	5100 2200 4800 2200
 Wire Wire Line
-	2300 7250 2650 7250
+	1150 6000 800  6000
+Wire Wire Line
+	1150 6100 800  6100
+Wire Wire Line
+	1150 6200 800  6200
+Wire Wire Line
+	1150 6300 800  6300
+Wire Wire Line
+	1150 6400 800  6400
+Wire Wire Line
+	1150 6500 800  6500
+Wire Wire Line
+	1150 6600 800  6600
+Wire Wire Line
+	1250 7150 1250 7650
+Wire Wire Line
+	1350 7150 1350 7650
+Wire Wire Line
+	1450 7150 1450 7650
+Wire Wire Line
+	1550 7150 1550 7650
+Wire Wire Line
+	1650 7150 1650 7650
+Wire Wire Line
+	1750 7150 1750 7650
+Wire Wire Line
+	1850 6000 2150 6000
+Wire Wire Line
+	1850 6100 2150 6100
+Wire Wire Line
+	1850 6200 2150 6200
+Wire Wire Line
+	1850 6300 2150 6300
+Wire Wire Line
+	1850 6400 2150 6400
+Wire Wire Line
+	1850 6500 2150 6500
+Wire Wire Line
+	1850 6600 2150 6600
+Wire Wire Line
+	5150 5750 5150 5550
+Wire Wire Line
+	4950 5850 4950 5550
+Wire Wire Line
+	4750 5550 4750 5950
+Wire Wire Line
+	5300 6250 5150 6250
+Wire Wire Line
+	5150 6250 5150 6950
+Wire Wire Line
+	4550 6050 5300 6050
+Wire Wire Line
+	3550 6350 5300 6350
+Wire Wire Line
+	4350 6350 4350 5550
+Wire Wire Line
+	5300 6450 4150 6450
+Wire Wire Line
+	4150 6450 4150 5550
+Wire Wire Line
+	5150 5750 5300 5750
+Wire Wire Line
+	3550 5850 5300 5850
+Wire Wire Line
+	3550 5950 5300 5950
+Wire Wire Line
+	4550 5100 4550 6050
+Wire Wire Line
+	4150 5250 5150 5250
+Connection ~ 4550 5250
+Connection ~ 4350 5250
+Wire Wire Line
+	4750 5250 4950 5250
+Connection ~ 4950 5250
+Connection ~ 4750 5250
+Connection ~ 4950 5850
+Connection ~ 4750 5950
+Wire Wire Line
+	5300 6150 3550 6150
+Connection ~ 4350 6350
+Wire Wire Line
+	5150 6850 6350 6850
+Connection ~ 6250 6850
+Connection ~ 6150 6850
+Connection ~ 5150 6850
+Connection ~ 6050 6850
+Text Notes 5450 4950 0    178  Italic 0
+SD card
+Text Notes 5550 3150 0    178  Italic 0
+LCD
 $Comp
-L MICRO_SD_HINGE J2
-U 1 1 56772422
-P 6100 6150
-F 0 "J2" H 6150 6200 60  0000 C CNN
-F 1 "MICRO_SD_HINGE" H 6100 6700 60  0000 C CNN
-F 2 "armory_local:MICRO_SD_HINGE_AMP" V 6210 5650 60  0001 C CNN
-F 3 "" V 6210 5650 60  0000 C CNN
-	1    6100 6150
+L CONN_01X08 P?
+U 1 1 56780E5F
+P 5600 3700
+F 0 "P?" H 5600 4150 50  0000 C CNN
+F 1 "CONN_01X08" V 5700 3700 50  0000 C CNN
+F 2 "" H 5600 3700 50  0000 C CNN
+F 3 "" H 5600 3700 50  0000 C CNN
+	1    5600 3700
+	1    0    0    -1  
+$EndComp
+Text Label 4550 3350 0    60   ~ 0
+LCD_RST
+Text Label 4550 3450 0    60   ~ 0
+LCD_CS
+Text Label 4550 3550 0    60   ~ 0
+SD_LCD_DATA_CMD
+Text Label 4550 3650 0    60   ~ 0
+SD_LCD_MOSI
+Text Label 4550 3750 0    60   ~ 0
+SD_LCD_CLK
+Text Label 4550 3950 0    60   ~ 0
+LCD_LED
+Text GLabel 4500 3850 0    60   Input ~ 0
+VCC
+Text GLabel 4500 4050 0    60   Input ~ 0
+GND
+Wire Wire Line
+	4500 3850 5400 3850
+Wire Wire Line
+	4500 4050 5400 4050
+Wire Wire Line
+	5400 3950 4550 3950
+Wire Wire Line
+	5400 3750 4550 3750
+Wire Wire Line
+	5400 3650 4550 3650
+Wire Wire Line
+	5400 3550 4550 3550
+Wire Wire Line
+	5400 3450 4550 3450
+Wire Wire Line
+	4550 3350 5400 3350
+$Comp
+L CONN_01X08 P?
+U 1 1 56783B7F
+P 6000 3700
+F 0 "P?" H 6000 4150 50  0000 C CNN
+F 1 "CONN_01X08" V 6100 3700 50  0000 C CNN
+F 2 "" H 6000 3700 50  0000 C CNN
+F 3 "" H 6000 3700 50  0000 C CNN
+	1    6000 3700
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
