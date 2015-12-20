@@ -4,3 +4,6 @@
 [submodule "hw/kicad/libs/3rd-party/kicad-ESP8266"]
 	path = hw/kicad/libs/3rd-party/kicad-ESP8266
 	url = https://github.com/jdunmire/kicad-ESP8266
+[submodule "hw/kicad/libs/3rd-party/KiCad-Libraries"]
+	path = hw/kicad/libs/3rd-party/KiCad-Libraries
+	url = https://github.com/imciner2/KiCad-Libraries
