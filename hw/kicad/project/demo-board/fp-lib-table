@@ -1,3 +1,5 @@
 (fp_lib_table
-  (lib (name ESP8266)(type KiCad)(uri ${KIPRJMOD}/../../libs/3rd-party/kicad-ESP8266/ESP8266.pretty)(options "")(descr ""))
+  (lib (name ESP8266)(type KiCad)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/3rd-party/kicad-ESP8266/ESP8266.pretty)(options "")(descr ""))
+  (lib (name armory)(type Legacy)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/3rd-party/usbarmory_sdcard/armory.mod)(options "")(descr ""))
+  (lib (name armory_new)(type KiCad)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/3rd-party/usbarmory_sdcard/sdcard.pretty)(options "")(descr ""))
 )
