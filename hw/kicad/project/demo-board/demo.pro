@@ -1,4 +1,4 @@
-update=Sun 20 Dec 2015 11:30:55 PM EET
+update=Mon 21 Dec 2015 11:30:09 PM EET
 version=1
 last_client=kicad
 [general]
@@ -61,3 +61,4 @@ LibName29=valves
 LibName30=self/kicad-ESP8266_local/ESP8266
 LibName31=self/kicad-imciner_local/symbols/DataStorage
 LibName32=self/usbarmory_local/armory
+LibName33=self/display_local/display_local
