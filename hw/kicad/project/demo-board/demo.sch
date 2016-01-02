@@ -32,6 +32,7 @@ LIBS:ESP8266
 LIBS:DataStorage
 LIBS:armory
 LIBS:display_local
+LIBS:open-project
 LIBS:demo-cache
 EELAYER 25 0
 EELAYER END
@@ -239,7 +240,7 @@ U 1 1 56734DC4
 P 1600 3650
 F 0 "SW1" H 1750 3760 50  0000 C CNN
 F 1 "KEY_FLASH" H 1600 3570 50  0000 C CNN
-F 2 "Buttons_Switches_ThroughHole:SW_PUSH_SMALL" H 1600 3650 50  0001 C CNN
+F 2 "kicadlib_local:SW_PUSH_SMD" H 1700 3850 50  0000 C CNN
 F 3 "" H 1600 3650 50  0000 C CNN
 	1    1600 3650
 	1    0    0    -1  
@@ -253,17 +254,6 @@ F 1 "Jumper_NO_Small" H 1160 4140 50  0001 C CNN
 F 2 "Pin_Headers:Pin_Header_Straight_1x02" H 1150 4200 50  0001 C CNN
 F 3 "" H 1150 4200 50  0000 C CNN
 	1    1150 4200
-	1    0    0    -1  
-$EndComp
-$Comp
-L SW_PUSH SW2
-U 1 1 5673650D
-P 1600 4200
-F 0 "SW2" H 1750 4350 50  0000 C CNN
-F 1 "KEY_RST" H 1600 4100 50  0000 C CNN
-F 2 "Buttons_Switches_ThroughHole:SW_PUSH_SMALL" H 1600 4200 50  0001 C CNN
-F 3 "" H 1600 4200 50  0000 C CNN
-	1    1600 4200
 	1    0    0    -1  
 $EndComp
 Text GLabel 1900 4200 2    60   Input ~ 0
@@ -825,4 +815,15 @@ Wire Wire Line
 Wire Wire Line
 	3200 6200 3200 7050
 Connection ~ 6150 6850
+$Comp
+L SW_PUSH SW2
+U 1 1 5673650D
+P 1600 4200
+F 0 "SW2" H 1750 4310 50  0000 C CNN
+F 1 "KEY_RST" H 1600 4120 50  0000 C CNN
+F 2 "kicadlib_local:SW_PUSH_SMD" H 1700 4400 50  0000 C CNN
+F 3 "" H 1600 4200 50  0000 C CNN
+	1    1600 4200
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
