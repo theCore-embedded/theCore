@@ -1,14 +1,11 @@
 # Might be reviewed
 cmake_minimum_required(VERSION 3.3)
 
-# ASM is crucial
-enable_language(ASM-ATT)
-
 # Set for latter use
 set(CORE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 # Registers a project
-function(register_project toolchain_path project_path target_path platform_name)
+function(register_project project_path target_path platform_name)
 	set(PROJECT_DIR ${project_path})
 	set(TARGET_DIR ${target_path})
 	set(PLATFORM_DIR ${CORE_DIR}/platform/${platform_name})
@@ -33,10 +30,10 @@ function(register_project toolchain_path project_path target_path platform_name)
 	message("--- *> ${PROJECT_NAME}")
 	message("--- *> ${toolchain_path}")
 
-
 	# Pick proper compiler definitions
 	include(${PLATFORM_DIR}/compiler/compiler.cmake)
 
+	# System headers avaliable for all modules
 	include_directories(${CORE_DIR}/sys/export)
 
 	add_subdirectory(${PROJECT_DIR}
