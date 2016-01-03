@@ -6,14 +6,14 @@ add_custom_target(mp3basic_dummy_target SOURCES "${ALL_HEADERS}")
 ## EO hack
 
 # Our project sources
-add_executable(${BASE_PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
 
 # Register project with target
 link_project_with_target()
 
-target_link_libraries(${BASE_PROJECT_NAME} pcd8544)
-target_link_libraries(${BASE_PROJECT_NAME} sys)
-target_link_libraries(${BASE_PROJECT_NAME} sdspi)
-target_link_libraries(${BASE_PROJECT_NAME} fat)
-target_link_libraries(${BASE_PROJECT_NAME} allocators)
-target_link_libraries(${BASE_PROJECT_NAME} fs)
+target_link_libraries(${PROJECT_NAME} pcd8544)
+target_link_libraries(${PROJECT_NAME} sys)
+target_link_libraries(${PROJECT_NAME} sdspi)
+target_link_libraries(${PROJECT_NAME} fat)
+target_link_libraries(${PROJECT_NAME} allocators)
+target_link_libraries(${PROJECT_NAME} fs)
