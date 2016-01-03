@@ -1,0 +1,7 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP CONN_DISPLAY
+D LCD connector 1x8
+$ENDCMP
+#
+#End Doc Library

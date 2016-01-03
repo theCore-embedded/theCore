@@ -1,0 +1,7 @@
+(fp_lib_table
+  (lib (name ESP8266_local)(type KiCad)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/self/kicad-ESP8266_local/ESP8266.pretty)(options "")(descr ""))
+  (lib (name imciner_local)(type KiCad)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/self/kicad-imciner_local/Connectors.pretty)(options "")(descr ""))
+  (lib (name armory_local)(type KiCad)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/self/usbarmory_local/Storage.pretty)(options "")(descr ""))
+  (lib (name display_local)(type KiCad)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/self/display_local/display_local.pretty)(options "")(descr ""))
+  (lib (name kicadlib_local)(type Legacy)(uri ${HOME}/kicad_ecf_project/hw/kicad/libs/3rd-party/kicadlibrary/open-project.mod)(options "")(descr ""))
+)
