@@ -28,7 +28,6 @@ function(register_project project_path target_path platform_name)
 	message("--- *> ${PLATFORM_NAME}")
 	message("--- *> ${TARGET_NAME}")
 	message("--- *> ${PROJECT_NAME}")
-	message("--- *> ${toolchain_path}")
 
 	# Pick proper compiler definitions
 	include(${PLATFORM_DIR}/compiler/compiler.cmake)
@@ -36,8 +35,8 @@ function(register_project project_path target_path platform_name)
 	# System headers avaliable for all modules
 	include_directories(${CORE_DIR}/sys/export)
 
-	add_subdirectory(${PROJECT_DIR}
-		${CMAKE_CURRENT_BINARY_DIR}/project/${PROJECT_NAME}/)
+	#add_subdirectory(${PROJECT_DIR}
+	#	${CMAKE_CURRENT_BINARY_DIR}/project/${PROJECT_NAME}/)
 
 	# TODO: find better place for it
 	add_subdirectory(${CORE_DIR}/sys)
