@@ -12,6 +12,7 @@ add_subdirectory(startup)
 add_subdirectory(SPL)
 add_subdirectory(CMSIS)
 
+message(" *** --------------- > ${PLATFORM_NAME}")
 # TODO: clarify essential libraries
 target_link_libraries(${PLATFORM_NAME} startup)
 target_link_libraries(${PLATFORM_NAME} spl)
