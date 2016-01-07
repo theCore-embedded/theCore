@@ -7,4 +7,4 @@ add_library(libcpp STATIC arm_eabi.cpp)
 target_include_directories(libcpp PUBLIC export)
 
 # Some of the includes are provided by the project itself
-target_link_libraries(libcpp PUBLIC ${PROJECT_LIB})
+target_link_libraries(libcpp PUBLIC ${PROJECT_CONFIG_LIB})
