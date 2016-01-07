@@ -5,4 +5,6 @@ add_custom_target(libcpp_dummy_target SOURCES "${ALL_HEADERS}")
 
 add_library(libcpp STATIC arm_eabi.cpp)
 target_include_directories(libcpp PUBLIC export)
-target_link_libraries(libcpp ${PLATFORM_NAME})
+
+# Some of the includes are provided by the project itself
+target_link_libraries(libcpp PUBLIC ${PROJECT_LIB})

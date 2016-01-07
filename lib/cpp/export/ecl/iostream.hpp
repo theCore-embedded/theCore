@@ -4,7 +4,7 @@
 #include "istream.hpp"
 #include "ostream.hpp"
 
-#include <target/usart.hpp>
+#include <console_driver.hpp>
 
 #include <unistd.h>
 #include <stdint.h>

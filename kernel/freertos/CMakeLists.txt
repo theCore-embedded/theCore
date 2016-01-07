@@ -26,4 +26,3 @@ target_include_directories(freertos PRIVATE
 )
 
 target_link_libraries(freertos sys)
-target_link_libraries(freertos ${TARGET_NAME})

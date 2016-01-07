@@ -5,7 +5,6 @@
 #include <array>
 #include <string.h>
 
-#include <target/usart.hpp>
 #include <ecl/iostream.hpp>
 #include <ecl/endian.hpp>
 

@@ -30,10 +30,10 @@ macro(register_project project_path platform_name)
 	add_subdirectory(${PLATFORM_DIR} ${CMAKE_CURRENT_BINARY_DIR}/platform)
 
 	# TODO: find better place for it
-	add_subdirectory(${CORE_DIR}/sys ${CMAKE_CURRENT_BINARY_DIR}/core/sys)
-	add_subdirectory(${CORE_DIR}/lib ${CMAKE_CURRENT_BINARY_DIR}/core/lib)
-	add_subdirectory(${CORE_DIR}/dev ${CMAKE_CURRENT_BINARY_DIR}/core/dev)
-	add_subdirectory(${CORE_DIR}/kernel ${CMAKE_CURRENT_BINARY_DIR}/core/kernel)
+	#add_subdirectory(${CORE_DIR}/sys ${CMAKE_CURRENT_BINARY_DIR}/core/sys)
+	#add_subdirectory(${CORE_DIR}/lib ${CMAKE_CURRENT_BINARY_DIR}/core/lib)
+	#add_subdirectory(${CORE_DIR}/dev ${CMAKE_CURRENT_BINARY_DIR}/core/dev)
+	#add_subdirectory(${CORE_DIR}/kernel ${CMAKE_CURRENT_BINARY_DIR}/core/kernel)
 
 	# Make binary from the project object file
 	add_custom_target(${PROJECT_NAME}.bin ALL
