@@ -9,5 +9,4 @@ add_library(sys STATIC sys.cpp)
 target_include_directories(sys PUBLIC export)
 
 target_link_libraries(sys libcpp)
-message("--------------- > ${PLATFORM_NAME}")
 target_link_libraries(sys ${PLATFORM_NAME})
