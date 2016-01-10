@@ -120,7 +120,16 @@
   */           
 
 #if !defined  (HSE_VALUE)
-  #define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */
+ /* Originally SPL provided default value for the HSE clock which is likely not the
+  * same as used by your target, like this:
+  * #define HSE_VALUE    ((uint32_t)25000000)
+  *
+  * But it led to hard-to-figure-out bugs that sprout from incrorrect
+  * clock configuration.
+  *
+  * You will thank me later.
+  */
+#error HSE clock must be provided!
   
 #endif /* HSE_VALUE */
 
