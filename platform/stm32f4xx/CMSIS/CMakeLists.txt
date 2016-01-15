@@ -6,4 +6,3 @@ add_custom_target(cmsis_dummy_target SOURCES "${ALL_HEADERS}")
 add_library(cmsis ./st/system_stm32f4xx.c)
 target_include_directories(cmsis SYSTEM PUBLIC ./includes)
 
-
