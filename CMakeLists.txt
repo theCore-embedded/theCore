@@ -1,13 +1,20 @@
 include(CheckIncludeFileCXX)
 
-message(STATUS "Determining project configuration...")
-
 # TODO: add same configuration mechanism for choosing right kernel
+if (NOT DEFINED USE_PLATFORM)
+	message(FATAL_ERROR "USE_PLATFORM must be set in order to use valid platform")
+else()
+	message("Platform will be used: ${USE_PLATFORM}")
+	set(PLATFORM_NAME ${USE_PLATFORM}) # For convinience
+endif()
 
-# Add platform to the builde
-add_subdirectory(${PLATFORM_DIR} ${CMAKE_CURRENT_BINARY_DIR}/platform)
+# In order to pick proper definitions from the platform it is required
+# that platform will be added in first place
+add_subdirectory(platform)
 
-add_subdirectory(sys ${CMAKE_CURRENT_BINARY_DIR}/core/sys)
-add_subdirectory(lib ${CMAKE_CURRENT_BINARY_DIR}/core/lib)
-add_subdirectory(dev ${CMAKE_CURRENT_BINARY_DIR}/core/dev)
-add_subdirectory(kernel ${CMAKE_CURRENT_BINARY_DIR}/core/kernel)
+# Rest of modules
+add_subdirectory(sys)
+add_subdirectory(lib)
+add_subdirectory(dev)
+add_subdirectory(kernel)
+
