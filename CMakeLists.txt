@@ -1,4 +1,5 @@
-include(CheckIncludeFileCXX)
+# ASM is crucial
+enable_language(ASM-ATT)
 
 # TODO: add same configuration mechanism for choosing right kernel
 if (NOT DEFINED USE_PLATFORM)
