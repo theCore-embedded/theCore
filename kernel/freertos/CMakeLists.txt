@@ -43,7 +43,6 @@ add_library(freertos
 	os.cpp
 	)
 
-
 target_include_directories(freertos PUBLIC .)
 
 target_include_directories(freertos PRIVATE
@@ -51,5 +50,9 @@ target_include_directories(freertos PRIVATE
 	${SRC_DIR}portable/GCC/ARM_CM4F/
 )
 
+# TODO: better check for FREERTOS_CONFIG_HEADERS_PATH
+target_include_directories(freertos PUBLIC
+	${FREERTOS_CONFIG_HEADERS_PATH}/
+)
+
 target_link_libraries(freertos sys)
-target_link_libraries(freertos ${PROJECT_CONFIG_LIB})

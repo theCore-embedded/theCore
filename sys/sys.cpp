@@ -54,7 +54,7 @@ ecl::ostream< console_driver >  cout{&cout_device};
 ecl::ostream< console_driver >  cerr{&cout_device};
 }
 
-extern "C" void early_main(void)
+extern "C" void core_init(void)
 {
 	extern uint32_t ___init_array_start;
 	extern uint32_t ___init_array_end;

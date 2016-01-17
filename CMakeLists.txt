@@ -5,7 +5,7 @@ enable_language(ASM-ATT)
 if (NOT DEFINED USE_PLATFORM)
 	message(FATAL_ERROR "USE_PLATFORM must be set in order to use valid platform")
 else()
-	message("Platform will be used: ${USE_PLATFORM}")
+	message(STATUS "Platform will be used: ${USE_PLATFORM}")
 	set(PLATFORM_NAME ${USE_PLATFORM}) # For convinience
 endif()
 

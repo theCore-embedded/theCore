@@ -13,15 +13,12 @@ macro(register_project project_name)
 	if (NOT DEFINED USE_PLATFORM)
 		message(FATAL_ERROR "USE_PLATFORM must be set in order to use valid platform")
 	else()
-		message("Platform will be used: ${USE_PLATFORM}")
+		message(STATUS "Platform will be used: ${USE_PLATFORM}")
 		set(PLATFORM_NAME ${USE_PLATFORM}) # For convinience
 	endif()
 
 	set(PROJECT_DIR ${CMAKE_CURRENT_DIR}/${project_name})
 	set(PLATFORM_DIR ${CORE_DIR}/platform/${PLATFORM_NAME})
-
-	# Export the platform name
-	#set(PLATFORM_NAME ${platform_name})
 
 	# Pick common compiler definitions for given platform
 	include(${PLATFORM_DIR}/compiler/compiler.cmake)

@@ -6,4 +6,6 @@ add_custom_target(cmsis_dummy_target SOURCES "${ALL_HEADERS}")
 add_library(cmsis ./st/system_stm32f4xx.c)
 target_include_directories(cmsis SYSTEM PUBLIC ./includes)
 
-target_link_libraries(cmsis PUBLIC ${PLATFORM_CONFIG_LIB})
+# TODO: check if variables are defined
+target_compile_definitions(cmsis PUBLIC "-D${PLATFORM_CONFIG_DEVICE}")
+target_compile_definitions(cmsis PUBLIC "-DHSE_VALUE=${PLATFORM_CONFIG_HSE_VAL}")

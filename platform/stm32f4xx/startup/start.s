@@ -37,10 +37,10 @@ clear_bss:
 			bne		clear_bss			@ If counter greather than 0
 
 clear_bss_end:
-			bl		SystemInit			@ Initialize a system
-			blx		platform_init		@ Initialize a platform // TODO: remove
-			blx		target_init			@ Initialize a target
-			blx		early_main			@ Do the last step before entering main routine
+			bl		SystemInit			@ Initialize a core system
+			blx		platform_init		@ Initialize a platform
+			blx		board_init			@ Optional. Initialize target board
+			blx		core_init			@ Initialize core
 			blx		main				@ Allow return, for now
 			b		board_stop			@ Infinite loop if returned
 .size		Reset_Handler, . - Reset_Handler
@@ -108,6 +108,7 @@ DebugMon_Handler:
 PendSV_Handler:
 .thumb_func
 SysTick_Handler:
- b    board_stop
+	b	board_stop
+
 
 .end
