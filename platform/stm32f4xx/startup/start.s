@@ -1,17 +1,16 @@
 /* Note that M4 is capable only of THUMB instrucion set
  * TODO: validate algorithms
  */
-.global		_resetHandler				@ The first this that must be executed
+.global		Reset_Handler				@ The first this that must be executed
 .section	handlers
 .syntax		unified
 .align		2
 
-
-.func		_resetHandler, _resetHandler
-.type		_resetHandler, %function
+.func		Reset_Handler, Reset_Handler
+.type		Reset_Handler, %function
 .thumb_func
 .align
-_resetHandler:
+Reset_Handler:
 			cpsid	i					@ Disable interrupts
 			ldr		r0, =___data_load	@ Obtain data address in ROM
 			ldr		r1, =___data_start  @ Obtain data start address in RAM
@@ -44,36 +43,31 @@ clear_bss_end:
 			blx		early_main			@ Do the last step before entering main routine
 			blx		main				@ Allow return, for now
 			b		board_stop			@ Infinite loop if returned
-.size		_resetHandler, . - _resetHandler
+.size		Reset_Handler, . - Reset_Handler
 .pool
 .endfunc
-
-board_stop:
-			b		.					@ Infinite loop if returned
-
-
 
 /* TODO: assign proper handlers for first 16 interrupts */
 .section	vectors
 			.align	2 /* TODO: clarify */
 			.long   0x20020000
-			.long	_resetHandler					@ Reset handler
-			.long	board_stop						@ NMI
-			.long	board_stop						@ Hard fault
-			.long	board_stop						@ Memory management fault
-			.long	board_stop						@ Bus fault
-			.long	board_stop						@ Usage fault
-			.long	0								@ Reserved bytes
-			.long	0								@ Reserved bytes
-			.long	0								@ Reserved bytes
-			.long	0								@ Reserved bytes
-			.long	vPortSVCHandler					@ SVC handler
-			.long	board_stop						@ Debug monitor
-			.long	0								@ Reserved bytes
-			.long	xPortPendSVHandler				@ PendSV handler
-			.long	xPortSysTickHandler				@ SysTick handler
-			.rept	81								@ Repeat ASM statement
-			.long	_ZN11IRQ_manager3ISREv			@ All other handlers
+			.long  Reset_Handler               /* Reset Handler                */
+			.long  NMI_Handler                 /* NMI Handler                  */
+			.long  HardFault_Handler           /* Hard Fault Handler           */
+			.long  MemManage_Handler           /* MPU Fault Handler            */
+			.long  BusFault_Handler            /* Bus Fault Handler            */
+			.long  UsageFault_Handler          /* Usage Fault Handler          */
+			.long  0                           /* Reserved                     */
+			.long  0                           /* Reserved                     */
+			.long  0                           /* Reserved                     */
+			.long  0                           /* Reserved                     */
+			.long  SVC_Handler                 /* SVCall Handler               */
+			.long  DebugMon_Handler            /* Debug Monitor Handler        */
+			.long  0                           /* Reserved                     */
+			.long  PendSV_Handler              /* PendSV Handler               */
+			.long  SysTick_Handler             /* SysTick Handler              */
+			.rept  81							@ Repeat ASM statement
+			.long  _ZN11IRQ_manager3ISREv		@ All other handlers
 			.endr
 			.align
 
@@ -82,5 +76,38 @@ board_stop:
 	Below is not working, why?
 */
 			@.skip	976, board_stop		@ Rest of IRQ handlers
+
+board_stop:
+			b		.					@ Infinite loop if returned
+
+.weak NMI_Handler
+.weak HardFault_Handler
+.weak MemManage_Handler
+.weak BusFault_Handler
+.weak UsageFault_Handler
+.weak SVC_Handler
+.weak DebugMon_Handler
+.weak PendSV_Handler
+.weak SysTick_Handler
+
+.thumb_func
+NMI_Handler:
+.thumb_func
+HardFault_Handler:
+.thumb_func
+MemManage_Handler:
+.thumb_func
+BusFault_Handler:
+.thumb_func
+UsageFault_Handler:
+.thumb_func
+SVC_Handler:
+.thumb_func
+DebugMon_Handler:
+.thumb_func
+PendSV_Handler:
+.thumb_func
+SysTick_Handler:
+ b    board_stop
 
 .end

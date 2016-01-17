@@ -18,7 +18,7 @@ MEMORY
 /* This is the actual start point, for ARM it is a
  * reset handler. Defined in main startup file
  */
-ENTRY(_resetHandler)
+ENTRY(Reset_Handler)
 
 SECTIONS
 {
