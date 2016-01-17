@@ -10,3 +10,4 @@ target_include_directories(sys PUBLIC export)
 
 target_link_libraries(sys libcpp)
 target_link_libraries(sys ${PLATFORM_NAME})
+target_link_libraries(sys ${USE_OS})

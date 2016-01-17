@@ -2,7 +2,7 @@
 #ifndef PLATFORM_SPI_DEVICE_HPP
 #define PLATFORM_SPI_DEVICE_HPP
 
-#include <sys/spi_cfgs.h>
+#include <common/spi.hpp>
 #include <platform/irq_manager.hpp>
 
 #include <type_traits>

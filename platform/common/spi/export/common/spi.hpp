@@ -1,6 +1,5 @@
-// TODO: better name for this module
-#ifndef SYS_SPI_CFGS_H
-#define SYS_SPI_CFGS_H
+#ifndef COMMON_SPI_HPP
+#define COMMON_SPI_HPP
 
 #include <os.hpp>
 
@@ -89,4 +88,4 @@ void SPI_lock< SPIx >::unlock()
 }
 
 
-#endif
+#endif // COMMON_SPI_HPP
