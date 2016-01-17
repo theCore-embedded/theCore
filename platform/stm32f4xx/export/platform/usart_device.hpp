@@ -2,7 +2,7 @@
 #ifndef USART_HANDLER_HPP
 #define USART_HANDLER_HPP
 
-#include <sys/usart_cfgs.h>
+#include <common/usart.hpp>
 
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_rcc.h>

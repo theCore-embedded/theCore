@@ -1,5 +1,5 @@
-#ifndef SYS_USART_CFGS_H
-#define SYS_USART_CFGS_H
+#ifndef COMMON_USART_HPP_
+#define COMMON_USART_HPP_
 
 #include <cstdint>
 
@@ -40,5 +40,5 @@ enum class USART_mode
     DMA_no_IRQ	// DMA without IRQ
 };
 
-#endif // SYS_USART_CFGS_H
+#endif // COMMON_USART_HPP_
 
