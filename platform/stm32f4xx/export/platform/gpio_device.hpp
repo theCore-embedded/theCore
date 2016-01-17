@@ -1,7 +1,7 @@
 #ifndef PLATFORM_GPIO_DEVICE_HPP
 #define PLATFORM_GPIO_DEVICE_HPP
 
-#include <sys/pin_cfgs.h>
+#include <common/pin.hpp>
 #include "pin_descriptor.hpp"
 
 // TODO: support for output port as well

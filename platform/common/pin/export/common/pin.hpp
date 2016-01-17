@@ -1,6 +1,5 @@
-// TODO: better name
-#ifndef SYS_PIN_CFGS_H
-#define SYS_PIN_CFGS_H
+#ifndef COMMON_PIN_HPP_
+#define COMMON_PIN_HPP_
 
 // Pin purpose
 enum class pin_function
@@ -61,4 +60,4 @@ enum class pin_type
     open_drain
 };
 
-#endif
+#endif // COMMON_PIN_HPP_
