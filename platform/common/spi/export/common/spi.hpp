@@ -1,7 +1,9 @@
 #ifndef COMMON_SPI_HPP
 #define COMMON_SPI_HPP
 
+#ifndef SPI_NO_OS
 #include <os.hpp>
+#endif
 
 // TODO: drop it
 // Represents distinct peripheral devices
@@ -61,30 +63,35 @@ private:
 template< SPI_device SPIx >
 void* SPI_lock< SPIx >::m_handle = nullptr;
 
-
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::lock_init()
 {
+#ifndef SPI_NO_OS
     // TODO: error check
     if (m_handle == nullptr) {
         m_handle = semaphore_create();
     }
+#endif
 }
 
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::lock()
 {
+#ifndef SPI_NO_OS
     if (m_handle) {
         semaphore_take(m_handle);
     }
+#endif
 }
 
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::unlock()
 {
+#ifndef SPI_NO_OS
     if (m_handle) {
         semaphore_give(m_handle);
     }
+#endif
 }
 
 

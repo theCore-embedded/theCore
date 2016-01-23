@@ -10,11 +10,11 @@ macro(register_project project_name)
 	# This check is intentionally copied from core's listfile
 	# Reason is that if build API used a proper platform must be set
 	# _before_ compiler definitions and core inclusion.
-	if (NOT DEFINED USE_PLATFORM)
-		message(FATAL_ERROR "USE_PLATFORM must be set in order to use valid platform")
+	if (NOT DEFINED CONFIG_PLATFORM)
+		message(FATAL_ERROR "CONFIG_PLATFORM must be set in order to use valid platform")
 	else()
-		message(STATUS "Platform will be used: ${USE_PLATFORM}")
-		set(PLATFORM_NAME ${USE_PLATFORM}) # For convinience
+		message(STATUS "Platform will be used: ${CONFIG_PLATFORM}")
+		set(PLATFORM_NAME ${CONFIG_PLATFORM}) # For convinience
 	endif()
 
 	set(PROJECT_DIR ${CMAKE_CURRENT_DIR}/${project_name})

@@ -50,9 +50,9 @@ target_include_directories(freertos PRIVATE
 	${SRC_DIR}portable/GCC/ARM_CM4F/
 )
 
-# TODO: better check for FREERTOS_CONFIG_HEADERS_PATH
+# TODO: better check for CONFIG_FREERTOS_HEADERS_PATH
 target_include_directories(freertos PUBLIC
-	${FREERTOS_CONFIG_HEADERS_PATH}/
+	${CONFIG_FREERTOS_HEADERS_PATH}/
 )
 
 target_link_libraries(freertos sys)

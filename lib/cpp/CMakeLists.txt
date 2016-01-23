@@ -8,13 +8,13 @@ target_include_directories(libcpp PUBLIC export)
 
 message(STATUS "Determining console driver configuration...")
 # Pick console driver
-if (${USE_CONSOLE})
-	if (DEFINED CONSOLE_CONFIG_LIB)
-		if (TARGET "${CONSOLE_CONFIG_LIB}")
-			message(STATUS "Console library \"${CONSOLE_CONFIG_LIB}\""
+if (${CONFIG_USE_CONSOLE})
+	if (DEFINED CONFIG_CONSOLE_LIB)
+		if (TARGET "${CONFIG_CONSOLE_LIB}")
+			message(STATUS "Console library \"${CONFIG_CONSOLE_LIB}\""
 				"is provided by the project")
 		else()
-			message(FATAL_ERROR "${CONSOLE_CONFIG_LIB} is not a valid console library!")
+			message(FATAL_ERROR "${CONFIG_CONSOLE_LIB} is not a valid console library!")
 		endif()
 	else()
 		message(FATAL_ERROR "Provide a console configuration library"
@@ -23,8 +23,8 @@ if (${USE_CONSOLE})
 else()
 	message(STATUS "Console is not enabled.")
 	add_subdirectory(default)
-	set(CONSOLE_CONFIG_LIB default_console_driver)
+	set(CONFIG_CONSOLE_LIB default_console_driver)
 endif()
 
 # Some of the includes are provided by the project itself
-target_link_libraries(libcpp PUBLIC ${CONSOLE_CONFIG_LIB})
+target_link_libraries(libcpp PUBLIC ${CONFIG_CONSOLE_LIB})
