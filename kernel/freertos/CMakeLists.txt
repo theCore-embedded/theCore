@@ -55,4 +55,4 @@ target_include_directories(freertos PUBLIC
 	${CONFIG_FREERTOS_HEADERS_PATH}/
 )
 
-target_link_libraries(freertos sys)
+#target_link_libraries(freertos sys)

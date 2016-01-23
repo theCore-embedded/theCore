@@ -42,6 +42,10 @@ void __stack_chk_fail(void)
     for(;;);
 }
 
+extern "C" void platform_init();
+extern "C" void board_init();
+extern "C" void main();
+
 namespace ecl {
 // TODO: avoid this somehow.
 // See https://isocpp.org/wiki/faq/ctors#static-init-order
@@ -54,8 +58,11 @@ ecl::ostream< console_driver >  cout{&cout_device};
 ecl::ostream< console_driver >  cerr{&cout_device};
 }
 
-extern "C" void core_init(void)
+extern "C" void core_main(void)
 {
+    platform_init();
+    board_init();
+
 	extern uint32_t ___init_array_start;
 	extern uint32_t ___init_array_end;
 
@@ -77,8 +84,9 @@ extern "C" void core_init(void)
     ecl::cerr_device.init();
     ecl::cerr_device.open();
 
-    // Make sure IRQ is ready
     IRQ_manager::init();
+
+    main();
 }
 
 extern "C" void __cxa_pure_virtual()

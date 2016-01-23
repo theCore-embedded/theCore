@@ -37,11 +37,8 @@ clear_bss:
 			bne		clear_bss			@ If counter greather than 0
 
 clear_bss_end:
-			bl		SystemInit			@ Initialize a core system
-			blx		platform_init		@ Initialize a platform
-			blx		board_init			@ Optional. Initialize target board
-			blx		core_init			@ Initialize core
-			blx		main				@ Allow return, for now
+			bl		SystemInit			@ Initialize a system
+			blx		core_main			@ Start a core
 			b		board_stop			@ Infinite loop if returned
 .size		Reset_Handler, . - Reset_Handler
 .pool

@@ -25,16 +25,5 @@ macro(register_project project_name)
 
 	# Make sure the core is included
 	add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
-
-	# Make binary from the project object file
-	add_custom_target(${PROJECT_NAME}.bin ALL
-	COMMAND ${CMAKE_OBJCOPY} --output-format=binary
-	${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${PROJECT_NAME}.bin
-	DEPENDS ${PROJECT_NAME}
-	COMMENT "Making binary ${PROJECT_NAME}"
-	)
-
-	# Clean binary on 'make clean' call
-	set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 endmacro()
 

@@ -1,9 +1,5 @@
-## Qt creator hack
-file(GLOB_RECURSE ALL_PLATFORM_HEADERS *.hpp)
-add_custom_target(platform_dummy_target SOURCES "${ALL_PLATFORM_HEADERS}")
-## EO hack
-
-add_library(stm32f4xx STATIC platform.cpp)# ${ALL_PLATFORM_HEADERS})
+add_library(stm32f4xx STATIC platform.cpp)
+add_library(stm32f4xx_utils STATIC utils.c)
 
 target_include_directories(stm32f4xx PUBLIC export)
 
@@ -13,7 +9,6 @@ add_subdirectory(SPL)
 add_subdirectory(CMSIS)
 
 # TODO: clarify essential libraries
-target_link_libraries(stm32f4xx startup)
 target_link_libraries(stm32f4xx spl)
 target_link_libraries(stm32f4xx common_spi)
 target_link_libraries(stm32f4xx common_pin)

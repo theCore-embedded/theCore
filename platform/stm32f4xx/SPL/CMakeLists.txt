@@ -61,5 +61,5 @@ add_library(spl STATIC
 # STM32 peripherial library headers
 target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/inc)
 
-target_link_libraries(spl startup)
+target_link_libraries(spl stm32f4xx_utils)
 target_link_libraries(spl cmsis)

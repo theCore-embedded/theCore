@@ -14,4 +14,3 @@ extern "C" __attribute__((used)) void platform_init()
     // Required for FreeRTOS
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 }
-
