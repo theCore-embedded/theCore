@@ -15,14 +15,6 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC startup)
 
-# Make binary from the project object file
-add_custom_target(${PROJECT_NAME}.bin ALL
-COMMAND ${CMAKE_OBJCOPY} --output-format=binary
-${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${PROJECT_NAME}.bin
-DEPENDS ${PROJECT_NAME}
-COMMENT "Making binary ${PROJECT_NAME}"
-)
-
 # Clean binary on 'make clean' call
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 
@@ -30,8 +22,21 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.
 # that platform will be added in first place
 add_subdirectory(platform)
 
+# TODO: support binary stripping only for projects that requires its
+# Means we are crosscompiling
+if (NOT ${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+	# Make binary from the project object file
+	add_custom_target(${PROJECT_NAME}.bin ALL
+	COMMAND ${CMAKE_OBJCOPY} --output-format=binary
+	${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${PROJECT_NAME}.bin
+	DEPENDS ${PROJECT_NAME}
+	COMMENT "Making binary ${PROJECT_NAME}"
+	)
+
+	add_subdirectory(sys)
+endif()
+
 # Rest of modules
-add_subdirectory(sys)
 add_subdirectory(lib)
 add_subdirectory(dev)
 add_subdirectory(kernel)

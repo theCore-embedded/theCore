@@ -5,7 +5,6 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
 # set various flags for C\C++ compiler and linker
 # warn flags goes here
-# TODO: separate debug\release builds
 set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
 

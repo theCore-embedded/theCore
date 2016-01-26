@@ -1,5 +1,3 @@
-//#include "sys/pin_cfgs.h"
-
 #include <cstdint>
 #include <cstddef>
 
