@@ -17,17 +17,17 @@
 // instance.
 // TODO: think about making driver config (USART_TypeDef&)
 // reusable in runtime, not compile time
-template< USART_device	USARTx,
+template< usart_device	USARTx,
           USART_mode    mode        = USART_mode::poll,
           int32_t       flags       = USART_state::EMPTY >
-class USART_dev
+class usart
 {
     // Supported only IRQ and POLL modes.
     static_assert((mode == USART_mode::poll) ||
                   (mode == USART_mode::IRQ), "Invalid USART mode used!");
 public:
-    USART_dev();
-    ~USART_dev();
+    usart();
+    ~usart();
 
     // Lazy initialization, -1 if error. 0 otherwise
     static int init();
@@ -87,17 +87,17 @@ private:
 // Interface
 // -----------------------------------------------------------------------------
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-USART_dev< USARTx, mode, flags >::USART_dev()
+usart< USARTx, mode, flags >::usart()
 {
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-USART_dev< USARTx, mode, flags >::~USART_dev()
+usart< USARTx, mode, flags >::~usart()
 {
     // TODO: implement
     if (m_inited) {
@@ -105,10 +105,10 @@ USART_dev< USARTx, mode, flags >::~USART_dev()
     }
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::init()
+int usart< USARTx, mode, flags >::init()
 {
     USART_InitTypeDef initStruct;
 
@@ -149,21 +149,21 @@ int USART_dev< USARTx, mode, flags >::init()
     return 0;
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::m_inited = 0;
+int usart< USARTx, mode, flags >::m_inited = 0;
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::m_opened = 0;
+int usart< USARTx, mode, flags >::m_opened = 0;
 
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::open()
+int usart< USARTx, mode, flags >::open()
 {
     if (!m_inited || m_opened)
         return -1;
@@ -176,10 +176,10 @@ int USART_dev< USARTx, mode, flags >::open()
     return 0;
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::close()
+int usart< USARTx, mode, flags >::close()
 {
     if (!m_opened)
         return -1;
@@ -193,10 +193,10 @@ int USART_dev< USARTx, mode, flags >::close()
 }
 
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-ssize_t USART_dev< USARTx, mode, flags >::read(uint8_t *data, size_t count)
+ssize_t usart< USARTx, mode, flags >::read(uint8_t *data, size_t count)
 {
     if (!count)
         return 0;
@@ -221,10 +221,10 @@ ssize_t USART_dev< USARTx, mode, flags >::read(uint8_t *data, size_t count)
     return 1;
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-ssize_t USART_dev< USARTx, mode, flags >::write(const uint8_t *data, size_t count)
+ssize_t usart< USARTx, mode, flags >::write(const uint8_t *data, size_t count)
 {
     if (!count)
         return 0;
@@ -253,10 +253,10 @@ ssize_t USART_dev< USARTx, mode, flags >::write(const uint8_t *data, size_t coun
     return count;
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int32_t USART_dev< USARTx, mode, flags >::get_state()
+int32_t usart< USARTx, mode, flags >::get_state()
 {
     constexpr auto usart = pick_USART();
 
@@ -289,10 +289,10 @@ int32_t USART_dev< USARTx, mode, flags >::get_state()
     return status;
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::clear_state(int32_t state)
+int usart< USARTx, mode, flags >::clear_state(int32_t state)
 {
     constexpr auto usart = pick_USART();
 
@@ -315,10 +315,10 @@ int USART_dev< USARTx, mode, flags >::clear_state(int32_t state)
 }
 
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::register_IRQ(const std::function< void() > &handler)
+int usart< USARTx, mode, flags >::register_IRQ(const std::function< void() > &handler)
 {
     // TODO
     constexpr auto IRQn = pick_IRQn();
@@ -328,10 +328,10 @@ int USART_dev< USARTx, mode, flags >::register_IRQ(const std::function< void() >
 }
 
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::complete_IRQ(int32_t state)
+int usart< USARTx, mode, flags >::complete_IRQ(int32_t state)
 {
     constexpr auto usart = pick_USART();
     constexpr auto IRQn = pick_IRQn();
@@ -358,19 +358,19 @@ int USART_dev< USARTx, mode, flags >::complete_IRQ(int32_t state)
     return 0;
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::complete_IRQ()
+int usart< USARTx, mode, flags >::complete_IRQ()
 {
     return complete_IRQ(USART_state::INVALID);
 }
 
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-int USART_dev< USARTx, mode, flags >::deregisterIRQ()
+int usart< USARTx, mode, flags >::deregisterIRQ()
 {
     constexpr auto IRQn = pick_IRQn();
     IRQ_manager::mask(IRQn);
@@ -381,10 +381,10 @@ int USART_dev< USARTx, mode, flags >::deregisterIRQ()
 
 // Private members
 // -----------------------------------------------------------------------------
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-constexpr auto USART_dev< USARTx, mode, flags >::pick_RCC()
+constexpr auto usart< USARTx, mode, flags >::pick_RCC()
 {
     // USART1 and USART6 are on APB2
     // USART2, USART3, UART4, UART5 are on APB1
@@ -407,10 +407,10 @@ constexpr auto USART_dev< USARTx, mode, flags >::pick_RCC()
     return static_cast< uint32_t >(-1);
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-constexpr auto USART_dev< USARTx, mode, flags >::pick_RCCfn()
+constexpr auto usart< USARTx, mode, flags >::pick_RCCfn()
 {
     // USART1 and USART6 are on APB2
     // USART2, USART3, UART4, UART5 are on APB1
@@ -428,10 +428,10 @@ constexpr auto USART_dev< USARTx, mode, flags >::pick_RCCfn()
     }
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-constexpr auto USART_dev< USARTx, mode, flags >::pick_IRQn()
+constexpr auto usart< USARTx, mode, flags >::pick_IRQn()
 {
     constexpr auto usart = pick_USART();
 
@@ -450,23 +450,23 @@ constexpr auto USART_dev< USARTx, mode, flags >::pick_IRQn()
     }
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-constexpr auto USART_dev< USARTx, mode, flags >::pick_USART()
+constexpr auto usart< USARTx, mode, flags >::pick_USART()
 {
     switch (USARTx) {
-    case USART_device::dev_1:
+    case usart_device::dev_1:
         return USART1;
-    case USART_device::dev_2:
+    case usart_device::dev_2:
         return USART2;
-    case USART_device::dev_3:
+    case usart_device::dev_3:
         return USART3;
-    case USART_device::dev_4:
+    case usart_device::dev_4:
         return UART4;
-    case USART_device::dev_5:
+    case usart_device::dev_5:
         return UART5;
-    case USART_device::dev_6:
+    case usart_device::dev_6:
         return USART6;
         // TODO: clarify
     default:
@@ -474,10 +474,10 @@ constexpr auto USART_dev< USARTx, mode, flags >::pick_USART()
     };
 }
 
-template< USART_device USARTx,
+template< usart_device USARTx,
           USART_mode mode,
           int32_t flags >
-void USART_dev< USARTx, mode, flags >::init_IRQ()
+void usart< USARTx, mode, flags >::init_IRQ()
 {
     constexpr auto usart = pick_USART();
 

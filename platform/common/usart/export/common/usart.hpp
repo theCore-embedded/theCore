@@ -4,7 +4,7 @@
 #include <cstdint>
 
 // Represents distinct peripheral devices
-enum class USART_device
+enum class usart_device
 {
     dev_1,
     dev_2,

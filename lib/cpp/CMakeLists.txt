@@ -3,7 +3,7 @@ file(GLOB_RECURSE ALL_HEADERS *.hpp)
 add_custom_target(libcpp_dummy_target SOURCES "${ALL_HEADERS}")
 ## EO hack
 
-add_library(libcpp STATIC arm_eabi.cpp)
+add_library(libcpp STATIC arm_eabi.cpp streams.cpp)
 target_include_directories(libcpp PUBLIC export)
 
 message(STATUS "Determining console driver configuration...")
@@ -11,7 +11,7 @@ message(STATUS "Determining console driver configuration...")
 if (${CONFIG_USE_CONSOLE})
 	if (DEFINED CONFIG_CONSOLE_LIB)
 		if (TARGET "${CONFIG_CONSOLE_LIB}")
-			message(STATUS "Console library \"${CONFIG_CONSOLE_LIB}\""
+			message(STATUS "Console library \"${CONFIG_CONSOLE_LIB}\" "
 				"is provided by the project")
 		else()
 			message(FATAL_ERROR "${CONFIG_CONSOLE_LIB} is not a valid console library!")

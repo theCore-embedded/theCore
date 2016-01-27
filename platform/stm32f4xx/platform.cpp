@@ -1,7 +1,4 @@
-#include <platform/usart_device.hpp>
 #include <platform/irq_manager.hpp>
-#include <platform/usart_device.hpp>
-
 #include <misc.h>
 
 
