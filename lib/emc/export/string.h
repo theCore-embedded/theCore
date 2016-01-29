@@ -7,14 +7,22 @@
 extern "C" {
 #endif
 
-void *memmove(void *dst, const void *src, size_t cnt);
-void *memset(void *s, int c, size_t n);
-void *memcpy(void *dst, const void *src, size_t cnt);
+/* To avoid collisions between hosted libc and existing implementation
+ * names must be mangled */
+#if __STDC_HOSTED__
+#define LIBC_FUNCTION(name) ecl_##name
+#else
+#define LIBC_FUNCTION(name) name
+#endif
 
-int strcmp(const char *str1, const char *str2);
-int strcmpi(const char *str1, const char *str2);
-const char* strchr(const char *str, int character);
-size_t strlen(const char *str);
+void *LIBC_FUNCTION(memmove) (void *dst, const void *src, size_t cnt);
+void *LIBC_FUNCTION(memset) (void *s, int c, size_t n);
+void *LIBC_FUNCTION(memcpy) (void *dst, const void *src, size_t cnt);
+
+int LIBC_FUNCTION(strcmp) (const char *str1, const char *str2);
+int LIBC_FUNCTION(strcmpi) (const char *str1, const char *str2);
+const char* LIBC_FUNCTION(strchr) (const char *str, int character);
+size_t LIBC_FUNCTION(strlen) (const char *str);
 
 #ifdef __cplusplus
 }

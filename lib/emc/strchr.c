@@ -1,6 +1,6 @@
 #include "string.h"
 
-const char* strchr(const char *str, int character)
+const char*  LIBC_FUNCTION(strchr) (const char *str, int character)
 {
     const char *p;
     while (*(p = str++)) {

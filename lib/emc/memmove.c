@@ -2,7 +2,7 @@
 
 // Hack to avoid errors when using LTO
 __attribute__((used))
-void *memmove(void *dst_void, const void *src_void, size_t length)
+void * LIBC_FUNCTION(memmove) (void *dst_void, const void *src_void, size_t length)
 {
     // Grabbed from newlib implementation
     char *dst = dst_void;

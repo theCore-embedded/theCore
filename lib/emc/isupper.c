@@ -1,6 +1,10 @@
-#include "ctype.h"
+/* Avoid collisions with libc by using relative paths */
+#include "export/ctype.h"
 
-int isupper(int c)
+/* Rely upon actual function */
+extern int islower(int c);
+
+int LIBC_FUNCTION(isupper) (int c)
 {
     return !islower(c);
 }

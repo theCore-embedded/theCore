@@ -26,3 +26,12 @@ macro(register_project project_name)
 	add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
 endmacro()
 
+# Creates a host unit test
+function(add_unit_host_test test_name test_sources)
+	# Add test only if not cross-compiling
+	if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+		add_executable(${test_name} ${test_sources} ${ARGN})
+		target_link_libraries(${test_name} CppUTest)
+		add_test(${test_name} ${test_name})
+	endif()
+endfunction()

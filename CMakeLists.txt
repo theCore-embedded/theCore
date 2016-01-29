@@ -1,5 +1,7 @@
 # ASM is crucial
 enable_language(ASM-ATT)
+# All subproject may use tests
+enable_testing()
 
 # TODO: add same configuration mechanism for choosing right kernel
 if (NOT DEFINED CONFIG_PLATFORM)
