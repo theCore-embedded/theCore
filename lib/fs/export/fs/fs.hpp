@@ -64,7 +64,7 @@ private:
                 if (len >= 16) {
                     // Name is too long
                     // TODO: fix it
-                    assert(0);
+                    ecl_assert(0);
                 } else {
                     std::copy(path + cur, p, component);
                     component[len] = 0;
@@ -81,7 +81,7 @@ private:
                 if (len >= 16) {
                     // Name is too long
                     // TODO: fix it
-                    assert(0);
+                    ecl_assert(0);
                 } else {
                     std::copy(path + cur, path + cur + len, component);
                     component[len] = 0;
@@ -185,7 +185,7 @@ dir_ptr vfs< Fs... >::open_dir(const char *path)
 template< class ...Fs >
 auto vfs< Fs... >::get_root_node(const char *&path)
 {
-    assert(path);
+    ecl_assert(path);
 
     inode_ptr root;
     size_t last_match = 0;
@@ -239,9 +239,9 @@ auto vfs< Fs... >::get_root_node(const char *&path)
 template< class ...Fs >
 auto vfs< Fs... >::path_to_inode(const char *path)
 {
-    assert(path);
+    ecl_assert(path);
     auto root = get_root_node(path);
-    assert(root);
+    ecl_assert(root);
 
     path_iter iter{path};
     const char *part;
@@ -275,9 +275,9 @@ auto vfs< Fs... >::path_to_inode(const char *path)
 template< class ...Fs >
 auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
 {
-    assert(cur_dir);
-    assert(name);
-    assert(cur_dir->get_type() == inode::type::dir);
+    ecl_assert(cur_dir);
+    ecl_assert(name);
+    ecl_assert(cur_dir->get_type() == inode::type::dir);
 
     auto dd = cur_dir->open_dir();
     char inode_name[16]; // TODO: Clarify size
@@ -295,7 +295,7 @@ auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
 
         if ((size_t) ret >= sizeof(inode_name)) {
             // Name is too long
-            assert(0);
+            ecl_assert(0);
         }
 
         // TODO: most of FSes are case sensitive.

@@ -66,7 +66,7 @@ const char* path_erased< Alloc >::get_path() const
 template< class Alloc >
 path_ptr allocate_path(const char *path, const char *tail, const Alloc &alloc)
 {
-    assert(path);
+    ecl_assert(path);
 
     auto    char_alloc      = alloc.template rebind< char >();
     using   path_container  = path_erased< decltype(char_alloc) >;
@@ -75,7 +75,7 @@ path_ptr allocate_path(const char *path, const char *tail, const Alloc &alloc)
     size_t  tail_sz         = (tail ? strlen(tail) : 0) + 1;
     char    *path_buf       = char_alloc.allocate(buf_sz + tail_sz + !trailed);
 
-    assert(path_buf);
+    ecl_assert(path_buf);
 
     std::copy(path, path + buf_sz, path_buf);
 

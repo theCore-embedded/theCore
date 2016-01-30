@@ -29,12 +29,12 @@ dir_inode::type dir_inode::get_type() const
 fs::dir_ptr dir_inode::open_dir()
 {
 
-    assert(!my_ptr.expired());
+    ecl_assert(!my_ptr.expired());
     DIR fat_dir;
 
     FRESULT res = pf_opendir(m_fs, &fat_dir, m_path->get_path());
     // TODO: graceful error handing
-    // assert(res == FR_OK);
+    // ecl_assert(res == FR_OK);
     if (res != FR_OK) {
         ecl::cout << "Error opening dir: " << m_path->get_path()
                   << " : " << res << ecl::endl;
@@ -42,7 +42,7 @@ fs::dir_ptr dir_inode::open_dir()
     }
 
     auto inode = my_ptr.lock();
-    assert(inode);
+    ecl_assert(inode);
 
     auto ptr = ecl::allocate_shared< dir, decltype(m_alloc) >
             (m_alloc, inode, m_fs, m_alloc, fat_dir, m_path);
@@ -58,8 +58,8 @@ ssize_t dir_inode::size() const
 
 ssize_t dir_inode::get_name(char *buf, size_t buf_sz) const
 {
-    assert(buf);
-    assert(buf_sz);
+    ecl_assert(buf);
+    ecl_assert(buf_sz);
 
     const char *path = m_path->get_path();
 
@@ -82,8 +82,8 @@ ssize_t dir_inode::get_name(char *buf, size_t buf_sz) const
     size_t to_copy = std::min(buf_sz - 1, (size_t) (end - start));
 
     // Algorithm check
-    assert(to_copy < buf_sz);
-    assert(start < end);
+    ecl_assert(to_copy < buf_sz);
+    ecl_assert(start < end);
 
     buf[to_copy] = 0;
 

@@ -1,8 +1,10 @@
 #ifndef ECL_MEMORY_HPP_
 #define ECL_MEMORY_HPP_
 
+#include <ecl/assert.h>
+
 #include <cstddef>
-#include <ecl/assert.hpp>
+#include <utility>
 
 namespace ecl
 {
@@ -98,7 +100,7 @@ private:
         virtual void destroy() override
         {
             // Make sure there is no other references
-            assert(!m_cnt);
+            ecl_assert(!m_cnt);
 
             // No more weak references so this object may be deleted
             if (!m_weak) {
@@ -263,7 +265,7 @@ template< typename T >
 T& shared_ptr< T >::operator *()
 {
     auto obj = get();
-    assert(obj);
+    ecl_assert(obj);
     return *obj;
 }
 
@@ -271,7 +273,7 @@ template< typename T >
 const T& shared_ptr< T >::operator *() const
 {
     auto obj = get();
-    assert(obj);
+    ecl_assert(obj);
     return *obj;
 }
 
@@ -279,7 +281,7 @@ template< typename T >
 T* shared_ptr< T >::operator ->()
 {
     auto obj = get();
-    assert(obj);
+    ecl_assert(obj);
     return obj;
 }
 
@@ -287,7 +289,7 @@ template< typename T >
 const T* shared_ptr< T >::operator ->() const
 {
     auto obj = get();
-    assert(obj);
+    ecl_assert(obj);
     return obj;
 }
 
@@ -308,7 +310,7 @@ shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
     // Rebind an allocator to use with the auxilarity object
     auto allocator = alloc.template rebind< Aux >();
     auto *ptr = allocator.allocate(1);
-    assert(ptr); // TODO: add here valid check
+    ecl_assert(ptr); // TODO: add here valid check
 
     // Init auxilary object
     new (ptr) Aux{alloc, args...};
@@ -512,10 +514,10 @@ template< typename T >
 void weak_ptr< T >::reset() const
 {
     // Valid object is required
-    assert(m_aux);
-    assert(m_obj);
+    ecl_assert(m_aux);
+    ecl_assert(m_obj);
     // Must be called only if there are no more strong references
-    assert(!m_aux->ref());
+    ecl_assert(!m_aux->ref());
 
     if (!m_aux->weak_dec()) {
         m_aux->destroy();

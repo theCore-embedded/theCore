@@ -6,9 +6,9 @@ using namespace fs;
 file_descriptor::file_descriptor(const inode_weak &node)
     :m_inode(nullptr)
 {
-    assert(!node.expired());
+    ecl_assert(!node.expired());
     m_inode = node.lock();
-    assert(m_inode);
+    ecl_assert(m_inode);
 }
 
 file_descriptor::~file_descriptor()

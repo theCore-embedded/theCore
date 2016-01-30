@@ -3,6 +3,7 @@
 #include "fat/file_inode.hpp"
 
 #include <ecl/iostream.hpp>
+#include <ecl/assert.h>
 
 using namespace fat;
 
@@ -15,7 +16,7 @@ dir::dir(const fs::inode_ptr &node, FATFS *fs, const allocator &alloc,
     ,m_path{path}
     ,m_opened{true}
 {
-    assert(node);
+    ecl_assert(node);
 }
 
 dir::~dir()

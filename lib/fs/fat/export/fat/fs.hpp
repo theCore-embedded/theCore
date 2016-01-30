@@ -1,13 +1,15 @@
 #ifndef FATFS_FILESYSTEM_HPP_
 #define FATFS_FILESYSTEM_HPP_
 
-#include <ecl/pool.hpp>
-#include <fs/inode.hpp>
 
 #include "fat/types.hpp"
 #include "fat/file_inode.hpp"
 #include "fat/dir_inode.hpp"
 #include "src/pff.h"
+
+#include <ecl/pool.hpp>
+#include <fs/inode.hpp>
+#include <ecl/iostream.hpp>
 
 namespace fat
 {
@@ -135,7 +137,7 @@ DSTATUS petit< Block >::disk_initialize(void* disk_obj)
 {
     Block *device = reinterpret_cast< Block* >(disk_obj);
     // Do nothing?
-    assert(device);
+    ecl_assert(device);
     return RES_OK;
 }
 
@@ -146,7 +148,7 @@ DRESULT petit< Block >::disk_writep(void* disk_obj, const BYTE* buff, DWORD sc)
     (void) buff;
     (void) sc;
     Block *device = reinterpret_cast< Block* >(disk_obj);
-    assert(device);
+    ecl_assert(device);
 
     return RES_OK;
 }
@@ -157,7 +159,7 @@ DRESULT petit< Block >::disk_readp(void* disk_obj, BYTE* buff,
                                    DWORD sector, UINT offser, UINT count)
 {
     Block *device = reinterpret_cast< Block* >(disk_obj);
-    assert(device);
+    ecl_assert(device);
 
 
     if (buff) {

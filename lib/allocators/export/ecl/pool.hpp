@@ -1,9 +1,10 @@
 #ifndef LIB_ALLOC_POOL_HPP_
 #define LIB_ALLOC_POOL_HPP_
 
-#include <ecl/assert.hpp>
+#include <ecl/assert.h>
 #include <memory>
 #include <array>
+#include <ecl/types.h>
 
 namespace ecl
 {
@@ -112,9 +113,9 @@ template< size_t blk_sz, size_t blk_cnt >
 uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_sz)
 {
     // Consider reviewing the block size if this assertion fails.
-    assert(align < blk_sz);
+    ecl_assert(align < blk_sz);
     // Not allowed to allocated zero-length buffer
-    assert(n);
+    ecl_assert(n);
 
     // TODO: use byte-based iteration, instead of bit-based
 
@@ -163,24 +164,24 @@ uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_
 template< size_t blk_sz, size_t blk_cnt >
 void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n, size_t obj_sz)
 {
-    assert(n);
-    assert(p); // For now
+    ecl_assert(n);
+    ecl_assert(p); // For now
 
     const uint8_t *start = m_data.begin();
     const uint8_t *end   = m_data.end();
 
-    assert(p >= start && p < end);
+    ecl_assert(p >= start && p < end);
 
     size_t idx = (p - start) / blk_sz;
     size_t cnt = (end - p)   / blk_sz;
     // Convert a count of objects to a block count with ceiling.
     n = n * obj_sz / blk_sz + 1;
 
-    assert(n <= cnt);
+    ecl_assert(n <= cnt);
 
     while (n) {
         size_t to_free = idx + --n;
-        assert(!is_free(to_free));
+        ecl_assert(!is_free(to_free));
         mark(to_free, false);
     }
 
@@ -207,7 +208,7 @@ constexpr auto pool<blk_sz, blk_cnt>::data_blks_sz()
 template< size_t blk_sz, size_t blk_cnt >
 bool pool< blk_sz, blk_cnt >::is_free(size_t idx) const
 {
-    assert(idx < blk_cnt);
+    ecl_assert(idx < blk_cnt);
 
     uint byte = idx >> 3;
     uint bit  = idx & 7;
@@ -219,7 +220,7 @@ bool pool< blk_sz, blk_cnt >::is_free(size_t idx) const
 template< size_t blk_sz, size_t blk_cnt >
 void pool< blk_sz, blk_cnt >::mark(size_t idx, bool used)
 {
-    assert(idx < blk_cnt);
+    ecl_assert(idx < blk_cnt);
 
     uint byte = idx >> 3;
     uint bit  = idx & 7;
@@ -234,7 +235,7 @@ void pool< blk_sz, blk_cnt >::mark(size_t idx, bool used)
 template< size_t blk_sz, size_t blk_cnt >
 uint8_t *pool< blk_sz, blk_cnt >::get_block(size_t idx)
 {
-    assert(idx < blk_cnt);
+    ecl_assert(idx < blk_cnt);
     return m_data.begin() + idx * blk_sz;
 }
 

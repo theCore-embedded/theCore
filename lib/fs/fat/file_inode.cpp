@@ -45,8 +45,8 @@ ssize_t file_inode::size() const
 
 ssize_t file_inode::get_name(char *buf, size_t buf_sz) const
 {
-    assert(buf);
-    assert(buf_sz);
+    ecl_assert(buf);
+    ecl_assert(buf_sz);
 
     const char *path = m_path->get_path();
 
@@ -67,8 +67,8 @@ ssize_t file_inode::get_name(char *buf, size_t buf_sz) const
     const char *end = start + to_copy + 1;
 
     // Algorithm check
-    assert(to_copy < buf_sz);
-    assert(start < end);
+    ecl_assert(to_copy < buf_sz);
+    ecl_assert(start < end);
 
     buf[to_copy] = 0;
 

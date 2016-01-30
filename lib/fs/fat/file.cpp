@@ -16,8 +16,8 @@ file::~file()
 
 ssize_t file::read(uint8_t *buf, size_t size)
 {
-    assert(buf);
-    assert(size); // TODO: for now
+    ecl_assert(buf);
+    ecl_assert(size); // TODO: for now
 
     if (m_opened) {
         size_t read;
@@ -33,8 +33,8 @@ ssize_t file::read(uint8_t *buf, size_t size)
 
 ssize_t file::write(const uint8_t *buf, size_t size)
 {
-    assert(buf);
-    assert(size); // TODO: for now
+    ecl_assert(buf);
+    ecl_assert(size); // TODO: for now
 
 #if _USE_WRITE
     if (m_opened) {

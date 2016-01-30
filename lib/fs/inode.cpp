@@ -15,21 +15,21 @@ inode::~inode()
 file_ptr inode::open()
 {
 	// Must not be called, if inode is a dir
-	assert(0);
+    ecl_assert_msg(0, "Function call not permitted");
 	return file_ptr{};
 }
 
 dir_ptr inode::open_dir()
 {
 	// Must not be called, if inode is a file
-	assert(0);
-	return dir_ptr{};
+    ecl_assert_msg(0, "Function call not permitted");
+    return dir_ptr{};
 }
 
 int inode::set_weak(const fs::inode_ptr &ptr)
 {
-    assert(my_ptr.expired());
-    assert(ptr);
+    ecl_assert(my_ptr.expired());
+    ecl_assert(ptr);
     my_ptr = ptr;
     return 0;
 }
