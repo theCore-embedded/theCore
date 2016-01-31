@@ -1,6 +1,8 @@
-# Add only requested kernel
+# Add kernel to the build if it is really requested
 if (DEFINED CONFIG_OS)
-	add_subdirectory(${CONFIG_OS})
-else()
-	message(STATUS "Be aware: no OS was selected. Thread support will be disabled.")
+	if (${CONFIG_OS_INTERNAL})
+		add_subdirectory(${CONFIG_OS})
+	else()
+		message(INFO "Kernel is selected, but it is provdided externally")
+	endif()
 endif()
