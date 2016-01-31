@@ -38,21 +38,14 @@ add_library(freertos
 	${SRC_DIR}tasks.c
 	${SRC_DIR}timers.c
 	${SRC_DIR}portable/${PORT_DIR}/port.c
-	${SRC_DIR}portable/${PORT_DIR}/portmacro.h
 	${SRC_DIR}portable/MemMang/heap_1.c # TODO: make it configurable as well
-	os.cpp
 	)
 
 target_include_directories(freertos PUBLIC .)
 
-target_include_directories(freertos PRIVATE
-	${SRC_DIR}include/
-	${SRC_DIR}portable/GCC/ARM_CM4F/
-)
-
 # TODO: better check for CONFIG_FREERTOS_HEADERS_PATH
 target_include_directories(freertos PUBLIC
+	${SRC_DIR}include/
 	${CONFIG_FREERTOS_HEADERS_PATH}/
+	${SRC_DIR}portable/${PORT_DIR}/
 )
-
-#target_link_libraries(freertos sys)
