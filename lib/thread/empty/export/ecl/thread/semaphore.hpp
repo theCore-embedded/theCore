@@ -10,10 +10,14 @@ namespace ecl
 class semaphore
 {
 public:
-    constexpr semaphore();
+    constexpr semaphore()
+        :m_counter{0} { }
 
     void signal();
     void wait();
+
+    semaphore(const semaphore&)             = delete;
+    semaphore& operator=(const semaphore&)  = delete;
 
 private:
     std::atomic_int m_counter;
