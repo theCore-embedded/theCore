@@ -5,7 +5,8 @@
 
 namespace ecl
 {
-    using ::common::spinlock;
+// TODO: comment
+using ::common::spinlock;
 }
 
 #endif // LIB_THREAD_EMPTY_SPINLOCK_HPP_

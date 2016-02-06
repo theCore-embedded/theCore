@@ -1,11 +1,12 @@
 #ifndef LIB_THREAD_EMPTY_SEMAPHORE_
 #define LIB_THREAD_EMPTY_SEMAPHORE_
 
-#include "spinlock.hpp"
+#include <atomic>
 
 namespace ecl
 {
 
+// Empty semaphore, acting like spinlock of some kind
 class semaphore
 {
 public:
@@ -15,7 +16,7 @@ public:
     void wait();
 
 private:
-    spinlock m_lock;
+    std::atomic_int m_counter;
 };
 
 }

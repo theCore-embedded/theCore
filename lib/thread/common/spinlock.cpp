@@ -8,7 +8,7 @@ constexpr ecl::common::spinlock::spinlock()
 
 void ecl::common::spinlock::lock()
 {
-    while (m_flag.test_and_set(std::memory_order_aquire))
+    while (m_flag.test_and_set(std::memory_order_acquire))
         ;
 }
 

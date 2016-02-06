@@ -8,7 +8,9 @@ if (DEFINED CONFIG_OS)
 		message(FATAL_ERROR "OS is selected: ${CONFIG_OS}, but no thread support exist")
 	endif()
 else()
-	message(STATUS "Be aware: no OS was selected. Thread support will be disabled.")
+	message(STATUS "Be aware: no OS was selected. Thread support will be disabled."
+		"Stubs are provided for most synchronization primitives")
+	add_subdirectory(empty)
 endif()
 
 add_subdirectory(common)

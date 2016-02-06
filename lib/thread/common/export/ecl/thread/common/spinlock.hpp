@@ -1,5 +1,5 @@
-#ifndef LIB_THREAD_COMMON_SPINLOCK
-#define LIB_THREAD_COMMON_SPINLOCK
+#ifndef LIB_THREAD_COMMON_SPINLOCK_
+#define LIB_THREAD_COMMON_SPINLOCK_
 
 #include <atomic>
 
@@ -27,4 +27,4 @@ private:
 }
 
 
-#endif
+#endif // LIB_THREAD_COMMON_SPINLOCK_
