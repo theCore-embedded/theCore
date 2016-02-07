@@ -1,5 +1,5 @@
-#ifndef LIB_THREAD_MUTEX_
-#define LIB_THREAD_MUTEX_
+#ifndef LIB_THREAD_HOST_MUTEX_
+#define LIB_THREAD_HOST_MUTEX_
 
 #include <mutex>
 
@@ -24,4 +24,4 @@ private:
 }
 
 
-#endif // LIB_THREAD_MUTEX_
+#endif // LIB_THREAD_HOST_MUTEX_

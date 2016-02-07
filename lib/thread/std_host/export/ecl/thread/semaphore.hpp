@@ -1,0 +1,6 @@
+#ifndef LIB_THREAD_HOST_SEMAPHORE_HPP_
+#define LIB_THREAD_HOST_SEMAPHORE_HPP_
+
+// TODO
+
+#endif

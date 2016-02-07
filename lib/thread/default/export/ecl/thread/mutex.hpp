@@ -1,5 +1,5 @@
-#ifndef LIB_THREAD_MUTEX_
-#define LIB_THREAD_MUTEX_
+#ifndef LIB_THREAD_DEFAULT_MUTEX_
+#define LIB_THREAD_DEFAULT_MUTEX_
 
 namespace ecl
 {
@@ -20,4 +20,4 @@ public:
 
 }
 
-#endif // LIB_THREAD_MUTEX_
+#endif // LIB_THREAD_DEFAULT_MUTEX_
