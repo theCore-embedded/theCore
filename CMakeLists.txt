@@ -15,7 +15,7 @@ endif()
 # It depends on startup module, which is actual entry point (not main module).
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC startup)
+target_link_libraries(${PROJECT_NAME} startup)
 
 # Clean binary on 'make clean' call
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
