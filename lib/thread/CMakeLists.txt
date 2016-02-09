@@ -1,11 +1,12 @@
 # Add thread support for valid kernel
 if (DEFINED CONFIG_OS)
+	message(STATUS "OS selected: ${CONFIG_OS}")
 	if (${CONFIG_OS} STREQUAL "freertos")
 		add_subdirectory(freertos)
 	else(${CONFIG_OS} STREQUAL "host")
 		add_subdirectory(std_host)
 	else()
-		message(FATAL_ERROR "OS is selected: ${CONFIG_OS}, but no thread support exist")
+		message(FATAL_ERROR "	No thread support exist for given OS")
 	endif()
 else()
 	message(STATUS "Be aware: no OS was selected. Thread support will be disabled."
