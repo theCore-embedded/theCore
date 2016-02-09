@@ -22,8 +22,10 @@ add_subdirectory(common)
 # This includes 'default' and 'std_host' implementations.
 # TODO: add here 'if' statemenent to somehow emphasize that some tests
 # are included depending on which library is used.
-add_unit_host_test(test_semaphore tests/semaphore_unit.cpp)
-target_link_libraries(test_semaphore thread)
-# TODO: proper dependenices! What is about compilation on Win system?
-target_link_libraries(test_semaphore pthread)
+add_unit_host_test(
+	NAME test_semaphore
+	SOURCES tests/semaphore_unit.cpp
+	# TODO: proper dependenices! What is about compilation on Win system?
+	DEPENDS thread pthread
+	)
 

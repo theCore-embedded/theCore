@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.3)
 # Set for latter use
 set(CORE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+# Requried to improve function managament
+include(CMakeParseArguments)
+
 # Registers a project
 macro(register_project project_name)
 	# This check is intentionally copied from core's listfile
@@ -27,11 +30,51 @@ macro(register_project project_name)
 endmacro()
 
 # Creates a host unit test
-function(add_unit_host_test test_name test_sources)
+#function(add_unit_host_test test_name test_sources)
+#	# Add test only if not cross-compiling
+#	if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+#		add_executable(${test_name} ${test_sources} ${ARGN})
+#		target_link_libraries(${test_name} CppUTest)
+#		add_test(NAME ${test_name} COMMAND ${test_name})
+#	endif()
+#endfunction()
+
+
+# Creates a host unit test
+function(add_unit_host_test)
 	# Add test only if not cross-compiling
 	if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
-		add_executable(${test_name} ${test_sources} ${ARGN})
-		target_link_libraries(${test_name} CppUTest)
-		add_test(NAME ${test_name} COMMAND ${test_name})
+		cmake_parse_arguments(
+			UNIT_TEST
+			"OPTIONAL"
+			"NAME"
+			"SOURCES;DEPENDS;INC_DIRS"
+			${ARGN}
+			)
+
+		if (DEFINED UNIT_TEST_NAME AND DEFINED UNIT_TEST_SOURCES)
+			message("-----------------------------------------------")
+			message("	Test added: ${UNIT_TEST_NAME}")
+			message("	Test sources: ${UNIT_TEST_SOURCES}")
+
+			add_executable(${UNIT_TEST_NAME} ${UNIT_TEST_SOURCES})
+			add_test(NAME ${UNIT_TEST_NAME} COMMAND ${UNIT_TEST_NAME})
+			target_link_libraries(${UNIT_TEST_NAME} CppUTest)
+		else()
+			message(FATAL_ERROR "Test sources and name must be defined!")
+		endif()
+
+		if (UNIT_TEST_DEPENDS)
+			message("	Test dependencies: ${UNIT_TEST_DEPENDS}")
+			target_link_libraries(${UNIT_TEST_NAME} ${UNIT_TEST_DEPENDS})
+		endif()
+
+		if (UNIT_TEST_INC_DIRS)
+			message("	Test includes: ${UNIT_TEST_INC_DIRS}")
+			target_include_directories(
+			${UNIT_TEST_NAME}
+			${UNIT_TEST_INC_DIRS})
+		endif()
+		message("-----------------------------------------------")
 	endif()
 endfunction()
