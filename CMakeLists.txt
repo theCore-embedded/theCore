@@ -3,6 +3,11 @@ enable_language(ASM-ATT)
 # All subproject may use tests
 enable_testing()
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
+
+include(Findcppcheck)
+include(CppcheckTargets)
+
 # TODO: add same configuration mechanism for choosing right kernel
 if (NOT DEFINED CONFIG_PLATFORM)
 	message(FATAL_ERROR "CONFIG_PLATFORM must be set in order to use valid platform")
@@ -29,10 +34,10 @@ add_subdirectory(platform)
 if (NOT ${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
 	# Make binary from the project object file
 	add_custom_target(${PROJECT_NAME}.bin ALL
-	COMMAND ${CMAKE_OBJCOPY} --output-format=binary
-	${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${PROJECT_NAME}.bin
-	DEPENDS ${PROJECT_NAME}
-	COMMENT "Making binary ${PROJECT_NAME}"
+		COMMAND ${CMAKE_OBJCOPY} --output-format=binary
+		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} ${PROJECT_NAME}.bin
+		DEPENDS ${PROJECT_NAME}
+		COMMENT "Making binary ${PROJECT_NAME}"
 	)
 
 	add_subdirectory(sys)
@@ -42,4 +47,5 @@ endif()
 add_subdirectory(lib)
 add_subdirectory(dev)
 add_subdirectory(kernel)
+
 

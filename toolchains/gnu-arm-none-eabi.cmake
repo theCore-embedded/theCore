@@ -7,9 +7,11 @@ set(CMAKE_SYSTEM_NAME Generic)
 # this one not so much
 set(CMAKE_SYSTEM_VERSION 1)
 
+# GCC is used as a linker in order to use LTO properly
+set(CMAKE_C_LINKER arm-none-eabi-gcc)
+set(CMAKE_CXX_LINKER arm-none-eabi-g++)
+
 # specify the cross compiler
-set(CMAKE_C_LINKER arm-none-eabi-ld)
-set(CMAKE_CXX_LINKER arm-none-eabi-ld)
 CMAKE_FORCE_C_COMPILER(arm-none-eabi-gcc GNU)
 CMAKE_FORCE_CXX_COMPILER(arm-none-eabi-g++ GNU)
 

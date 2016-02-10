@@ -1,8 +1,3 @@
-## Qt creator hack
-file(GLOB_RECURSE ALL_HEADERS *.hpp *.h)
-add_custom_target(fat_dummy_target SOURCES "${ALL_HEADERS}")
-## EO hack
-
 add_library(fat STATIC
 fat.cpp
 dir.cpp

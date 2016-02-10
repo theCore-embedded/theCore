@@ -39,10 +39,6 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
 set(CMAKE_C_FLAGS_DEBUG  "-O0 -g3 ")
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 
-# GCC is used as a linker in order to use LTO properly
-set(CMAKE_C_LINKER "arm-none-eabi-gcc")
-set(CMAKE_CXX_LINKER "arm-none-eabi-g++")
-
 # Linker flags
 set(CMAKE_C_LINK_FLAGS
 	"-fuse-linker-plugin -nostdlib -nostartfiles -T${CMAKE_CURRENT_LIST_DIR}/stm32.ld -flto -Wl,--gc-sections ")
