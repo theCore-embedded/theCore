@@ -5,6 +5,8 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
 
+set(CONFIG_RUN_CPPCHECK true)
+
 include(Findcppcheck)
 include(CppcheckTargets)
 
@@ -48,4 +50,4 @@ add_subdirectory(lib)
 add_subdirectory(dev)
 add_subdirectory(kernel)
 
-
+add_dependencies(all_cppcheck ${PROJECT_NAME})

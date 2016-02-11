@@ -32,14 +32,20 @@ endif()
 
 if(CPPCHECK_FOUND)
 	if(NOT TARGET all_cppcheck)
-		add_custom_target(all_cppcheck)
-		set_target_properties(all_cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
+		if (${CONFIG_RUN_CPPCHECK})
+			add_custom_target(all_cppcheck ALL)
+		else()
+			add_custom_target(all_cppcheck ALL)
+			set_target_properties(all_cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
+		endif()
 	endif()
 endif()
 
 function(add_cppcheck_sources _targetname)
 	if(CPPCHECK_FOUND)
 		set(_cppcheck_args)
+		list(APPEND _cppcheck_args
+			--enable=performance --enable=portability --enable=missingInclude)
 		set(_input ${ARGN})
 		list(FIND _input UNUSED_FUNCTIONS _unused_func)
 		if("${_unused_func}" GREATER "-1")
@@ -143,6 +149,9 @@ function(add_cppcheck _name)
 	endif()
 	if(CPPCHECK_FOUND)
 		set(_cppcheck_args)
+		list(APPEND _cppcheck_args
+			--enable=performance --enable=portability
+			--enable=missingInclude --enable=information)
 
 		list(FIND ARGN UNUSED_FUNCTIONS _unused_func)
 		if("${_unused_func}" GREATER "-1")
@@ -172,66 +181,46 @@ function(add_cppcheck _name)
 			list(REMOVE_AT _input ${_unused_func})
 		endif()
 
-		get_target_property(_cppcheck_includes "${_name}" INCLUDE_DIRECTORIES)
-		set(_includes)
-		foreach(_include ${_cppcheck_includes})
-			list(APPEND _includes "-I${_include}")
-		endforeach()
-
 		get_target_property(_cppcheck_sources "${_name}" SOURCES)
 		set(_files)
 		foreach(_source ${_cppcheck_sources})
 			get_source_file_property(_cppcheck_lang "${_source}" LANGUAGE)
 			get_source_file_property(_cppcheck_loc "${_source}" LOCATION)
-			if("${_cppcheck_lang}" MATCHES "CXX")
+			if(("${_cppcheck_lang}" MATCHES "CXX")
+					OR ("${_cppcheck_lang}" MATCHES "C"))
 				list(APPEND _files "${_cppcheck_loc}")
 			endif()
 		endforeach()
 
-#		if("1.${CMAKE_VERSION}" VERSION_LESS "1.2.8.0")
-#			# Older than CMake 2.8.0
-#			add_test(${_name}_cppcheck_test
-#				"${CPPCHECK_EXECUTABLE}"
-#				${CPPCHECK_TEMPLATE_ARG}
-#				${_cppcheck_args}
-#				${_files})
-#		else()
-#			# CMake 2.8.0 and newer
-#			add_test(NAME
-#				${_name}_cppcheck_test
-#				COMMAND
-#				"${CPPCHECK_EXECUTABLE}"
-#				${CPPCHECK_TEMPLATE_ARG}
-#				${_cppcheck_args}
-#				${_files})
-#		endif()
+		add_custom_target(${_name}_cppcheck)
+		set_target_properties(${_name}_cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-#		set_tests_properties(${_name}_cppcheck_test
-#			PROPERTIES
-#			FAIL_REGULAR_EXPRESSION
-#			"${CPPCHECK_FAIL_REGULAR_EXPRESSION}")
+		add_dependencies(all_cppcheck ${_name}_cppcheck)
+		set(white "")
 
-		add_custom_target(${_name}_cppcheck_target)
-		set_target_properties(${_name}_cppcheck_target PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
-		add_dependencies(${_name} ${_name}_cppcheck_target)
-		add_dependencies(all_cppcheck ${_name}_cppcheck_target)
+		# TODO: comment
+		set(_includes
+			"-I$<JOIN:$<TARGET_PROPERTY:${_name},INCLUDE_DIRECTORIES>, -I>")
 
 		add_custom_command(TARGET
-			${_name}_cppcheck_target
+			${_name}_cppcheck
 			PRE_BUILD
 			COMMAND
-			${CPPCHECK_EXECUTABLE}
-			${CPPCHECK_QUIET_ARG}
-			${CPPCHECK_TEMPLATE_ARG}
-			${_cppcheck_args}
-			${_includes}
-			${_files}
+			#${CPPCHECK_EXECUTABLE}
+			#echo "${CPPCHECK_TEMPLATE_ARG}"
+			cmake
+			ARGS
+			-DCPPCHECK_QUIET_ARG="${CPPCHECK_QUIET_ARG}"
+			-DCPPCHECK_TEMPLATE_ARG="${CPPCHECK_TEMPLATE_ARG}"
+			-DCPPCHECK_ARGS="${_cppcheck_args}"
+			-DINCLUDES=${_includes}
+			-DFILES="${_files}"
+			-P ${CORE_DIR}/modules/Cppcheck.cmake
 			WORKING_DIRECTORY
 			"${CMAKE_CURRENT_SOURCE_DIR}"
 			COMMENT
 			"${_name}_cppcheck: Running cppcheck on target ${_name}..."
-			VERBATIM)
+			)
 	endif()
 
 endfunction()

@@ -20,3 +20,6 @@ add_unit_host_test(NAME test_memcpy SOURCES tests/memcpy_unit.cpp memcpy.c)
 
 target_include_directories(emc PUBLIC export)
 target_include_directories(emc PRIVATE .)
+
+# Static analysis
+add_cppcheck(emc STYLE FORCE)
