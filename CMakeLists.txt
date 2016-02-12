@@ -5,12 +5,11 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
 
-set(CONFIG_RUN_CPPCHECK true)
-
 include(Findcppcheck)
 include(CppcheckTargets)
 
 # TODO: add same configuration mechanism for choosing right kernel
+message(STATUS "Checking [CONFIG_PLATFORM]...")
 if (NOT DEFINED CONFIG_PLATFORM)
 	message(FATAL_ERROR "CONFIG_PLATFORM must be set in order to use valid platform")
 else()

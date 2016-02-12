@@ -1,9 +1,11 @@
 add_library(libcpp STATIC arm_eabi.cpp streams.cpp)
 target_include_directories(libcpp PUBLIC export)
 
-message(STATUS "Determining console driver configuration...")
+message(STATUS "Checking [CONFIG_USE_CONSOLE]...")
+
 # Pick console driver
 if (${CONFIG_USE_CONSOLE})
+	message(STATUS "Checking [CONFIG_CONSOLE_LIB]...")
 	if (DEFINED CONFIG_CONSOLE_LIB)
 		if (TARGET "${CONFIG_CONSOLE_LIB}")
 			message(STATUS "Console library \"${CONFIG_CONSOLE_LIB}\" "

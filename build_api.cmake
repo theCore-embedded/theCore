@@ -12,6 +12,7 @@ macro(register_project project_name)
 	# This check is intentionally copied from core's listfile
 	# Reason is that if build API used a proper platform must be set
 	# _before_ compiler definitions and core inclusion.
+	message(STATUS "Checking [CONFIG_PLATFORM]...")
 	if (NOT DEFINED CONFIG_PLATFORM)
 		message(FATAL_ERROR "CONFIG_PLATFORM must be set in order to use valid platform")
 	else()
