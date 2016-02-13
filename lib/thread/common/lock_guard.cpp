@@ -1,6 +1,0 @@
-#ifndef LIB_THREAD_COMMON_LOCK_GUARD_
-#define LIB_THREAD_COMMON_LOCK_GUARD_
-
-// TODO
-
-#endif

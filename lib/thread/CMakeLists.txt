@@ -16,6 +16,11 @@ endif()
 
 add_subdirectory(common)
 
+# TODO: comment about lib names
+add_library(thread lock_guard.cpp)
+target_include_directories(thread PUBLIC export)
+target_link_libraries(thread PUBLIC thread_os)
+
 # Tests.
 
 # Semaphore test will be triggered for implementations based on the

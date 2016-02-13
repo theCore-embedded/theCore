@@ -1,13 +1,13 @@
 // Empty semaphore
 
-#include <ecl/thread/semaphore.hpp>
+#include <ecl/thread/common/semaphore.hpp>
 
-void ecl::semaphore::signal()
+void ecl::common::semaphore::signal()
 {
     m_counter++;
 }
 
-void ecl::semaphore::wait()
+void ecl::common::semaphore::wait()
 {
     int cnt;
 

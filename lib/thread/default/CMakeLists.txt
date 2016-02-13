@@ -1,4 +1,3 @@
-add_library(thread mutex.cpp semaphore.cpp future.cpp)
-target_include_directories(thread PUBLIC export)
-
-add_cppcheck(thread UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
+add_library(thread_os INTERFACE)
+target_include_directories(thread_os INTERFACE export)
+target_link_libraries(thread_os INTERFACE thread_common)
