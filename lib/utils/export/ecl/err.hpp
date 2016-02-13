@@ -98,6 +98,8 @@ static inline bool is_ok(err error)
     return !is_error(error);
 }
 
+const char* err_to_str(err error);
+
 }
 
 #endif // LIB_UTILS_ERR_HPP_

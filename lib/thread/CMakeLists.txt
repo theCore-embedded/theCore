@@ -32,7 +32,7 @@ add_unit_host_test(
 	NAME test_semaphore
 	SOURCES tests/semaphore_unit.cpp
 	# TODO: proper dependenices! What is about compilation on Win system?
-	DEPENDS thread pthread
+	DEPENDS thread_os pthread
 )
 
 if (${CONFIG_OS} STREQUAL "host")
@@ -40,6 +40,6 @@ if (${CONFIG_OS} STREQUAL "host")
 		NAME test_thread
 		SOURCES tests/thread_unit.cpp
 		# TODO: proper dependenices! What is about compilation on Win system?
-		DEPENDS thread pthread
+		DEPENDS thread_os pthread
 	)
 endif()
