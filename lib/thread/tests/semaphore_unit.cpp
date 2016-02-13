@@ -77,7 +77,7 @@ TEST(semaphore, one_semaphore_few_threads)
         (void) thread; // We don't need this
         semaphore.signal();
         signalled++;
-        test_delay(500); // Let some thread finish its work
+        test_delay(200); // Let some thread finish its work
         CHECK_EQUAL(signalled, counter); // Check that only one thread is finished
     });
 
@@ -113,13 +113,13 @@ TEST(semaphore, multiple_threads)
     });
 
     // Let them wait on semaphore
-    test_delay();
+    test_delay(100);
     // Threads are started and should wait for orders
     test_for_each(objs, [](auto &obj) { CHECK(!obj.flag); } );
     // Unblock threads
     test_for_each(objs, [](auto &obj) { obj.semaphore.signal(); });
     // Let threads do the work
-    test_delay();
+    test_delay(100);
     // Check that work is done
     test_for_each(objs, [](auto &obj) { CHECK(obj.flag); });
     // Wait for threads to finish

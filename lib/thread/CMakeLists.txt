@@ -4,6 +4,7 @@ if (DEFINED CONFIG_OS)
 	if (${CONFIG_OS} STREQUAL "freertos")
 		add_subdirectory(freertos)
 	else(${CONFIG_OS} STREQUAL "host")
+		# TODO: create separate implementation for posix and win32 threads
 		add_subdirectory(std_host)
 	else()
 		message(FATAL_ERROR "	No thread support exist for given OS")

@@ -9,15 +9,15 @@ namespace ecl
 {
 
 // TODO
-class exposed_thread
+class native_thread
 {
 public:
-    exposed_thread();
-    exposed_thread(void (*fn)(void *ctx), void *data);
-    exposed_thread(exposed_thread &&other);
-    ~exposed_thread();
+    native_thread();
+    native_thread(int (*fn)(void *ctx), void *data);
+    native_thread(native_thread &&other);
+    ~native_thread();
 
-    exposed_thread& operator=(exposed_thread &) = delete;
+    native_thread& operator=(native_thread &) = delete;
 
     ecl::err join();
 private:
