@@ -1,11 +1,19 @@
 # Add thread support for valid kernel
+message(STATUS "Checking [CONFIG_OS]...")
 if (DEFINED CONFIG_OS)
 	message(STATUS "OS selected: ${CONFIG_OS}")
 	if (${CONFIG_OS} STREQUAL "freertos")
 		add_subdirectory(freertos)
-	else(${CONFIG_OS} STREQUAL "host")
-		# TODO: create separate implementation for posix and win32 threads
-		add_subdirectory(std_host)
+	else (${CONFIG_OS} STREQUAL "host")
+		if (${UNIX})
+			add_subdirectory(posix)
+		else(${WIN32})
+			# Currently missing
+			add_subdirectory(win32)
+		else()
+			# Please, implement it if you see this message
+			message(FATAL_ERROR "	Your host system has no known thread support")
+		endif()
 	else()
 		message(FATAL_ERROR "	No thread support exist for given OS")
 	endif()

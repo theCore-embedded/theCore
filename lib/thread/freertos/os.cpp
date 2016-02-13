@@ -9,7 +9,7 @@ extern "C" void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                     signed char *pcTaskName )
 {
     (void) xTask;
-    (void)  pcTaskName;
+    (void) pcTaskName;
     //ecl::cout << "Stack is overflowed by: " << (char *)pcTaskName << ecl::endl;
     for(;;);
 }

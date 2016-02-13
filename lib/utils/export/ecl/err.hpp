@@ -86,6 +86,7 @@ enum class err : int
     txtbsy           = -76,    // Text file busy
     wouldblock       = -77,    // Operation would block
     xdev             = -78,    // Cross-device link
+    generic          = -79,    // Generic error
 };
 
 static inline bool is_error(err error)

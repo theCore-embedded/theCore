@@ -1,4 +1,4 @@
-add_library(thread_os os.cpp)
+add_library(thread_os os.cpp mutex.cpp semaphore.cpp thread.cpp)
 target_include_directories(thread_os PUBLIC .)
 
 # If kernel is provided by us then built it
