@@ -1,12 +1,12 @@
 #include <ecl/thread/thread.hpp>
 #include <ecl/assert.h>
-
+#include <bits/local_lim.h>
 #include <algorithm>
 
 ecl::native_thread::native_thread()
     :m_thread{}
-    ,m_stack{1024}
-    ,m_name{"unnamed"}
+    ,m_stack{PTHREAD_STACK_MIN}
+    ,m_name{""}
     ,m_state{state::initial}
     ,m_fn{nullptr}
     ,m_arg{nullptr}
@@ -35,13 +35,13 @@ ecl::native_thread::~native_thread()
 
 ecl::err ecl::native_thread::set_stack_size(size_t size)
 {
-    ecl_assert_msg(!size, "Stack size cannot be 0");
+    ecl_assert_msg(size, "Stack size cannot be 0");
 
     if (m_state != state::initial) {
         return err::busy;
     }
 
-    m_stack = size + 512; // TODO: rationale for such values
+    m_stack += size; // TODO: rationale for such values
     return err::ok;
 }
 
@@ -98,17 +98,12 @@ ecl::err ecl::native_thread::start()
         return err::generic;
     }
 
-    // Set stack
-    rc = pthread_attr_setstack(&attr, nullptr, m_stack);
-    if (rc != 0) {
-        pthread_attr_destroy(&attr);
-        return err::generic;
-    }
+    // TODO: comment about why stack size is not used
 
     // TODO: comment about it
     runner_arg arg = { {}, m_fn, m_arg };
 
-    rc = pthread_create(&m_thread, &attr, thread_runner, reinterpret_cast< void * >(&arg));
+    rc = pthread_create(&m_thread, &attr, thread_runner, reinterpret_cast< void* >(&arg));
     if (rc != 0) {
         pthread_attr_destroy(&attr);
         return err::generic;

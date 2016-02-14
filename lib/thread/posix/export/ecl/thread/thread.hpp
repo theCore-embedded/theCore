@@ -16,6 +16,7 @@ class native_thread
 {
 public:
     using routine = ecl::err (*)(void *);
+
     native_thread();
 
     native_thread(native_thread &&other);
