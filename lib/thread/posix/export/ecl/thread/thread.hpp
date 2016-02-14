@@ -1,10 +1,12 @@
 #ifndef LIB_THREAD_HOST_THREAD_HPP_
 #define LIB_THREAD_HOST_THREAD_HPP_
 
+#include "semaphore.hpp"
+
 #include <pthread.h>
 #include <string>
-
 #include <ecl/err.hpp>
+
 
 namespace ecl
 {
@@ -29,7 +31,7 @@ public:
     // Sets name
     // err::srch if thread is in detached state
     // err::generic if something bad happens
-    void set_name(const char *name);
+    ecl::err set_name(const char *name);
 
     // Writes thread name to buf, at most 'size' bytes including null-character
     // returns length of expected name (excluding null-character).
@@ -39,7 +41,7 @@ public:
     // Sets routine and its context
     // Asserts if fn == null
     // Return error if thread already started
-    ecl::err set_routine(routine fn, void *ctx);
+    ecl::err set_routine(routine fn, void *arg);
 
     // Starts thread
     // Hits assert if routine wasn't set
@@ -62,6 +64,15 @@ public:
     ecl::err detach();
 
 private:
+    struct runner_arg
+    {
+        ecl::semaphore  start_flag;
+        routine         start_routine;
+        void            *routine_arg;
+    };
+
+    static void* thread_runner(void *ctx);
+
     enum class state
     {
         initial,
@@ -75,7 +86,7 @@ private:
     std::string     m_name;
     state           m_state;
     routine         m_fn;
-    void            *m_ctx;
+    void            *m_arg;
 //    bool        m_default;   // Thread is in default state
 };
 

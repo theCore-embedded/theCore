@@ -9,7 +9,7 @@ ecl::native_thread::native_thread()
     ,m_name{"unnamed"}
     ,m_state{state::initial}
     ,m_fn{nullptr}
-    ,m_ctx{nullptr}
+    ,m_arg{nullptr}
 {
 
 }
@@ -19,8 +19,11 @@ ecl::native_thread::native_thread(native_thread &&other)
     this->m_thread = other.m_thread;
     this->m_state = other.m_state;
     this->m_fn = other.m_fn;
-    this->m_ctx = other.m_ctx;
+    this->m_stack = other.m_stack;
+    this->m_arg = other.m_arg;
     this->m_name = std::move(other.m_name);
+
+    other.m_state = state::initial;
 }
 
 ecl::native_thread::~native_thread()
@@ -38,12 +41,13 @@ ecl::err ecl::native_thread::set_stack_size(size_t size)
         return err::busy;
     }
 
-    m_size = size + 512; // TODO: rationale for such values
+    m_stack = size + 512; // TODO: rationale for such values
+    return err::ok;
 }
 
-void ecl::native_thread::set_name(const char *name)
+ecl::err ecl::native_thread::set_name(const char *name)
 {
-    if (m_state = state::started) {
+    if (m_state == state::started) {
         int rc = pthread_setname_np(m_thread, m_name.c_str());
         if (rc != 0) {
             return err::generic;
@@ -64,7 +68,7 @@ ssize_t ecl::native_thread::get_name(char *buf, size_t size)
     return m_name.length();
 }
 
-ecl::err ecl::native_thread::set_routine(routine fn, void *ctx)
+ecl::err ecl::native_thread::set_routine(routine fn, void *arg)
 {
     ecl_assert(fn);
 
@@ -72,7 +76,7 @@ ecl::err ecl::native_thread::set_routine(routine fn, void *ctx)
         return err::busy;
     }
 
-    m_ctx = ctx;
+    m_arg = arg;
     m_fn = fn;
 
     return err::ok;
@@ -101,11 +105,16 @@ ecl::err ecl::native_thread::start()
         return err::generic;
     }
 
-    rc = pthread_create(&m_thread, &attr, m_fn, m_ctx);
+    // TODO: comment about it
+    runner_arg arg = { {}, m_fn, m_arg };
+
+    rc = pthread_create(&m_thread, &attr, thread_runner, reinterpret_cast< void * >(&arg));
     if (rc != 0) {
         pthread_attr_destroy(&attr);
         return err::generic;
     }
+
+    arg.start_flag.wait();
 
     m_state = state::started;
 
@@ -121,7 +130,7 @@ ecl::err ecl::native_thread::join(ecl::err &retcode)
     void *retval;
 
     if (m_state != state::started) {
-        return ecl::srch;
+        return err::srch;
     }
 
     int rc = pthread_join(m_thread, &retval);
@@ -129,7 +138,7 @@ ecl::err ecl::native_thread::join(ecl::err &retcode)
         return err::generic;
     }
 
-    retcode = reinterpret_cast< ecl::err >(retval);
+    retcode = * reinterpret_cast< ecl::err * >(&retval);
 
     m_state = state::initial;
 
@@ -145,7 +154,7 @@ ecl::err ecl::native_thread::join()
 ecl::err ecl::native_thread::detach()
 {
     if (m_state != state::started) {
-        return ecl::srch;
+        return err::srch;
     }
 
     int rc = pthread_detach(m_thread);
@@ -154,6 +163,22 @@ ecl::err ecl::native_thread::detach()
     }
 
     m_state = state::detached;
+    return err::ok;
 }
 
+
+//------------------------------------------------------------------------------
+
+void* ecl::native_thread::thread_runner(void *arg)
+{
+    runner_arg *rarg = reinterpret_cast< runner_arg* >(arg);
+    auto *fn = rarg->start_routine;
+    auto *fn_arg = rarg->routine_arg;
+
+    // TODO: comment
+    rarg->start_flag.signal();
+
+    err result = fn(fn_arg);
+    return reinterpret_cast< void * >(result);
+}
 

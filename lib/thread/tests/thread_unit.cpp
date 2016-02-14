@@ -6,10 +6,10 @@
 // Error code helper
 // TODO: move it to 'utils' headers and protect with check of
 // current test state (enabled or disabled)
-static SimpleString StringFrom(ecl::err err)
-{
-    return SimpleString{ecl::err_to_str(err)};
-}
+//static SimpleString StringFrom(ecl::err err)
+//{
+//    return SimpleString{ecl::err_to_str(err)};
+//}
 
 int test_counter;
 
@@ -38,15 +38,10 @@ TEST_GROUP(native_thread)
 
 TEST(native_thread, default_thread_is_not_joinable)
 {
-    ecl::native_thread tr;
-    CHECK_EQUAL(ecl::err::perm, tr.join());
 }
 
 TEST(native_thread, single_thread_is_running)
 {
-    ecl::native_thread tr(single_thread_fn, &test_counter);
-    CHECK_EQUAL(ecl::err::ok, tr.join());
-    CHECK_EQUAL(1, test_counter);
 }
 
 
