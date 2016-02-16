@@ -157,6 +157,8 @@ ecl::err ecl::native_thread::detach()
         return err::generic;
     }
 
+    // There is no return from detached state,
+    // since there is no way to check if thread finish its execution or not
     m_state = state::detached;
     return err::ok;
 }

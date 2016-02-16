@@ -69,7 +69,7 @@ TEST(semaphore, one_semaphore_few_threads)
     });
 
     // Let them wait on semaphore
-    test_delay();
+    test_delay(50);
     // Threads are started and should wait for orders
     CHECK_EQUAL(0, counter);
     // Unblock threads one by one
@@ -77,7 +77,7 @@ TEST(semaphore, one_semaphore_few_threads)
         (void) thread; // We don't need this
         semaphore.signal();
         signalled++;
-        test_delay(200); // Let some thread finish its work
+        test_delay(10); // Let some thread finish its work
         CHECK_EQUAL(signalled, counter); // Check that only one thread is finished
     });
 
