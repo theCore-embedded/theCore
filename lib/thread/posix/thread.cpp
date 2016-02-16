@@ -23,7 +23,7 @@ ecl::native_thread::native_thread(native_thread &&other)
     this->m_arg = other.m_arg;
     this->m_name = std::move(other.m_name);
 
-    other.m_state = state::initial;
+    other.m_state = state::detached;
 }
 
 ecl::native_thread::~native_thread()

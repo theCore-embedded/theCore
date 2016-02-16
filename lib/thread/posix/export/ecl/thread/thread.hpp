@@ -11,7 +11,6 @@
 namespace ecl
 {
 
-// TODO
 class native_thread
 {
 public:
@@ -79,7 +78,6 @@ private:
         initial,
         started,
         detached,
-        //joined,
     };
 
     pthread_t       m_thread;
@@ -88,7 +86,6 @@ private:
     state           m_state;
     routine         m_fn;
     void            *m_arg;
-//    bool        m_default;   // Thread is in default state
 };
 
 }
