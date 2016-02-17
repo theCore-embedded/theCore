@@ -27,7 +27,7 @@ void kernel_main()
 {
     int ret = xTaskCreate(freertos_main_runner,
                           "main",
-                          configMINIMAL_STACK_SIZE,
+                          configMINIMAL_STACK_SIZE, // TODO: make it configurable
                           NULL,
                           tskIDLE_PRIORITY,
                           NULL);

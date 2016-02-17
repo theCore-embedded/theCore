@@ -93,7 +93,7 @@ ecl::err ecl::native_thread::start()
     }
 
     // TODO: comment about it
-    runner_arg arg = { {}, m_fn, m_arg };
+    runner_arg arg = { false, m_fn, m_arg };
 
     xTaskCreate(thread_runner,
                 m_name,
@@ -106,7 +106,11 @@ ecl::err ecl::native_thread::start()
         return ecl::err::generic;
     }
 
-    arg.start_flag.wait();
+
+    while (!arg.start_flag) {
+        // yield-spinlock
+        taskYIELD();
+    }
 
     m_state = state::detached;
 
@@ -136,7 +140,7 @@ void ecl::native_thread::thread_runner(void *arg)
     auto *fn_arg = rarg->routine_arg;
 
     // TODO: comment
-    rarg->start_flag.signal();
+    rarg->start_flag = true;
 
     fn(fn_arg);
 }

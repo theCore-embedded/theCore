@@ -8,7 +8,6 @@
 
 #include <cstdint>
 #include <sys/types.h>
-#include <ecl/thread/common/semaphore.hpp>
 
 namespace ecl
 {
@@ -69,7 +68,7 @@ public:
 private:
     struct runner_arg
     {
-        ecl::common::semaphore      start_flag;
+        volatile bool               start_flag;
         routine                     start_routine;
         void                        *routine_arg;
     };
