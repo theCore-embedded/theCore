@@ -6,7 +6,7 @@
 
 ecl::native_thread::native_thread()
     :m_task{nullptr}
-    ,m_stack{128}
+    ,m_stack{512} // TODO: rationale, why this number?
     ,m_name{0}
     ,m_state{state::initial}
     ,m_fn{nullptr}
@@ -25,6 +25,24 @@ ecl::native_thread::native_thread(native_thread &&other)
     memcpy(this->m_name, other.m_name, sizeof(m_name));
 
     other.m_state = state::detached;
+}
+
+ecl::native_thread::~native_thread()
+{
+    // TODO: comment
+    this->m_state = state::detached;
+}
+
+ecl::err ecl::native_thread::set_stack_size(size_t size)
+{
+    ecl_assert_msg(size, "Stack size cannot be 0");
+
+    if (m_state != state::initial) {
+        return err::busy;
+    }
+
+    m_stack = size;
+    return err::ok;
 }
 
 ecl::err ecl::native_thread::set_name(const char *name)
@@ -74,18 +92,6 @@ ecl::err ecl::native_thread::start()
         return ecl::err::busy;
     }
 
-#if 0
-    pthread_attr_t attr;
-
-    int rc = pthread_attr_init(&attr);
-
-    if (rc != 0) {
-        return err::generic;
-    }
-#endif
-
-    // TODO: comment about why stack size is not used
-
     // TODO: comment about it
     runner_arg arg = { {}, m_fn, m_arg };
 
@@ -100,32 +106,38 @@ ecl::err ecl::native_thread::start()
         return ecl::err::generic;
     }
 
-#if 0
-    rc = pthread_create(&m_thread, &attr, thread_runner, reinterpret_cast< void* >(&arg));
-    if (rc != 0) {
-        pthread_attr_destroy(&attr);
-        return err::generic;
-    }
-#endif
-
     arg.start_flag.wait();
 
-    m_state = state::started;
-
-#if 0
-    rc = pthread_setname_np(m_thread, m_name.c_str());
-
-    pthread_attr_destroy(&attr);
-#endif
+    m_state = state::detached;
 
     return ecl::err::ok;
 }
 
 
+ecl::err ecl::native_thread::join(ecl::err &retcode)
+{
+    (void) retcode;
+    ecl_assert_msg(0, "Thread join is not supported on FreeRTOS (yet)");
+    return ecl::err::notsup;
+}
+
+ecl::err ecl::native_thread::join()
+{
+    ecl::err dummy;
+    return join(dummy);
+}
+
 //------------------------------------------------------------------------------
 
 void ecl::native_thread::thread_runner(void *arg)
 {
-    (void) arg;
+    runner_arg *rarg = reinterpret_cast< runner_arg* >(arg);
+    auto *fn = rarg->start_routine;
+    auto *fn_arg = rarg->routine_arg;
+
+    // TODO: comment
+    rarg->start_flag.signal();
+
+    fn(fn_arg);
 }
 
