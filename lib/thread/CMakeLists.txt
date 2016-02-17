@@ -44,7 +44,7 @@ add_unit_host_test(
 	DEPENDS thread_os pthread
 )
 
-if (${CONFIG_OS} STREQUAL "host")
+if ("${CONFIG_OS}" STREQUAL "host")
 	add_unit_host_test(
 		NAME test_thread
 		SOURCES tests/thread_unit.cpp

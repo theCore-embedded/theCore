@@ -1,9 +1,12 @@
-set(SRC_DIR freertos/FreeRTOS/Source/)
+add_library(freertos_main kernel_main.c)
+target_link_libraries(freertos_main main)
 
-## Qt creator hack
-file(GLOB_RECURSE ALL_HEADERS "${SRC_DIR}include/*.h")
-add_custom_target(free_rtos_dummy_target SOURCES "${ALL_HEADERS}")
-## EO hack
+if (NOT ${CONFIG_OS_INTERNAL})
+	message(STATUS "Kernel is selected, but it is provdided externally")
+	return()
+endif()
+
+set(SRC_DIR freertos/FreeRTOS/Source/)
 
 # Obtain some processor info
 #get_property(TARGET_ARCH GLOBAL PROPERTY TARGET_PROCESSOR_ARCHITECTURE)
@@ -37,11 +40,12 @@ add_library(freertos
 	${SRC_DIR}queue.c
 	${SRC_DIR}tasks.c
 	${SRC_DIR}timers.c
-	${SRC_DIR}portable/${PORT_DIR}/port.c
+	${SRC_DIR}portable/${PORT_DIR}port.c
 	${SRC_DIR}portable/MemMang/heap_1.c # TODO: make it configurable as well
 	)
 
-target_include_directories(freertos PUBLIC .)
+# Depend on locally built FreeRTOS
+target_link_libraries(freertos_main freertos)
 
 # TODO: better check for CONFIG_FREERTOS_HEADERS_PATH
 target_include_directories(freertos PUBLIC

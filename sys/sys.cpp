@@ -4,11 +4,6 @@
 #include <platform/irq_manager.hpp>
 #include <ecl/iostream.hpp>
 
-extern "C" __attribute__((used))
-void vTaskSwitchContext( void );
-
-// TODO: decide if to keep this here or not
-
 // TODO: move it somewhere
 void operator delete(void *)
 {
@@ -42,7 +37,8 @@ void __stack_chk_fail(void)
 
 extern "C" void platform_init();
 extern "C" void board_init();
-extern "C" void main();
+extern "C" void kernel_init();
+extern "C" void kernel_main();
 
 namespace ecl {
 extern typename istream< console_driver >::device_type cin_device;
@@ -54,6 +50,7 @@ extern "C" void core_main(void)
 {
     platform_init();
     board_init();
+    kernel_init();
 
 	extern uint32_t ___init_array_start;
 	extern uint32_t ___init_array_end;
@@ -77,7 +74,7 @@ extern "C" void core_main(void)
 
     IRQ_manager::init();
 
-    main();
+    kernel_main();
 }
 
 extern "C" void __cxa_pure_virtual()
