@@ -122,8 +122,6 @@ void SPI_XFER< DMA_TX, DMA_RX >::IRQ_handler()
     }
 }
 
-
-
 // SPI platform configuration class
 template< SPI_com_type  SPI_type,
           uint16_t      SPI_direction,
@@ -163,7 +161,6 @@ template< SPI_device   SPIx,            // TODO: move it to config ?
 class SPI_dev : public SPI_lock< SPIx >
 {
 public:
-
     // General type to hold status bits
     using s_t = uint16_t;
 
@@ -288,7 +285,6 @@ SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::~SPI_dev()
     }
 }
 
-
 // TODO: implement, comments
 template< SPI_device SPIx, class SPI_config, class DMA_TX, class DMA_RX >
 int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::init()
@@ -297,9 +293,6 @@ int SPI_dev< SPIx, SPI_config, DMA_TX, DMA_RX >::init()
         constexpr auto spi               = pick_SPI();
         constexpr auto RCC_Periph        = pick_RCC();
         constexpr auto RCC_fn            = pick_RCC_fn();
-
-        // Init locks so bus can be locked
-        SPI_dev::lock_init();
 
         // Why it does work in so strange way?
         constexpr auto init_const_obj = SPI_config::m_init_obj;

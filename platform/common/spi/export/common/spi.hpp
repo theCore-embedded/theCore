@@ -1,9 +1,7 @@
 #ifndef COMMON_SPI_HPP
 #define COMMON_SPI_HPP
 
-#ifndef SPI_NO_OS
-#include <os.hpp>
-#endif
+#include <ecl/thread/mutex.hpp>
 
 // TODO: drop it
 // Represents distinct peripheral devices
@@ -50,48 +48,25 @@ public:
     // Unlocks a bus
     static void unlock();
 
-protected:
-    // Initializes lock on demand
-    static void lock_init();
-
 private:
     // TODO: replace it with special OS abstractions
-    static void *m_handle;
+    static ecl::mutex m_lock;
 };
 
 // TODO: replace it with special OS abstractions
 template< SPI_device SPIx >
-void* SPI_lock< SPIx >::m_handle = nullptr;
-
-template< SPI_device SPIx >
-void SPI_lock< SPIx >::lock_init()
-{
-#ifndef SPI_NO_OS
-    // TODO: error check
-    if (m_handle == nullptr) {
-        m_handle = semaphore_create();
-    }
-#endif
-}
+ecl::mutex SPI_lock< SPIx >::m_lock;
 
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::lock()
 {
-#ifndef SPI_NO_OS
-    if (m_handle) {
-        semaphore_take(m_handle);
-    }
-#endif
+    m_lock.lock();
 }
 
 template< SPI_device SPIx >
 void SPI_lock< SPIx >::unlock()
 {
-#ifndef SPI_NO_OS
-    if (m_handle) {
-        semaphore_give(m_handle);
-    }
-#endif
+    m_lock.unlock();
 }
 
 
