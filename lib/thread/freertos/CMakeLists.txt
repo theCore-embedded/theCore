@@ -1,4 +1,4 @@
-add_library(thread_os os.cpp mutex.cpp semaphore.cpp thread.cpp)
+add_library(thread_os mutex.cpp semaphore.cpp thread.cpp utils.cpp)
 target_include_directories(thread_os PUBLIC .)
 target_include_directories(thread_os PUBLIC export)
 target_link_libraries(thread_os PUBLIC utils)

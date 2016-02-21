@@ -7,6 +7,24 @@ extern int main();
 __attribute__((used))
 void vTaskSwitchContext( void );
 
+// TODO: find better place for this handlers?
+void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                    signed char *pcTaskName )
+{
+    (void) xTask;
+    (void) pcTaskName;
+    //ecl::cout << "Stack is overflowed by: " << (char *)pcTaskName << ecl::endl;
+    for(;;);
+}
+
+void vAssertCalled(const char *file, int line)
+{
+    (void) file;
+    (void) line;
+    //ecl::cout << "FreeRTOS assert failed: " << file << ':' << line;
+    for(;;);
+}
+
 // FreeRTOS doesn't require special init procedure
 void kernel_init()
 {
