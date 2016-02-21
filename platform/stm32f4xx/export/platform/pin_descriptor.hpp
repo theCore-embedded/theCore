@@ -207,6 +207,11 @@ static constexpr uint8_t pick_AF(const pin_function &purpose)
         return GPIO_AF_SPI2;
     case pin_function::pin_SPI3:
         return GPIO_AF_SPI3;
+    case pin_function::pin_I2C1:
+        return GPIO_AF_I2C1;
+    case pin_function::pin_I2C2:
+        return GPIO_AF_I2C2;
+
         // TODO: add rest of SPI
     default:
         return (uint8_t) -1;
