@@ -1,6 +1,17 @@
 add_library(freertos_main kernel_main.c)
 target_link_libraries(freertos_main main)
 
+set(MAIN_STACK_SIZE)
+if (DEFINED CONFIG_FREERTOS_MAIN_THREAD_STACK)
+	set(MAIN_STACK_SIZE ${CONFIG_FREERTOS_MAIN_THREAD_STACK})
+else()
+	set(MAIN_STACK_SIZE 512)
+endif()
+
+message(STATUS "FreeRTOS main thread stack size: ${MAIN_STACK_SIZE} bytes")
+
+target_compile_definitions(freertos_main PRIVATE -DMAIN_STACK_SIZE=${MAIN_STACK_SIZE})
+
 if (NOT ${CONFIG_OS_INTERNAL})
 	message(STATUS "Kernel is selected, but it is provdided externally")
 	return()
