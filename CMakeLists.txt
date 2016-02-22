@@ -23,6 +23,19 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
 target_link_libraries(${PROJECT_NAME} startup)
 
+# Set general flags for C\C++ compiler and linker
+set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
+
+set(C_CXX_EXTRA_FLAGS "-gdwarf-2")
+set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS}")
+set(CXX_EXTRA_FLAGS "-std=c++14 ${C_CXX_EXTRA_FLAGS}")
+
+set(CMAKE_C_FLAGS
+"${CMAKE_C_FLAGS} ${CC_WARN_FLAGS} ${CC_EXTRA_FLAGS}")
+set(CMAKE_CXX_FLAGS
+"${CMAKE_CXX_FLAGS} ${CC_WARN_FLAGS} ${CXX_EXTRA_FLAGS}")
+
 # Clean binary on 'make clean' call
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 
