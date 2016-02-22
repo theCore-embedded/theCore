@@ -23,8 +23,8 @@ macro(register_project project_name)
 	set(PROJECT_DIR ${CMAKE_CURRENT_DIR}/${project_name})
 	set(PLATFORM_DIR ${CORE_DIR}/platform/${PLATFORM_NAME})
 
-	# Pick common compiler definitions for given platform
-	include(${CORE_DIR}/platform/common/compiler.cmake)
+	# Pick common linker definitions for given platform
+	include(${CORE_DIR}/platform/common/linker.cmake)
 
 	# Make sure the core is included
 	add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)

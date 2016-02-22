@@ -1,3 +1,6 @@
+/* This is old version of linker script and MUST be updated as soon as Clang
+ * support will be implemented */
+
 /* Just a memory regions */
 MEMORY
 {
