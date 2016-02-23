@@ -19,9 +19,8 @@ public:
 
     static void init()
     {
-        auto defaultHandler = []() { for(;;); };
         for (auto &h : m_handlers) {
-            h = defaultHandler;
+            h = default_handler;
         }
 
         __enable_irq();
@@ -30,13 +29,17 @@ public:
     static int subscribe(IRQn_t IRQn, const std::function< void() > &handler)
     {
         // TODO: error check
+        __disable_irq();
         m_handlers[IRQn] = handler;
+        __enable_irq();
         return 0;
     }
 
     static int unsubscribe(IRQn_t IRQn)
     {
-        m_handlers[IRQn] = nullptr;
+        __disable_irq();
+        m_handlers[IRQn] = default_handler;
+        __enable_irq();
         return 0;
     }
 
@@ -76,14 +79,15 @@ private:
         // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/CHDBIBGJ.html
         IRQn -= 16;
 
-        if (m_handlers[IRQn]) {
-            // TODO: Is it needed?
-            mask(static_cast< IRQn_t >(IRQn));
-            m_handlers[IRQn]();
-            return;
-        }
+        // TODO: Is it needed?
+        mask(static_cast< IRQn_t >(IRQn));
+        m_handlers[IRQn]();
+    }
 
-        for(;;); // Default handler, TODO: change to something more useful
+    static void default_handler()
+    {
+        __disable_irq();
+        for(;;);
     }
 
     // Registered IRQ handlers
