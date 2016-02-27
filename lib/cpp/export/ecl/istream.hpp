@@ -184,9 +184,9 @@ template< class IO_device >
 int istream< IO_device >::get()
 {
 	int c = 0;
-	if(m_device->read((uint8_t *) &c, 1) < 0) {
-		return -1;
-	}
+    if(m_device->read((uint8_t *) &c, 1) < 0) {
+        return -1;
+    }
 
     return c;
 }
@@ -194,9 +194,9 @@ int istream< IO_device >::get()
 template< class IO_device >
 istream<IO_device>& istream< IO_device >::get(char& character)
 {
-	m_device->read((uint8_t *) &character, 1);
+    m_device->read((uint8_t *) &character, 1);
 
-	return *this;
+    return *this;
 }
 
 }
