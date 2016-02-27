@@ -183,7 +183,7 @@ istream<IO_device>& istream< IO_device >::operator>>(
 template< class IO_device >
 int istream< IO_device >::get()
 {
-	int c = 0;
+    int c = 0;
     if(m_device->read((uint8_t *) &c, 1) < 0) {
         return -1;
     }
