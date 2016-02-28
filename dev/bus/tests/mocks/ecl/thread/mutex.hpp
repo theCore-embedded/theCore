@@ -1,0 +1,6 @@
+#ifndef BUS_MOCKS_MUTEX_HPP_
+#define BUS_MOCKS_MUTEX_HPP_
+
+
+
+#endif // BUS_MOCKS_MUTEX_HPP_

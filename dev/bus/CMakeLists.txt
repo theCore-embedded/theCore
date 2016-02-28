@@ -5,4 +5,4 @@ target_link_libraries(bus INTERFACE utils)
 add_unit_host_test(NAME bus_test
 				   SOURCES tests/bus_unit.cpp
 				   DEPENDS utils
-				   INC_DIRS export)
+				   INC_DIRS export tests/mocks)
