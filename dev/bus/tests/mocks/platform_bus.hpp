@@ -21,19 +21,16 @@ public:
         rx_err,
     };
 
-    platform_mock()
-    {
-    }
-
-    ~platform_mock()
-    {
-    }
-
     ecl::err init()
     {
         mock("platform_bus").actualCall("init");
         return static_cast< ecl::err >
                 (mock("platform_bus").intReturnValue());
+    }
+
+    void reset()
+    {
+        mock("platform_bus").actualCall("reset");
     }
 };
 

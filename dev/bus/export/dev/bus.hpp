@@ -61,7 +61,10 @@ public:
     //!
     //! \brief Locks a bus.
     //! Any further operations can be executed after call to this function.
-    //! \pre    Bus is in unlocked state.
+    //! If previous async xfer is in progress then current thread will be blocked
+    //! until its finish.
+    //!
+    //! \pre    Bus is inited successfully and unlocked.
     //! \post   Bus is locked.
     //! \sa     unlock()
     //!
@@ -117,6 +120,7 @@ public:
     err xfer(const handler &event_handler);
 
 private:
+
     //!
     //! \brief Event handler dedicated to the platform bus.
     //! \param[in] ctx  Custom context.
@@ -125,6 +129,8 @@ private:
     static void bus_handler(void *ctx, typename Bus::event type);
 
     Bus         m_bus;      //!< Platform bus object.
+    ecl::mutex  m_lock;     //!< Lock to protect a platform bus.
+    bool        m_async;    //!< Flag holding an operation mode: sync or async
 };
 
 
@@ -133,6 +139,8 @@ private:
 template< class Bus >
 generic_bus< Bus >::generic_bus()
     :m_bus{}
+    ,m_lock{}
+    ,m_async{false}
 {
 
 }
@@ -152,13 +160,19 @@ err generic_bus< Bus >::init()
 template< class Bus >
 void generic_bus< Bus >::lock()
 {
+    m_lock.lock();
+
+    if (m_async) {
+        // TODO: implement a wait
+    }
 
 }
 
 template< class Bus >
 void generic_bus< Bus >::unlock()
 {
-
+    m_bus.reset();
+    m_lock.unlock();
 }
 
 
