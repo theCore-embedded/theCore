@@ -72,10 +72,13 @@ public:
 
     //!
     //! \brief Unlocks a bus.
-    //! Any operations beside unlock() is not permitted after this method finishes.
-    //! Buffers that were provided by a user will be no longer valid.
-    //! This means that if one will lock this bus afterwards then it should call
-    //! set_buffers() again.
+    //! Any operations beside lock() is not permitted after this method finishes.
+    //!
+    //! \par Side effects:
+    //! \li In block mode all buffers provided with set_buffers() will be discarded
+    //! \li In async mode if opration still ongoing, buffers will be discarded
+    //!     after operation will finish.
+    //!
     //! \pre    Bus is locked.
     //! \post   Bus is unlocked.
     //! \sa     set_buffers()
@@ -83,20 +86,31 @@ public:
     void unlock();
 
     //!
-    //! \brief set_buffers
-    //! \pre
-    //! \post
-    //! \param[in] tx
-    //! \param[in] rx
-    //! \param[in] size
-    //! \return
+    //! \brief Sets RX and TX buffers and their sizes.
+    //! If only TX or RX transaction required, then only one buffer must
+    //! be passed. All effects from calls to set_buffers() will be discarded.
+    //!
+    //! \par Side effects:
+    //! \li Bus will remember all buffers, until unlock() or set_buffers()
+    //!     will be called.
+    //!
+    //! \pre            Bus is locked or it is locked and ready.
+    //! \post           Bus is ready to execute xfer.
+    //! \param[in] tx   Data to transmit.
+    //!                 If this param is null, then rx must be set.
+    //! \param[in] rx   Buffer to receive a data. Optional.
+    //!                 If this param is null, then tx must be set.
+    //! \param[in] size Size of buffers. Zero is valid size.
+    //! \retval    err::ok      Buffers successfully set.
+    //! \retval    err::inval   Both buffers are null.
+    //! \retval    err::busy    Device is still executing async xfer.
     //!
     err set_buffers(const uint8_t *tx, uint8_t *rx, size_t size);
 
     //!
     //! \brief set_buffers
-    //! \pre
-    //! \post
+    //! \pre            Bus is locked.
+    //! \post           Bus is ready to execute xfer.
     //! \param[in] count
     //! \param[in] fill_byte
     //! \return
@@ -171,10 +185,22 @@ void generic_bus< Bus >::lock()
 template< class Bus >
 void generic_bus< Bus >::unlock()
 {
-    m_bus.reset();
+    m_bus.reset_buffers();
     m_lock.unlock();
 }
 
+template< class Bus >
+ecl::err generic_bus< Bus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
+{
+    if (!tx && !rx) {
+        return err::inval;
+    }
+
+    m_bus.reset_buffers();
+    m_bus.set_tx(tx, size);
+    m_bus.set_rx(rx, size);
+    return err::ok;
+}
 
 
 

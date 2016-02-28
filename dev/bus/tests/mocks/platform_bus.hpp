@@ -7,7 +7,7 @@
 #include <CppUTestExt/MockSupport.h>
 
 #include <ecl/err.hpp>
-
+#include <iostream>
 class platform_mock
 {
 public:
@@ -25,12 +25,28 @@ public:
     {
         mock("platform_bus").actualCall("init");
         return static_cast< ecl::err >
-                (mock("platform_bus").intReturnValue());
+                (mock("platform_bus").returnIntValueOrDefault(0));
     }
 
-    void reset()
+    void reset_buffers()
     {
-        mock("platform_bus").actualCall("reset");
+        mock("platform_bus").actualCall("reset_buffers");
+    }
+
+    void set_tx(const uint8_t *tx, size_t size)
+    {
+        mock("platform_bus")
+                .actualCall("set_tx")
+                .withParameter("tx_buf", tx)
+                .withParameter("size", size);
+    }
+
+    void set_rx(uint8_t *rx, size_t size)
+    {
+        mock("platform_bus")
+                .actualCall("set_rx")
+                .withParameter("rx_buf", rx)
+                .withParameter("size", size);
     }
 };
 
