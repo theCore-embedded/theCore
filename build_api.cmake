@@ -31,6 +31,12 @@ macro(register_project project_name)
 endmacro()
 
 # Creates a host unit test
+#
+# Syntax:
+# add_unit_host_test(NAME test_name
+#					 SOURCES test_sources_files...
+#					 [DEPENDS list_of_dependencies...]
+#					 [INC_DIRS list_of_include_directories...])
 function(add_unit_host_test)
 	# Add test only if not cross-compiling
 	if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
@@ -63,6 +69,7 @@ function(add_unit_host_test)
 			message("	Test includes: ${UNIT_TEST_INC_DIRS}")
 			target_include_directories(
 			${UNIT_TEST_NAME}
+			PRIVATE
 			${UNIT_TEST_INC_DIRS})
 		endif()
 		message("-----------------------------------------------")
