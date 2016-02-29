@@ -145,6 +145,49 @@ TEST(bus_is_ready, size_is_zero)
 
 }
 
+TEST(bus_is_ready, consequent_calls_and_buffers_reset)
+{
+    constexpr size_t zero_size = 0;
+    constexpr size_t non_zero_size = 8;
+
+    mock("platform_bus").expectOneCall("reset_buffers");
+    mock("platform_bus").ignoreOtherCalls();
+
+    auto rc = test_bus->set_buffers(tx_buf, rx_buf, zero_size);
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    mock().checkExpectations();
+
+    // When doing second call, reset must be called again
+
+    mock("platform_bus").expectOneCall("reset_buffers");
+    mock("platform_bus").ignoreOtherCalls();
+
+    rc = test_bus->set_buffers(tx_buf, rx_buf, non_zero_size);
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    mock().checkExpectations();
+}
+
+
+TEST(bus_is_ready, fill_tx)
+{
+    constexpr size_t fill_size = 32;
+    constexpr uint8_t fill_byte = 0xae;
+
+    mock("platform_bus").expectOneCall("reset_buffers");
+    mock("platform_bus")
+            .expectOneCall("set_tx")
+            .withParameter("rx_size", fill_size)
+            .withParameter("fill_byte", fill_byte);
+
+    auto rc = test_bus->set_buffers(fill_size, fill_byte);
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    mock().checkExpectations();
+}
+
+
 int main(int argc, char *argv[])
 {
     return CommandLineTestRunner::RunAllTests(argc, argv);

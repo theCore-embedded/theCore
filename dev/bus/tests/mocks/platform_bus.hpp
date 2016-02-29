@@ -48,6 +48,15 @@ public:
                 .withParameter("rx_buf", rx)
                 .withParameter("size", size);
     }
+
+    void set_tx(size_t size, uint8_t fill_byte)
+    {
+        mock("platform_bus")
+                .actualCall("set_tx")
+                .withParameter("rx_size", size)
+                .withParameter("fill_byte", fill_byte);
+    }
+
 };
 
 #endif

@@ -94,7 +94,7 @@ public:
     //! \li Bus will remember all buffers, until unlock() or set_buffers()
     //!     will be called.
     //!
-    //! \pre            Bus is locked or it is locked and ready.
+    //! \pre            Bus is locked.
     //! \post           Bus is ready to execute xfer.
     //! \param[in] tx   Data to transmit.
     //!                 If this param is null, then rx must be set.
@@ -108,14 +108,26 @@ public:
     err set_buffers(const uint8_t *tx, uint8_t *rx, size_t size);
 
     //!
-    //! \brief set_buffers
-    //! \pre            Bus is locked.
-    //! \post           Bus is ready to execute xfer.
-    //! \param[in] count
-    //! \param[in] fill_byte
-    //! \return
+    //! \brief Sets TX buffer size and fills it with given byte.
+    //! This will instruct a platform bus to send a byte given number of times.
+    //! It is implementation defined how bis is chunks in which data is sent.
+    //! If possible, platform bus will just send single-byte buffer via DMA.
     //!
-    err set_buffers(size_t count, uint8_t fill_byte = 0xff);
+    //! In half-duplex case RX will not be performed. If platform bus is in
+    //! full duplex mode then RX will be exeucted but RX data will be ignored.
+    //!
+    //! \par Side effects:
+    //! \li Bus will remember a buffer, until unlock() or set_buffers()
+    //!     will be called.
+    //!
+    //! \pre                    Bus is locked.
+    //! \post                   Bus is ready to execute xfer.
+    //! \param[in] size         Size of filled buffer.
+    //! \param[in] fill_byte    Byte which will be sent in TX stream.
+    //! \retval    err::ok      Buffer successfully set and filled.
+    //! \retval    err::busy    Device is still executing async xfer.
+    //!
+    err set_buffers(size_t size, uint8_t fill_byte = 0xff);
 
     //!
     //! \brief xfer
@@ -185,7 +197,11 @@ void generic_bus< Bus >::lock()
 template< class Bus >
 void generic_bus< Bus >::unlock()
 {
-    m_bus.reset_buffers();
+    // Buffers should be reset in the bus_handler()
+    if (!m_async) {
+        m_bus.reset_buffers();
+    }
+
     m_lock.unlock();
 }
 
@@ -196,9 +212,21 @@ ecl::err generic_bus< Bus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t 
         return err::inval;
     }
 
+    // TODO: check async flag, if set - error
+
     m_bus.reset_buffers();
     m_bus.set_tx(tx, size);
     m_bus.set_rx(rx, size);
+    return err::ok;
+}
+
+template< class Bus >
+ecl::err generic_bus< Bus >::set_buffers(size_t size, uint8_t fill_byte)
+{
+    // TODO: check async flag, if set - error
+
+    m_bus.reset_buffers();
+    m_bus.set_tx(size, fill_byte);
     return err::ok;
 }
 
