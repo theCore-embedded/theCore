@@ -21,6 +21,8 @@ public:
         rx_err,
     };
 
+    using handler_fn = std::function< void(event type) >;
+
     ecl::err init()
     {
         mock("platform_bus").actualCall("init");
@@ -57,6 +59,16 @@ public:
                 .withParameter("fill_byte", fill_byte);
     }
 
+    void set_handler(const handler_fn &handler)
+    {
+        (void) handler;
+        mock("platform_bus").actualCall("set_handler");
+    }
+
+    void reset_handler()
+    {
+
+    }
 };
 
 #endif

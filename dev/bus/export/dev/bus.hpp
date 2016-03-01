@@ -39,7 +39,7 @@ public:
     //! User can provide a function object in order to handle events from a bus.
     //! \sa xfer()
     //!
-    using handler = std::function< void(void *ctx, event type) >;
+    using handler_fn = std::function< void(event type) >;
 
     //!
     //! \brief Constructs a bus.
@@ -94,8 +94,8 @@ public:
     //! \li Bus will remember all buffers, until unlock() or set_buffers()
     //!     will be called.
     //!
-    //! \pre            Bus is locked.
-    //! \post           Bus is ready to execute xfer.
+    //! \pre       Bus is locked.
+    //! \post      Bus is ready to execute xfer.
     //! \param[in] tx   Data to transmit.
     //!                 If this param is null, then rx must be set.
     //! \param[in] rx   Buffer to receive a data. Optional.
@@ -120,8 +120,8 @@ public:
     //! \li Bus will remember a buffer, until unlock() or set_buffers()
     //!     will be called.
     //!
-    //! \pre                    Bus is locked.
-    //! \post                   Bus is ready to execute xfer.
+    //! \pre       Bus is locked.
+    //! \post      Bus is ready to execute xfer.
     //! \param[in] size         Size of filled buffer.
     //! \param[in] fill_byte    Byte which will be sent in TX stream.
     //! \retval    err::ok      Buffer successfully set and filled.
@@ -130,10 +130,12 @@ public:
     err set_buffers(size_t size, uint8_t fill_byte = 0xff);
 
     //!
-    //! \brief xfer
-    //! \pre
-    //! \post
-    //! \return
+    //! \brief Performs xfer in blocking mode using buffers set previously.
+    //! \pre       Bus is locked and buffers are set.
+    //! \post      Bus remains in the same state.
+    //! \retval    err::ok      Data is sent successfully.
+    //! \retval    err::busy    Device is still executing async xfer.
+    //! \retval    err          Any other error that can occur in platform bus
     //!
     err xfer();
 
@@ -143,16 +145,16 @@ public:
     //! \post
     //! \return
     //!
-    err xfer(const handler &event_handler);
+    err xfer(const handler_fn &handler);
 
 private:
 
     //!
     //! \brief Event handler dedicated to the platform bus.
-    //! \param[in] ctx  Custom context.
+    //! \param[in] obj  This object.
     //! \param[in] type Type of event occured.
     //!
-    static void bus_handler(void *ctx, typename Bus::event type);
+    static void bus_handler(generic_bus< Bus > *obj, typename Bus::event type);
 
     Bus         m_bus;      //!< Platform bus object.
     ecl::mutex  m_lock;     //!< Lock to protect a platform bus.
@@ -180,6 +182,11 @@ generic_bus< Bus >::~generic_bus()
 template< class Bus >
 err generic_bus< Bus >::init()
 {
+    auto fn = [this](typename Bus::event type) {
+        this->bus_handler(this, type);
+    };
+
+    m_bus.set_handler(fn);
     return m_bus.init();
 }
 
@@ -191,7 +198,6 @@ void generic_bus< Bus >::lock()
     if (m_async) {
         // TODO: implement a wait
     }
-
 }
 
 template< class Bus >
@@ -230,7 +236,20 @@ ecl::err generic_bus< Bus >::set_buffers(size_t size, uint8_t fill_byte)
     return err::ok;
 }
 
+template< class Bus >
+ecl::err generic_bus< Bus >::xfer()
+{
 
+}
+
+//------------------------------------------------------------------------------
+
+template< class Bus >
+void generic_bus< Bus >::bus_handler(generic_bus< Bus > *obj, typename Bus::event type)
+{
+    (void) obj;
+    (void) type;
+}
 
 }
 

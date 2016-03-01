@@ -35,6 +35,7 @@ TEST(bus, init)
     mock("platform_bus")
             .expectOneCall("init")
             .andReturnValue(static_cast< int >(expected_ret));
+    mock("platform_bus").expectOneCall("set_handler");
 
     auto ret = test_bus->init();
 
