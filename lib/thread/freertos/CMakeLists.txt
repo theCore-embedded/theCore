@@ -3,6 +3,7 @@ target_include_directories(thread_os PUBLIC .)
 target_include_directories(thread_os PUBLIC export)
 target_link_libraries(thread_os PUBLIC utils)
 target_link_libraries(thread_os PUBLIC thread_common)
+target_link_libraries(thread_os PRIVATE ${PLATFORM_NAME})
 
 # If kernel is provided by us then built it
 if (${CONFIG_OS_INTERNAL})
