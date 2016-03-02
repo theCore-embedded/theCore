@@ -1,12 +1,15 @@
 #ifndef COMMON_PIN_HPP_
 #define COMMON_PIN_HPP_
 
+namespace pin
+{
+
 // Pin purpose
-enum class pin_function
+enum class function
 {
     // Basic purposes
-    GPIO_in,
-    GPIO_out,
+    gpio_in,
+    gpio_out,
     analog,
 
     // Alternate function purposes
@@ -21,7 +24,7 @@ enum class pin_function
 };
 
 // Pin numbers
-enum class pin_number
+enum class number
 {
     pin_0,
     pin_1,
@@ -42,7 +45,7 @@ enum class pin_number
 };
 
 // Pin ports
-enum class pin_port
+enum class port
 {
     port_a,
     port_b,
@@ -53,13 +56,20 @@ enum class pin_port
 };
 
 // Type of pin
-enum class pin_type
+enum class type
+{
+    push_pull,
+    open_drain,
+};
+
+// Push/pull modes
+enum class pp_mode
 {
     no_pull,
-    floating,
-    pull_up,
     pull_down,
-    open_drain
+    pull_up,
 };
+
+}
 
 #endif // COMMON_PIN_HPP_
