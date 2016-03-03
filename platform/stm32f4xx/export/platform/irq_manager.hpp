@@ -29,7 +29,14 @@ public:
     static int subscribe(IRQn_t IRQn, const std::function< void() > &handler)
     {
         // TODO: error check
+
         __disable_irq();
+
+        // Magic here.
+        // Logical priority of *any* user interrupt that use
+        // FreeRTOS API must not be greather than
+        // configMAX_SYSCALL_INTERRUPT_PRIORITY
+        NVIC_SetPriority(IRQn, CONFIG_MAX_ISR_PRIORITY);
         m_handlers[IRQn] = handler;
         __enable_irq();
         return 0;

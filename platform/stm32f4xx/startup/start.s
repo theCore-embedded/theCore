@@ -47,7 +47,7 @@ clear_bss_end:
 /* TODO: assign proper handlers for first 16 interrupts */
 .section	vectors
 			.align	2 /* TODO: clarify */
-			.long   0x20020000
+			.long  0x20020000
 			.long  Reset_Handler               /* Reset Handler                */
 			.long  NMI_Handler                 /* NMI Handler                  */
 			.long  HardFault_Handler           /* Hard Fault Handler           */
