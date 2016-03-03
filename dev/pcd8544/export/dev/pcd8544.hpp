@@ -1,6 +1,8 @@
 #ifndef DEV_PCD8544_HPP
 #define DEV_PCD8544_HPP
 
+#include <ecl/thread/semaphore.hpp>
+
 // TODO: move it somewhere
 class point
 {
@@ -166,11 +168,12 @@ private:
         for (volatile int i = 0; i < 10000; ++i) {};
     }
 
-    SPI_dev             m_device;
-    volatile SPI_f_t    m_status;
-    volatile DMA_f_t    m_DMA_status;
-    DMA_t               m_DMA;      // ?
-    uint8_t             m_array[84][6];    // TODO: magic numbers
+    SPI_dev                 m_device;
+    volatile SPI_f_t        m_status;
+    volatile DMA_f_t        m_DMA_status;
+    DMA_t                   m_DMA;      // ?
+    uint8_t                 m_array[84][6];    // TODO: magic numbers
+    ecl::binary_semaphore   m_sem;             // Handle bus events
 };
 
 
@@ -347,7 +350,7 @@ int pcd8544< SPI_dev >::internal_mode_init()
 {
     // Catch all IRQs
 
-    // Avoid using std::bind since it usses dynamic memory
+    // Avoid using std::bind since it uses dynamic memory
     auto handler = [this]() {
         this->IRQ_handler(this->m_device.get_status());
     };
@@ -385,6 +388,7 @@ int pcd8544< SPI_dev >::send(uint8_t byte, DC_state op)
     m_device.unmask_IRQ();
 
     // In order to complete send, we need to wait until device will be ready
+    m_sem.wait();
     while (!(m_status & SPI_dev::flags::TX_RDY)) {}
 
     int rc = m_device.write(&byte, 1);
@@ -423,6 +427,7 @@ int pcd8544< SPI_dev >::send(uint8_t byte, DC_state op)
     int rc = m_device.write(m_DMA);
 
     // Wait for transaction to be over
+    m_sem.wait();
     while (!(m_DMA_status & DMA_t::flags::TC)) {}
 
     // Request completed
@@ -486,6 +491,7 @@ int pcd8544< SPI_dev >::internal_flush()
     m_device.write(m_DMA);
 
     // Wait for transaction to be over
+    m_sem.wait();
     while (!(m_DMA_status & DMA_t::flags::TC)) {}
     while ((m_device.get_status() & SPI_dev::flags::BSY)) { }
 
@@ -505,6 +511,7 @@ template< class SPI_dev >
 void pcd8544< SPI_dev >::IRQ_handler(SPI_f_t status)
 {
     // Do nothing special for now
+    m_sem.signal();
     m_status = status;
     return;
 }
@@ -515,6 +522,7 @@ void pcd8544< SPI_dev >::DMA_handler(DMA_f_t status)
     // Do nothing special for now
     m_DMA_status |= status;
     m_DMA.complete_IRQ(status);
+    m_sem.signal();
     return;
 }
 
