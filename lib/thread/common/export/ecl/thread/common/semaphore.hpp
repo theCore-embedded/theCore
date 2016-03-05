@@ -1,6 +1,8 @@
 #ifndef LIB_THREAD_COMMON_SEMAPHORE_
 #define LIB_THREAD_COMMON_SEMAPHORE_
 
+#include <ecl/err.hpp>
+
 #include <atomic>
 
 namespace ecl
@@ -18,6 +20,7 @@ public:
 
     void signal();
     void wait();
+    ecl::err try_wait();
 
     semaphore(const semaphore&)             = delete;
     semaphore& operator=(const semaphore&)  = delete;
