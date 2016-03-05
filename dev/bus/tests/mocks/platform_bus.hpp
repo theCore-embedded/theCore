@@ -8,9 +8,12 @@
 
 #include <ecl/err.hpp>
 #include <iostream>
+
 class platform_mock
 {
 public:
+//------------------------------------------------------------------------------
+// Bus interface itself
     enum class event
     {
         tx_half_complete,
@@ -19,6 +22,7 @@ public:
         rx_complete,
         tx_err,
         rx_err,
+        xfer_done, // End of transfer
     };
 
     using handler_fn = std::function< void(event type) >;
@@ -61,14 +65,36 @@ public:
 
     void set_handler(const handler_fn &handler)
     {
-        (void) handler;
         mock("platform_bus").actualCall("set_handler");
+        m_handler = handler;
     }
 
     void reset_handler()
     {
-
+        mock("platform_bus").actualCall("reset_handler");
+        m_handler = handler_fn{};
     }
+
+    ecl::err do_xfer()
+    {
+        mock("platform_bus").actualCall("do_xfer");
+        return static_cast< ecl::err >
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
+//------------------------------------------------------------------------------
+// Internally used by the test
+
+    static void invoke(event e)
+    {
+        m_handler(e);
+    }
+
+private:
+    static handler_fn m_handler;
 };
+
+// TODO: move it to cpp file to avoid link errors in future
+platform_mock::handler_fn platform_mock::m_handler = platform_mock::handler_fn{};
 
 #endif

@@ -3,7 +3,11 @@
 
 #include <ecl/err.hpp>
 #include <ecl/thread/mutex.hpp>
+#include <ecl/thread/semaphore.hpp>
+#include <ecl/assert.h>
+
 #include <functional>
+#include <atomic>
 
 namespace ecl
 {
@@ -22,17 +26,10 @@ class generic_bus
 public:
     //!
     //! \brief Events that are passed via handler.
+    //! 1-to-1 correspondance with platform-bus events.
     //! \sa handler
     //!
-    enum class event
-    {
-        tx_half_complete  = Bus::event::tx_half_complete,
-        rx_half_complete  = Bus::event::rx_half_complete,
-        tx_complete       = Bus::event::tx_complete,
-        rx_complete       = Bus::event::rx_complete,
-        tx_err            = Bus::event::tx_err,
-        rx_err            = Bus::event::rx_err,
-    };
+    using event = typename Bus::event;
 
     //!
     //! \brief Event handler type.
@@ -64,7 +61,7 @@ public:
     //! If previous async xfer is in progress then current thread will be blocked
     //! until its finish.
     //!
-    //! \pre    Bus is inited successfully and unlocked.
+    //! \pre    Bus is inited successfully.
     //! \post   Bus is locked.
     //! \sa     unlock()
     //!
@@ -131,6 +128,13 @@ public:
 
     //!
     //! \brief Performs xfer in blocking mode using buffers set previously.
+    //!
+    //! \note Method uses a semaphore to wait for a bus event (most likely
+    //! an IRQ event). It means that in bare-metal environment,
+    //! without RTOS it is implemented as simple spin-lock. Likely that
+    //! such behaviour is unwanted. In order to control event handling,
+    //! consider using xfer(const handler_fn &handler) overload.
+    //!
     //! \pre       Bus is locked and buffers are set.
     //! \post      Bus remains in the same state.
     //! \retval    err::ok      Data is sent successfully.
@@ -140,14 +144,27 @@ public:
     err xfer();
 
     //!
-    //! \brief xfer
-    //! \pre
-    //! \post
-    //! \return
+    //! \brief Performs xfer in async mode using buffers set previously.
+    //! When xfer will be done, given handler will be invoked with a
+    //! type of an event.
+    //! \warning Event handler most likely will be executed in ISR context.
+    //! Pay attention to it. Do not block inside of it or do anything else that
+    //! can break ISR or impose high interrupt latency.
+    //! \todo Leave here a note about bare-metal environment, without threads
+    //! and blocking semaphore support.
+    //! \pre       Bus is locked and buffers are set.
+    //! \post      Bus remains in the same state.
+    //! \param[in] handler      User-supplied event handler.
+    //! \retval    err::ok      Data is sent successfully.
+    //! \retval    err::busy    Device is still executing async xfer.
+    //! \retval    err          Any other error that can occur in platform bus.
     //!
     err xfer(const handler_fn &handler);
 
 private:
+    using semaphore     = ecl::binary_semaphore;
+    using mutex         = ecl::mutex;
+    using atomic_flag   = std::atomic_flag;
 
     //!
     //! \brief Event handler dedicated to the platform bus.
@@ -156,9 +173,34 @@ private:
     //!
     static void bus_handler(generic_bus< Bus > *obj, typename Bus::event type);
 
-    Bus         m_bus;      //!< Platform bus object.
-    ecl::mutex  m_lock;     //!< Lock to protect a platform bus.
-    bool        m_async;    //!< Flag holding an operation mode: sync or async
+    //!
+    //! \brief Checks if bus is busy transferring data at this moment or not.
+    //! \retval true Bus is busy.
+    //!
+    bool bus_is_busy();
+
+    //!
+    //! \brief Performs cleanup required after unlocking and delivering an event.
+    //!
+    void cleanup();
+
+    // Status flags.
+    //! Bus init status: set - bus initialized, reset - bus not yet initialized
+    static constexpr uint8_t bus_inited     = 0x1;
+    //! Operation mode of a bus: set - async mode, reset - block mode
+    static constexpr uint8_t async_mode     = 0x2;
+    //! Bus lock state: set - locked, reset - unlocked
+    static constexpr uint8_t bus_locked     = 0x4;
+    //! Xfer event status: set - all events from xfer are served,
+    //! reset - not all are served
+    static constexpr uint8_t xfer_served    = 0x8;
+
+    Bus          m_bus;      //!< Platform bus object.
+    mutex        m_lock;     //!< Lock to protect a platform bus.
+    semaphore    m_complete; //!< Semaphore to notify about end of xfer.
+    handler_fn   m_handler;  //!< User-supplied handler, used in async mode
+    atomic_flag  m_cleaned;  //!< Cleanup is performed after xfer and unlock are done.
+    uint8_t      m_state;    //!< State flags
 };
 
 
@@ -168,7 +210,10 @@ template< class Bus >
 generic_bus< Bus >::generic_bus()
     :m_bus{}
     ,m_lock{}
-    ,m_async{false}
+    ,m_complete{}
+    ,m_handler{}
+    ,m_cleaned{false}
+    ,m_state{0}
 {
 
 }
@@ -176,7 +221,7 @@ generic_bus< Bus >::generic_bus()
 template< class Bus >
 generic_bus< Bus >::~generic_bus()
 {
-
+    // TODO: what to do if bus is destroyed?
 }
 
 template< class Bus >
@@ -187,25 +232,62 @@ err generic_bus< Bus >::init()
     };
 
     m_bus.set_handler(fn);
-    return m_bus.init();
+    auto rc = m_bus.init();
+
+    if (is_ok(rc)) {
+        m_state |= bus_inited;
+    }
+
+    return rc;
 }
 
 template< class Bus >
 void generic_bus< Bus >::lock()
 {
+    // If bus is not initialized then pre-conditions are violated.
+    ecl_assert(m_state & bus_inited);
+
     m_lock.lock();
 
-    if (m_async) {
-        // TODO: implement a wait
+    m_state |= bus_locked;
+
+    // Bus may be busy at this moment, wait until it finished most
+    // recent transaction.
+    if (m_state & async_mode) {
+        m_complete.wait();
     }
 }
 
 template< class Bus >
 void generic_bus< Bus >::unlock()
 {
-    // Buffers should be reset in the bus_handler()
-    if (!m_async) {
-        m_bus.reset_buffers();
+    // If bus is not locked then pre-conditions are violated
+    // and it is clearly a sign of a bug
+    ecl_assert(m_state & bus_locked);
+
+    // Notify handler routine that unlock is called and it is possible to
+    // do cleanup.
+    // An assert above becomes unreliable, if unlock flag is set so early,
+    // however main purpose of this flag is to notify handler about unlocking,
+    // rather than an error check.
+    m_state &= ~(bus_locked);
+
+    // Do cleanup in block mode - bus is guaranteed to finish all transaction
+    // prior to unlock() call
+    if (m_state & async_mode) {
+        if (m_state & xfer_served) {
+
+            // Cleanup routine is a critical section and both bus_handler()
+            // and unlock() routine can try to access it concurently.
+            // Wrapping this part with mutexes must be avoided
+            // because bus_handler() will likely be executed in ISR context.
+            // Using atomics is most convinient solution.
+            if (!m_cleaned.test_and_set()) {
+                cleanup();
+            }
+        }
+    } else {
+        cleanup();
     }
 
     m_lock.unlock();
@@ -214,22 +296,35 @@ void generic_bus< Bus >::unlock()
 template< class Bus >
 ecl::err generic_bus< Bus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
 {
+    // If bus is not locked then pre-conditions are violated
+    // and it is clearly a sign of a bug
+    ecl_assert(m_state & bus_locked);
+
     if (!tx && !rx) {
         return err::inval;
     }
 
-    // TODO: check async flag, if set - error
+    if (bus_is_busy()) {
+        return err::again;
+    }
 
     m_bus.reset_buffers();
     m_bus.set_tx(tx, size);
     m_bus.set_rx(rx, size);
+
     return err::ok;
 }
 
 template< class Bus >
 ecl::err generic_bus< Bus >::set_buffers(size_t size, uint8_t fill_byte)
 {
-    // TODO: check async flag, if set - error
+    // If bus is not locked then pre-conditions are violated
+    // and it is clearly a sign of a bug
+    ecl_assert(m_state & bus_locked);
+
+    if (bus_is_busy()) {
+        return err::again;
+    }
 
     m_bus.reset_buffers();
     m_bus.set_tx(size, fill_byte);
@@ -239,7 +334,65 @@ ecl::err generic_bus< Bus >::set_buffers(size_t size, uint8_t fill_byte)
 template< class Bus >
 ecl::err generic_bus< Bus >::xfer()
 {
+    // If bus is not locked then pre-conditions are violated
+    // and it is clearly a sign of a bug
+    ecl_assert(m_state & bus_locked);
 
+    if (bus_is_busy()) {
+        return err::busy;
+    }
+
+    // Blocking mode xfer is provided.
+    m_state &= ~(async_mode);
+
+    // Events of this particular xfer is not yet served.
+    m_state &= ~(xfer_served);
+
+    // Reset binary semaphore counter
+    m_complete.try_wait();
+
+    auto rc = m_bus.do_xfer();
+
+    if (!is_error(rc)) {
+        m_complete.wait();
+    } else {
+        // Deem that xfer virtually occurs in blocking mode and thus
+        // momentally served in case of error.
+        m_state |= xfer_served;
+    }
+
+    return rc;
+}
+
+template< class Bus >
+ecl::err generic_bus< Bus >::xfer(const handler_fn &handler)
+{
+    // If bus is not locked then pre-conditions are violated
+    // and it is clearly a sign of a bug
+    ecl_assert(m_state & bus_locked);
+
+    // Clears IRQ flag as well.
+    if (bus_is_busy()) {
+        return err::busy;
+    }
+
+    // Async mode xfer is provided
+    m_state |= async_mode;
+    m_handler = handler;
+
+    auto rc = m_bus.do_xfer();
+
+    if (is_error(rc)) {
+        // Deem that xfer virtually occurs in blocking mode and thus
+        // momentally served in case of error.
+        m_state |= xfer_served;
+        m_state &= ~(async_mode);
+    } else {
+        // Events of this particular xfer is not yet served.
+        m_state &= ~(xfer_served);
+    }
+
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -247,8 +400,59 @@ ecl::err generic_bus< Bus >::xfer()
 template< class Bus >
 void generic_bus< Bus >::bus_handler(generic_bus< Bus > *obj, typename Bus::event type)
 {
-    (void) obj;
-    (void) type;
+    bool last_event = (type == Bus::event::xfer_done);
+
+    if (last_event) {
+        // Spurious events are not allowed
+        ecl_assert(!(obj->m_state & xfer_served));
+
+        obj->m_state |= xfer_served;
+    }
+
+    if (obj->m_state & async_mode) {
+        obj->m_handler(type);
+
+        // Bus unlocked, it is time to check if bus cleaned.
+        if (last_event && !(obj->m_state & bus_locked)) {
+
+            // It is possible that bus_handler() is executed in thread context
+            // rather in ISR context. This means that context switch can occur
+            // right after unlock flag is set inside unlock() but before
+            // cleanup will occur. Atomic test_and_set will protect important
+            // call with lock-free critical section.
+            // In case if handler is executed in ISR context, this check
+            // is almost meaningless, besides that setting a flag is required
+            // to inform rest of the system that cleanup already done.
+            if (!obj->m_cleaned.test_and_set()) {
+                obj->cleanup();
+            }
+        }
+    }
+
+    if (last_event) {
+        // Inform rest of the bus about event handling
+        obj->m_complete.signal();
+    }
+}
+
+template< class Bus >
+bool generic_bus< Bus >::bus_is_busy()
+{
+    bool in_progress = false;
+
+    if (m_state & async_mode) {
+        // Asynchronius operation still in progress.
+        in_progress = !(m_state & async_mode);
+    }
+
+    return in_progress;
+}
+
+template< class Bus >
+void generic_bus< Bus >::cleanup()
+{
+    m_bus.reset_buffers();
+    m_handler = handler_fn{};
 }
 
 }

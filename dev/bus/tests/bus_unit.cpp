@@ -5,6 +5,9 @@
 #include "dev/bus.hpp"
 #include "mocks/platform_bus.hpp"
 
+// Our resident
+using bus_t = ecl::generic_bus< platform_mock >;
+
 // Error code helper
 // TODO: move it to 'utils' headers and protect with check of
 // current test state (enabled or disabled)
@@ -15,11 +18,11 @@ static SimpleString StringFrom(ecl::err err)
 
 TEST_GROUP(bus)
 {
-    ecl::generic_bus< platform_mock > *test_bus;
+    bus_t *test_bus;
 
     void setup()
     {
-        test_bus = new ecl::generic_bus< platform_mock >;
+        test_bus = new bus_t;
     }
 
     void teardown()
@@ -77,13 +80,14 @@ TEST_GROUP(bus_is_ready)
     uint8_t tx_buf[buf_size];
     uint8_t rx_buf[buf_size];
 
-    ecl::generic_bus< platform_mock > *test_bus;
+    bus_t *test_bus;
 
     void setup()
     {
-        test_bus = new ecl::generic_bus< platform_mock >;
+        test_bus = new bus_t;
 
         mock().disable();
+        test_bus->init();
         test_bus->lock();
         mock().enable();
     }
@@ -159,7 +163,7 @@ TEST(bus_is_ready, consequent_calls_and_buffers_reset)
 
     mock().checkExpectations();
 
-    // When doing second call, reset must be called again
+    // When doing a second call, reset must be called again
 
     mock("platform_bus").expectOneCall("reset_buffers");
     mock("platform_bus").ignoreOtherCalls();
@@ -169,7 +173,6 @@ TEST(bus_is_ready, consequent_calls_and_buffers_reset)
 
     mock().checkExpectations();
 }
-
 
 TEST(bus_is_ready, fill_tx)
 {
@@ -187,6 +190,73 @@ TEST(bus_is_ready, fill_tx)
 
     mock().checkExpectations();
 }
+
+TEST(bus_is_ready, xfer_error)
+{
+    ecl::err expected_ret = ecl::err::nomem;
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast< int >(expected_ret));
+
+    auto ret = test_bus->xfer();
+
+    // Retval must be the same as produced by platform counterpart
+    CHECK_EQUAL(expected_ret, ret);
+
+    mock().checkExpectations();
+}
+
+TEST(bus_is_ready, async_xfer_error)
+{
+    // Call to this handler in case of error is a buggy behaviour.
+    auto handler = [](bus_t::event e) {
+        (void) e;
+        mock("handler").actualCall("call");
+    };
+
+    ecl::err expected_ret = ecl::err::nomem;
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast< int >(expected_ret));
+
+    auto ret = test_bus->xfer(handler);
+
+    // Retval must be the same as produced by platform counterpart
+    CHECK_EQUAL(expected_ret, ret);
+
+    mock().checkExpectations();
+}
+
+TEST(bus_is_ready, async_xfer_valid)
+{
+    bus_t::event expected_event = bus_t::event::tx_half_complete;
+
+    auto handler = [expected_event](bus_t::event e) {
+        CHECK_TRUE(expected_event == e);
+        mock("handler").actualCall("call");
+    };
+
+    ecl::err expected_ret = ecl::err::ok;
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast< int >(expected_ret));
+
+    auto ret = test_bus->xfer(handler);
+
+    // Retval must be the same as produced by platform counterpart
+    CHECK_EQUAL(expected_ret, ret);
+
+    mock().checkExpectations();
+
+    // Now, trigger the event and see what happens
+
+    mock("handler").expectOneCall("call");
+
+    platform_mock::invoke(expected_event);
+
+    mock().checkExpectations();
+}
+
 
 
 int main(int argc, char *argv[])
