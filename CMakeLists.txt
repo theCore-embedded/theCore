@@ -3,8 +3,6 @@ enable_language(ASM-ATT)
 # All subproject may use tests
 enable_testing()
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
-
 include(Findcppcheck)
 include(CppcheckTargets)
 

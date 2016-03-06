@@ -9,6 +9,14 @@
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
 
+// Error code helper
+// TODO: move it to 'utils' headers and protect with check of
+// current test state (enabled or disabled)
+static SimpleString StringFrom(ecl::err err)
+{
+    return SimpleString{ecl::err_to_str(err)};
+}
+
 // Helpers
 template< class Container, class Func >
 static void test_for_each(Container &cont, Func fn)
@@ -42,6 +50,33 @@ TEST(semaphore, signal_wait_no_hang)
     sem.wait();
 }
 
+TEST(semaphore, try_wait)
+{
+    // Should complete without a hang
+    ecl::semaphore sem;
+
+    sem.signal();
+
+    auto rc = sem.try_wait();
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(ecl::err::again, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(ecl::err::again, rc);
+
+    // Signal same semaphore again
+    // to make sure counter is in valid state
+    sem.signal();
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(ecl::err::again, rc);
+}
+
 TEST(semaphore, one_semaphore_few_threads)
 {
     // Preparation
@@ -69,7 +104,7 @@ TEST(semaphore, one_semaphore_few_threads)
     });
 
     // Let them wait on semaphore
-    test_delay(50);
+    test_delay(20);
     // Threads are started and should wait for orders
     CHECK_EQUAL(0, counter);
     // Unblock threads one by one
@@ -77,7 +112,7 @@ TEST(semaphore, one_semaphore_few_threads)
         (void) thread; // We don't need this
         semaphore.signal();
         signalled++;
-        test_delay(10); // Let some thread finish its work
+        test_delay(50); // Let some thread finish its work
         CHECK_EQUAL(signalled, counter); // Check that only one thread is finished
     });
 

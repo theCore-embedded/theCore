@@ -1,6 +1,8 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
+#include <ecl/assert.h>
+
 extern int main();
 
 // Somehow linker drops this function if LTO is enabled
@@ -21,7 +23,13 @@ void vAssertCalled(const char *file, int line)
 {
     (void) file;
     (void) line;
-    //ecl::cout << "FreeRTOS assert failed: " << file << ':' << line;
+
+    ecl_assert_failed("",
+                      "<see FreeRTOS sources>\n",
+                      file,
+                      NULL,
+                      line);
+
     for(;;);
 }
 
