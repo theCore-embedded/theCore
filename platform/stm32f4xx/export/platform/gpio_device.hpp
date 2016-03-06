@@ -6,7 +6,7 @@
 
 // TODO: support for output port as well
 // Incapsulate pin usage
-template< pin_port port, pin_number pin >
+template< pin::port port, pin::number pin >
 class GPIO
 {
 public:
@@ -23,7 +23,7 @@ public:
     static uint8_t get();
 };
 
-template< pin_port port, pin_number pin >
+template< pin::port port, pin::number pin >
 void GPIO< port, pin >::set()
 {
     constexpr auto m_port = pick_port(port);
@@ -32,7 +32,7 @@ void GPIO< port, pin >::set()
     GPIO_WriteBit(m_port, m_pin, Bit_SET);
 }
 
-template< pin_port port, pin_number pin >
+template< pin::port port, pin::number pin >
 void GPIO< port, pin >::reset()
 {
     constexpr auto m_port = pick_port(port);
@@ -41,7 +41,7 @@ void GPIO< port, pin >::reset()
     GPIO_WriteBit(m_port, m_pin, Bit_RESET);
 }
 
-template< pin_port port, pin_number pin >
+template< pin::port port, pin::number pin >
 void GPIO< port, pin >::toggle()
 {
     constexpr auto m_port = pick_port(port);
@@ -50,7 +50,7 @@ void GPIO< port, pin >::toggle()
     GPIO_ToggleBits(m_port, m_pin);
 }
 
-template< pin_port port, pin_number pin >
+template< pin::port port, pin::number pin >
 uint8_t GPIO< port, pin >::get()
 {
     constexpr auto m_port = pick_port(port);
