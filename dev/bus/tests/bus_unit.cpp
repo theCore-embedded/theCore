@@ -209,8 +209,10 @@ TEST(bus_is_ready, xfer_error)
 TEST(bus_is_ready, async_xfer_error)
 {
     // Call to this handler in case of error is a buggy behaviour.
-    auto handler = [](bus_t::event e) {
+    auto handler = [](bus_t::channel ch, bus_t::event e, size_t total) {
         (void) e;
+        (void) ch;
+        (void) total;
         mock("handler").actualCall("call");
     };
 
@@ -229,10 +231,14 @@ TEST(bus_is_ready, async_xfer_error)
 
 TEST(bus_is_ready, async_xfer_valid)
 {
-    bus_t::event expected_event = bus_t::event::tx_half_complete;
+    bus_t::event    expected_event    = bus_t::event::hc;
+    size_t          expected_total    = 100500;
+    bus_t::channel  expected_channel  = bus_t::channel::tx;
 
-    auto handler = [expected_event](bus_t::event e) {
-        CHECK_TRUE(expected_event == e);
+    auto handler = [&](bus_t::channel ch, bus_t::event e, size_t total) {
+        CHECK_TRUE(expected_event    == e);
+        CHECK_TRUE(expected_total    == total);
+        CHECK_TRUE(expected_channel  == ch);
         mock("handler").actualCall("call");
     };
 
@@ -252,7 +258,7 @@ TEST(bus_is_ready, async_xfer_valid)
 
     mock("handler").expectOneCall("call");
 
-    platform_mock::invoke(expected_event);
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
 
     mock().checkExpectations();
 }

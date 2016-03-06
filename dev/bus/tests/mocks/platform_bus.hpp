@@ -14,18 +14,22 @@ class platform_mock
 public:
 //------------------------------------------------------------------------------
 // Bus interface itself
-    enum class event
+    enum class channel
     {
-        tx_half_complete,
-        rx_half_complete,
-        tx_complete,
-        rx_complete,
-        tx_err,
-        rx_err,
-        xfer_done, // End of transfer
+        rx,
+        tx,
+        meta,
     };
 
-    using handler_fn = std::function< void(event type) >;
+    enum class event
+    {
+        hc,
+        tc,
+        err,
+    };
+
+    using handler_fn
+    = std::function< void(channel ch, event type, size_t total) >;
 
     ecl::err init()
     {
@@ -85,9 +89,9 @@ public:
 //------------------------------------------------------------------------------
 // Internally used by the test
 
-    static void invoke(event e)
+    static void invoke(channel ch, event e, size_t total)
     {
-        m_handler(e);
+        m_handler(ch, e, total);
     }
 
 private:

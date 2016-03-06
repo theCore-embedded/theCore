@@ -1,6 +1,13 @@
 #ifndef DEV_BUS_BUS_HPP_
 #define DEV_BUS_BUS_HPP_
 
+//!
+//! \file
+//! \brief      Generic bus interface module.
+//! \copyfirght
+//! \todo       Description and examples.
+
+
 #include <ecl/err.hpp>
 #include <ecl/thread/mutex.hpp>
 #include <ecl/thread/semaphore.hpp>
@@ -18,9 +25,9 @@ namespace ecl
 //! \li Encapsulate locking policy when multithreded environment is used.
 //! \li Hide differences between full-duplex and half-duplex busses.
 //! \li Define and simplify platform-level bus interface
-//! \tparam Bus Plaform-level bus driver (I2C, SPI, etc.)
+//! \tparam PBus Plaform-level bus driver (I2C, SPI, etc.)
 //!
-template< class Bus >
+template< class PBus >
 class generic_bus
 {
 public:
@@ -29,14 +36,25 @@ public:
     //! 1-to-1 correspondance with platform-bus events.
     //! \sa handler
     //!
-    using event = typename Bus::event;
+    using event     = typename PBus::event;
+
+    //!
+    //! \brief Bus channels: tx and rx.
+    //! 1-to-1 correspondance with platform-bus channels.
+    //! \sa handler
+    //!
+    using channel   = typename PBus::channel;
 
     //!
     //! \brief Event handler type.
     //! User can provide a function object in order to handle events from a bus.
+    //! \param[in] ch    Channel where event occurred.
+    //! \param[in] type  Type of the event.
+    //! \param[in] total Bytes transferred trough given channel
+    //!                  during current xfer.
     //! \sa xfer()
     //!
-    using handler_fn = std::function< void(event type) >;
+    using handler_fn = std::function< void(channel ch, event type, size_t total) >;
 
     //!
     //! \brief Constructs a bus.
@@ -128,20 +146,22 @@ public:
 
     //!
     //! \brief Performs xfer in blocking mode using buffers set previously.
-    //!
-    //! \note Method uses a semaphore to wait for a bus event (most likely
+    //! \warning Method uses a semaphore to wait for a bus event (most likely
     //! an IRQ event). It means that in bare-metal environment,
     //! without RTOS it is implemented as simple spin-lock. Likely that
     //! such behaviour is unwanted. In order to control event handling,
     //! consider using xfer(const handler_fn &handler) overload.
     //!
-    //! \pre       Bus is locked and buffers are set.
-    //! \post      Bus remains in the same state.
-    //! \retval    err::ok      Data is sent successfully.
-    //! \retval    err::busy    Device is still executing async xfer.
-    //! \retval    err          Any other error that can occur in platform bus
+    //! \pre        Bus is locked and buffers are set.
+    //! \post       Bus remains in the same state.
+    //! \param[out] sent        Optional. Bytes sent during this xfer.
+    //! \param[out] received    Optional. Bytes received during this xfer.
+    //! \retval     err::ok     Data is sent successfully.
+    //! \retval     err::busy   Device is still executing async xfer.
+    //! \retval     err::io     Transaction started but failed.
+    //! \retval     err         Any other error that can occur in platform bus
     //!
-    err xfer();
+    err xfer(size_t *sent = nullptr, size_t *received = nullptr);
 
     //!
     //! \brief Performs xfer in async mode using buffers set previously.
@@ -150,8 +170,10 @@ public:
     //! \warning Event handler most likely will be executed in ISR context.
     //! Pay attention to it. Do not block inside of it or do anything else that
     //! can break ISR or impose high interrupt latency.
-    //! \todo Leave here a note about bare-metal environment, without threads
-    //! and blocking semaphore support.
+    //! \note Errors that occur after transaction has started are reported via
+    //! user-supplied handler. \sa PBus::event
+    //! \note Bytes transferred are reported via user-supplied handler
+    //! per each channel (tx, rx) separately.
     //! \pre       Bus is locked and buffers are set.
     //! \post      Bus remains in the same state.
     //! \param[in] handler      User-supplied event handler.
@@ -168,9 +190,11 @@ private:
 
     //!
     //! \brief Event handler dedicated to the platform bus.
-    //! \param[in] type Type of event occured.
+    //! \param[in] ch     Channel (rx or tx) where the event occurred.
+    //! \param[in] type   Type of event occurred.
+    //! \param[in] total  Total amount of bytes transferred within given channel.
     //!
-    void bus_handler(typename Bus::event type);
+    void bus_handler(channel ch, event type, size_t total);
 
     //!
     //! \brief Checks if bus is busy transferring data at this moment or not.
@@ -183,7 +207,7 @@ private:
     //!
     void cleanup();
 
-    // Status flags.
+    // State flags.
     //! Bus init status: set - bus initialized, reset - bus not yet initialized
     static constexpr uint8_t bus_inited     = 0x1;
     //! Operation mode of a bus: set - async mode, reset - block mode
@@ -193,41 +217,48 @@ private:
     //! Xfer event status: set - all events from xfer are served,
     //! reset - not all are served
     static constexpr uint8_t xfer_served    = 0x8;
+    //! Xfer error status: set - error(s) occurred during transfer,
+    //! reset - no error occurred.
+    static constexpr uint8_t xfer_error     = 0x10;
 
-    Bus          m_bus;      //!< Platform bus object.
+    PBus         m_bus;      //!< Platform bus object.
     mutex        m_lock;     //!< Lock to protect a platform bus.
     semaphore    m_complete; //!< Semaphore to notify about end of xfer.
     handler_fn   m_handler;  //!< User-supplied handler, used in async mode
+    size_t       m_received; //!< Bytes received during last blocking xfer.
+    size_t       m_sent;     //!< Bytes sent during last blocking xfer.
     atomic_flag  m_cleaned;  //!< Cleanup is performed after xfer and unlock are done.
-    uint8_t      m_state;    //!< State flags
+    uint8_t      m_state;    //!< State flags.
 };
 
 
 //------------------------------------------------------------------------------
 
-template< class Bus >
-generic_bus< Bus >::generic_bus()
+template< class PBus >
+generic_bus< PBus >::generic_bus()
     :m_bus{}
     ,m_lock{}
     ,m_complete{}
     ,m_handler{}
+    ,m_received{0}
+    ,m_sent{0}
     ,m_cleaned{false}
     ,m_state{0}
 {
 
 }
 
-template< class Bus >
-generic_bus< Bus >::~generic_bus()
+template< class PBus >
+generic_bus< PBus >::~generic_bus()
 {
     // TODO: what to do if bus is destroyed?
 }
 
-template< class Bus >
-err generic_bus< Bus >::init()
+template< class PBus >
+err generic_bus< PBus >::init()
 {
-    auto fn = [this](typename Bus::event type) {
-        this->bus_handler(type);
+    auto fn = [this](channel ch, event type, size_t total) {
+        this->bus_handler(ch, type, total);
     };
 
     m_bus.set_handler(fn);
@@ -240,8 +271,8 @@ err generic_bus< Bus >::init()
     return rc;
 }
 
-template< class Bus >
-void generic_bus< Bus >::lock()
+template< class PBus >
+void generic_bus< PBus >::lock()
 {
     // If bus is not initialized then pre-conditions are violated.
     ecl_assert(m_state & bus_inited);
@@ -257,8 +288,8 @@ void generic_bus< Bus >::lock()
     }
 }
 
-template< class Bus >
-void generic_bus< Bus >::unlock()
+template< class PBus >
+void generic_bus< PBus >::unlock()
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -292,8 +323,8 @@ void generic_bus< Bus >::unlock()
     m_lock.unlock();
 }
 
-template< class Bus >
-ecl::err generic_bus< Bus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
+template< class PBus >
+ecl::err generic_bus< PBus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -314,8 +345,8 @@ ecl::err generic_bus< Bus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t 
     return err::ok;
 }
 
-template< class Bus >
-ecl::err generic_bus< Bus >::set_buffers(size_t size, uint8_t fill_byte)
+template< class PBus >
+ecl::err generic_bus< PBus >::set_buffers(size_t size, uint8_t fill_byte)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -330,8 +361,8 @@ ecl::err generic_bus< Bus >::set_buffers(size_t size, uint8_t fill_byte)
     return err::ok;
 }
 
-template< class Bus >
-ecl::err generic_bus< Bus >::xfer()
+template< class PBus >
+ecl::err generic_bus< PBus >::xfer(size_t *sent, size_t *received)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -347,13 +378,34 @@ ecl::err generic_bus< Bus >::xfer()
     // Events of this particular xfer is not yet served.
     m_state &= ~(xfer_served);
 
+    // Clear previous errors
+    m_state &= ~(xfer_error);
+
     // Reset binary semaphore counter
     m_complete.try_wait();
+
+    // Reset transfer counters
+    m_received = m_sent = 0;
 
     auto rc = m_bus.do_xfer();
 
     if (!is_error(rc)) {
         m_complete.wait();
+
+        // Errors can occur after transaction start, check this
+        if (m_state & xfer_error) {
+            rc = err::io;
+        }
+
+        // Return amount of bytes written and/or read
+
+        if (received) {
+            *received = m_received;
+        }
+        if (sent) {
+            *sent = m_sent;
+        }
+
     } else {
         // Deem that xfer virtually occurs in blocking mode and thus
         // momentally served in case of error.
@@ -363,8 +415,8 @@ ecl::err generic_bus< Bus >::xfer()
     return rc;
 }
 
-template< class Bus >
-ecl::err generic_bus< Bus >::xfer(const handler_fn &handler)
+template< class PBus >
+ecl::err generic_bus< PBus >::xfer(const handler_fn &handler)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -396,10 +448,15 @@ ecl::err generic_bus< Bus >::xfer(const handler_fn &handler)
 
 //------------------------------------------------------------------------------
 
-template< class Bus >
-void generic_bus< Bus >::bus_handler(typename Bus::event type)
+template< class PBus >
+void generic_bus< PBus >::bus_handler(channel ch, event type, size_t total)
 {
-    bool last_event = (type == Bus::event::xfer_done);
+    // Transfer complete accross all channels
+    bool last_event = (ch == channel::meta && type == event::tc);
+
+    if (type == event::err) {
+        m_state |= xfer_error;
+    }
 
     if (last_event) {
         // Spurious events are not allowed
@@ -409,7 +466,7 @@ void generic_bus< Bus >::bus_handler(typename Bus::event type)
     }
 
     if (m_state & async_mode) {
-        m_handler(type);
+        m_handler(ch, type, total);
 
         // Bus unlocked, it is time to check if bus cleaned.
         if (last_event && !(m_state & bus_locked)) {
@@ -426,6 +483,15 @@ void generic_bus< Bus >::bus_handler(typename Bus::event type)
                 cleanup();
             }
         }
+    } else {
+        // In blocking mode a bus is responcible for bytes counting
+        if (ch == channel::tx) {
+            m_sent = total;
+        } else if (ch == channel::rx) {
+            m_received = total;
+        }
+
+        // Don't do anything for 'meta' channel
     }
 
     if (last_event) {
@@ -434,8 +500,8 @@ void generic_bus< Bus >::bus_handler(typename Bus::event type)
     }
 }
 
-template< class Bus >
-bool generic_bus< Bus >::bus_is_busy()
+template< class PBus >
+bool generic_bus< PBus >::bus_is_busy()
 {
     bool in_progress = false;
 
