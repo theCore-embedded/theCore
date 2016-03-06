@@ -168,10 +168,9 @@ private:
 
     //!
     //! \brief Event handler dedicated to the platform bus.
-    //! \param[in] obj  This object.
     //! \param[in] type Type of event occured.
     //!
-    static void bus_handler(generic_bus< Bus > *obj, typename Bus::event type);
+    void bus_handler(typename Bus::event type);
 
     //!
     //! \brief Checks if bus is busy transferring data at this moment or not.
@@ -228,7 +227,7 @@ template< class Bus >
 err generic_bus< Bus >::init()
 {
     auto fn = [this](typename Bus::event type) {
-        this->bus_handler(this, type);
+        this->bus_handler(type);
     };
 
     m_bus.set_handler(fn);
@@ -398,22 +397,22 @@ ecl::err generic_bus< Bus >::xfer(const handler_fn &handler)
 //------------------------------------------------------------------------------
 
 template< class Bus >
-void generic_bus< Bus >::bus_handler(generic_bus< Bus > *obj, typename Bus::event type)
+void generic_bus< Bus >::bus_handler(typename Bus::event type)
 {
     bool last_event = (type == Bus::event::xfer_done);
 
     if (last_event) {
         // Spurious events are not allowed
-        ecl_assert(!(obj->m_state & xfer_served));
+        ecl_assert(!(m_state & xfer_served));
 
-        obj->m_state |= xfer_served;
+        m_state |= xfer_served;
     }
 
-    if (obj->m_state & async_mode) {
-        obj->m_handler(type);
+    if (m_state & async_mode) {
+        m_handler(type);
 
         // Bus unlocked, it is time to check if bus cleaned.
-        if (last_event && !(obj->m_state & bus_locked)) {
+        if (last_event && !(m_state & bus_locked)) {
 
             // It is possible that bus_handler() is executed in thread context
             // rather in ISR context. This means that context switch can occur
@@ -423,15 +422,15 @@ void generic_bus< Bus >::bus_handler(generic_bus< Bus > *obj, typename Bus::even
             // In case if handler is executed in ISR context, this check
             // is almost meaningless, besides that setting a flag is required
             // to inform rest of the system that cleanup already done.
-            if (!obj->m_cleaned.test_and_set()) {
-                obj->cleanup();
+            if (!m_cleaned.test_and_set()) {
+                cleanup();
             }
         }
     }
 
     if (last_event) {
         // Inform rest of the bus about event handling
-        obj->m_complete.signal();
+        m_complete.signal();
     }
 }
 
