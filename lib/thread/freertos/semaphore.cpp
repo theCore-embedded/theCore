@@ -40,8 +40,13 @@ void ecl::semaphore::wait()
     ecl_assert(rc == pdTRUE);
 }
 
-//------------------------------------------------------------------------------
+ecl::err ecl::semaphore::try_wait()
+{
+    auto rc = xSemaphoreTake(m_semaphore, 0);
+    return rc == pdTRUE ? ecl::err::ok : ecl::err::again;
+}
 
+//------------------------------------------------------------------------------
 
 ecl::binary_semaphore::binary_semaphore()
     :m_semaphore{nullptr}
@@ -73,4 +78,10 @@ void ecl::binary_semaphore::wait()
 {
     auto rc = xSemaphoreTake(m_semaphore, portMAX_DELAY);
     ecl_assert(rc == pdTRUE);
+}
+
+ecl::err ecl::binary_semaphore::try_wait()
+{
+    auto rc = xSemaphoreTake(m_semaphore, 0);
+    return rc == pdTRUE ? ecl::err::ok : ecl::err::again;
 }

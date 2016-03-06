@@ -4,6 +4,8 @@
 #include <FreeRTOS.h>
 #include <semphr.h>
 
+#include <ecl/err.hpp>
+
 namespace ecl
 {
 
@@ -28,6 +30,13 @@ public:
     //! Cannot be called from ISR.
     //!
     void wait();
+
+    //!
+    //! \brief Tries to wait on semaphore without lock.
+    //! \retval err::again  Someone already waits a semaphore.
+    //! \retval err::ok     Semaphore counter decremented.
+    //!
+    ecl::err try_wait();
 
     semaphore(const semaphore&)             = delete;
     semaphore& operator=(const semaphore&)  = delete;
@@ -61,6 +70,13 @@ public:
     //! will call signal()
     //!
     void wait();
+
+    //!
+    //! \brief Tries to wait on semaphore without lock.
+    //! \retval err::again  Someone already waits a semaphore.
+    //! \retval err::ok     Semaphore counter decremented.
+    //!
+    ecl::err try_wait();
 
     binary_semaphore(const semaphore&)             = delete;
     binary_semaphore& operator=(const semaphore&)  = delete;
