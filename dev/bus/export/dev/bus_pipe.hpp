@@ -124,7 +124,7 @@ ssize_t bus_pipe< GBus >::write(const uint8_t *data, size_t count)
     if (!count)
         return count;
 
-    size_t sent;
+    size_t sent = 0;
     ssize_t ret;
 
     m_gbus.lock();

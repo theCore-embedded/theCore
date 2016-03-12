@@ -146,6 +146,8 @@ public:
 
     //!
     //! \brief Performs xfer in blocking mode using buffers set previously.
+    //! If underlying bus works in half-duplex mode then first tx transaction
+    //! will occur and then rx.
     //! \warning Method uses a semaphore to wait for a bus event (most likely
     //! an IRQ event). It means that in bare-metal environment,
     //! without RTOS it is implemented as simple spin-lock. Likely that
@@ -165,6 +167,8 @@ public:
 
     //!
     //! \brief Performs xfer in async mode using buffers set previously.
+    //! If underlying bus works in half-duplex mode then first tx transaction
+    //! will occur and then rx.
     //! When xfer will be done, given handler will be invoked with a
     //! type of an event.
     //! \warning Event handler most likely will be executed in ISR context.
@@ -257,11 +261,16 @@ generic_bus< PBus >::~generic_bus()
 template< class PBus >
 err generic_bus< PBus >::init()
 {
+    if (m_state & bus_inited) {
+        return err::ok;
+    }
+
     auto fn = [this](channel ch, event type, size_t total) {
         this->bus_handler(ch, type, total);
     };
 
     m_bus.set_handler(fn);
+
     auto rc = m_bus.init();
 
     if (is_ok(rc)) {
