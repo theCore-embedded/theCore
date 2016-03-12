@@ -52,20 +52,21 @@ public:
 
     static int mask(IRQn_t IRQn)
     {
+        // TODO: error check
         NVIC_DisableIRQ(IRQn);
-        // TODO
         return 0;
     }
 
     static int unmask(IRQn_t IRQn)
     {
+        // TODO: error check
         NVIC_EnableIRQ(IRQn);
-        // TODO
         return 0;
     }
 
     static int clear(IRQn_t IRQn)
     {
+        // TODO: error check
         NVIC_ClearPendingIRQ(static_cast< IRQn_t > (IRQn));
         return 0;
     }

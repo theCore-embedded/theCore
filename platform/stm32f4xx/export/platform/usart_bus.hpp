@@ -19,6 +19,9 @@
 
 #include <ecl/err.hpp>
 
+namespace stm32f4xx
+{
+
 //!
 //! \brief STM32F4 USART bus
 //!
@@ -45,7 +48,6 @@ public:
         tc,         //!< Transfer complete event.
         err,        //!< Error event.
     };
-
 
     //!
     //! \brief Externally supplied event handler.
@@ -77,10 +79,10 @@ public:
 
     //!
     //! \brief Sets rx buffer made-up from sequence of similar bytes.
-    //! \param[in] size Size of sequence
-    //! \param fill_byte
+    //! \param[in] size         Size of sequence
+    //! \param[in] fill_byte    Byte to fill a sequence. Optional.
     //!
-    void set_tx(size_t size, uint8_t fill_byte);
+    void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
     //!
     //! \brief Sets tx buffer with given size.
@@ -128,16 +130,24 @@ private:
     //! Handles IRQ events from a bus.
     void irq_handler();
 
-    handler_fn      m_event_handler; //! Handler passed via set_handler()
-    const uint8_t   *m_tx;           //! Transmit buffer
-    uint8_t         *m_rx;           //! Recieve buffer
+    handler_fn      m_event_handler; //! Handler passed via set_handler().
+    const uint8_t   *m_tx;           //! Transmit buffer.
+    size_t          m_tx_size;       //! TX buffer size.
+    size_t          m_tx_left;       //! Left to send in TX buffer.
+    uint8_t         *m_rx;           //! Recieve buffer.
+    size_t          m_rx_size;       //! RX buffer size.
+    size_t          m_rx_left;       //! Left to receive in RX buffer.
 };
 
 template< usart_device dev >
 usart_bus< dev >::usart_bus()
     :m_event_handler{}
     ,m_tx{nullptr}
+    ,m_tx_size{0}
+    ,m_tx_left{0}
     ,m_rx{nullptr}
+    ,m_rx_size{0}
+    ,m_rx_left{0}
 {
 
 }
@@ -151,31 +161,32 @@ usart_bus< dev >::~usart_bus()
 template< usart_device dev >
 ecl::err usart_bus< dev >::init()
 {
-    USART_InitTypeDef initStruct;
+    USART_InitTypeDef init_struct;
 
     // TODO: implement
 //    if (m_inited)
 //        return -1;
 
     // Must be optimized at compile time
-    constexpr auto RCC_Periph = pick_rcc();
-    constexpr auto RCC_fn     = pick_rcc_fn();
+    constexpr auto rcc_periph = pick_rcc();
+    constexpr auto rcc_fn     = pick_rcc_fn();
     constexpr auto usart      = pick_usart();
+    constexpr auto irqn       = pick_irqn();
 
     // Enable peripheral clock
-    RCC_fn(RCC_Periph, ENABLE);
+    rcc_fn(rcc_periph, ENABLE);
 
     // Configure UART
     // TODO: make configuration values be chosen at compile time
-    initStruct.USART_BaudRate             = 115200;
-    initStruct.USART_WordLength           = USART_WordLength_8b;
-    initStruct.USART_StopBits             = USART_StopBits_1;
-    initStruct.USART_Parity               = USART_Parity_No;
-    initStruct.USART_Mode                 = USART_Mode_Rx | USART_Mode_Tx;
-    initStruct.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
+    init_struct.USART_BaudRate             = 115200;
+    init_struct.USART_WordLength           = USART_WordLength_8b;
+    init_struct.USART_StopBits             = USART_StopBits_1;
+    init_struct.USART_Parity               = USART_Parity_No;
+    init_struct.USART_Mode                 = USART_Mode_Rx | USART_Mode_Tx;
+    init_struct.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
 
     // Init UART
-    USART_Init(usart, &initStruct);
+    USART_Init(usart, &init_struct);
 //    m_inited = 1;
 
     // TODO: disable UART interrupts in NVIC
@@ -183,9 +194,17 @@ ecl::err usart_bus< dev >::init()
     // TODO: add static assert for supported modes and flags
     // Intended to be optimized at compile time
 
-    USART_ITConfig(usart, USART_IT_ERR, ENABLE);
-    USART_ITConfig(usart, USART_IT_TXE, ENABLE);
-    USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
+//    USART_ITConfig(usart, USART_IT_ERR, ENABLE);
+//    USART_ITConfig(usart, USART_IT_TXE, ENABLE);
+//    USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
+
+    // TODO: enable irq before each transaction and disable after
+    // rather than keep it enabled all time
+    auto lambda = [this]() {
+        this->irq_handler();
+    };
+
+    IRQ_manager::subscribe(irqn, lambda);
 
     // Enable UART
     USART_Cmd(usart, ENABLE);
@@ -197,38 +216,63 @@ ecl::err usart_bus< dev >::init()
 template< usart_device dev >
 void usart_bus< dev >::set_rx(uint8_t *rx, size_t size)
 {
+    // TODO: assert if not initialized
     (void) rx;
     (void) size;
 }
 
 template< usart_device dev >
+void usart_bus< dev >::set_tx(size_t size, uint8_t fill_byte)
+{
+    // TODO: assert if not initialized
+    (void) size;
+    (void) fill_byte;
+}
+
+template< usart_device dev >
 void usart_bus< dev >::set_tx(const uint8_t *tx, size_t size)
 {
-    (void) tx;
-    (void) size;
+    // TODO: assert if not initialized
+    m_tx = tx;
+    m_tx_size = size;
 }
+
 
 template< usart_device dev >
 void usart_bus< dev >::set_handler(const handler_fn &handler)
 {
-    (void) handler;
+    // TODO: assert if not initialized
+    m_event_handler = handler;
 }
 
 template< usart_device dev >
 void usart_bus< dev >::reset_buffers()
 {
+    // TODO: assert if not initialized
 
 }
 
 template< usart_device dev >
 void usart_bus< dev >::reset_handler()
 {
-
+    // TODO: assert if not initialized
+    m_event_handler = handler_fn{};
 }
 
 template< usart_device dev >
 ecl::err usart_bus< dev >::do_xfer()
 {
+    constexpr auto irqn = pick_irqn();
+    // TODO: assert if not initialized
+
+    constexpr auto usart = pick_usart();
+
+    m_tx_left = m_tx_size;
+
+    // Bytes will be send in IRQ handler.
+    USART_ITConfig(usart, USART_IT_TXE, ENABLE);
+    IRQ_manager::unmask(irqn);
+
     return ecl::err::ok;
 }
 
@@ -323,6 +367,33 @@ constexpr auto usart_bus< dev >::pick_usart()
 template< usart_device dev >
 void usart_bus< dev >::irq_handler()
 {
+    constexpr auto usart = pick_usart();
+    constexpr auto irqn  = pick_irqn();
+    auto status = USART_GetITStatus(usart, USART_IT_TXE);
+
+    IRQ_manager::clear(irqn);
+
+    // TODO: comment about flags clear sequence
+
+    if (status == SET) {
+        if (m_tx) {
+            if (m_tx_left) {
+                USART_SendData(usart, *(m_tx + (m_tx_size - m_tx_left)));
+                m_tx_left--;
+                IRQ_manager::unmask(irqn);
+            } else {
+                // Last interrupt occurred, need to notify.
+                m_event_handler(channel::tx, event::tc, m_tx_size);
+                m_event_handler(channel::meta, event::tc, 0);
+
+                // Transaction complete.
+                USART_ITConfig(usart, USART_IT_TXE, DISABLE);
+            }
+        }
+    } else {
+        for(;;); // TODO: remove it after debugging
+    }
+}
 
 }
 

@@ -93,7 +93,7 @@ private:
     //! \retval true Error occurs on start
     //! \retval false Error hasn't occur at all, or occurred during xfer
     //!
-    bool err_on_start();
+    bool err_on_start() const;
 };
 
 
@@ -176,6 +176,15 @@ template< class GBus >
 err bus_pipe< GBus >::last_error() const
 {
     return m_last;
+}
+
+//------------------------------------------------------------------------------
+
+
+template< class GBus >
+bool bus_pipe< GBus >::err_on_start() const
+{
+    return is_error(m_last) && !(m_last == err::io);
 }
 
 
