@@ -1,7 +1,13 @@
-#ifndef COMMON_SPI_HPP
-#define COMMON_SPI_HPP
+#ifndef PLATFORM_COMMON_SPI_HPP_
+#define PLATFORM_COMMON_SPI_HPP_
 
 #include <ecl/thread/mutex.hpp>
+
+namespace platform
+{
+
+namespace common
+{
 
 // TODO: drop it
 // Represents distinct peripheral devices
@@ -17,8 +23,12 @@ enum class spi_device
     bus_8
 };
 
+}
+
+}
+
 // TODO: drop it when SPI will be migrated
-using SPI_device = spi_device;
+using SPI_device = platform::common::spi_device;
 
 
 // SPI communication type
@@ -74,4 +84,4 @@ void SPI_lock< SPIx >::unlock()
 }
 
 
-#endif // COMMON_SPI_HPP
+#endif // PLATFORM_COMMON_SPI_HPP_

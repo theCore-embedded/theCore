@@ -13,6 +13,9 @@
 namespace stm32f4xx
 {
 
+// Convinient type alias
+using spi_device = platform::common::spi_device;
+
 template< spi_device spix, class spi_config >
 class spi_bus
 {
