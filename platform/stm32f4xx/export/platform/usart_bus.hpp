@@ -6,7 +6,7 @@
 #ifndef PLATFORM_USART_BUS_HPP_
 #define PLATFORM_USART_BUS_HPP_
 
-#include <dev/bus.hpp>
+#include <platform/common/bus.hpp>
 #include <common/usart.hpp>
 #include <ecl/err.hpp>
 
@@ -31,9 +31,9 @@ class usart_bus
 {
 public:
     // Convinient type aliases.
-    using channel       = ecl::bus_channel;
-    using event         = ecl::bus_event;
-    using handler_fn    = ecl::bus_handler;
+    using channel       = platform::common::bus_channel;
+    using event         = platform::common::bus_event;
+    using handler_fn    = platform::common::bus_handler;
 
     //!
     //! \brief Constructs a bus.

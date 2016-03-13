@@ -2,6 +2,7 @@
 #define PLATFORM_SPI_BUS_HPP_
 
 #include <common/spi.hpp>
+#include <platform/common/bus.hpp>
 #include <platform/irq_manager.hpp>
 
 #include <sys/types.h>
@@ -17,9 +18,9 @@ class spi_bus
 {
 public:
     // Convinient type aliases.
-    using channel       = ecl::bus_channel;
-    using event         = ecl::bus_event;
-    using handler_fn    = ecl::bus_handler;
+    using channel       = platform::common::bus_channel;
+    using event         = platform::common::bus_event;
+    using handler_fn    = platform::common::bus_handler;
 
     //!
     //! \brief Constructs a bus.
@@ -165,6 +166,8 @@ ecl::err spi_bus< spix, spi_config >::init()
     SPI_Init(spi, &init_obj);
 
     m_inited = true;
+
+    return ecl::err::ok;
 }
 
 //------------------------------------------------------------------------------

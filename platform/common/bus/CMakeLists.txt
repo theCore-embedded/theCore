@@ -1,0 +1,2 @@
+add_library(common_bus INTERFACE)
+target_include_directories(common_bus INTERFACE export)
