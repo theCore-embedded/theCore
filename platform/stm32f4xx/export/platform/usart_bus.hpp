@@ -214,10 +214,6 @@ ecl::err usart_bus< dev >::init()
     // Init UART
     USART_Init(usart, &init_struct);
 
-//    USART_ITConfig(usart, USART_IT_ERR, ENABLE);
-//    USART_ITConfig(usart, USART_IT_TXE, ENABLE);
-//    USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
-
     // TODO: enable irq before each transaction and disable after
     // rather than keep it enabled all time
     auto lambda = [this]() {
@@ -310,7 +306,6 @@ ecl::err usart_bus< dev >::do_xfer()
 
     constexpr auto irqn = pick_irqn();
     constexpr auto usart = pick_usart();
-
 
     if (m_tx) {
         m_tx_left = m_tx_size;
@@ -476,7 +471,6 @@ void usart_bus< dev >::irq_handler()
 
             // 1 byte is recieved. No need to unmask interrupts.
         }
-
     }
 
     if (tx_done() && rx_done()) {

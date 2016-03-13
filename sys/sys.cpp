@@ -41,9 +41,9 @@ extern "C" void kernel_init();
 extern "C" void kernel_main();
 
 namespace ecl {
-extern typename istream< console_driver >::device_type cin_device;
-extern typename istream< console_driver >::device_type cout_device;
-extern typename istream< console_driver >::device_type cerr_device;
+extern typename istream< console_driver >::device_type *cin_device;
+extern typename istream< console_driver >::device_type *cout_device;
+extern typename istream< console_driver >::device_type *cerr_device;
 }
 
 extern "C" void core_main(void)
@@ -64,15 +64,13 @@ extern "C" void core_main(void)
 		((void (*)()) *p)();
     }
 
-    // Due to undefined static init order, this initialization is placed here
-    ecl::cin_device.init();
-    ecl::cin_device.open();
-    ecl::cout_device.init();
-    ecl::cout_device.open();
-    ecl::cerr_device.init();
-    ecl::cerr_device.open();
-
     IRQ_manager::init();
+
+    // Due to undefined static init order, this initialization is placed here
+    ecl::cin_device->init();
+    ecl::cout_device->init();
+    ecl::cerr_device->init();
+
 
     kernel_main();
 }
