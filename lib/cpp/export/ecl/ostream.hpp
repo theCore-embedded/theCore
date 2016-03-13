@@ -135,6 +135,10 @@ ostream<IO_device>& ostream< IO_device >::operator<<(char character)
 template< class IO_device >
 ostream<IO_device>& ostream< IO_device >::operator<<(const char *string)
 {
+    // TODO: improve this function in a way it can write a string
+    // to a device with chunks that are splitted by '\n' symbol
+    // What about somehow move it to the platform layer?
+
     size_t i = 0;
     while(string[i] != 0) {
         if (string[i] == '\n') {
@@ -142,7 +146,7 @@ ostream<IO_device>& ostream< IO_device >::operator<<(const char *string)
             m_device->write(&carret_ret, 1);
         }
 
-        if(m_device->write((const uint8_t *) &string[i],1) < 0) {
+        if(m_device->write((const uint8_t *) &string[i], 1) < 0) {
             break; //FIXME: add error handling
         }
 
