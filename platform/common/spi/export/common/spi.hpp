@@ -5,7 +5,7 @@
 
 // TODO: drop it
 // Represents distinct peripheral devices
-enum class SPI_device
+enum class spi_device
 {
     bus_1,
     bus_2,
@@ -16,6 +16,10 @@ enum class SPI_device
     bus_7,
     bus_8
 };
+
+// TODO: drop it when SPI will be migrated
+using SPI_device = spi_device;
+
 
 // SPI communication type
 enum class SPI_com_type

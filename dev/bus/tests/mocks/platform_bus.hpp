@@ -9,27 +9,17 @@
 #include <ecl/err.hpp>
 #include <iostream>
 
+#include <dev/bus.hpp>
+
 class platform_mock
 {
 public:
 //------------------------------------------------------------------------------
 // Bus interface itself
-    enum class channel
-    {
-        rx,
-        tx,
-        meta,
-    };
 
-    enum class event
-    {
-        hc,
-        tc,
-        err,
-    };
-
-    using handler_fn
-    = std::function< void(channel ch, event type, size_t total) >;
+    using channel    = ecl::bus_channel;
+    using event      = ecl::bus_event;
+    using handler_fn = ecl::bus_handler;
 
     ecl::err init()
     {

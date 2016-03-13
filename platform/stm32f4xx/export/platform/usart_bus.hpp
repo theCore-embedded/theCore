@@ -6,17 +6,19 @@
 #ifndef PLATFORM_USART_BUS_HPP_
 #define PLATFORM_USART_BUS_HPP_
 
+#include <dev/bus.hpp>
 #include <common/usart.hpp>
+#include <ecl/err.hpp>
+
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_rcc.h>
+
+#include <platform/irq_manager.hpp>
 
 #include <cstdint>
 #include <unistd.h>
 
 #include <functional>
-#include <platform/irq_manager.hpp>
-
-#include <ecl/err.hpp>
 
 namespace stm32f4xx
 {
@@ -28,31 +30,10 @@ template< usart_device dev >
 class usart_bus
 {
 public:
-    //!
-    //! \brief Channles of a bus.
-    //!
-    enum class channel
-    {
-        rx,         //!< Receive channel.
-        tx,         //!< Transmit channel.
-        meta,       //!< Meta-channel.
-    };
-
-    //!
-    //! \brief Various events.
-    //!
-    enum class event
-    {
-        ht,         //!< Half transfer event.
-        tc,         //!< Transfer complete event.
-        err,        //!< Error event.
-    };
-
-    //!
-    //! \brief Externally supplied event handler.
-    //!
-    using handler_fn
-    = std::function< void(channel ch, event type, size_t total) >;
+    // Convinient type aliases.
+    using channel       = ecl::bus_channel;
+    using event         = ecl::bus_event;
+    using handler_fn    = ecl::bus_handler;
 
     //!
     //! \brief Constructs a bus.
