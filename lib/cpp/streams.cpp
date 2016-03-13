@@ -2,15 +2,14 @@
 
 namespace ecl {
 
+// TODO: think about extending of console devices to cover
+// case when there are different drivers for cin, count and cerr streams.
 typename istream< console_driver >::device_type console_device;
 
 // TODO: avoid this somehow.
 // See https://isocpp.org/wiki/faq/ctors#static-init-order
-typename istream< console_driver >::device_type *cin_device = &console_device;
-typename istream< console_driver >::device_type *cout_device = &console_device;
-typename istream< console_driver >::device_type *cerr_device = &console_device;
 
-ecl::istream< console_driver >  cin{cin_device};
-ecl::ostream< console_driver >  cout{cout_device};
-ecl::ostream< console_driver >  cerr{cout_device};
+istream< console_driver > cin{&console_device};
+ostream< console_driver > cout{&console_device};
+ostream< console_driver > cerr{&console_device};
 }
