@@ -260,7 +260,6 @@ int sd_spi< SPI_dev, GPIO_CS >::open()
     int ret = 0;
 
     if (!m_opened) {
-        m_spi.open();
         m_spi.lock();
 
 
@@ -382,21 +381,9 @@ constexpr size_t sd_spi< SPI_dev, GPIO_CS >::get_block_length()
 template< class SPI_dev, class GPIO_CS >
 ssize_t sd_spi< SPI_dev, GPIO_CS >::SPI_send(const uint8_t *buf, size_t size)
 {
-    volatile bool completed = false;
-
-    auto handler = [&completed]() {
-        completed = true;
-    };
-
-    typename SPI_dev::XFER_t spi_xfer;
-    spi_xfer.set_buffers(buf, nullptr, size);
-    spi_xfer.set_handler(handler);
-
-    if (m_spi.xfer(spi_xfer) < 0)
-        return sd_spi_err;
-
-    while (!completed) { }
-    while ((m_spi.get_status() & SPI_dev::flags::BSY)) { }
+    m_spi.set_buffers(buf, nullptr, size);
+    // TODO: check error code
+    m_spi.xfer(&size, nullptr);
 
     // TODO: verify that all data was transfered
     return size;
@@ -405,22 +392,9 @@ ssize_t sd_spi< SPI_dev, GPIO_CS >::SPI_send(const uint8_t *buf, size_t size)
 template< class SPI_dev, class GPIO_CS >
 ssize_t sd_spi< SPI_dev, GPIO_CS >::SPI_receive(uint8_t *buf, size_t size)
 {
-    volatile bool completed = false;
-
-    auto handler = [&completed]() {
-        completed = true;
-    };
-
-    typename SPI_dev::XFER_t spi_xfer;
-    spi_xfer.set_buffers(nullptr, buf, size);
-    spi_xfer.set_handler(handler);
-
-    if (m_spi.xfer(spi_xfer) < 0)
-        return sd_spi_err;
-
-    // TODO: lock instead of wait
-    while (!completed) { }
-    while ((m_spi.get_status() & SPI_dev::flags::BSY)) { }
+    m_spi.set_buffers(nullptr, buf, size);
+    // TODO: check error code
+    m_spi.xfer(nullptr, &size);
 
     // TODO: verify that all data was transfered
     return size;
@@ -429,26 +403,12 @@ ssize_t sd_spi< SPI_dev, GPIO_CS >::SPI_receive(uint8_t *buf, size_t size)
 template< class SPI_dev, class GPIO_CS >
 ssize_t sd_spi< SPI_dev, GPIO_CS >::SPI_send_dummy(size_t size)
 {
-    volatile bool completed = false;
-
-    auto handler = [&completed]() {
-        completed = true;
-    };
-
-    typename SPI_dev::XFER_t spi_xfer;
-    spi_xfer.set_buffers(nullptr, nullptr, size);
-    spi_xfer.set_handler(handler);
-
-    if (m_spi.xfer(spi_xfer) < 0)
-        return sd_spi_err;
-
-    // TODO: lock instead of wait
-    while (!completed) { }
-    while ((m_spi.get_status() & SPI_dev::flags::BSY)) { }
+    m_spi.set_buffers(size);
+    // TODO: check error code
+    m_spi.xfer(&size, nullptr);
 
     // TODO: verify that all data was transfered
     return size;
-
 }
 
 template< class SPI_dev, class GPIO_CS >

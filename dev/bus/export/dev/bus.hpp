@@ -387,7 +387,8 @@ ecl::err generic_bus< PBus >::xfer(size_t *sent, size_t *received)
             rc = err::io;
         }
 
-        // Return amount of bytes written and/or read
+        // Return amount of bytes written and/or read.
+        // Even if error occurred, some data was possibly transffered.
 
         if (received) {
             *received = m_received;
