@@ -1,2 +1,3 @@
 add_library(common_bus INTERFACE)
 target_include_directories(common_bus INTERFACE export)
+target_link_libraries(common_bus INTERFACE types)
