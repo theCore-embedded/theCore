@@ -6,6 +6,9 @@
 #include <platform/utils.hpp>
 #include <ecl/assert.h>
 
+namespace ecl
+{
+
 namespace os
 {
 
@@ -58,6 +61,8 @@ ecl::err try_wait()
     return rc == pdPASS ? ecl::err::ok : ecl::err::again;
 }
 
-}
+} // namespace signal
 
-}
+} // namespace os
+
+} // namespace ecl

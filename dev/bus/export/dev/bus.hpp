@@ -32,10 +32,10 @@ template< class PBus >
 class generic_bus
 {
 public:
-    // Convinient type aliases.
-    using bus_channel       = platform::common::bus_channel;
-    using bus_event         = platform::common::bus_event;
-    using bus_handler       = platform::common::bus_handler;
+//    // Convinient type aliases.
+//    using bus_channel       = ecl::bus_channel;
+//    using bus_event         = ecl::bus_event;
+//    using bus_handler       = ecl::bus_handler;
 
     //!
     //! \brief Constructs a bus.

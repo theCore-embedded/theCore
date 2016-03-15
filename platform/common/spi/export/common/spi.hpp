@@ -3,10 +3,7 @@
 
 #include <ecl/thread/mutex.hpp>
 
-namespace platform
-{
-
-namespace common
+namespace ecl
 {
 
 // TODO: drop it
@@ -25,10 +22,8 @@ enum class spi_device
 
 }
 
-}
-
 // TODO: drop it when SPI will be migrated
-using SPI_device = platform::common::spi_device;
+using SPI_device = ecl::spi_device;
 
 
 // SPI communication type

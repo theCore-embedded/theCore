@@ -11,10 +11,8 @@
 
 #include <functional>
 
-namespace platform
-{
 
-namespace common
+namespace ecl
 {
 
 //!
@@ -117,8 +115,7 @@ public:
     { return ecl::err::nosys; }
 };
 
-}
+} // namespace ecl
 
-}
 
 #endif // PLATFORM_COMMON_BUS_

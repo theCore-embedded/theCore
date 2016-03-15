@@ -520,7 +520,7 @@ int sd_spi< SPI_dev, GPIO_CS >::receive_data(uint8_t *buf, size_t size)
     static constexpr uint8_t out_of_range  = 0x08;
     static constexpr uint8_t card_locked   = 0x10;
 
-    uint8_t  token;
+    uint8_t  token = 0;
     uint16_t crc;
     uint8_t  tries = 64;
     int      SD_ret;
@@ -582,7 +582,7 @@ int sd_spi< SPI_dev, GPIO_CS >::send_data(const uint8_t *buf, size_t size)
 
     static constexpr uint8_t crc           = 0x0;
 
-    uint8_t  data_response;
+    uint8_t  data_response = 0;
     uint8_t  tries = 32;
     int      SD_ret;
 

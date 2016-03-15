@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <cstdint>
 
+namespace ecl
+{
+
 namespace os
 {
 
@@ -34,8 +37,10 @@ void sleep_for(uint32_t msesc);
 //!
 thread_handle get_handle();
 
-}
+} // namespace this_thread
 
-}
+} // namespace os
+
+} // namespace ecl
 
 #endif

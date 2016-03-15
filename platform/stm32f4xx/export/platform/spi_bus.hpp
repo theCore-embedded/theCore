@@ -10,20 +10,20 @@
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_rcc.h>
 
-namespace stm32f4xx
+namespace ecl
 {
 
 // Convinient type alias
-using spi_device = platform::common::spi_device;
+using spi_device = ecl::spi_device;
 
 template< spi_device spix, class spi_config >
 class spi_bus
 {
 public:
     // Convinient type aliases.
-    using channel       = platform::common::bus_channel;
-    using event         = platform::common::bus_event;
-    using handler_fn    = platform::common::bus_handler;
+    using channel       = ecl::bus_channel;
+    using event         = ecl::bus_event;
+    using handler_fn    = ecl::bus_handler;
 
     //!
     //! \brief Constructs a bus.
@@ -110,8 +110,8 @@ private:
 
 template< spi_device spix, class spi_config >
 spi_bus< spix, spi_config >::spi_bus()
-    :m_event_handler{}
-    ,m_inited{false}
+    :m_inited{false}
+    ,m_event_handler{false}
 {
 
 }
@@ -172,6 +172,55 @@ ecl::err spi_bus< spix, spi_config >::init()
 
     return ecl::err::ok;
 }
+
+template< spi_device spix, class spi_config >
+void spi_bus< spix, spi_config >::set_rx(uint8_t *rx, size_t size)
+{
+    (void) rx;
+    (void) size;
+}
+
+template< spi_device spix, class spi_config >
+void spi_bus< spix, spi_config >::set_tx(size_t size, uint8_t fill_byte)
+{
+    (void) size;
+    (void) fill_byte;
+}
+
+
+template< spi_device spix, class spi_config >
+void spi_bus< spix, spi_config >::set_tx(const uint8_t *tx, size_t size)
+{
+    (void) tx;
+    (void) size;
+}
+
+
+template< spi_device spix, class spi_config >
+void spi_bus< spix, spi_config >::set_handler(const handler_fn &handler)
+{
+    (void) handler;
+}
+
+
+template< spi_device spix, class spi_config >
+void spi_bus< spix, spi_config >::reset_buffers()
+{
+
+}
+
+template< spi_device spix, class spi_config >
+void spi_bus< spix, spi_config >::reset_handler()
+{
+
+}
+
+template< spi_device spix, class spi_config >
+ecl::err spi_bus< spix, spi_config >::do_xfer()
+{
+    return ecl::err::ok;
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -260,6 +309,7 @@ auto spi_bus< spix, spi_config >::pick_pclk()
         return static_cast< decltype(clkcfg.PCLK1_Frequency) >(-1);
     }
 }
+
 
 }
 

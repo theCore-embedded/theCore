@@ -20,7 +20,7 @@
 
 #include <functional>
 
-namespace stm32f4xx
+namespace ecl
 {
 
 //!
@@ -31,9 +31,9 @@ class usart_bus
 {
 public:
     // Convinient type aliases.
-    using channel       = platform::common::bus_channel;
-    using event         = platform::common::bus_event;
-    using handler_fn    = platform::common::bus_handler;
+    using channel       = ecl::bus_channel;
+    using event         = ecl::bus_event;
+    using handler_fn    = ecl::bus_handler;
 
     //!
     //! \brief Constructs a bus.
