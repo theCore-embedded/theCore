@@ -879,6 +879,51 @@ constexpr auto get_err_if()
     }
 }
 
+//!
+//! \brief Initializes DMA peripherial.
+//!
+template< std::uintptr_t dma_stream >
+void init_rcc()
+{
+    // stm32f4 DMA is placed on AHB1 bus only
+    constexpr auto dma_rcc = get_rcc< dma_stream >();
+    RCC_AHB1PeriphClockCmd(dma_rcc, ENABLE);
+}
+
+//!
+//! \brief Enables IRQ for given DMA stream and interrupt sources.
+//!
+template< std::uintptr_t dma_stream, uint32_t flags >
+void enable_irq()
+{
+    constexpr auto stream   = get_stream< dma_stream >();
+
+    // Enable interrupt sources
+    DMA_ITConfig(stream, flags, ENABLE);
+}
+
+//!
+//! \brief Subscribes to DMA IRQ associated with given DMA stream.
+//!
+template< std::uintptr_t dma_stream >
+void subscribe_irq(const std::function< void () > &handler)
+{
+    constexpr auto dma_irqn = get_irqn< dma_stream >();
+
+    // Disable interrupts when configuring interrupts
+    IRQ_manager::mask(dma_irqn);
+
+    // Do not expose old, not handled interrupts
+    IRQ_manager::clear(dma_irqn);
+
+    // Subscribe, actually
+    IRQ_manager::subscribe(dma_irqn, handler);
+
+    // Go on
+    // TODO: think about letting user to decide when to unmask interrupts
+    IRQ_manager::unmask(dma_irqn);
+}
+
 } // namespace dma
 
 } // namespace ecl
