@@ -4,6 +4,7 @@
 #include <common/spi.hpp>
 #include <platform/common/bus.hpp>
 #include <platform/irq_manager.hpp>
+#include <platform/dma_device.hpp>
 
 #include <sys/types.h>
 
@@ -13,17 +14,48 @@
 namespace ecl
 {
 
-// Convinient type alias
-using spi_device = ecl::spi_device;
+template< spi_device        dev,
+          std::uintptr_t    dma_tx_stream,
+          uint32_t          dma_tx_channel,
+          std::uintptr_t    dma_rx_stream,
+          uint32_t          dma_rx_channel,
+          uint16_t          direction,
+          uint16_t          mode,
+          uint16_t          cpol,
+          uint16_t          cpha,
+          uint16_t          nss,
+          uint16_t          first_bit,
+          uint32_t          clk >
+struct spi_config
+{
+    static constexpr SPI_InitTypeDef m_init_obj = {
+        direction,
+        mode,
+        SPI_DataSize_8b,
+        cpol,
+        cpha,
+        nss,
+        SPI_BaudRatePrescaler_8, // Initial prescaler
+        first_bit,
+        7
+    };
 
-template< spi_device spix, class spi_config >
+    static constexpr uint32_t           m_clk              = clk;
+    static constexpr spi_device         m_dev              = dev;
+    static constexpr uint32_t           m_dma_tx_channel   = dma_tx_channel;
+    static constexpr std::uintptr_t     m_dma_tx_stream    = dma_tx_stream;
+    static constexpr uint32_t           m_dma_rx_channel   = dma_rx_channel;
+    static constexpr std::uintptr_t     m_dma_rx_stream    = dma_rx_stream;
+};
+
+template< class spi_config >
 class spi_bus
 {
 public:
     // Convinient type aliases.
-    using channel       = ecl::bus_channel;
-    using event         = ecl::bus_event;
-    using handler_fn    = ecl::bus_handler;
+    using channel       = bus_channel;
+    using event         = bus_event;
+    using handler_fn    = bus_handler;
 
     //!
     //! \brief Constructs a bus.
@@ -96,6 +128,14 @@ private:
     // Depends on the evironment
     static auto pick_pclk();
 
+    // DMA init helper
+    void init_dma();
+
+    // IRQ init helper
+    void init_irq();
+
+    // Handles both DMA and SPI IRQ events. (for now it handles DMA only)
+    void irq_handler();
 
     bool            m_inited;
     handler_fn      m_event_handler; //! Handler passed via set_handler().
@@ -108,22 +148,22 @@ private:
 //    uint8_t         m_status;        //! Tracks device status.
 };
 
-template< spi_device spix, class spi_config >
-spi_bus< spix, spi_config >::spi_bus()
+template< class spi_config >
+spi_bus< spi_config >::spi_bus()
     :m_inited{false}
     ,m_event_handler{false}
 {
 
 }
 
-template< spi_device spix, class spi_config >
-spi_bus< spix, spi_config >::~spi_bus()
+template< class spi_config >
+spi_bus< spi_config >::~spi_bus()
 {
 
 }
 
-template< spi_device spix, class spi_config >
-ecl::err spi_bus< spix, spi_config >::init()
+template< class spi_config >
+ecl::err spi_bus< spi_config >::init()
 {
     if (m_inited) {
         return ecl::err::ok;
@@ -141,7 +181,7 @@ ecl::err spi_bus< spix, spi_config >::init()
     auto apb_clk = pick_pclk();
 
     // To calculate closest supported clock:
-    uint16_t quotient = apb_clk / spi_config::m_clock;
+    uint16_t quotient = apb_clk / spi_config::m_clk;
 
     // Prescaler has a range from 2 to 256
     if (quotient < 2) {
@@ -168,55 +208,58 @@ ecl::err spi_bus< spix, spi_config >::init()
     rcc_fn(rcc_periph, ENABLE);
     SPI_Init(spi, &init_obj);
 
+    // TODO: check order
+    init_dma();
+
     m_inited = true;
 
     return ecl::err::ok;
 }
 
-template< spi_device spix, class spi_config >
-void spi_bus< spix, spi_config >::set_rx(uint8_t *rx, size_t size)
+template< class spi_config >
+void spi_bus< spi_config >::set_rx(uint8_t *rx, size_t size)
 {
     (void) rx;
     (void) size;
 }
 
-template< spi_device spix, class spi_config >
-void spi_bus< spix, spi_config >::set_tx(size_t size, uint8_t fill_byte)
+template< class spi_config >
+void spi_bus< spi_config >::set_tx(size_t size, uint8_t fill_byte)
 {
     (void) size;
     (void) fill_byte;
 }
 
 
-template< spi_device spix, class spi_config >
-void spi_bus< spix, spi_config >::set_tx(const uint8_t *tx, size_t size)
+template< class spi_config >
+void spi_bus< spi_config >::set_tx(const uint8_t *tx, size_t size)
 {
     (void) tx;
     (void) size;
 }
 
 
-template< spi_device spix, class spi_config >
-void spi_bus< spix, spi_config >::set_handler(const handler_fn &handler)
+template< class spi_config >
+void spi_bus< spi_config >::set_handler(const handler_fn &handler)
 {
     (void) handler;
 }
 
 
-template< spi_device spix, class spi_config >
-void spi_bus< spix, spi_config >::reset_buffers()
+template< class spi_config >
+void spi_bus< spi_config >::reset_buffers()
 {
 
 }
 
-template< spi_device spix, class spi_config >
-void spi_bus< spix, spi_config >::reset_handler()
+template< class spi_config >
+void spi_bus< spi_config >::reset_handler()
 {
 
 }
 
-template< spi_device spix, class spi_config >
-ecl::err spi_bus< spix, spi_config >::do_xfer()
+template< class spi_config >
+ecl::err spi_bus< spi_config >::do_xfer()
 {
     return ecl::err::ok;
 }
@@ -224,10 +267,10 @@ ecl::err spi_bus< spix, spi_config >::do_xfer()
 
 //------------------------------------------------------------------------------
 
-template< spi_device spix, class spi_config >
-constexpr auto spi_bus< spix, spi_config >::pick_spi()
+template< class spi_config >
+constexpr auto spi_bus< spi_config >::pick_spi()
 {
-    switch (spix) {
+    switch (spi_config::m_dev) {
     case spi_device::bus_1:
         return SPI1;
     case spi_device::bus_2:
@@ -246,11 +289,11 @@ constexpr auto spi_bus< spix, spi_config >::pick_spi()
     }
 }
 
-template< spi_device spix, class spi_config >
-constexpr auto spi_bus< spix, spi_config >::pick_rcc()
+template< class spi_config >
+constexpr auto spi_bus< spi_config >::pick_rcc()
 {
     // TODO: comments
-    switch (spix) {
+    switch (spi_config::m_dev) {
     case spi_device::bus_1:
         return RCC_APB2Periph_SPI1;
     case spi_device::bus_2:
@@ -269,12 +312,12 @@ constexpr auto spi_bus< spix, spi_config >::pick_rcc()
     }
 }
 
-template< spi_device spix, class spi_config >
-constexpr auto spi_bus< spix, spi_config >::pick_rcc_fn()
+template< class spi_config >
+constexpr auto spi_bus< spi_config >::pick_rcc_fn()
 {
     // APB1 - SPI3 SPI2
     // APB2 - SPI5 SPI6 SPI1 SPI4
-    switch (spix) {
+    switch (spi_config::m_dev) {
     case spi_device::bus_1:
     case spi_device::bus_5:
     case spi_device::bus_4:
@@ -289,13 +332,13 @@ constexpr auto spi_bus< spix, spi_config >::pick_rcc_fn()
     }
 }
 
-template< spi_device spix, class spi_config >
-auto spi_bus< spix, spi_config >::pick_pclk()
+template< class spi_config >
+auto spi_bus< spi_config >::pick_pclk()
 {
     RCC_ClocksTypeDef clkcfg;
     RCC_GetClocksFreq(&clkcfg);
 
-    switch (spix) {
+    switch (spi_config::m_dev) {
     case SPI_device::bus_1:
     case SPI_device::bus_5:
     case SPI_device::bus_4:
@@ -310,7 +353,26 @@ auto spi_bus< spix, spi_config >::pick_pclk()
     }
 }
 
+template< class spi_config >
+void spi_bus< spi_config >::init_dma()
+{
+    dma::init_rcc< spi_config::m_dma_rx_stream >();
+    dma::init_rcc< spi_config::m_dma_tx_stream >();
+
+    auto handler = [this]() {
+        this->irq_handler();
+    };
+
+    dma::subscribe_irq< spi_config::m_dma_rx_stream >(handler);
+    dma::subscribe_irq< spi_config::m_dma_rx_stream >(handler);
+}
+
+template< class spi_config >
+void spi_bus< spi_config >::irq_handler()
+{
 
 }
+
+} // namespace ecl
 
 #endif // PLATFORM_SPI_BUS_HPP_
