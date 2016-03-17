@@ -123,7 +123,7 @@ private:
     static constexpr auto pick_spi();
     static constexpr auto pick_rcc();
     static constexpr auto pick_rcc_fn();
-//    static constexpr auto pick_IT();
+    //    static constexpr auto pick_IT();
 
     // Depends on the evironment
     static auto pick_pclk();
@@ -142,9 +142,9 @@ private:
     //! Bus is in fill mode if this flag is set.
     static constexpr uint8_t mode_fill      = 0x2;
     //! TX is finished if this flag is set.
-    static constexpr uint8_t tx_complete    = 0x2;
+    static constexpr uint8_t tx_complete    = 0x4;
     //! RX is finished if this flag is set.
-    static constexpr uint8_t rx_complete    = 0x2;
+    static constexpr uint8_t rx_complete    = 0x8;
 
     handler_fn      m_event_handler; //! Handler passed via set_handler().
     union
@@ -241,6 +241,12 @@ void spi_bus< spi_config >::set_rx(uint8_t *rx, size_t size)
         return;
     }
 
+    // Threat nullptr buffers as indication that xfer of this type
+    // is not required
+    if (!rx) {
+        return;
+    }
+
     m_rx = rx;
     m_rx_size = size;
 }
@@ -262,6 +268,12 @@ template< class spi_config >
 void spi_bus< spi_config >::set_tx(const uint8_t *tx, size_t size)
 {
     if (!(m_status & inited)) {
+        return;
+    }
+
+    // Threat nullptr buffers as indication that xfer of this type
+    // is not required
+    if (!tx) {
         return;
     }
 
@@ -314,11 +326,8 @@ ecl::err spi_bus< spi_config >::do_xfer()
     // Convinient aliases
 
     constexpr auto spi      = pick_spi();
-    constexpr auto tx_dma   = dma::get_stream< spi_config::m_dma_tx_stream >();
-    constexpr auto rx_dma   = dma::get_stream< spi_config::m_dma_rx_stream >();
 
     // Holds DMA requests to enable
-    uint16_t spi_dma_req = 0;
 
     m_status &= ~(tx_complete);
     m_status &= ~(rx_complete);
@@ -326,9 +335,18 @@ ecl::err spi_bus< spi_config >::do_xfer()
     DMA_InitTypeDef dma_init;
     DMA_StructInit(&dma_init);
 
-    // Provided that tx size == rx size.
-    dma_init.DMA_BufferSize              = m_tx_size;
-    dma_init.DMA_PeripheralInc           = DMA_PeripheralInc_Disable;
+    dma_init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+
+
+    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_TXE) == RESET)
+    {}
+    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_BSY) == SET)
+    {}
+
+    constexpr auto tx_dma
+            = dma::get_stream< spi_config::m_dma_tx_stream >();
+    constexpr auto rx_dma
+            = dma::get_stream< spi_config::m_dma_rx_stream >();
 
     // Setup TX DMA
 
@@ -345,12 +363,16 @@ ecl::err spi_bus< spi_config >::do_xfer()
             dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(m_tx.buf);
         }
 
+        dma_init.DMA_BufferSize          = m_tx_size;
+
         DMA_ITConfig(tx_dma, DMA_IT_TC, ENABLE);
 
         DMA_Init(tx_dma, &dma_init);
-        DMA_Cmd(tx_dma, ENABLE);
 
-        spi_dma_req |= SPI_I2S_DMAReq_Tx;
+        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx, ENABLE);
+    } else {
+        // Preventing interrupt routine from waiting TX complete event.
+        m_status |= tx_complete;
     }
 
     // Setup RX DMA
@@ -361,16 +383,28 @@ ecl::err spi_bus< spi_config >::do_xfer()
         dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
         dma_init.DMA_MemoryInc           = DMA_MemoryInc_Enable;
         dma_init.DMA_Memory0BaseAddr     = reinterpret_cast< uint32_t >(m_rx);
+        dma_init.DMA_BufferSize          = m_rx_size;
 
         DMA_ITConfig(rx_dma, DMA_IT_TC, ENABLE);
 
         DMA_Init(rx_dma, &dma_init);
-        DMA_Cmd(rx_dma, ENABLE);
 
-        spi_dma_req |= SPI_I2S_DMAReq_Rx;
+        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx, ENABLE);
+        DMA_Cmd(rx_dma, ENABLE);
+    } else {
+        // Preventing interrupt routine from waiting RX complete event.
+        m_status |= rx_complete;
     }
 
-    SPI_I2S_DMACmd(spi, spi_dma_req, ENABLE);
+    // After all directions configured, streams may be enabled
+
+    if (m_tx_size) {
+        DMA_Cmd(tx_dma, ENABLE);
+    }
+    if (m_rx_size) {
+        DMA_Cmd(rx_dma, ENABLE);
+    }
+
     return ecl::err::ok;
 }
 
@@ -396,16 +430,18 @@ void spi_bus< spi_config >::irq_handler()
 
         m_event_handler(channel::tx, event::tc, m_tx_size);
 
+        DMA_Cmd(tx_dma, DISABLE);
+
         DMA_ClearFlag(tx_dma, tx_tc_flag);
         DMA_ClearITPendingBit(tx_dma, tx_tc_if);
         DMA_ITConfig(tx_dma, DMA_IT_TC, DISABLE);
 
-        DMA_Cmd(tx_dma, DISABLE);
+        DMA_DeInit(tx_dma);
 
         m_status |= tx_complete;
     }
 
-    auto rx_tc = DMA_GetITStatus(rx_dma, tx_tc_if);
+    auto rx_tc = DMA_GetITStatus(rx_dma, rx_tc_if);
 
     if (rx_tc) {
         // Complete TX transaction
@@ -413,11 +449,13 @@ void spi_bus< spi_config >::irq_handler()
 
         m_event_handler(channel::rx, event::tc, m_rx_size);
 
+        DMA_Cmd(rx_dma, DISABLE);
+
         DMA_ClearFlag(rx_dma, rx_tc_flag);
         DMA_ClearITPendingBit(rx_dma, rx_tc_if);
         DMA_ITConfig(rx_dma, DMA_IT_TC, DISABLE);
 
-        DMA_Cmd(rx_dma, DISABLE);
+        DMA_DeInit(rx_dma);
 
         m_status |= rx_complete;
     }
@@ -426,6 +464,15 @@ void spi_bus< spi_config >::irq_handler()
         // All transfers comepleted
         m_event_handler(channel::meta, event::tc, m_tx_size);
         SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
+
+        constexpr auto rx_irqn = dma::get_irqn< spi_config::m_dma_rx_stream >();
+        constexpr auto tx_irqn = dma::get_irqn< spi_config::m_dma_tx_stream >();
+
+        // Clear/enable NVIC interrupts
+        IRQ_manager::clear(rx_irqn);
+        IRQ_manager::unmask(rx_irqn);
+        IRQ_manager::clear(tx_irqn);
+        IRQ_manager::unmask(tx_irqn);
     }
 }
 
@@ -526,7 +573,7 @@ void spi_bus< spi_config >::init_dma()
     };
 
     dma::subscribe_irq< spi_config::m_dma_rx_stream >(handler);
-    dma::subscribe_irq< spi_config::m_dma_rx_stream >(handler);
+    dma::subscribe_irq< spi_config::m_dma_tx_stream >(handler);
 }
 
 

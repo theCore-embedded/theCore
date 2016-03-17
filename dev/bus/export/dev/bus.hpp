@@ -32,11 +32,6 @@ template< class PBus >
 class generic_bus
 {
 public:
-//    // Convinient type aliases.
-//    using bus_channel       = ecl::bus_channel;
-//    using bus_event         = ecl::bus_event;
-//    using bus_handler       = ecl::bus_handler;
-
     //!
     //! \brief Constructs a bus.
     //!
@@ -247,7 +242,7 @@ err generic_bus< PBus >::init()
     }
 
     auto fn = [this](bus_channel ch, bus_event type, size_t total) {
-        this->m_handler(ch, type, total);
+        this->platform_handler(ch, type, total);
     };
 
     m_bus.set_handler(fn);
