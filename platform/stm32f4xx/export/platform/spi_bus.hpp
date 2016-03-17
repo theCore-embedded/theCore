@@ -131,27 +131,38 @@ private:
     // DMA init helper
     void init_dma();
 
-    // IRQ init helper
-    void init_irq();
+    // IRQ init helper. TODO: decide if this needed or not
+    // void init_irq();
 
     // Handles both DMA and SPI IRQ events. (for now it handles DMA only)
     void irq_handler();
 
-    bool            m_inited;
+    //! Bus is inited if this flag is set.
+    static constexpr uint8_t inited         = 0x1;
+    //! Bus is in fill mode if this flag is set.
+    static constexpr uint8_t mode_fill      = 0x2;
+
     handler_fn      m_event_handler; //! Handler passed via set_handler().
-//    const uint8_t   *m_tx;           //! Transmit buffer.
-//    size_t          m_tx_size;       //! TX buffer size.
-//    size_t          m_tx_left;       //! Left to send in TX buffer.
-//    uint8_t         *m_rx;           //! Recieve buffer.
-//    size_t          m_rx_size;       //! RX buffer size.
-//    size_t          m_rx_left;       //! Left to receive in RX buffer.
-//    uint8_t         m_status;        //! Tracks device status.
+    union
+    {
+        const uint8_t   *buf;        //! Transmit buffer.
+        uint8_t          byte;       //! Byte to transmit.
+    } m_tx;
+
+    size_t          m_tx_size;       //! TX buffer size.
+    uint8_t         *m_rx;           //! Recieve buffer.
+    size_t          m_rx_size;       //! RX buffer size.
+    uint8_t         m_status;        //! Represents bus status.
 };
 
 template< class spi_config >
 spi_bus< spi_config >::spi_bus()
-    :m_inited{false}
-    ,m_event_handler{false}
+    :m_event_handler{false}
+    ,m_tx{nullptr}
+    ,m_tx_size{0}
+    ,m_rx{nullptr}
+    ,m_rx_size{0}
+    ,m_status{0}
 {
 
 }
@@ -165,7 +176,7 @@ spi_bus< spi_config >::~spi_bus()
 template< class spi_config >
 ecl::err spi_bus< spi_config >::init()
 {
-    if (m_inited) {
+    if (m_status & inited) {
         return ecl::err::ok;
     }
 
@@ -211,7 +222,7 @@ ecl::err spi_bus< spi_config >::init()
     // TODO: check order
     init_dma();
 
-    m_inited = true;
+    m_status |= inited;
 
     return ecl::err::ok;
 }
@@ -219,43 +230,49 @@ ecl::err spi_bus< spi_config >::init()
 template< class spi_config >
 void spi_bus< spi_config >::set_rx(uint8_t *rx, size_t size)
 {
-    (void) rx;
-    (void) size;
+    m_rx = rx;
+    m_rx_size = size;
 }
 
 template< class spi_config >
 void spi_bus< spi_config >::set_tx(size_t size, uint8_t fill_byte)
 {
-    (void) size;
-    (void) fill_byte;
+    m_status    |= mode_fill;
+    m_tx.byte   = fill_byte;
+    m_tx_size   = size;
 }
 
 
 template< class spi_config >
 void spi_bus< spi_config >::set_tx(const uint8_t *tx, size_t size)
 {
-    (void) tx;
-    (void) size;
+    m_status    &= ~(mode_fill);
+    m_tx.buf    = tx;
+    m_tx_size   = size;
 }
 
 
 template< class spi_config >
 void spi_bus< spi_config >::set_handler(const handler_fn &handler)
 {
-    (void) handler;
+    m_event_handler = handler;
 }
 
 
 template< class spi_config >
 void spi_bus< spi_config >::reset_buffers()
 {
-
+    m_status    &= ~(mode_fill);
+    m_tx.buf    = nullptr;
+    m_tx_size   = 0;
+    m_rx        = nullptr;
+    m_rx_size   = 0;
 }
 
 template< class spi_config >
 void spi_bus< spi_config >::reset_handler()
 {
-
+    m_event_handler = handler_fn{};
 }
 
 template< class spi_config >
