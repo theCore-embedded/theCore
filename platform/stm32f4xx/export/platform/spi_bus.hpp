@@ -141,6 +141,10 @@ private:
     static constexpr uint8_t inited         = 0x1;
     //! Bus is in fill mode if this flag is set.
     static constexpr uint8_t mode_fill      = 0x2;
+    //! TX is finished if this flag is set.
+    static constexpr uint8_t tx_complete    = 0x2;
+    //! RX is finished if this flag is set.
+    static constexpr uint8_t rx_complete    = 0x2;
 
     handler_fn      m_event_handler; //! Handler passed via set_handler().
     union
@@ -219,8 +223,11 @@ ecl::err spi_bus< spi_config >::init()
     rcc_fn(rcc_periph, ENABLE);
     SPI_Init(spi, &init_obj);
 
-    // TODO: check order
+    // TODO: check order (do it need to be swapped with SPI_init()? )
     init_dma();
+
+    // TODO: disable SPI when there in no XFER
+    SPI_Cmd(spi, ENABLE);
 
     m_status |= inited;
 
@@ -230,6 +237,10 @@ ecl::err spi_bus< spi_config >::init()
 template< class spi_config >
 void spi_bus< spi_config >::set_rx(uint8_t *rx, size_t size)
 {
+    if (!(m_status & inited)) {
+        return;
+    }
+
     m_rx = rx;
     m_rx_size = size;
 }
@@ -237,6 +248,10 @@ void spi_bus< spi_config >::set_rx(uint8_t *rx, size_t size)
 template< class spi_config >
 void spi_bus< spi_config >::set_tx(size_t size, uint8_t fill_byte)
 {
+    if (!(m_status & inited)) {
+        return;
+    }
+
     m_status    |= mode_fill;
     m_tx.byte   = fill_byte;
     m_tx_size   = size;
@@ -246,6 +261,10 @@ void spi_bus< spi_config >::set_tx(size_t size, uint8_t fill_byte)
 template< class spi_config >
 void spi_bus< spi_config >::set_tx(const uint8_t *tx, size_t size)
 {
+    if (!(m_status & inited)) {
+        return;
+    }
+
     m_status    &= ~(mode_fill);
     m_tx.buf    = tx;
     m_tx_size   = size;
@@ -278,11 +297,137 @@ void spi_bus< spi_config >::reset_handler()
 template< class spi_config >
 ecl::err spi_bus< spi_config >::do_xfer()
 {
+    if (!(m_status & inited)) {
+        return err::perm;
+    }
+
+    // Bus is in full-duplex mode. Different sizes are not permitted.
+    if (m_tx_size && m_rx_size) {
+        if (m_tx_size != m_rx_size) {
+            return err::nobufs;
+        }
+    }
+
+    // TODO: check if buffers are the same as in previous transacuib
+    // If so, do not reinitialize DMA but rather just update a data counter.
+
+    // Convinient aliases
+
+    constexpr auto spi      = pick_spi();
+    constexpr auto tx_dma   = dma::get_stream< spi_config::m_dma_tx_stream >();
+    constexpr auto rx_dma   = dma::get_stream< spi_config::m_dma_rx_stream >();
+
+    // Holds DMA requests to enable
+    uint16_t spi_dma_req = 0;
+
+    m_status &= ~(tx_complete);
+    m_status &= ~(rx_complete);
+
+    DMA_InitTypeDef dma_init;
+    DMA_StructInit(&dma_init);
+
+    // Provided that tx size == rx size.
+    dma_init.DMA_BufferSize              = m_tx_size;
+    dma_init.DMA_PeripheralInc           = DMA_PeripheralInc_Disable;
+
+    // Setup TX DMA
+
+    if (m_tx_size) {
+        dma_init.DMA_Channel             = spi_config::m_dma_tx_channel;
+        dma_init.DMA_DIR                 = DMA_DIR_MemoryToPeripheral;
+        dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
+
+        if (m_status & mode_fill) {
+            dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
+            dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(&m_tx.byte);
+        } else {
+            dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
+            dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(m_tx.buf);
+        }
+
+        DMA_ITConfig(tx_dma, DMA_IT_TC, ENABLE);
+
+        DMA_Init(tx_dma, &dma_init);
+        DMA_Cmd(tx_dma, ENABLE);
+
+        spi_dma_req |= SPI_I2S_DMAReq_Tx;
+    }
+
+    // Setup RX DMA
+
+    if (m_rx_size) {
+        dma_init.DMA_Channel             = spi_config::m_dma_rx_channel;
+        dma_init.DMA_DIR                 = DMA_DIR_PeripheralToMemory;
+        dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
+        dma_init.DMA_MemoryInc           = DMA_MemoryInc_Enable;
+        dma_init.DMA_Memory0BaseAddr     = reinterpret_cast< uint32_t >(m_rx);
+
+        DMA_ITConfig(rx_dma, DMA_IT_TC, ENABLE);
+
+        DMA_Init(rx_dma, &dma_init);
+        DMA_Cmd(rx_dma, ENABLE);
+
+        spi_dma_req |= SPI_I2S_DMAReq_Rx;
+    }
+
+    SPI_I2S_DMACmd(spi, spi_dma_req, ENABLE);
     return ecl::err::ok;
 }
 
 
 //------------------------------------------------------------------------------
+
+template< class spi_config >
+void spi_bus< spi_config >::irq_handler()
+{
+    constexpr auto tx_dma   = dma::get_stream< spi_config::m_dma_tx_stream >();
+    constexpr auto rx_dma   = dma::get_stream< spi_config::m_dma_rx_stream >();
+
+    constexpr auto tx_tc_if = dma::get_tc_if< spi_config::m_dma_tx_stream >();
+    constexpr auto rx_tc_if = dma::get_tc_if< spi_config::m_dma_rx_stream >();
+
+    constexpr auto spi      = pick_spi();
+
+    auto tx_tc = DMA_GetITStatus(tx_dma, tx_tc_if);
+
+    if (tx_tc) {
+        // Complete TX transaction
+        constexpr auto tx_tc_flag = dma::get_tc_flag< spi_config::m_dma_tx_stream >();
+
+        m_event_handler(channel::tx, event::tc, m_tx_size);
+
+        DMA_ClearFlag(tx_dma, tx_tc_flag);
+        DMA_ClearITPendingBit(tx_dma, tx_tc_if);
+        DMA_ITConfig(tx_dma, DMA_IT_TC, DISABLE);
+
+        DMA_Cmd(tx_dma, DISABLE);
+
+        m_status |= tx_complete;
+    }
+
+    auto rx_tc = DMA_GetITStatus(rx_dma, tx_tc_if);
+
+    if (rx_tc) {
+        // Complete TX transaction
+        constexpr auto rx_tc_flag = dma::get_tc_flag< spi_config::m_dma_rx_stream >();
+
+        m_event_handler(channel::rx, event::tc, m_rx_size);
+
+        DMA_ClearFlag(rx_dma, rx_tc_flag);
+        DMA_ClearITPendingBit(rx_dma, rx_tc_if);
+        DMA_ITConfig(rx_dma, DMA_IT_TC, DISABLE);
+
+        DMA_Cmd(rx_dma, DISABLE);
+
+        m_status |= rx_complete;
+    }
+
+    if ((m_status & (rx_complete | tx_complete)) == (rx_complete | tx_complete)) {
+        // All transfers comepleted
+        m_event_handler(channel::meta, event::tc, m_tx_size);
+        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
+    }
+}
 
 template< class spi_config >
 constexpr auto spi_bus< spi_config >::pick_spi()
@@ -384,11 +529,6 @@ void spi_bus< spi_config >::init_dma()
     dma::subscribe_irq< spi_config::m_dma_rx_stream >(handler);
 }
 
-template< class spi_config >
-void spi_bus< spi_config >::irq_handler()
-{
-
-}
 
 } // namespace ecl
 

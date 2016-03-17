@@ -697,7 +697,7 @@ constexpr auto get_ht_flag()
 template< std::uintptr_t dma_stream >
 constexpr auto get_tc_flag()
 {
-    constexpr auto stream_no = get_stream< dma_stream >();
+    constexpr auto stream_no = get_stream_number< dma_stream >();
 
     switch (stream_no) {
     case 0:
@@ -900,6 +900,18 @@ void enable_irq()
 
     // Enable interrupt sources
     DMA_ITConfig(stream, flags, ENABLE);
+}
+
+//!
+//! \brief Disables IRQ for given DMA stream and interrupt sources.
+//!
+template< std::uintptr_t dma_stream, uint32_t flags >
+void disable_irq()
+{
+    constexpr auto stream   = get_stream< dma_stream >();
+
+    // Enable interrupt sources
+    DMA_ITConfig(stream, flags, DISABLE);
 }
 
 //!
