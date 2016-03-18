@@ -13,7 +13,9 @@ target_link_libraries(stm32f4xx spl)
 target_link_libraries(stm32f4xx common_spi)
 target_link_libraries(stm32f4xx common_pin)
 target_link_libraries(stm32f4xx common_usart)
+target_link_libraries(stm32f4xx common_bus)
 target_link_libraries(stm32f4xx types)
+
 add_cppcheck(stm32f4xx)
 
 # Notify whole system about which processor is used

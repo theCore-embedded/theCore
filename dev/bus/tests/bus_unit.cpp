@@ -27,6 +27,10 @@ TEST_GROUP(bus)
 
     void teardown()
     {
+        mock().disable();
+        test_bus->deinit();
+        mock().enable();
+
         delete test_bus;
         mock().clear();
     }
@@ -96,6 +100,7 @@ TEST_GROUP(bus_is_ready)
     {
         mock().disable();
         test_bus->unlock();
+        test_bus->deinit();
         mock().enable();
 
         delete test_bus;
@@ -209,7 +214,7 @@ TEST(bus_is_ready, xfer_error)
 TEST(bus_is_ready, async_xfer_error)
 {
     // Call to this handler in case of error is a buggy behaviour.
-    auto handler = [](bus_t::channel ch, bus_t::event e, size_t total) {
+    auto handler = [](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
         (void) e;
         (void) ch;
         (void) total;
@@ -231,11 +236,11 @@ TEST(bus_is_ready, async_xfer_error)
 
 TEST(bus_is_ready, async_xfer_valid)
 {
-    bus_t::event    expected_event    = bus_t::event::hc;
-    size_t          expected_total    = 100500;
-    bus_t::channel  expected_channel  = bus_t::channel::tx;
+    auto   expected_event    = ecl::bus_event::ht;
+    size_t expected_total    = 100500;
+    auto   expected_channel  = ecl::bus_channel::tx;
 
-    auto handler = [&](bus_t::channel ch, bus_t::event e, size_t total) {
+    auto handler = [&](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
         CHECK_TRUE(expected_event    == e);
         CHECK_TRUE(expected_total    == total);
         CHECK_TRUE(expected_channel  == ch);
@@ -256,8 +261,15 @@ TEST(bus_is_ready, async_xfer_valid)
 
     // Now, trigger the event and see what happens
 
-    mock("handler").expectOneCall("call");
+    mock("handler").expectNCalls(2, "call");
 
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // Small cleanup. TC event is required.
     platform_mock::invoke(expected_channel, expected_event, expected_total);
 
     mock().checkExpectations();

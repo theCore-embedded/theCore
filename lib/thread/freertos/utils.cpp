@@ -11,18 +11,17 @@ typedef struct TCB TCB_t;
 extern "C" TCB_t * volatile pxCurrentTCB;
 
 
-
-void os::this_thread::yield()
+void ecl::os::this_thread::yield()
 {
     taskYIELD();
 }
 
-void os::this_thread::sleep_for(uint32_t msecs)
+void ecl::os::this_thread::sleep_for(uint32_t msecs)
 {
     vTaskDelay(msecs / portTICK_PERIOD_MS);
 }
 
-os::thread_handle os::this_thread::get_handle()
+ecl::os::thread_handle ecl::os::this_thread::get_handle()
 {
     TaskHandle_t handle = NULL;
 

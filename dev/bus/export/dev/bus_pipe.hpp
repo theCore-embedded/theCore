@@ -152,7 +152,7 @@ ssize_t bus_pipe< GBus >::read(uint8_t *buffer, size_t size)
     if (!size)
         return size;
 
-    size_t read;
+    size_t read = 0;
     ssize_t ret;
 
     m_gbus.lock();

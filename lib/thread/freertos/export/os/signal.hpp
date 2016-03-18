@@ -5,6 +5,9 @@
 
 #include <ecl/err.hpp>
 
+namespace ecl
+{
+
 namespace os
 {
 
@@ -47,5 +50,7 @@ ecl::err try_wait();
 } // namespace signal
 
 } // namespace os
+
+} // namespace ecl
 
 #endif // LIB_THREAD_FREERTOS_OS_SIGNALS_
