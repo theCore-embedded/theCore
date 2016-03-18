@@ -27,6 +27,10 @@ TEST_GROUP(bus)
 
     void teardown()
     {
+        mock().disable();
+        test_bus->deinit();
+        mock().enable();
+
         delete test_bus;
         mock().clear();
     }
@@ -96,6 +100,7 @@ TEST_GROUP(bus_is_ready)
     {
         mock().disable();
         test_bus->unlock();
+        test_bus->deinit();
         mock().enable();
 
         delete test_bus;
@@ -256,8 +261,15 @@ TEST(bus_is_ready, async_xfer_valid)
 
     // Now, trigger the event and see what happens
 
-    mock("handler").expectOneCall("call");
+    mock("handler").expectNCalls(2, "call");
 
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // Small cleanup. TC event is required.
     platform_mock::invoke(expected_channel, expected_event, expected_total);
 
     mock().checkExpectations();

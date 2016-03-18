@@ -45,9 +45,18 @@ public:
     //!
     //! \brief Inits a bus.
     //! Lazy initialization. Inits an underlaying platform bus.
+    //! \todo introduce init counter.
     //! \return Status of operation.
     //!
     static err init();
+
+    //!
+    //! \brief De-inits a bus.
+    //! \pre Bus is initied.
+    //! \todo use init counter to measure how many users are inited this bus.
+    //! \return Status of operation.
+    //!
+    static err deinit();
 
     //!
     //! \brief Locks a bus.
@@ -250,6 +259,20 @@ err generic_bus< PBus >::init()
     }
 
     return rc;
+}
+
+template< class PBus >
+err generic_bus< PBus >::deinit()
+{
+    if (!(m_state & bus_inited)) {
+        return err::perm;
+    }
+
+    m_bus.reset_handler();
+    cleanup();
+    m_state = 0;
+
+    return err::ok;
 }
 
 template< class PBus >
@@ -485,14 +508,8 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
 template< class PBus >
 bool generic_bus< PBus >::bus_is_busy()
 {
-    bool in_progress = false;
-
-    if (m_state & async_mode) {
-        // Asynchronius operation still in progress.
-        in_progress = !(m_state & async_mode);
-    }
-
-    return in_progress;
+    // Asynchronius operation still in progress.
+    return (m_state & async_mode);
 }
 
 template< class Bus >
@@ -500,6 +517,8 @@ void generic_bus< Bus >::cleanup()
 {
     m_bus.reset_buffers();
     m_handler = bus_handler{};
+    // When bus will be locked agian, no need to wait for events.
+    m_state &= ~(async_mode);
 }
 
 }
