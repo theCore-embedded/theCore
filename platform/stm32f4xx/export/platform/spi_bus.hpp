@@ -131,6 +131,18 @@ private:
     // DMA init helper
     void init_dma();
 
+    // Checks if buffer sizes are valid
+    bool valid_sizes();
+
+    // Prepares TX transaction, if needed
+    void prepare_tx();
+
+    // Prepares RX transaction, if needed
+    void prepare_rx();
+
+    // Starts transaction, if needed
+    void start_xfer();
+
     // IRQ init helper. TODO: decide if this needed or not
     // void init_irq();
 
@@ -143,8 +155,10 @@ private:
     static constexpr uint8_t mode_fill      = 0x2;
     //! TX is finished if this flag is set.
     static constexpr uint8_t tx_complete    = 0x4;
+    //! User will not be notified about TX events if this flag is set.
+    static constexpr uint8_t tx_hidden      = 0x8;
     //! RX is finished if this flag is set.
-    static constexpr uint8_t rx_complete    = 0x8;
+    static constexpr uint8_t rx_complete    = 0x10;
 
     handler_fn      m_event_handler; //! Handler passed via set_handler().
     union
@@ -259,10 +273,10 @@ void spi_bus< spi_config >::set_tx(size_t size, uint8_t fill_byte)
     }
 
     m_status    |= mode_fill;
+    m_status    &= ~(tx_hidden);
     m_tx.byte   = fill_byte;
     m_tx_size   = size;
 }
-
 
 template< class spi_config >
 void spi_bus< spi_config >::set_tx(const uint8_t *tx, size_t size)
@@ -274,10 +288,14 @@ void spi_bus< spi_config >::set_tx(const uint8_t *tx, size_t size)
     // Threat nullptr buffers as indication that xfer of this type
     // is not required
     if (!tx) {
+        // TX channel must be enabled in bidir SPI even if user don't
+        // want it.
+        m_status |= tx_hidden;
         return;
     }
 
     m_status    &= ~(mode_fill);
+    m_status    &= ~(tx_hidden);
     m_tx.buf    = tx;
     m_tx_size   = size;
 }
@@ -313,103 +331,135 @@ ecl::err spi_bus< spi_config >::do_xfer()
         return err::perm;
     }
 
-    // Bus is in full-duplex mode. Different sizes are not permitted.
-    if (m_tx_size && m_rx_size) {
-        if (m_tx_size != m_rx_size) {
-            return err::nobufs;
-        }
+    if (!valid_sizes()) {
+        return err::nobufs;
     }
 
     // TODO: check if buffers are the same as in previous transacuib
     // If so, do not reinitialize DMA but rather just update a data counter.
 
-    // Convinient aliases
 
-    constexpr auto spi      = pick_spi();
+    // TODO: wait for BSY flag before we go
+    //    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_TXE) == RESET)
+    //    {}
+    //    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_BSY) == SET)
+    //    {}
 
-    // Holds DMA requests to enable
-
-    m_status &= ~(tx_complete);
-    m_status &= ~(rx_complete);
-
-    DMA_InitTypeDef dma_init;
-    DMA_StructInit(&dma_init);
-
-    dma_init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-
-
-    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_TXE) == RESET)
-    {}
-    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_BSY) == SET)
-    {}
-
-    constexpr auto tx_dma
-            = dma::get_stream< spi_config::m_dma_tx_stream >();
-    constexpr auto rx_dma
-            = dma::get_stream< spi_config::m_dma_rx_stream >();
-
-    // Setup TX DMA
-
-    if (m_tx_size) {
-        dma_init.DMA_Channel             = spi_config::m_dma_tx_channel;
-        dma_init.DMA_DIR                 = DMA_DIR_MemoryToPeripheral;
-        dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
-
-        if (m_status & mode_fill) {
-            dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
-            dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(&m_tx.byte);
-        } else {
-            dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
-            dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(m_tx.buf);
-        }
-
-        dma_init.DMA_BufferSize          = m_tx_size;
-
-        DMA_ITConfig(tx_dma, DMA_IT_TC, ENABLE);
-
-        DMA_Init(tx_dma, &dma_init);
-
-        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Tx, ENABLE);
-    } else {
-        // Preventing interrupt routine from waiting TX complete event.
-        m_status |= tx_complete;
-    }
-
-    // Setup RX DMA
-
-    if (m_rx_size) {
-        dma_init.DMA_Channel             = spi_config::m_dma_rx_channel;
-        dma_init.DMA_DIR                 = DMA_DIR_PeripheralToMemory;
-        dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
-        dma_init.DMA_MemoryInc           = DMA_MemoryInc_Enable;
-        dma_init.DMA_Memory0BaseAddr     = reinterpret_cast< uint32_t >(m_rx);
-        dma_init.DMA_BufferSize          = m_rx_size;
-
-        DMA_ITConfig(rx_dma, DMA_IT_TC, ENABLE);
-
-        DMA_Init(rx_dma, &dma_init);
-
-        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx, ENABLE);
-        DMA_Cmd(rx_dma, ENABLE);
-    } else {
-        // Preventing interrupt routine from waiting RX complete event.
-        m_status |= rx_complete;
-    }
-
-    // After all directions configured, streams may be enabled
-
-    if (m_tx_size) {
-        DMA_Cmd(tx_dma, ENABLE);
-    }
-    if (m_rx_size) {
-        DMA_Cmd(rx_dma, ENABLE);
-    }
+    prepare_tx();
+    prepare_rx();
+    start_xfer();
 
     return ecl::err::ok;
 }
 
-
 //------------------------------------------------------------------------------
+
+template< class spi_config >
+bool spi_bus< spi_config >::valid_sizes()
+{
+    // Bus is in full-duplex mode. Different sizes are not permitted.
+    if (m_tx_size && m_rx_size) {
+        if (m_tx_size != m_rx_size) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template< class spi_config >
+void spi_bus< spi_config >::prepare_tx()
+{
+    if (m_status & tx_hidden) {
+        // TX is not requested by user but it is required to setup this stream
+        // in SPI in order to receive data from RX channel.
+        // Trick is to use fill mode in TX channel without notifying
+        // user about it.
+
+        if (!m_rx_size) {
+            // TODO: is this correct that both buffers with 0 size???
+            for(;;);
+        }
+
+        m_status    |= mode_fill;
+        m_tx_size   = m_rx_size;
+        m_tx.byte   = 0xff;
+    }
+
+    m_status &= ~(tx_complete);
+
+    constexpr auto tx_dma   = dma::get_stream< spi_config::m_dma_tx_stream >();
+    constexpr auto spi      = pick_spi();
+
+    DMA_InitTypeDef dma_init;
+    DMA_StructInit(&dma_init);
+
+    dma_init.DMA_Channel             = spi_config::m_dma_tx_channel;
+    dma_init.DMA_DIR                 = DMA_DIR_MemoryToPeripheral;
+    dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
+    dma_init.DMA_PeripheralInc       = DMA_PeripheralInc_Disable;
+
+    if (m_status & mode_fill) {
+        dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
+        dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(&m_tx.byte);
+    } else {
+        dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
+        dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(m_tx.buf);
+    }
+
+    dma_init.DMA_BufferSize          = m_tx_size;
+
+    DMA_ITConfig(tx_dma, DMA_IT_TC, ENABLE);
+    DMA_Init(tx_dma, &dma_init);
+}
+
+template< class spi_config >
+void spi_bus< spi_config >::prepare_rx()
+{
+    if (!m_rx_size) {
+        // Preventing event routine from waiting RX complete event.
+        m_status |= rx_complete;
+        return;
+    }
+
+    m_status &= ~(rx_complete);
+
+    constexpr auto rx_dma   = dma::get_stream< spi_config::m_dma_rx_stream >();
+    constexpr auto spi      = pick_spi();
+
+    DMA_InitTypeDef dma_init;
+    DMA_StructInit(&dma_init);
+
+    dma_init.DMA_Channel             = spi_config::m_dma_rx_channel;
+    dma_init.DMA_DIR                 = DMA_DIR_PeripheralToMemory;
+    dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
+    dma_init.DMA_MemoryInc           = DMA_MemoryInc_Enable;
+    dma_init.DMA_Memory0BaseAddr     = reinterpret_cast< uint32_t >(m_rx);
+    dma_init.DMA_BufferSize          = m_rx_size;
+
+    DMA_ITConfig(rx_dma, DMA_IT_TC, ENABLE);
+    DMA_Init(rx_dma, &dma_init);
+}
+
+template< class spi_config >
+void spi_bus< spi_config >::start_xfer()
+{
+    constexpr auto rx_dma = dma::get_stream< spi_config::m_dma_rx_stream >();
+    constexpr auto tx_dma = dma::get_stream< spi_config::m_dma_tx_stream >();
+    constexpr auto spi    = pick_spi();
+
+    // After all directions configured, streams may be enabled
+    if (m_tx_size) {
+        DMA_Cmd(tx_dma, ENABLE);
+    }
+
+    if (m_rx_size) {
+        DMA_Cmd(rx_dma, ENABLE);
+    }
+
+    // Enable interrupt request from SPI periphery
+    SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx , ENABLE);
+}
 
 template< class spi_config >
 void spi_bus< spi_config >::irq_handler()
@@ -422,57 +472,63 @@ void spi_bus< spi_config >::irq_handler()
 
     constexpr auto spi      = pick_spi();
 
-    auto tx_tc = DMA_GetITStatus(tx_dma, tx_tc_if);
 
-    if (tx_tc) {
-        // Complete TX transaction
-        constexpr auto tx_tc_flag = dma::get_tc_flag< spi_config::m_dma_tx_stream >();
+    if (!(m_status & tx_complete)) {
+        auto tx_tc = DMA_GetITStatus(tx_dma, tx_tc_if);
 
-        m_event_handler(channel::tx, event::tc, m_tx_size);
+        if (tx_tc) {
+            // Complete TX transaction
+            constexpr auto tx_tc_flag = dma::get_tc_flag< spi_config::m_dma_tx_stream >();
 
-        DMA_Cmd(tx_dma, DISABLE);
+            if (!(m_status & tx_hidden)) {
+                m_event_handler(channel::tx, event::tc, m_tx_size);
+            }
 
-        DMA_ClearFlag(tx_dma, tx_tc_flag);
-        DMA_ClearITPendingBit(tx_dma, tx_tc_if);
-        DMA_ITConfig(tx_dma, DMA_IT_TC, DISABLE);
+            DMA_ClearFlag(tx_dma, tx_tc_flag);
+            DMA_ClearITPendingBit(tx_dma, tx_tc_if);
+            DMA_ITConfig(tx_dma, DMA_IT_TC, DISABLE);
 
-        DMA_DeInit(tx_dma);
-
-        m_status |= tx_complete;
+            m_status |= tx_complete;
+        }
     }
 
     auto rx_tc = DMA_GetITStatus(rx_dma, rx_tc_if);
 
-    if (rx_tc) {
-        // Complete TX transaction
-        constexpr auto rx_tc_flag = dma::get_tc_flag< spi_config::m_dma_rx_stream >();
+    if (!(m_status & rx_complete)) {
+        if (rx_tc) {
+            // Complete TX transaction
+            constexpr auto rx_tc_flag = dma::get_tc_flag< spi_config::m_dma_rx_stream >();
 
-        m_event_handler(channel::rx, event::tc, m_rx_size);
+            m_event_handler(channel::rx, event::tc, m_rx_size);
 
-        DMA_Cmd(rx_dma, DISABLE);
+            DMA_ClearFlag(rx_dma, rx_tc_flag);
+            DMA_ClearITPendingBit(rx_dma, rx_tc_if);
+            DMA_ITConfig(rx_dma, DMA_IT_TC, DISABLE);
 
-        DMA_ClearFlag(rx_dma, rx_tc_flag);
-        DMA_ClearITPendingBit(rx_dma, rx_tc_if);
-        DMA_ITConfig(rx_dma, DMA_IT_TC, DISABLE);
-
-        DMA_DeInit(rx_dma);
-
-        m_status |= rx_complete;
+            m_status |= rx_complete;
+        }
     }
 
     if ((m_status & (rx_complete | tx_complete)) == (rx_complete | tx_complete)) {
-        // All transfers comepleted
-        m_event_handler(channel::meta, event::tc, m_tx_size);
-        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
-
         constexpr auto rx_irqn = dma::get_irqn< spi_config::m_dma_rx_stream >();
         constexpr auto tx_irqn = dma::get_irqn< spi_config::m_dma_tx_stream >();
+
+        DMA_Cmd(tx_dma, DISABLE);
+        DMA_DeInit(tx_dma);
+
+        DMA_Cmd(rx_dma, DISABLE);
+        DMA_DeInit(rx_dma);
+
+        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
 
         // Clear/enable NVIC interrupts
         IRQ_manager::clear(rx_irqn);
         IRQ_manager::unmask(rx_irqn);
         IRQ_manager::clear(tx_irqn);
         IRQ_manager::unmask(tx_irqn);
+
+        // All transfers comepleted
+        m_event_handler(channel::meta, event::tc, m_tx_size);
     }
 }
 
