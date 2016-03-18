@@ -9,7 +9,7 @@
 #include <ecl/endian.hpp>
 
 // TODO: mention about 8 additional clocks before each command!!!
-template< class SPI_dev, class GPIO_CS >
+template< class spi_dev, class GPIO_CS >
 class sd_spi
 {
 public:
@@ -204,22 +204,16 @@ private:
     ssize_t spi_receive(uint8_t *buf, size_t size);
     ssize_t spi_send_dummy(size_t size);
 
-    SPI_dev       m_spi;       // SPI device
-    bool          m_inited;    // Inited flags
-    bool          m_HC;        // High Capacity flag
-    int           m_opened;    // Opened times counter
-    off_t         m_offt;    // Current offset in units of bytes
-    block_buffer  m_block;     // Buffer containing last read\write block
+    bool          m_inited;     // Inited flags
+    bool          m_HC;         // High Capacity flag
+    int           m_opened;     // Opened times counter
+    off_t         m_offt;       // Current offset in units of bytes
+    block_buffer  m_block;      // Buffer containing last read\write block
 };
 
-
-//template< class SPI_dev, class GPIO_CS >
-//constexpr size_t sd_spi< SPI_dev, GPIO_CS >::block_len;
-
-template< class SPI_dev, class GPIO_CS >
-sd_spi< SPI_dev, GPIO_CS >::sd_spi()
-    :m_spi{}
-    ,m_inited{false}
+template< class spi_dev, class GPIO_CS >
+sd_spi< spi_dev, GPIO_CS >::sd_spi()
+    :m_inited{false}
     ,m_HC{false}
     ,m_opened{0}
     ,m_offt{0}
@@ -227,21 +221,21 @@ sd_spi< SPI_dev, GPIO_CS >::sd_spi()
 {
 }
 
-template< class SPI_dev, class GPIO_CS >
-sd_spi< SPI_dev, GPIO_CS >::~sd_spi()
+template< class spi_dev, class GPIO_CS >
+sd_spi< spi_dev, GPIO_CS >::~sd_spi()
 {
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::init()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::init()
 {
     if (!m_inited) {
-        m_spi.init();
+        spi_dev::init();
 
-        m_spi.lock();
+        spi_dev::lock();
         GPIO_CS::set();
 
-        m_spi.unlock();
+        spi_dev::unlock();
 
         m_inited = true;
     }
@@ -250,8 +244,8 @@ int sd_spi< SPI_dev, GPIO_CS >::init()
     return 0;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::open()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::open()
 {
     if (!m_inited) {
         return -1;
@@ -260,7 +254,7 @@ int sd_spi< SPI_dev, GPIO_CS >::open()
     int ret = 0;
 
     if (!m_opened) {
-        m_spi.lock();
+        spi_dev::lock();
 
 
         if (send_init() < 0) {
@@ -274,15 +268,15 @@ int sd_spi< SPI_dev, GPIO_CS >::open()
             GPIO_CS::set();
         }
 
-        m_spi.unlock();
+        spi_dev::unlock();
     }
 
     m_opened++;
     return ret;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::close()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::close()
 {
     if (!--m_opened) {
         // TODO
@@ -291,8 +285,8 @@ int sd_spi< SPI_dev, GPIO_CS >::close()
     return 0;
 }
 
-template< class SPI_dev, class GPIO_CS >
-ssize_t sd_spi< SPI_dev, GPIO_CS >::write(const uint8_t *data, size_t count)
+template< class spi_dev, class GPIO_CS >
+ssize_t sd_spi< spi_dev, GPIO_CS >::write(const uint8_t *data, size_t count)
 {
     if (!m_opened) {
         return -1;
@@ -311,8 +305,8 @@ ssize_t sd_spi< SPI_dev, GPIO_CS >::write(const uint8_t *data, size_t count)
     return count;
 }
 
-template< class SPI_dev, class GPIO_CS >
-ssize_t sd_spi< SPI_dev, GPIO_CS >::read(uint8_t *data, size_t count)
+template< class spi_dev, class GPIO_CS >
+ssize_t sd_spi< spi_dev, GPIO_CS >::read(uint8_t *data, size_t count)
 {
     if (!m_opened) {
         return -1;
@@ -330,26 +324,26 @@ ssize_t sd_spi< SPI_dev, GPIO_CS >::read(uint8_t *data, size_t count)
     return count;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::flush()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::flush()
 {
     int ret = 0;
 
-    m_spi.lock();
+    spi_dev::lock();
     GPIO_CS::reset();
 
     if (flush_block() < 0)
         ret = -1;
 
-    m_spi.unlock();
+    spi_dev::unlock();
     GPIO_CS::set();
 
     return ret;
 }
 
 // TODO: change off_t to int
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::seek(off_t offset)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::seek(off_t offset)
 {
     if (!m_opened) {
         return -1;
@@ -360,8 +354,8 @@ int sd_spi< SPI_dev, GPIO_CS >::seek(off_t offset)
 }
 
 
-template< class SPI_dev, class GPIO_CS >
-off_t sd_spi< SPI_dev, GPIO_CS >::tell() const
+template< class spi_dev, class GPIO_CS >
+off_t sd_spi< spi_dev, GPIO_CS >::tell() const
 {
     if (!m_opened) {
         return -1;
@@ -370,49 +364,49 @@ off_t sd_spi< SPI_dev, GPIO_CS >::tell() const
     return m_offt;
 }
 
-template< class SPI_dev, class GPIO_CS >
-constexpr size_t sd_spi< SPI_dev, GPIO_CS >::get_block_length()
+template< class spi_dev, class GPIO_CS >
+constexpr size_t sd_spi< spi_dev, GPIO_CS >::get_block_length()
 {
     return block_buffer::block_len;
 }
 
 // Private methods -------------------------------------------------------------
 
-template< class SPI_dev, class GPIO_CS >
-ssize_t sd_spi< SPI_dev, GPIO_CS >::spi_send(const uint8_t *buf, size_t size)
+template< class spi_dev, class GPIO_CS >
+ssize_t sd_spi< spi_dev, GPIO_CS >::spi_send(const uint8_t *buf, size_t size)
 {
-    m_spi.set_buffers(buf, nullptr, size);
+    spi_dev::set_buffers(buf, nullptr, size);
     // TODO: check error code
-    m_spi.xfer(&size, nullptr);
+    spi_dev::xfer(&size, nullptr);
 
     // TODO: verify that all data was transfered
     return size;
 }
 
-template< class SPI_dev, class GPIO_CS >
-ssize_t sd_spi< SPI_dev, GPIO_CS >::spi_receive(uint8_t *buf, size_t size)
+template< class spi_dev, class GPIO_CS >
+ssize_t sd_spi< spi_dev, GPIO_CS >::spi_receive(uint8_t *buf, size_t size)
 {
-    m_spi.set_buffers(nullptr, buf, size);
+    spi_dev::set_buffers(nullptr, buf, size);
     // TODO: check error code
-    m_spi.xfer(nullptr, &size);
+    spi_dev::xfer(nullptr, &size);
 
     // TODO: verify that all data was transfered
     return size;
 }
 
-template< class SPI_dev, class GPIO_CS >
-ssize_t sd_spi< SPI_dev, GPIO_CS >::spi_send_dummy(size_t size)
+template< class spi_dev, class GPIO_CS >
+ssize_t sd_spi< spi_dev, GPIO_CS >::spi_send_dummy(size_t size)
 {
-    m_spi.set_buffers(size);
+    spi_dev::set_buffers(size);
     // TODO: check error code
-    m_spi.xfer(&size, nullptr);
+    spi_dev::xfer(&size, nullptr);
 
     // TODO: verify that all data was transfered
     return size;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::send_init()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::send_init()
 {
     /* Initialise card with >= 74 clocks on start */
     ssize_t ret = spi_send_dummy(80);
@@ -422,9 +416,9 @@ int sd_spi< SPI_dev, GPIO_CS >::send_init()
     return sd_ok;
 }
 
-template< class SPI_dev, class GPIO_CS >
+template< class spi_dev, class GPIO_CS >
 template< typename R >
-int sd_spi< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const argument &arg, uint8_t crc)
+int sd_spi< spi_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const argument &arg, uint8_t crc)
 {
     ssize_t sd_ret;
 
@@ -458,8 +452,8 @@ int sd_spi< SPI_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const argumen
 
 //------------------------------------------------------------------------------
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::receive_response(R1 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::receive_response(R1 &r)
 {
     uint8_t tries = 8;
     int ret;
@@ -496,8 +490,8 @@ int sd_spi< SPI_dev, GPIO_CS >::receive_response(R1 &r)
     return sd_err;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::receive_response(R3 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::receive_response(R3 &r)
 {
     int SD_ret = receive_response(r.r1);
     if (SD_ret < 0)
@@ -506,8 +500,8 @@ int sd_spi< SPI_dev, GPIO_CS >::receive_response(R3 &r)
     return spi_receive((uint8_t *)&r.OCR, sizeof(r.OCR));
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::receive_data(uint8_t *buf, size_t size)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::receive_data(uint8_t *buf, size_t size)
 {
     // Data token that returned in case of success
     static constexpr uint8_t data_token    = 0xfe;
@@ -566,8 +560,8 @@ int sd_spi< SPI_dev, GPIO_CS >::receive_data(uint8_t *buf, size_t size)
     return spi_receive((uint8_t *)&crc, sizeof(crc));
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::send_data(const uint8_t *buf, size_t size)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::send_data(const uint8_t *buf, size_t size)
 {
     // Data token that must be sent before data chunk
     static constexpr uint8_t data_token    = 0xfe;
@@ -632,8 +626,8 @@ int sd_spi< SPI_dev, GPIO_CS >::send_data(const uint8_t *buf, size_t size)
 
 //------------------------------------------------------------------------------
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD0(R1 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD0(R1 &r)
 {
     // TODO: comments
     constexpr uint8_t  CMD0_idx = 0;
@@ -642,8 +636,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD0(R1 &r)
     return send_CMD(r, CMD0_idx, arg, CMD0_crc);
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD8(R7 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD8(R7 &r)
 {
     // TODO: comments
     constexpr uint8_t   CMD8_idx = 8;
@@ -652,8 +646,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD8(R7 &r)
     return send_CMD(r, CMD8_idx, arg, CMD8_crc);
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD10(R1 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD10(R1 &r)
 {
     // TODO: comments
     constexpr uint8_t   CMD10_idx  = 10;
@@ -662,8 +656,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD10(R1 &r)
 
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD16(R1 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD16(R1 &r)
 {
     // TODO: comments
     constexpr uint8_t  CMD16_idx = 16;
@@ -677,8 +671,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD16(R1 &r)
     return send_CMD(r, CMD16_idx, arg);
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD17(R1 &r, uint32_t address)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD17(R1 &r, uint32_t address)
 {
     // TODO: comments
     constexpr uint8_t CMD17_idx = 17;
@@ -691,8 +685,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD17(R1 &r, uint32_t address)
     return send_CMD(r, CMD17_idx, arg);
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD24(R1 &r, uint32_t address)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD24(R1 &r, uint32_t address)
 {
     constexpr uint8_t CMD24_idx = 24;
     const argument arg = {
@@ -704,8 +698,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD24(R1 &r, uint32_t address)
     return send_CMD(r, CMD24_idx, arg);
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD55(R1 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD55(R1 &r)
 {
     // TODO: comments
     constexpr uint8_t CMD55_idx = 55;
@@ -713,8 +707,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD55(R1 &r)
     return send_CMD(r, CMD55_idx, arg);
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::CMD58(R3 &r)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::CMD58(R3 &r)
 {
     // TODO: comments
     constexpr uint8_t CMD58_idx = 58;
@@ -722,8 +716,8 @@ int sd_spi< SPI_dev, GPIO_CS >::CMD58(R3 &r)
     return send_CMD(r, CMD58_idx, arg);
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::ACMD41(R1 &r, bool HCS)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::ACMD41(R1 &r, bool HCS)
 {
     const uint8_t HCS_byte = HCS ? (1 << 6) : 0;
 
@@ -739,8 +733,8 @@ int sd_spi< SPI_dev, GPIO_CS >::ACMD41(R1 &r, bool HCS)
 
 //------------------------------------------------------------------------------
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::open_card()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::open_card()
 {
     int SD_ret;
     if ((SD_ret = software_reset()) < 0) {
@@ -788,8 +782,8 @@ int sd_spi< SPI_dev, GPIO_CS >::open_card()
     return SD_ret;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::software_reset()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::software_reset()
 {
     R1 r1;
 
@@ -805,8 +799,8 @@ int sd_spi< SPI_dev, GPIO_CS >::software_reset()
     return sd_err;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::check_conditions()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::check_conditions()
 {
     R7 r7;
 
@@ -833,8 +827,8 @@ int sd_spi< SPI_dev, GPIO_CS >::check_conditions()
     return sd_err;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::init_process()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::init_process()
 {
     //TODO: comments
     R1 r1;
@@ -859,8 +853,8 @@ int sd_spi< SPI_dev, GPIO_CS >::init_process()
     return sd_ok;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::check_OCR()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::check_OCR()
 {
     R3 r3;
     CMD58(r3);
@@ -901,8 +895,8 @@ int sd_spi< SPI_dev, GPIO_CS >::check_OCR()
     return sd_err;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::obtain_card_info()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::obtain_card_info()
 {
     R1  r1;
     int SD_ret;
@@ -939,8 +933,8 @@ int sd_spi< SPI_dev, GPIO_CS >::obtain_card_info()
     return sd_ok;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::set_block_length()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::set_block_length()
 {
     R1 r1;
 
@@ -957,8 +951,8 @@ int sd_spi< SPI_dev, GPIO_CS >::set_block_length()
 }
 
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::populate_block(size_t new_block)
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::populate_block(size_t new_block)
 {
     R1 r1;
     off_t address = m_HC ? new_block : new_block * block_buffer::block_len;
@@ -976,8 +970,8 @@ int sd_spi< SPI_dev, GPIO_CS >::populate_block(size_t new_block)
     return SD_ret;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::flush_block()
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::flush_block()
 {
     int SD_ret;
     R1 r1;
@@ -1000,8 +994,8 @@ int sd_spi< SPI_dev, GPIO_CS >::flush_block()
     return SD_ret;
 }
 
-template< class SPI_dev, class GPIO_CS >
-int sd_spi< SPI_dev, GPIO_CS >::traverse_data(
+template< class spi_dev, class GPIO_CS >
+int sd_spi< spi_dev, GPIO_CS >::traverse_data(
         size_t count,
         const std::function< void (size_t, size_t, size_t) > &fn
         )
@@ -1017,11 +1011,11 @@ int sd_spi< SPI_dev, GPIO_CS >::traverse_data(
 
     while (left) {
         if (blk_num  != m_block.origin) {
-            m_spi.lock();
+            spi_dev::lock();
             GPIO_CS::reset();
             SD_ret = populate_block(blk_num);
             GPIO_CS::set();
-            m_spi.unlock();
+            spi_dev::unlock();
 
             if (SD_ret < 0)
                 return SD_ret;
