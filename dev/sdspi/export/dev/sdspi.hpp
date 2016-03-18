@@ -8,6 +8,9 @@
 #include <ecl/iostream.hpp>
 #include <ecl/endian.hpp>
 
+namespace ecl
+{
+
 // TODO: mention about 8 additional clocks before each command!!!
 template< class spi_dev, class GPIO_CS >
 class sd_spi
@@ -1040,5 +1043,6 @@ int sd_spi< spi_dev, GPIO_CS >::traverse_data(
     return SD_ret;
 }
 
+} // namespace ecl
 
 #endif // DEV_SDSPI_H

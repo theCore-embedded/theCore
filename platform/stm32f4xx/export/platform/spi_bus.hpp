@@ -604,13 +604,13 @@ auto spi_bus< spi_config >::pick_pclk()
     RCC_GetClocksFreq(&clkcfg);
 
     switch (spi_config::m_dev) {
-    case SPI_device::bus_1:
-    case SPI_device::bus_5:
-    case SPI_device::bus_4:
-    case SPI_device::bus_6:
+    case spi_device::bus_1:
+    case spi_device::bus_5:
+    case spi_device::bus_4:
+    case spi_device::bus_6:
         return clkcfg.PCLK2_Frequency;
-    case SPI_device::bus_2:
-    case SPI_device::bus_3:
+    case spi_device::bus_2:
+    case spi_device::bus_3:
         return clkcfg.PCLK1_Frequency;
     default:
         // TODO: clarify
