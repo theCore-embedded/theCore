@@ -2,6 +2,10 @@
 #define DEV_PCD8544_HPP
 
 #include <ecl/thread/semaphore.hpp>
+#include <os/utils.hpp>
+
+namespace ecl
+{
 
 // TODO: move it somewhere
 class point
@@ -23,29 +27,31 @@ private:
 
 // TODO: add GPIO type here, instead of using special names for SPI CS
 // and LCD D/C
-template< class SPI_dev >
+template< class Spi >
 class pcd8544
 {
 public:
     pcd8544();
     ~pcd8544();
 
-    // Lazy initialization, -1 if error. 0 otherwise
-    int init();
+    // Lazy initialization
+    // err::ok if succeed
+    err init();
 
-    // -1 if error, 0 otherwise
-    int open();
-    // -1 if error, 0 otherwise
-    int close();
+    // err::ok if succeed.
+    err open();
+    // err::ok if succeed.
+    err close();
 
-    // Graphic primitives
-    // -1 if error, 0 otherwise
-    int set_point(const point& coord);
-    int clear_point(const point& coord);
+    // Graphic primitive operations.
+    // err::ok if succeed
+    err set_point(const point& coord);
+    err clear_point(const point& coord);
 
-    // Displays a data
-    int flush();
-    int clear();
+    // Sends VRAM data to a display
+    // err::ok if succeed
+    err flush();
+    err clear();
 
 private:
     // Rows as they are represented in a device
@@ -120,70 +126,21 @@ private:
     // VOP mask
     static constexpr uint8_t VOP_mask           = 0b01111111;
 
-    // Convinient aliases
-    using SPI_f_t                  = typename SPI_dev::s_t;
-    using DMA_f_t                  = typename SPI_dev::DMA_TX_t::s_t;
-    using DMA_t                    = typename SPI_dev::DMA_TX_t;
-    static constexpr auto SPI_mode = SPI_dev::com_type;
+    // Blocking send
+    err send(uint8_t byte, DC_state op);
 
-    // DMA mode init
-    template< SPI_com_type mode = SPI_mode,
-              typename std::enable_if< mode == SPI_com_type::DMA, int >::type = 0 >
-    int internal_mode_init();
+    // Bulk data write
+    err internal_flush();
 
-    // IRQ mode init
-    template< SPI_com_type mode = SPI_mode,
-              typename std::enable_if< mode == SPI_com_type::IRQ, int >::type = 0 >
-    int internal_mode_init();
-
-    // Blocking send in DMA mode
-    template< SPI_com_type mode = SPI_mode,
-              typename std::enable_if< mode == SPI_com_type::DMA, int >::type = 0 >
-    int send(uint8_t byte, DC_state op);
-
-    // Blocking send in IRQ mode
-    template< SPI_com_type mode = SPI_mode,
-              typename std::enable_if< mode == SPI_com_type::IRQ, int >::type = 0 >
-    int send(uint8_t byte, DC_state op);
-
-    // Bulk data write in DMA mode
-    template< SPI_com_type mode = SPI_mode,
-              typename std::enable_if< mode == SPI_com_type::DMA, int >::type = 0 >
-    int internal_flush();
-
-    // Bulk data write in IRQ mode
-    template< SPI_com_type mode = SPI_mode,
-              typename std::enable_if< mode == SPI_com_type::IRQ, int >::type = 0 >
-    int internal_flush();
-
-    // IRQ hander TODO: enable if
-    void IRQ_handler(SPI_f_t status);
-
-    // DMA hander TODO: enable if
-    void DMA_handler(DMA_f_t status);
-
-    // TODO: move it somewhere
-    void _delay()
-    {
-        for (volatile int i = 0; i < 10000; ++i) {};
-    }
-
-    SPI_dev                 m_device;
-    volatile SPI_f_t        m_status;
-    volatile DMA_f_t        m_DMA_status;
-    DMA_t                   m_DMA;      // ?
     uint8_t                 m_array[84][6];    // TODO: magic numbers
     ecl::binary_semaphore   m_sem;             // Handle bus events
 };
 
 
-template< class SPI_dev >
-pcd8544< SPI_dev >::pcd8544()
-    :m_device{}
-    ,m_status{0}
-    ,m_DMA_status{0}
-    ,m_DMA{}
-    ,m_array{0}
+template< class Spi >
+pcd8544< Spi >::pcd8544()
+    :m_array{0}
+    ,m_sem{}
 {
 
     PCD8544_CS::set();
@@ -191,36 +148,40 @@ pcd8544< SPI_dev >::pcd8544()
     PCD8544_Mode::set();
 }
 
-template< class SPI_dev >
-pcd8544< SPI_dev >::~pcd8544()
+template< class Spi >
+pcd8544< Spi >::~pcd8544()
 {
     // TODO
 }
 
-template< class SPI_dev >
-int pcd8544< SPI_dev >::init()
+template< class Spi >
+err pcd8544< Spi >::init()
 {
-    int rc = m_device.init();
-    if (rc < 0)
-        return rc;
+    Spi::lock();
 
-    m_device.lock();
+    auto rc = Spi::init();
+    if (is_error(rc)) {
+        Spi::unlock();
+        return rc;
+    }
+
     // RESET
     PCD8544_CS::set();
     PCD8544_Reset::reset();
-    _delay();
-    PCD8544_Reset::set();
-    m_device.unlock();
 
-    return internal_mode_init();
+    ecl::os::this_thread::sleep_for(1000);
+
+    PCD8544_Reset::set();
+    Spi::unlock();
+
+    return err::ok;
 }
 
 
-template< class SPI_dev >
-int pcd8544< SPI_dev >::open()
+template< class Spi >
+err pcd8544< Spi >::open()
 {
-    int rc = m_device.open();
-    // found somewhere in net
+    // Found somewhere in the net
 
     // Extended set on
     send(FS_prefix | FS_H_on, DC_state::command);
@@ -240,33 +201,28 @@ int pcd8544< SPI_dev >::open()
     // Set normal display mode
     send(normal_mode, DC_state::command);
 
-    return rc;
+    return err::ok;
 }
 
 
-template< class SPI_dev >
-int pcd8544< SPI_dev >::close()
+template< class Spi >
+err pcd8544< Spi >::close()
 {
     // TODO
-    return m_device.close();
+    return err::ok;
 }
 
 
-template< class SPI_dev >
-int pcd8544< SPI_dev >::set_point(const point& coord)
+template< class Spi >
+err pcd8544< Spi >::set_point(const point& coord)
 {
-    if ((m_device.get_status() & SPI_dev::flags::BSY)) {
-        // Device not ready, buffer under processing
-        return -2;
-    }
-
     // TODO: checks
     // TODO: common parts (see clear_point())
     int x = coord.get_x();
     int y = coord.get_y();
 
     if (x < 0 || y < 0 || x > 83 || y > 47)
-        return -1;
+        return err::inval;
 
     // Calculate a byte offcet
     int y_byte = y >> 3;
@@ -277,18 +233,12 @@ int pcd8544< SPI_dev >::set_point(const point& coord)
     // Set appropriate bit
     m_array[x][y_byte] |= (1 << y_bit);
 
-    return 0;
-
+    return err::ok;
 }
 
-template< class SPI_dev >
-int pcd8544< SPI_dev >::clear_point(const point& coord)
+template< class Spi >
+err pcd8544< Spi >::clear_point(const point& coord)
 {
-    if ((m_device.get_status() & SPI_dev::flags::BSY)) {
-        // Device not ready, buffer under processing
-        return -2;
-    }
-
     // TODO: checks
     // TODO: common parts (see set_point())
     int x = coord.get_x();
@@ -309,72 +259,33 @@ int pcd8544< SPI_dev >::clear_point(const point& coord)
     return 0;
 }
 
-template< class SPI_dev >
-int pcd8544< SPI_dev >::flush()
+template< class Spi >
+err pcd8544< Spi >::flush()
 {
-    auto status = m_device.get_status();
-
-    if (!(status & SPI_dev::flags::TX_RDY) || (status & SPI_dev::flags::BSY)) {
-        // Device not ready
-        return -2;
-    }
-
     return internal_flush();
 }
 
-template< class SPI_dev >
-int pcd8544< SPI_dev >::clear()
+template< class Spi >
+err pcd8544< Spi >::clear()
 {
-    if (m_device.get_status() & SPI_dev::flags::BSY) {
-        // Device not ready
-        return -2;
-    }
-
     // TODO: improve error check
-    // clear
+    // TODO: memset
     for (unsigned i = 0; i < 84; ++i) {
         for (unsigned j = 0; j < 6; ++j) {
             m_array[i][j] = 0;
         }
     }
-    return 0;
+
+    return err::ok;
 }
 
 //------------------------------------------------------------------------------
 // Private members
 
-template< class SPI_dev >
-template< SPI_com_type mode,
-          typename std::enable_if < mode == SPI_com_type::IRQ, int >::type >
-int pcd8544< SPI_dev >::internal_mode_init()
+template< class Spi >
+err pcd8544< Spi >::send(uint8_t byte, DC_state op)
 {
-    // Catch all IRQs
-
-    // Avoid using std::bind since it uses dynamic memory
-    auto handler = [this]() {
-        this->IRQ_handler(this->m_device.get_status());
-    };
-
-    m_device.mask_IRQ();
-    m_device.register_IRQ(handler);
-
-    return 0;
-}
-
-template< class SPI_dev >
-template< SPI_com_type mode,
-          typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
-int pcd8544< SPI_dev >::internal_mode_init()
-{
-    return 0;
-}
-
-template< class SPI_dev >
-template< SPI_com_type mode,
-          typename std::enable_if < mode == SPI_com_type::IRQ, int >::type >
-int pcd8544< SPI_dev >::send(uint8_t byte, DC_state op)
-{
-    m_device.lock();
+    Spi::lock();
 
     if (op == DC_state::data)
         PCD8544_Mode::set();
@@ -383,147 +294,79 @@ int pcd8544< SPI_dev >::send(uint8_t byte, DC_state op)
 
     PCD8544_CS::reset();
 
-    m_device.mask_IRQ();
-    m_status = 0;
-    m_device.unmask_IRQ();
+//    auto handler = [this]() {
+//        this->DMA_handler(this->m_DMA.get_status());
+//    };
 
-    // In order to complete send, we need to wait until device will be ready
-    m_sem.wait();
-    while (!(m_status & SPI_dev::flags::TX_RDY)) {}
+//    m_DMA.enable_IRQ(handler, DMA_t::flags::TC);
 
-    int rc = m_device.write(&byte, 1);
+//    m_DMA.set_origin(DMA_t::role::memory,
+//                     &byte,
+//                     sizeof(byte));
 
-    PCD8544_CS::set();
+//    int rc = m_device.write(m_DMA);
 
-    m_device.unlock();
+//    // Wait for transaction to be over
+//    m_sem.wait();
+//    while (!(m_DMA_status & DMA_t::flags::TC)) {}
 
-    return rc < 0 ? rc : 0;
-}
+//    // Request completed
+//    m_DMA.complete_IRQ(m_DMA_status);
+//    m_DMA.complete();
 
-template< class SPI_dev >
-template< SPI_com_type mode,
-          typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
-int pcd8544< SPI_dev >::send(uint8_t byte, DC_state op)
-{
-    m_device.lock();
-
-    if (op == DC_state::data)
-        PCD8544_Mode::set();
-    else
-        PCD8544_Mode::reset();
-
-    PCD8544_CS::reset();
-
-    auto handler = [this]() {
-        this->DMA_handler(this->m_DMA.get_status());
-    };
-
-    m_DMA.enable_IRQ(handler, DMA_t::flags::TC);
-
-    m_DMA.set_origin(DMA_t::role::memory,
-                     &byte,
-                     sizeof(byte));
-
-    int rc = m_device.write(m_DMA);
-
-    // Wait for transaction to be over
-    m_sem.wait();
-    while (!(m_DMA_status & DMA_t::flags::TC)) {}
-
-    // Request completed
-    m_DMA.complete_IRQ(m_DMA_status);
-    m_DMA.complete();
-
-    m_DMA_status = 0;
+//    m_DMA_status = 0;
+    Spi::set_buffers(&byte, nullptr, 1);
+    Spi::xfer();
 
     PCD8544_CS::set();
 
-    m_device.unlock();
+    Spi::unlock();
 
-    return rc < 0 ? rc : 0;
+    return err::ok;
 }
 
-template< class SPI_dev >
-template< SPI_com_type mode,
-          typename std::enable_if < mode == SPI_com_type::IRQ, int >::type >
-int pcd8544< SPI_dev >::internal_flush()
+template< class Spi >
+err pcd8544< Spi >::internal_flush()
 {
-    // TODO: improve error check
-    // TODO: improve remainder calculation. What if buffer
-    // was not consumed entirely? May be, catch interrupt and then
-    // send rest of the data.
-
-    int ret = 0;
-
-    for (unsigned i = 0; i < 84; ++i) {
-        for (unsigned j = 0; j < 6; ++j) {
-            ret = send(m_array[i][j], DC_state::data);
-            if (ret < 0)
-                return ret;
-        }
-    }
-
-    _delay();
-    return ret;
-}
-
-template< class SPI_dev >
-template< SPI_com_type mode,
-          typename std::enable_if < mode == SPI_com_type::DMA, int >::type >
-int pcd8544< SPI_dev >::internal_flush()
-{
-    m_device.lock();
+    Spi::lock();
 
     PCD8544_Mode::set();
     PCD8544_CS::reset();
 
-    auto handler = [this]() {
-        this->DMA_handler(this->m_DMA.get_status());
-    };
+//    auto handler = [this]() {
+//        this->DMA_handler(this->m_DMA.get_status());
+//    };
 
-    m_DMA.enable_IRQ(handler, DMA_t::flags::TC);
+//    m_DMA.enable_IRQ(handler, DMA_t::flags::TC);
 
-    m_DMA.set_origin(DMA_t::role::memory,
-                     reinterpret_cast< uint8_t* > (m_array),
-                     sizeof(m_array));
+//    m_DMA.set_origin(DMA_t::role::memory,
+//                     reinterpret_cast< uint8_t* > (m_array),
+//                     sizeof(m_array));
 
 
-    m_device.write(m_DMA);
+//    Spi::write(m_DMA);
 
-    // Wait for transaction to be over
-    m_sem.wait();
-    while (!(m_DMA_status & DMA_t::flags::TC)) {}
-    while ((m_device.get_status() & SPI_dev::flags::BSY)) { }
+//    // Wait for transaction to be over
+//    m_sem.wait();
+//    while (!(m_DMA_status & DMA_t::flags::TC)) {}
+//    while ((Spi::get_status() & spi::flags::BSY)) { }
 
-    m_DMA.complete();
+//    m_DMA.complete();
+
+
+    auto tx = reinterpret_cast< uint8_t* > (m_array);
+    Spi::set_buffers(tx, nullptr, sizeof(m_array));
+    Spi::xfer();
+
+    Spi::unlock();
 
     // Release the device
     PCD8544_CS::set();
     PCD8544_Mode::reset();
 
-    m_DMA_status = 0;
-    m_device.unlock();
-
-    return 0;
+    return err::ok;
 }
 
-template< class SPI_dev >
-void pcd8544< SPI_dev >::IRQ_handler(SPI_f_t status)
-{
-    // Do nothing special for now
-    m_sem.signal();
-    m_status = status;
-    return;
-}
-
-template< class SPI_dev >
-void pcd8544< SPI_dev >::DMA_handler(DMA_f_t status)
-{
-    // Do nothing special for now
-    m_DMA_status |= status;
-    m_DMA.complete_IRQ(status);
-    m_sem.signal();
-    return;
-}
+} // namespace ecl
 
 #endif
