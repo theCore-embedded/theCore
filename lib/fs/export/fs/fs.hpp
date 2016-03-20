@@ -2,9 +2,13 @@
 #define LIB_FS_FS_HPP_
 
 #include "fs_descriptor.hpp"
+#include "inode.hpp"
 
 #include <tuple>
+
 #include <ecl/utils.hpp>
+#include <ecl/iostream.hpp>
+#include <string.h>
 
 namespace fs
 {
@@ -38,7 +42,6 @@ private:
             ,component{0}
         {
         }
-
 
         // Get next path token
         const char* next(inode::type &next_type)
@@ -310,6 +313,6 @@ auto vfs< Fs... >::name_to_inode(inode_ptr cur_dir, const char *name)
     return inode_ptr{nullptr};
 }
 
-}
+} // namespace fs
 
 #endif // LIB_FS_FS_HPP_

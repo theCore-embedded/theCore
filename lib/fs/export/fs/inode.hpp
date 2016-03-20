@@ -50,6 +50,6 @@ protected:
 using inode_ptr = ecl::shared_ptr< inode >;
 
 
-}
+} // namespace fs
 
 #endif

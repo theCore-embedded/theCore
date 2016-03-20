@@ -4,6 +4,8 @@
 #include <ecl/thread/semaphore.hpp>
 #include <os/utils.hpp>
 
+#include <utility>
+
 namespace ecl
 {
 
@@ -27,7 +29,7 @@ private:
 
 // TODO: add GPIO type here, instead of using special names for SPI CS
 // and LCD D/C
-template< class Spi >
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
 class pcd8544
 {
 public:
@@ -137,25 +139,25 @@ private:
 };
 
 
-template< class Spi >
-pcd8544< Spi >::pcd8544()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::pcd8544()
     :m_array{0}
     ,m_sem{}
 {
 
-    PCD8544_CS::set();
-    PCD8544_Reset::set();
-    PCD8544_Mode::set();
+    Cs_gpio::set();
+    Rst_gpio::set();
+    Mode_gpio::set();
 }
 
-template< class Spi >
-pcd8544< Spi >::~pcd8544()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::~pcd8544()
 {
     // TODO
 }
 
-template< class Spi >
-err pcd8544< Spi >::init()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::init()
 {
     Spi::lock();
 
@@ -166,20 +168,20 @@ err pcd8544< Spi >::init()
     }
 
     // RESET
-    PCD8544_CS::set();
-    PCD8544_Reset::reset();
+    Cs_gpio::set();
+    Rst_gpio::reset();
 
     ecl::os::this_thread::sleep_for(1000);
 
-    PCD8544_Reset::set();
+    Rst_gpio::set();
     Spi::unlock();
 
     return err::ok;
 }
 
 
-template< class Spi >
-err pcd8544< Spi >::open()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::open()
 {
     // Found somewhere in the net
 
@@ -205,16 +207,16 @@ err pcd8544< Spi >::open()
 }
 
 
-template< class Spi >
-err pcd8544< Spi >::close()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::close()
 {
     // TODO
     return err::ok;
 }
 
 
-template< class Spi >
-err pcd8544< Spi >::set_point(const point& coord)
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::set_point(const point& coord)
 {
     // TODO: checks
     // TODO: common parts (see clear_point())
@@ -236,8 +238,8 @@ err pcd8544< Spi >::set_point(const point& coord)
     return err::ok;
 }
 
-template< class Spi >
-err pcd8544< Spi >::clear_point(const point& coord)
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::clear_point(const point& coord)
 {
     // TODO: checks
     // TODO: common parts (see set_point())
@@ -259,14 +261,14 @@ err pcd8544< Spi >::clear_point(const point& coord)
     return 0;
 }
 
-template< class Spi >
-err pcd8544< Spi >::flush()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::flush()
 {
     return internal_flush();
 }
 
-template< class Spi >
-err pcd8544< Spi >::clear()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::clear()
 {
     // TODO: improve error check
     // TODO: memset
@@ -282,77 +284,35 @@ err pcd8544< Spi >::clear()
 //------------------------------------------------------------------------------
 // Private members
 
-template< class Spi >
-err pcd8544< Spi >::send(uint8_t byte, DC_state op)
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::send(uint8_t byte, DC_state op)
 {
     Spi::lock();
 
     if (op == DC_state::data)
-        PCD8544_Mode::set();
+        Mode_gpio::set();
     else
-        PCD8544_Mode::reset();
+        Mode_gpio::reset();
 
-    PCD8544_CS::reset();
+    Cs_gpio::reset();
 
-//    auto handler = [this]() {
-//        this->DMA_handler(this->m_DMA.get_status());
-//    };
-
-//    m_DMA.enable_IRQ(handler, DMA_t::flags::TC);
-
-//    m_DMA.set_origin(DMA_t::role::memory,
-//                     &byte,
-//                     sizeof(byte));
-
-//    int rc = m_device.write(m_DMA);
-
-//    // Wait for transaction to be over
-//    m_sem.wait();
-//    while (!(m_DMA_status & DMA_t::flags::TC)) {}
-
-//    // Request completed
-//    m_DMA.complete_IRQ(m_DMA_status);
-//    m_DMA.complete();
-
-//    m_DMA_status = 0;
     Spi::set_buffers(&byte, nullptr, 1);
     Spi::xfer();
 
-    PCD8544_CS::set();
+    Cs_gpio::set();
 
     Spi::unlock();
 
     return err::ok;
 }
 
-template< class Spi >
-err pcd8544< Spi >::internal_flush()
+template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
+err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::internal_flush()
 {
     Spi::lock();
 
-    PCD8544_Mode::set();
-    PCD8544_CS::reset();
-
-//    auto handler = [this]() {
-//        this->DMA_handler(this->m_DMA.get_status());
-//    };
-
-//    m_DMA.enable_IRQ(handler, DMA_t::flags::TC);
-
-//    m_DMA.set_origin(DMA_t::role::memory,
-//                     reinterpret_cast< uint8_t* > (m_array),
-//                     sizeof(m_array));
-
-
-//    Spi::write(m_DMA);
-
-//    // Wait for transaction to be over
-//    m_sem.wait();
-//    while (!(m_DMA_status & DMA_t::flags::TC)) {}
-//    while ((Spi::get_status() & spi::flags::BSY)) { }
-
-//    m_DMA.complete();
-
+    Mode_gpio::set();
+    Cs_gpio::reset();
 
     auto tx = reinterpret_cast< uint8_t* > (m_array);
     Spi::set_buffers(tx, nullptr, sizeof(m_array));
@@ -361,8 +321,8 @@ err pcd8544< Spi >::internal_flush()
     Spi::unlock();
 
     // Release the device
-    PCD8544_CS::set();
-    PCD8544_Mode::reset();
+    Cs_gpio::set();
+    Mode_gpio::reset();
 
     return err::ok;
 }

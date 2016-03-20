@@ -19,32 +19,32 @@ Integer LE(Integer in)
 
 // Set of routines, converting from\to Big Endian order
 
-uint16_t BE(uint16_t in)
+static inline uint16_t BE(uint16_t in)
 {
     return __builtin_bswap16(in);
 }
 
-int16_t BE(int16_t in)
+static inline int16_t BE(int16_t in)
 {
     return __builtin_bswap16(in);
 }
 
-uint32_t BE(uint32_t in)
+static inline uint32_t BE(uint32_t in)
 {
     return __builtin_bswap32(in);
 }
 
-int32_t BE(int32_t in)
+static inline int32_t BE(int32_t in)
 {
     return __builtin_bswap32(in);
 }
 
-uint64_t BE(uint64_t in)
+static inline uint64_t BE(uint64_t in)
 {
     return __builtin_bswap64(in);
 }
 
-int64_t BE(int64_t in)
+static inline int64_t BE(int64_t in)
 {
     return __builtin_bswap64(in);
 }
