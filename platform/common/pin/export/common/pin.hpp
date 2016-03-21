@@ -21,6 +21,7 @@ enum class function
     UART1,
     UART2,
     UART3,
+    pin_MCO,
 };
 
 // Pin numbers
