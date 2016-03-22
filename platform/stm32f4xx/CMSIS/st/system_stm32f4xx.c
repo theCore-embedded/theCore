@@ -394,11 +394,11 @@
 
 #if defined (STM32F411xE)
 #define PLL_P      4
-#endif /* STM32F411xx */
+#endif /* STM32F411xE */
 
 #else
 #define PLL_P RCC_PLL_P
-#endif /* RCC_PLL_QP */
+#endif /* RCC_PLL_P */
 
 /******************************************************************************/
 
@@ -684,29 +684,41 @@ static void SetSysClock(void)
 	(void) StartUpCounter;
 	(void) SourceStatus;
 
-#if RCC_HCLK_DIV && !((RCC_HCLK_DIV - 1) & RCC_HCLK_DIV)
+#ifdef RCC_HCLK_DIV
+#if !((RCC_HCLK_DIV - 1) & RCC_HCLK_DIV)
 	uint32_t hclk_prescaler = get_HCLK_prescaler(RCC_HCLK_DIV);
 	RCC->CFGR |= hclk_prescaler;
 #else
+#error Invalid RCC_HCLK_DIV is provided (should be power of 2)
+#endif /* !((RCC_HCLK_DIV - 1) & RCC_HCLK_DIV) */
+#else
 	/* HCLK = SYSCLK / 1*/
 	RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
-#endif
+#endif /* RCC_HCLK_DIV */
 
-#if RCC_PCLK1_DIV && !((RCC_PCLK1_DIV - 1) & RCC_PCLK1_DIV)
+#ifdef RCC_PCLK1_DIV
+#if !((RCC_PCLK1_DIV - 1) & RCC_PCLK1_DIV)
 	uint32_t pclk1_prescaler = get_PCLK1_prescaler(RCC_PCLK1_DIV);
 	RCC->CFGR |= pclk1_prescaler;
 #else
+#error Invalid RCC_PCLK1_DIV is provided (should be power of 2)
+#endif /* !((RCC_PCLK1_DIV - 1) & RCC_PCLK1_DIV) */
+#else
 	/* PCLK1 = HCLK / 2 */
 	RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;
-#endif
+#endif /* RCC_PCLK1_DIV */
 
-#if RCC_PCLK2_DIV && !((RCC_PCLK2_DIV - 1) & RCC_PCLK2_DIV)
+#ifdef RCC_PCLK2_DIV
+#if !((RCC_PCLK2_DIV - 1) & RCC_PCLK2_DIV)
 	uint32_t pclk2_prescaler = get_PCLK2_prescaler(RCC_PCLK2_DIV);
 	RCC->CFGR |= pclk2_prescaler;
 #else
+#error Invalid RCC_PCLK2_DIV is provided (should be power of 2)
+#endif /* !((RCC_PCLK2_DIV - 1) & RCC_PCLK2_DIV) */
+#else
 	/* PCLK2 = HCLK / 1 */
 	RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;
-#endif
+#endif /* RCC_PCLK2_DIV */
 
 #if (RCC_SYSCLK_SRC == HSI_CLOCK_SOURCE || RCC_PLL_SRC == HSI_CLOCK_SOURCE)
 	/* Enable HSI */

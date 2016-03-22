@@ -1,8 +1,7 @@
 add_library(cmsis st/system_stm32f4xx.c)
 target_include_directories(cmsis SYSTEM PUBLIC includes)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error=unused-function")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-function")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error=unused-function -Wno-unused-function")
 
 # TODO: check if variables are defined
 target_compile_definitions(cmsis PUBLIC "-D${CONFIG_PLATFORM_DEVICE}")
