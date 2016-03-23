@@ -5,7 +5,7 @@ set(__build_api_def YES)
 
 
 # Might be reviewed
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.2)
 
 # Set for latter use
 set(CORE_DIR ${CMAKE_CURRENT_LIST_DIR})
