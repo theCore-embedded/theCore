@@ -2,9 +2,10 @@
 #define LIB_ALLOC_POOL_HPP_
 
 #include <ecl/assert.h>
+#include <ecl/types.h>
+
 #include <memory>
 #include <array>
-#include <ecl/types.h>
 
 namespace ecl
 {
@@ -20,6 +21,8 @@ public:
     // Deallocates memory
     template< typename T >
     void deallocate(T *p, size_t n);
+
+    virtual ~pool_base();
 
 protected:
     // Provided by a real pool
@@ -59,6 +62,12 @@ void pool_base::deallocate(T *p, size_t n)
     real_dealloc(reinterpret_cast< uint8_t *>(p), n, sizeof(T));
 }
 
+pool_base::~pool_base()
+{
+
+}
+
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
@@ -75,6 +84,7 @@ class pool : public pool_base
 
 public:
     pool();
+    ~pool();
 
     // Allocates memory suitable for type T, with respect to its aligment
     uint8_t* real_alloc(size_t n, size_t align, size_t obj_sz) override;
@@ -106,6 +116,11 @@ template< size_t blk_sz, size_t blk_cnt >
 pool< blk_sz, blk_cnt >::pool()
     :m_data{0}
     ,m_info{0}
+{
+}
+
+template< size_t blk_sz, size_t blk_cnt >
+pool< blk_sz, blk_cnt >::~pool()
 {
 }
 

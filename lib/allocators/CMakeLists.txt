@@ -4,3 +4,11 @@ target_include_directories(allocators PUBLIC export)
 target_link_libraries(allocators utils)
 # Static analysis
 add_cppcheck(allocators UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
+# Unit tests
+add_unit_host_test(NAME test_pool_allocator
+	SOURCES
+	tests/pool_base_unit.cpp
+	tests/pool_unit.cpp
+	tests/pool_main.cpp
+	INC_DIRS export
+	DEPENDS utils)
