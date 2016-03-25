@@ -13,6 +13,3 @@ add_unit_host_test(NAME test_pool_allocator
 	alloc.cpp
 	INC_DIRS export
 	DEPENDS utils libcpp)
-
-# Substitude standart headers
-target_include_directories(test_pool_allocator BEFORE PRIVATE test)
