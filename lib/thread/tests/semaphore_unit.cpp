@@ -9,6 +9,8 @@
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
 
+// TODO: remove ugly sleep-programming
+
 // Error code helper
 // TODO: move it to 'utils' headers and protect with check of
 // current test state (enabled or disabled)
@@ -112,7 +114,7 @@ TEST(semaphore, one_semaphore_few_threads)
         (void) thread; // We don't need this
         semaphore.signal();
         signalled++;
-        test_delay(50); // Let some thread finish its work
+        test_delay(100); // Let some thread finish its work
         CHECK_EQUAL(signalled, counter); // Check that only one thread is finished
     });
 
