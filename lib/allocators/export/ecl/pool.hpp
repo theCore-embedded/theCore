@@ -4,6 +4,10 @@
 #include <ecl/assert.h>
 #include <ecl/types.h>
 
+#if defined (POOL_ALLOC_TEST_PRINT_STATS) || defined (POOL_ALLOC_TEST_PRINT_EXTENDED_STATS)
+#include <ecl/iostream.hpp>
+#endif
+
 #include <memory>
 #include <array>
 
@@ -43,10 +47,10 @@ T* pool_base::aligned_alloc(size_t n)
 {
     T *p = reinterpret_cast< T* > (real_alloc(n, alignof(T), sizeof(T)));
 
-#if 0
-    ecl::cout << "alloc " << n << " x " << sizeof(T) << " = "
-              << n * sizeof(T) << " bytes from " << (int) p
-              << ecl::endl;
+#ifdef POOL_ALLOC_TEST_PRINT_EXTENDED_STATS
+    ecl::cout << "alloc " << (int)n << " x " << (int)sizeof(T) << " = "
+              << (int)(n * sizeof(T)) << " bytes from "
+              << static_cast< int >((uintptr_t)p) << ecl::endl;
 #endif
     return p;
 }
@@ -54,19 +58,13 @@ T* pool_base::aligned_alloc(size_t n)
 template< typename T >
 void pool_base::deallocate(T *p, size_t n)
 {
-#if 0
-    ecl::cout << "dealloc " << n << " x " << sizeof(T) << " = "
-              << n * sizeof(T) << " bytes from " << (int) p
-              << ecl::endl;
+#ifdef POOL_ALLOC_TEST_PRINT_EXTENDED_STATS
+    ecl::cout << "dealloc " << (int)n << " x " << (int)sizeof(T) << " = "
+              << (int)(n * sizeof(T)) << " bytes from "
+              << static_cast< int >((uintptr_t)p) << ecl::endl;
 #endif
     real_dealloc(reinterpret_cast< uint8_t *>(p), n, sizeof(T));
 }
-
-pool_base::~pool_base()
-{
-
-}
-
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -90,6 +88,15 @@ public:
     uint8_t* real_alloc(size_t n, size_t align, size_t obj_sz) override;
     void real_dealloc(uint8_t *p, size_t n, size_t obj_sz) override;
 
+
+#ifdef POOL_ALLOC_TEST
+    // Special routines used for test purposes only
+    auto& get_data() { return m_data; }
+    auto& get_info() { return m_info; }
+    // Debug routine
+    void print_stats() const;
+#endif
+
 private:
     static constexpr auto info_blks_sz();
     static constexpr auto data_blks_sz();
@@ -99,14 +106,13 @@ private:
     bool is_free(size_t idx) const;
     // Get a pointer of the particular block.
     uint8_t* get_block(size_t idx);
-    // Debug routine
-    void print_stats() const;
 
     // Data buffer must be aligned to size of block,
     // this will reduce complexity of calculations.
     // 64 is now maximum alignment supported TODO: clarify
     alignas((blk_sz > 64) ? 64 : blk_sz)
     std::array< uint8_t, data_blks_sz() >   m_data;
+    // TODO: use bitset?
     std::array< uint8_t, info_blks_sz() >   m_info;
 };
 
@@ -129,7 +135,7 @@ uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_
 {
     // Consider reviewing the block size if this assertion fails.
     ecl_assert(align < blk_sz);
-    // Not allowed to allocated zero-length buffer
+    // Not allowed to allocate zero-length buffer
     ecl_assert(n);
 
     // TODO: use byte-based iteration, instead of bit-based
@@ -138,8 +144,9 @@ uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_
     size_t i = 0;
     size_t j;
 
-    // Convert a count of objects to a block count with ceiling.
-    n = n * obj_sz / blk_sz + 1;
+    // Convert a count of objects to a block count with rounding away from zero
+    // to a boundary of the block size.
+    n = (n * obj_sz + blk_sz - 1) / blk_sz;
 
     // Convert count to offset
     n--;
@@ -170,8 +177,6 @@ uint8_t* pool< blk_sz, blk_cnt >::real_alloc(size_t n, size_t align, size_t obj_
         return get_block(i);
     }
 
-    print_stats();
-
     return nullptr;
 }
 
@@ -182,15 +187,17 @@ void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n, size_t obj_sz)
     ecl_assert(n);
     ecl_assert(p); // For now
 
-    const uint8_t *start = m_data.begin();
-    const uint8_t *end   = m_data.end();
+    auto start = m_data.begin();
+    auto end   = m_data.end();
 
     ecl_assert(p >= start && p < end);
 
     size_t idx = (p - start) / blk_sz;
     size_t cnt = (end - p)   / blk_sz;
-    // Convert a count of objects to a block count with ceiling.
-    n = n * obj_sz / blk_sz + 1;
+
+    // Convert a count of objects to a block count with rounding away from zero
+    // to a boundary of the block size.
+    n = (n * obj_sz + blk_sz - 1) / blk_sz;
 
     ecl_assert(n <= cnt);
 
@@ -199,8 +206,6 @@ void pool< blk_sz, blk_cnt >::real_dealloc(uint8_t *p, size_t n, size_t obj_sz)
         ecl_assert(!is_free(to_free));
         mark(to_free, false);
     }
-
-    print_stats();
 }
 
 
@@ -211,6 +216,7 @@ template< size_t blk_sz, size_t blk_cnt >
 constexpr auto pool< blk_sz, blk_cnt >::info_blks_sz()
 {
     // Count bytes required to hold info bits. One bit per each block.
+    // TODO: use bitset?
     return blk_cnt / 8 + 1;
 }
 
@@ -223,6 +229,7 @@ constexpr auto pool<blk_sz, blk_cnt>::data_blks_sz()
 template< size_t blk_sz, size_t blk_cnt >
 bool pool< blk_sz, blk_cnt >::is_free(size_t idx) const
 {
+    // TODO: use bitset?
     ecl_assert(idx < blk_cnt);
 
     uint byte = idx >> 3;
@@ -235,6 +242,7 @@ bool pool< blk_sz, blk_cnt >::is_free(size_t idx) const
 template< size_t blk_sz, size_t blk_cnt >
 void pool< blk_sz, blk_cnt >::mark(size_t idx, bool used)
 {
+    // TODO: use bitset?
     ecl_assert(idx < blk_cnt);
 
     uint byte = idx >> 3;
@@ -254,10 +262,10 @@ uint8_t *pool< blk_sz, blk_cnt >::get_block(size_t idx)
     return m_data.begin() + idx * blk_sz;
 }
 
+#ifdef POOL_ALLOC_TEST_PRINT_STATS
 template< size_t blk_sz, size_t blk_cnt >
 void pool< blk_sz, blk_cnt >::print_stats() const
 {
-#if 0
     // Print memory stats for whole pool
     size_t i = 0;
     size_t used = 0;
@@ -275,18 +283,15 @@ void pool< blk_sz, blk_cnt >::print_stats() const
         }
     }
 
-    ecl::cout << "\r\n";
-
+    ecl::cout << "\n\n";
 
     ecl::cout << "_________________________" << ecl::endl;
     ecl::cout << "total blk:\t\t"        << (int) blk_cnt << ecl::endl;
     ecl::cout << "blk sz:\t\t\t"         << (int) blk_sz << ecl::endl;
     ecl::cout << "used:\t\t\t"           << (int) used << ecl::endl;
-    ecl::cout << "longest streak:\t\t"   << (int) streak << ecl::endl;
-
-#endif
-
+    ecl::cout << "longest free streak:\t"<< (int) streak << ecl::endl;
 }
+#endif
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -301,7 +306,7 @@ public:
     T* allocate(size_t n);
     void deallocate(T *p, size_t n);
 
-    // Create new instanse of thr allocator, suitable for a new type
+    // Create new instanse of the allocator, suitable for a new type
     template< typename U >
     pool_allocator< U > rebind() const;
 
@@ -312,7 +317,7 @@ private:
 
 template< typename T >
 pool_allocator< T >::pool_allocator(pool_base *pool)
-    :m_pool(pool)
+    :m_pool{pool}
 {
 }
 

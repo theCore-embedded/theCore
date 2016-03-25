@@ -45,7 +45,7 @@ struct test_type
 // Test object itself
 static test_type obj;
 
-ecl::pool_base *test_pool;
+static ecl::pool_base *test_pool;
 
 TEST_GROUP(pool_base)
 {

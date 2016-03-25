@@ -8,7 +8,7 @@ include(CppcheckTargets)
 
 # TODO: add same configuration mechanism for choosing right kernel
 message(STATUS "Checking [CONFIG_PLATFORM]...")
-if (NOT DEFINED CONFIG_PLATFORM)
+if(NOT DEFINED CONFIG_PLATFORM)
 	message(FATAL_ERROR "CONFIG_PLATFORM must be set in order to use valid platform")
 else()
 	message(STATUS "Platform will be used: ${CONFIG_PLATFORM}")
@@ -43,7 +43,7 @@ add_subdirectory(platform)
 
 # TODO: support binary stripping only for projects that requires its
 # Means we are crosscompiling
-if (NOT ${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+if(NOT ${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
 	# Make binary from the project object file
 	add_custom_target(${PROJECT_NAME}.bin ALL
 		COMMAND ${CMAKE_OBJCOPY} --output-format=binary
