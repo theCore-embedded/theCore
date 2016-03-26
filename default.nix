@@ -16,7 +16,7 @@ let
 in with pkgs; rec {
   coreEnv = stdenv.mkDerivation rec {
     name = "thecore";
-    buildInputs = [ cmake gcc5 cppcheck cpputest gcc-arm ];
+    buildInputs = [ cmake gcc5 cppcheck cpputest gcc-arm doxygen ];
   };
 }
 
