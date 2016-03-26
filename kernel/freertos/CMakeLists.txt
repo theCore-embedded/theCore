@@ -1,5 +1,5 @@
 add_library(freertos_main kernel_main.c)
-target_link_libraries(freertos_main PRIVATE main)
+#target_link_libraries(freertos_main PRIVATE main)
 target_link_libraries(freertos_main PRIVATE utils)
 
 set(MAIN_STACK_SIZE)

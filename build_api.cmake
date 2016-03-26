@@ -17,26 +17,11 @@ include(CMakeParseArguments)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
 
 # Registers a project
-macro(register_project project_name)
-    # This check is intentionally copied from core's listfile
-    # Reason is that if build API used a proper platform must be set
-    # _before_ compiler definitions and core inclusion.
-    message(STATUS "Checking [CONFIG_PLATFORM]...")
-    if (NOT DEFINED CONFIG_PLATFORM)
-        message(FATAL_ERROR "CONFIG_PLATFORM must be set in order to use valid platform")
-    else ()
-        message(STATUS "Platform will be used: ${CONFIG_PLATFORM}")
-        set(PLATFORM_NAME ${CONFIG_PLATFORM}) # For convinience
-    endif ()
-
-    set(PROJECT_DIR ${CMAKE_CURRENT_DIR}/${project_name})
-    set(PLATFORM_DIR ${CORE_DIR}/platform/${PLATFORM_NAME})
-
-    # Pick common linker definitions for given platform
-    include(${CORE_DIR}/platform/common/linker.cmake)
+macro(register_project project_name path_to_exe_file)
+	set(EXEC_PATH ${path_to_exe_file})
 
     # Make sure the core is included
-    add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
+	add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
 endmacro()
 
 # Creates a host unit test
@@ -60,7 +45,7 @@ function(add_unit_host_test)
                 ${ARGN}
         )
 
-        if (DEFINED UNIT_TEST_NAME AND DEFINED UNIT_TEST_SOURCES)
+		if(DEFINED UNIT_TEST_NAME AND DEFINED UNIT_TEST_SOURCES)
             message("-----------------------------------------------")
             message("	Test added: ${UNIT_TEST_NAME}")
             message("	Test sources: ${UNIT_TEST_SOURCES}")
@@ -69,24 +54,24 @@ function(add_unit_host_test)
             add_test(NAME ${UNIT_TEST_NAME} COMMAND ${UNIT_TEST_NAME})
             target_link_libraries(${UNIT_TEST_NAME} CppUTest)
             target_link_libraries(${UNIT_TEST_NAME} CppUTestExt)
-        else ()
+		else()
             message(FATAL_ERROR "Test sources and name must be defined!")
-        endif ()
+		endif()
 
-        if (UNIT_TEST_DEPENDS)
+		if(UNIT_TEST_DEPENDS)
             message("	Test dependencies: ${UNIT_TEST_DEPENDS}")
             target_link_libraries(${UNIT_TEST_NAME} ${UNIT_TEST_DEPENDS})
-        endif ()
+		endif()
 
-        if (UNIT_TEST_INC_DIRS)
+		if(UNIT_TEST_INC_DIRS)
             message("	Test includes: ${UNIT_TEST_INC_DIRS}")
             target_include_directories(
                     ${UNIT_TEST_NAME}
                     PRIVATE
                     ${UNIT_TEST_INC_DIRS})
-        endif ()
+		endif()
 
         target_include_directories(${UNIT_TEST_NAME} PRIVATE ${CPPUTEST_INCLUDE_DIRS})
         message("-----------------------------------------------")
-    endif ()
+	endif()
 endfunction()
