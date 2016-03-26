@@ -25,6 +25,7 @@ macro(register_project project_name path_to_exe_file)
 endmacro()
 
 # Creates a host unit test
+# TODO: move this to separate module
 #
 # Syntax:
 # add_unit_host_test(NAME test_name
@@ -32,7 +33,10 @@ endmacro()
 #					 [DEPENDS list_of_dependencies...]
 #					 [INC_DIRS list_of_include_directories...])
 function(add_unit_host_test)
-    # Add test only if not cross-compiling
+	# All test can use most recent standart
+	set(CMAKE_CXX_STANDARD 14)
+
+	# Add test only if not cross-compiling
     if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
 
         find_package(CppUTest REQUIRED)
