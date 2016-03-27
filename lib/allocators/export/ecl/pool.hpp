@@ -1,3 +1,8 @@
+//!
+//! \file
+//! \brief Memory pool and corresponding allocator facilities.
+//! \todo Usage examples
+//!
 #ifndef LIB_ALLOC_POOL_HPP_
 #define LIB_ALLOC_POOL_HPP_
 
@@ -14,29 +19,81 @@
 namespace ecl
 {
 
-// Type erasure
+//!
+//! \brief Base class for memory pool.
+//!
+//! Provides interfaces for allocation and deallocation of objects of given type.
+//! This abstraction helps split handing of type requirement and memory
+//! allocations into separate entities.
+//! \sa ecl::pool
+//!
 class pool_base
 {
 public:
-    // Allocates memory suitable for type T, with respect to its aligment
+    //!
+    //! \brief Allocates memory suitable for type T, with respect to its aligment.
+    //! This method will allocate continuous block of memory that suitable
+    //! for given type and count of objects of given type. Start address of that
+    //! block will be aligned with respect to the given type.
+    //! \tparam    T  A type whose object will be placed in the allocated memory.
+    //! \param[in] n  Count of objects that will be placed in the allocated memory.
+    //!               Behavior is undefined if given count is equal to 0.
+    //! \return nullptr if there is no space for given type and count in the pool.
+    //!          Valid pointer returned otherwise.
+    //!
     template< typename T >
     T* aligned_alloc(size_t n);
 
-    // Deallocates memory
+    //!
+    //! \brief Deallocates memory, previously allocated by aligned_alloc.
+    //! \pre  Memory pool with allocated block of given type,
+    //!       starting from given address and with total size
+    //!       that corresponds to amount of objects that where requested
+    //!       in call to aligned_alloc()
+    //! \post Memory pool with deallocated (invalidated) block in
+    //!       given address with given object count and object type.
+    //! \tparam    T A type whose object was placed in the pool memory.
+    //!              block was originally allocated for other type.
+    //!              Undefined behavior otherwise.
+    //! \param[in] p A pointer to a block of previously allocated memory.
+    //!              If given pointer is outside of pool or it points
+    //!              to a block that wasn't allocated by alligned_alloc()
+    //!              then behavior is undefined.
+    //! \param[in] n Count of objects to deallocate. Must match the value
+    //!              previously passed to alligned_alloc().
+    //!              Undefined behavior otherwise.
     template< typename T >
     void deallocate(T *p, size_t n);
 
+    //!
+    //! Destroys a pool.
+    //!
     virtual ~pool_base();
 
 protected:
-    // Provided by a real pool
-    // Allocates n items each size of obj_size with respect to
-    // align
+    //!
+    //! \brief Allocates chunk with respect to given alingment.
+    //! \param[in] n        Object count.
+    //! \param[in] align    Required align.
+    //! \param[in] obj_size Size of single object.
+    //! \return  nullptr if there is no space for given type and count in the pool.
+    //!          Valid pointer returned otherwise.
+    //! \sa aligned_alloc()
+    //!
     virtual uint8_t* real_alloc(size_t n, size_t align, size_t obj_size) = 0;
-    // Provided by a real pool
-    // Deallocates n items each size of obj_size.
-    // 'p' is a pointer to memory area, previously returned by real_alloc
-    // function.
+
+    //!
+    //! \brief Deallocates chunk of given address and length.
+    //! Length of chunk is determined by multiplication count of objects
+    //! by object size.
+    //! \param[in] p        Address of a chunk. Must be valid address, returned
+    //!                     Previously by real_alloc().
+    //! \param[in] n        Objects count. Must be the same as passed to
+    //!                     real_alloc() when given chunk was allocated.
+    //! \param[in] obj_size Size of single object. Must be the same as passed to
+    //!                     real_alloc() when given chunk was allocated.
+    //! \sa deallocate()
+    //!
     virtual void real_dealloc(uint8_t *p, size_t n, size_t obj_size) = 0;
 };
 
@@ -67,11 +124,14 @@ void pool_base::deallocate(T *p, size_t n)
 }
 
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
 
-// TODO: comments
-// Holds given buffer as a pool. Can be shared by different instances of
-// an allocator
+//!
+//! \brief Holds given buffer as a pool.
+//!
+//! Object of this pool can be shared by different instances of an allocator.
+//! Refer to a wiki for further info:
+//! [here](https://en.wikipedia.org/wiki/Fixed-size_blocks_allocation)
+//!
 template< size_t blk_sz, size_t blk_cnt >
 class pool : public pool_base
 {
@@ -81,13 +141,17 @@ class pool : public pool_base
     static_assert(!(blk_sz & (blk_sz - 1)), "Block size must be power of two");
 
 public:
+    //! \brief Constructs pool.
     pool();
+
+    //! \brief Destructs pool.
     ~pool();
 
-    // Allocates memory suitable for type T, with respect to its aligment
+    //! \copydoc pool_base::real_alloc()
     uint8_t* real_alloc(size_t n, size_t align, size_t obj_sz) override;
-    void real_dealloc(uint8_t *p, size_t n, size_t obj_sz) override;
 
+    //! \copydoc pool_base::real_dealloc()
+    void real_dealloc(uint8_t *p, size_t n, size_t obj_sz) override;
 
 #ifdef POOL_ALLOC_TEST
     // Special routines used for test purposes only
@@ -98,22 +162,39 @@ public:
 #endif
 
 private:
+    //! Gets size of info array containing bits representing data chunk state.
     static constexpr auto info_blks_sz();
+    //! Gets size of data array.
     static constexpr auto data_blks_sz();
 
+    //!
+    //! \brief Marks block with given index as used\unused.
+    //! \param[in] idx  Block index. Must be valid index of a block within a pool.
+    //! \param[in] used True if block must be marked as used. False - if as unused.
+    //!
     void mark(size_t idx, bool used);
-    // Check if the block is free or not.
+
+    //!
+    //! \brief Checks if block with given index is free or not.
+    //! \param[in] idx  Block index. Must be valid index of a block within a pool.
+    //! \return true if block is free.
+    //!
     bool is_free(size_t idx) const;
-    // Get a pointer of the particular block.
+
+    //!
+    //! \brief Obtains a block by given index.
+    //! \param[in] idx  Block index. Must be valid index of a block within a pool.
+    //! \return Pointer to a block.
+    //!
     uint8_t* get_block(size_t idx);
 
     // Data buffer must be aligned to size of block,
     // this will reduce complexity of calculations.
     // 64 is now maximum alignment supported TODO: clarify
     alignas((blk_sz > 64) ? 64 : blk_sz)
-    std::array< uint8_t, data_blks_sz() >   m_data;
-    // TODO: use bitset?
-    std::array< uint8_t, info_blks_sz() >   m_info;
+    std::array< uint8_t, data_blks_sz() >   m_data; //!< Memory pool.
+    //! \todo use bitset?
+    std::array< uint8_t, info_blks_sz() >   m_info; //!< Memory info array.
 };
 
 //------------------------------------------------------------------------------
@@ -296,22 +377,44 @@ void pool< blk_sz, blk_cnt >::print_stats() const
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
+//!
+//! \brief Almost stateless pool allocator.
+//!
+//! Provides the interface for shared memory pool.
+//! \tparam Type for whom memory should be allocated.
+//!
 template< typename T >
 class pool_allocator
 {
 public:
+    //!
+    //! \brief Constructs pool allocator with memory pool given.
+    //! \param[in] Memory pool to use with this allocator.
+    //!
     pool_allocator(pool_base *pool);
+
+    //! Deallocates allocator.
     ~pool_allocator();
 
+    //!
+    //! \brief Allocates memory for given object count.
+    //!
+    //! \warn This will not call object constructors.
+    //! Memory will have alingment requirements of given type.
+    //! \param[in] n Objects count.
+    //! \return Valid pointer to an uninitilized memory if allocation sucessed.
+    //!         Nullptr otherwise.
+    //!
     T* allocate(size_t n);
     void deallocate(T *p, size_t n);
 
-    // Create new instanse of the allocator, suitable for a new type
+    //! \brief Create new instanse of the allocator, suitable for a new type
+    //! \tparam U A new allocator type.
     template< typename U >
     pool_allocator< U > rebind() const;
 
 private:
-    pool_base *m_pool;
+    pool_base *m_pool; //!< Memory pool. \todo use reference instead of pointer.
 };
 
 
