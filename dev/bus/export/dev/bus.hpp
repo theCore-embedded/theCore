@@ -20,8 +20,8 @@
 namespace ecl
 {
 
-//!
 //! \brief Generic bus interface.
+//!
 //! The generic bus is useful adapter, that allows to:
 //! \li Encapsulate locking policy when multithreded environment is used.
 //! \li Hide differences between full-duplex and half-duplex busses.
@@ -42,15 +42,14 @@ public:
     //!
     ~generic_bus();
 
-    //!
     //! \brief Inits a bus.
+    //!
     //! Lazy initialization. Inits an underlaying platform bus.
     //! \todo introduce init counter.
     //! \return Status of operation.
     //!
     static err init();
 
-    //!
     //! \brief De-inits a bus.
     //! \pre Bus is initied.
     //! \todo use init counter to measure how many users are inited this bus.
@@ -58,22 +57,20 @@ public:
     //!
     static err deinit();
 
-    //!
     //! \brief Locks a bus.
+    //!
     //! Any further operations can be executed after call to this function.
     //! If previous async xfer is in progress then current thread will be blocked
     //! until its finish.
-    //!
     //! \pre    Bus is inited successfully.
     //! \post   Bus is locked.
     //! \sa     unlock()
     //!
     static void lock();
 
-    //!
     //! \brief Unlocks a bus.
-    //! Any operations beside lock() is not permitted after this method finishes.
     //!
+    //! Any operations beside lock() is not permitted after this method finishes.
     //! \par Side effects:
     //! \li In block mode all buffers provided with set_buffers() will be discarded
     //! \li In async mode if opration still ongoing, buffers will be discarded
@@ -85,15 +82,13 @@ public:
     //!
     static void unlock();
 
-    //!
     //! \brief Sets RX and TX buffers and their sizes.
+    //!
     //! If only TX or RX transaction required, then only one buffer must
     //! be passed. All effects from calls to set_buffers() will be discarded.
-    //!
     //! \par Side effects:
     //! \li Bus will remember all buffers, until unlock() or set_buffers()
     //!     will be called.
-    //!
     //! \pre       Bus is locked.
     //! \post      Bus is ready to execute xfer.
     //! \param[in] tx   Data to transmit.
@@ -107,19 +102,17 @@ public:
     //!
     static err set_buffers(const uint8_t *tx, uint8_t *rx, size_t size);
 
-    //!
     //! \brief Sets TX buffer size and fills it with given byte.
+    //!
     //! This will instruct a platform bus to send a byte given number of times.
     //! It is implementation defined how bis is chunks in which data is sent.
     //! If possible, platform bus will just send single-byte buffer via DMA.
     //!
     //! In half-duplex case RX will not be performed. If platform bus is in
     //! full duplex mode then RX will be exeucted but RX data will be ignored.
-    //!
     //! \par Side effects:
     //! \li Bus will remember a buffer, until unlock() or set_buffers()
     //!     will be called.
-    //!
     //! \pre       Bus is locked.
     //! \post      Bus is ready to execute xfer.
     //! \param[in] size         Size of filled buffer.
@@ -129,8 +122,8 @@ public:
     //!
     static err set_buffers(size_t size, uint8_t fill_byte = 0xff);
 
-    //!
     //! \brief Performs xfer in blocking mode using buffers set previously.
+    //!
     //! If underlying bus works in half-duplex mode then first tx transaction
     //! will occur and then rx.
     //! \warning Method uses a semaphore to wait for a bus event (most likely
@@ -138,7 +131,6 @@ public:
     //! without RTOS it is implemented as simple spin-lock. Likely that
     //! such behaviour is unwanted. In order to control event handling,
     //! consider using xfer(const handler_fn &handler) overload.
-    //!
     //! \pre        Bus is locked and buffers are set.
     //! \post       Bus remains in the same state.
     //! \param[out] sent        Optional. Bytes sent during this xfer.
@@ -150,8 +142,8 @@ public:
     //!
     static err xfer(size_t *sent = nullptr, size_t *received = nullptr);
 
-    //!
     //! \brief Performs xfer in async mode using buffers set previously.
+    //!
     //! If underlying bus works in half-duplex mode then first tx transaction
     //! will occur and then rx.
     //! When xfer will be done, given handler will be invoked with a
@@ -177,7 +169,6 @@ private:
     using mutex         = ecl::mutex;
     using atomic_flag   = std::atomic_flag;
 
-    //!
     //! \brief Event handler dedicated to the platform bus.
     //! \param[in] ch     Channel (rx or tx) where the event occurred.
     //! \param[in] type   Type of event occurred.
@@ -185,15 +176,12 @@ private:
     //!
     static void platform_handler(bus_channel ch, bus_event type, size_t total);
 
-    //!
     //! \brief Checks if bus is busy transferring data at this moment or not.
     //! \retval true Bus is busy.
     //!
     static bool bus_is_busy();
 
-    //!
     //! \brief Performs cleanup required after unlocking and delivering an event.
-    //!
     static void cleanup();
 
     // State flags.
