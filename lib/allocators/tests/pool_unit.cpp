@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <map>
+#include <iostream>
 
 #include <CppUTest/TestHarness.h>
 #include <CppUTestExt/MockSupport.h>
