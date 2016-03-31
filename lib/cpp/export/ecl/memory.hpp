@@ -9,12 +9,16 @@
 namespace ecl
 {
 
-// The base helper class
+//!
+//! \brief Base helper class, used internally by shared_ptr
+//!
 class aux
 {
 public:
     aux()
         :m_cnt{0}, m_weak{0} { }
+
+    virtual ~aux() { }
 
     // Increments/decrements/gets the reference counter
     size_t inc() { return ++m_cnt; }
@@ -38,6 +42,9 @@ protected:
 
 //------------------------------------------------------------------------------
 
+//!
+//! \brief Classical shared pointer.
+//!
 template< typename T >
 class shared_ptr
 {
@@ -203,8 +210,9 @@ shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
         m_obj = other.m_obj;
 
         // Empty shared pointer assigment can be allowed, too.
-        if (m_aux)
+        if (m_aux) {
             m_aux->inc();
+        }
     }
 
     return *this;
@@ -216,8 +224,9 @@ shared_ptr< T >::shared_ptr(shared_ptr< U > &other)
     :m_aux(other.m_aux)
     ,m_obj(other.m_obj)
 {
-    if (m_aux)
+    if (m_aux) {
         m_aux->inc();
+    }
     // Else do nothing. Copy constructing from empty shared pointer is allowed.
 }
 
@@ -243,8 +252,9 @@ shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr< U > &other)
     m_obj = other.m_obj;
 
     // Empty shared pointer assigment can be allowed, too.
-    if (m_aux)
+    if (m_aux) {
         m_aux->inc();
+    }
 
     return *this;
 }
