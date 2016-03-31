@@ -15,8 +15,8 @@ tolower.c
 )
 
 # Tests
-add_unit_host_test(NAME test_memset SOURCES tests/memset_unit.cpp memset.c)
-add_unit_host_test(NAME test_memcpy SOURCES tests/memcpy_unit.cpp memcpy.c)
+add_unit_host_test(NAME memset SOURCES tests/memset_unit.cpp memset.c)
+add_unit_host_test(NAME memcpy SOURCES tests/memcpy_unit.cpp memcpy.c)
 
 target_include_directories(emc PUBLIC export)
 target_include_directories(emc PRIVATE .)

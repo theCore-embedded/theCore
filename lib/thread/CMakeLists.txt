@@ -38,7 +38,7 @@ target_link_libraries(thread PUBLIC thread_os)
 # TODO: add here 'if' statemenent to somehow emphasize that some tests
 # are included depending on which library is used.
 add_unit_host_test(
-	NAME test_semaphore
+	NAME semaphore
 	SOURCES tests/semaphore_unit.cpp
 	# TODO: proper dependenices! What is about compilation on Win system?
 	DEPENDS thread_os pthread
@@ -46,7 +46,7 @@ add_unit_host_test(
 
 if ("${CONFIG_OS}" STREQUAL "host")
 	add_unit_host_test(
-		NAME test_thread
+		NAME thread
 		SOURCES tests/thread_unit.cpp
 		# TODO: proper dependenices! What is about compilation on Win system?
 		DEPENDS thread_os pthread
