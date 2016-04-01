@@ -1,16 +1,27 @@
 #include "memory.hpp"
 
+#include <new>
+
+struct mock_aux : ecl::aux
+{
+    mock_aux() :ecl::aux{} { }
+    virtual void destroy();
+};
+
+// TODO: comment about why it is placed exacly here
+void init_aux(void *in)
+{
+    new (in) mock_aux;
+}
+
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
 #include <CppUTestExt/MockSupport.h>
 
-struct mock_aux : ecl::aux
+void mock_aux::destroy()
 {
-    virtual void destroy()
-    {
-        mock("aux").actualCall("destroy");
-    }
-};
+    mock("aux").actualCall("destroy");
+}
 
 TEST_GROUP(aux)
 {
@@ -18,13 +29,14 @@ TEST_GROUP(aux)
 
     void setup()
     {
-        test_aux = new mock_aux;
+        void *ptr = aligned_alloc(alignof(mock_aux), sizeof(mock_aux));
+        init_aux(ptr);
+        test_aux = reinterpret_cast< mock_aux* >(ptr);
     }
 
     void teardown()
     {
         mock().clear();
-        delete test_aux;
     }
 };
 

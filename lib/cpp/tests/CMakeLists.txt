@@ -4,3 +4,8 @@ add_unit_host_test(
 	DEPENDS utils
 	INC_DIRS ../export/ecl)
 
+add_unit_host_test(
+	NAME shared
+	SOURCES shared_unit.cpp
+	DEPENDS utils
+	INC_DIRS ../export/ecl)

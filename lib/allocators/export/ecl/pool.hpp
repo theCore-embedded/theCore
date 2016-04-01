@@ -406,6 +406,8 @@ public:
     //!         Nullptr otherwise.
     //!
     T* allocate(size_t n);
+
+    //! \todo: fill docs
     void deallocate(T *p, size_t n);
 
     //! \brief Create new instanse of the allocator, suitable for a new type

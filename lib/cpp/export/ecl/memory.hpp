@@ -1,5 +1,12 @@
+//!
+//! \file
+//! \brief Memory managment helpers: shared pointer.
+//! \todo Implement unique poitner
+//! \todo Detailed description
+//!
 #ifndef ECL_MEMORY_HPP_
 #define ECL_MEMORY_HPP_
+
 
 #include <ecl/assert.h>
 
@@ -15,85 +22,141 @@ namespace ecl
 class aux
 {
 public:
+    //! Constructs auxilary object
     aux()
         :m_cnt{0}, m_weak{0} { }
 
-    virtual ~aux() { }
-
-    // Increments/decrements/gets the reference counter
+    //! Incremets reference counter and returns new value.
     size_t inc() { return ++m_cnt; }
+    //! Decrements reference counter and returns new value.
     size_t dec() { return --m_cnt; }
+    //! Returns reference counter.
     size_t ref() { return m_cnt;   }
 
-    // Reference counting for weak references
+    //! Incremets weak reference counter and returns new value.
     size_t weak_inc() { return ++m_weak; }
+    //! Decrements weak reference counter and returns new value.
     size_t weak_dec() { return --m_weak; }
+    //! Returns wek reference counter.
     size_t weak_ref() { return m_weak;   }
 
-    // Destroys aux and deallocates memory if both shared and weak counter is zero.
-    // Destructor of the managed object must not be called here.
-    // _Must_ be called to destroy whole object.
+    //!
+    //! \brief  Destroys aux and deallocates memory if both shared and weak
+    //!         counter is zero.
+    //!
+    //! Destructor of the managed object must not be called here.
+    //! _Must_ be called to destroy whole object.
     virtual void destroy() = 0;
 
 protected:
-    size_t m_cnt;
-    size_t m_weak;
+    size_t m_cnt;       //!< Reference counter.
+    size_t m_weak;      //!< Weak reference counter.
 };
 
 //------------------------------------------------------------------------------
 
 //!
 //! \brief Classical shared pointer.
+//! \todo Mention about manadatory allocator for creating shared pointer
 //!
 template< typename T >
 class shared_ptr
 {
+    //! \brief Allocates a shared pointer.
+    //! \tparam U Is a T or is a subclass of T.
     template< typename U, class Alloc, class... Args >
     friend shared_ptr< U > allocate_shared(const Alloc& alloc, Args... args);
 
+    //! \brief Related shared pointer type.
+    //! \tparam U Is a subclass of T.
     template< typename U >
     friend class shared_ptr;
 
+    //! \brief Weak reference.
+    //! \tparam U Is a T or a subclass of T.
     template< typename U >
     friend class weak_ptr;
 
-    template< typename U, class Alloc >
-    friend struct allocation_size_info;
-
 public:
+    //! Constructs default shared pointer with no managed object.
     shared_ptr();
+    //! Destroys shared pointer and if counter
     virtual ~shared_ptr();
 
+    //! Initializes shared pointer with nullpointer
     shared_ptr(std::nullptr_t nullp);
+
+    //!
+    //! \brief   Constrcuts from existing pointer and inherit its ownership.
+    //! \details If other pointer manages no object, this manages no object too.
+    //! \param[in] other Valid shared pointer.
+    //!
     shared_ptr(const shared_ptr &other);
+
+    //!
+    //! \brief   Moves other shared pointer and inherit ownership.
+    //! \details This will not increase refernce counter, obviously.
+    //! \param[in] other Valid shared pointer to move. After moving pointer will
+    //!                  no longer hold any reference and will return to the
+    //!                  default state.
+    //!
     shared_ptr(shared_ptr &&other);
+
+    //!
+    //! \brief   Shares ownership of the object with a pointer provided.
+    //! \details This shared pointer will release ownership of the previously
+    //!          managed object if any. In case other pointer owns an
+    //!          object then new ownership will be applied to this pointer
+    //!          and it will be shared with other pointer.
+    //! \param[in] other Valid shared pointer.
+    //! \return This shared object.
+    //!
     shared_ptr& operator=(const shared_ptr &other);
+
+    //!
+    //! \brief Moves ownership from the pointer provided.
+    //! \details  This shared pointer will release ownership of the previously
+    //!           managed object if any. Other pointer will no longer own
+    //!           any object.
+    //! \param[in] other Valid shared pointer.
+    //! \return This shared object.
+    //!
+    shared_ptr& operator=(shared_ptr &&other);
+
+    //! Returns true if this shared pointer manages the object.
     explicit operator bool() const;
 
-    // Constructs/assigns pointer from dependent type.
-    // T and U must be in relation, such that
-    // U is subclass of T.
+    //!
+    //! \copydoc shared_ptr(const shared_ptr &other)
+    //! \tparam U Is a subclass of T
+    //!
     template< typename U >
     shared_ptr(shared_ptr< U > &other);
+
+    //!
+    //! \brief Shares ownership with a shared pointer of the derived type.
+    //! \tparam U Is a subclass of T
+    //!
     template< typename U >
     shared_ptr& operator=(shared_ptr< U > &other);
 
-    // Returns true if this pointer holds the last remaining node
+    //! Returns true if this pointer holds the last remaining node
     bool unique() const;
-    // Returns true if no weak pointers exists that points to the same object
-    bool weak_unique() const;
 
-    // Returs a value itself
+    //! Returs a value itself
     T* get() const;
 
-    // Common smart pointer overloads
+    //! Common smart pointer overload.
     T& operator *();
+    //! Common smart pointer overload.
     const T& operator*() const;
+    //! Common smart pointer overload.
     T* operator ->();
+    //! Common smart pointer overload.
     const T* operator ->() const;
 
 private:
-    // Type-erased helper class
+    //! Type-erased helper class
     template< class Alloc, class... Args >
     class aux_alloc : public aux
     {
@@ -104,6 +167,7 @@ private:
             ,m_alloc(a)
         { }
 
+        //! \copydoc aux::destroy
         virtual void destroy() override
         {
             // Make sure there is no other references
@@ -119,17 +183,18 @@ private:
         // Cannot be deleted by calling dtor
         ~aux_alloc() = delete;
 
-        // An object itself
-        T        m_object;
+        T        m_object; //! The managed object.
 
     private:
-        Alloc    m_alloc;
+        Alloc    m_alloc;  //! The allocator used to allocated this object.
     };
 
-    // Helper object
-    aux  *m_aux;
-    // Object itself
-    T    *m_obj;
+    //! Releases the ownership.
+    //! \todo: describe post and pre conditions
+    void release();
+
+    aux  *m_aux; //! Helper object.
+    T    *m_obj; //! Object itself.
 };
 
 //------------------------------------------------------------------------------
@@ -145,19 +210,7 @@ shared_ptr< T >::shared_ptr()
 template< typename T >
 shared_ptr< T >::~shared_ptr()
 {
-    if (m_aux) {
-        if (unique()) {
-            // Object of T can contain weak reference of the same resourse.
-            // Thus it is prohibited to decrease counter before
-            // object desctruction.
-            m_obj->~T();
-            // Now we can complete.
-            m_aux->dec();
-            m_aux->destroy();
-        } else {
-            m_aux->dec();
-        }
-    }
+    release();
 }
 
 template< typename T >
@@ -173,9 +226,9 @@ shared_ptr< T >::shared_ptr(const shared_ptr &other)
     :m_aux{other.m_aux}
     ,m_obj{other.m_obj}
 {
-
-    if (m_aux)
+    if (m_aux) {
         m_aux->inc();
+    }
     // Else do nothing. Copy constructing from empty shared pointer is allowed.
 }
 
@@ -192,19 +245,7 @@ template< typename T >
 shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
 {
     if (&other != this) {
-        if (m_aux) {
-            if (unique()) {
-                // Release the resource
-                m_obj->~T();
-                // Object of T can contain weak reference of the same resourse.
-                // Thus it is prohibited to decrease counter before
-                // object desctruction.
-                m_aux->dec();
-                m_aux->destroy();
-            } else {
-                m_aux->dec();
-            }
-        }
+        release();
 
         m_aux = other.m_aux;
         m_obj = other.m_obj;
@@ -213,6 +254,19 @@ shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
         if (m_aux) {
             m_aux->inc();
         }
+    }
+
+    return *this;
+}
+
+template< typename T >
+shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr &&other)
+{
+    if (&other != this) {
+        release();
+
+        std::swap(m_aux, other.m_aux);
+        std::swap(m_obj, other.m_obj);
     }
 
     return *this;
@@ -234,19 +288,7 @@ template< typename T >
 template< typename U >
 shared_ptr< T >& shared_ptr< T >::operator=(shared_ptr< U > &other)
 {
-    if (m_aux) {
-        if (unique()) {
-            // Release the resource
-            m_obj->~T();
-            // Object of T can contain weak reference of the same resourse.
-            // Thus it is prohibited to decrease counter before
-            // object desctruction.
-            m_aux->dec();
-            m_aux->destroy();
-        } else {
-            m_aux->dec();
-        }
-    }
+    release();
 
     m_aux = other.m_aux;
     m_obj = other.m_obj;
@@ -312,6 +354,29 @@ shared_ptr< T >::operator bool() const
 
 //------------------------------------------------------------------------------
 
+template< typename T >
+void shared_ptr< T >::release()
+{
+    if (m_aux) {
+        if (unique()) {
+            // Release the resource
+            m_obj->~T();
+            // Object of T can contain weak reference of the same resourse.
+            // Thus it is prohibited to decrease counter before
+            // object desctruction.
+            m_aux->dec();
+            m_aux->destroy();
+        } else {
+            m_aux->dec();
+        }
+
+        m_aux = nullptr;
+        m_obj = nullptr;
+    }
+}
+
+//------------------------------------------------------------------------------
+
 template< typename T, class Alloc, class... Args >
 shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
 {
@@ -328,7 +393,7 @@ shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
     // Construct a pointer
     shared_ptr< T > shared;
     shared.m_aux = ptr;
-    // Now it is owning the resourse
+    // Now it owns the resourse
     shared.m_aux->inc();
     shared.m_obj = &ptr->m_object;
 
