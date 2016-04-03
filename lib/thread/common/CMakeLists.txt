@@ -1,4 +1,4 @@
-add_library(thread_common future.cpp mutex.cpp semaphore.cpp spinlock.cpp)
+add_library(thread_common mutex.cpp semaphore.cpp spinlock.cpp)
 target_include_directories(thread_common PUBLIC export)
 target_link_libraries(thread_common PUBLIC utils)
 

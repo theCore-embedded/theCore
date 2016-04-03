@@ -5,6 +5,7 @@
 #include <atomic>
 #include <algorithm>
 #include <functional>
+#include <iostream>
 
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
@@ -89,11 +90,19 @@ TEST(semaphore, one_semaphore_few_threads)
     int signalled = 0;
 
     // Semaphore itself
-    ecl::semaphore semaphore;
+    ecl::semaphore entry_semaphore;
+    ecl::semaphore exit_semaphore;
 
-    auto single_thread = [&counter, &semaphore]() {
-        semaphore.wait();
+    auto single_thread = [&counter, &entry_semaphore, &exit_semaphore]() {
+        std::cout << "entry wait!" << std::endl;
+
+        ecl::err ret;
+        while ((ret = entry_semaphore.try_wait()) == ecl::err::again) {
+            std::this_thread::yield();
+        }
+
         counter++;
+        exit_semaphore.signal();
     };
 
     std::array< std::thread, threads_count > threads;
@@ -105,16 +114,22 @@ TEST(semaphore, one_semaphore_few_threads)
         thread = std::thread(single_thread);
     });
 
-    // Let them wait on semaphore
+    // Let thread wait on semaphore
     test_delay(20);
     // Threads are started and should wait for orders
     CHECK_EQUAL(0, counter);
     // Unblock threads one by one
     test_for_each(threads, [&](auto &thread) {
         (void) thread; // We don't need this
-        semaphore.signal();
+
+        entry_semaphore.signal();
         signalled++;
-        test_delay(100); // Let some thread finish its work
+
+        ecl::err ret;
+        while ((ret = exit_semaphore.try_wait()) == ecl::err::again) {
+            std::this_thread::yield();
+        }
+
         CHECK_EQUAL(signalled, counter); // Check that only one thread is finished
     });
 
@@ -156,7 +171,7 @@ TEST(semaphore, multiple_threads)
     // Unblock threads
     test_for_each(objs, [](auto &obj) { obj.semaphore.signal(); });
     // Let threads do the work
-    test_delay(100);
+    test_delay(50);
     // Check that work is done
     test_for_each(objs, [](auto &obj) { CHECK(obj.flag); });
     // Wait for threads to finish
