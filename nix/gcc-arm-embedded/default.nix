@@ -24,11 +24,11 @@ stdenv.mkDerivation {
   };
 
   buildInputs = [ bzip2 patchelf ];
- 
+
   dontPatchELF = true;
-  
+
   phases = "unpackPhase patchPhase installPhase";
-  
+
   installPhase = ''
     mkdir -pv $out
     cp -r ./* $out
