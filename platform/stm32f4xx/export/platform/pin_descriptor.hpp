@@ -58,6 +58,18 @@ static constexpr GPIO_TypeDef *pick_port(pin::port port)
         return GPIOD;
     case pin::port::port_e:
         return GPIOE;
+    case pin::port::port_f:
+        return GPIOF;
+    case pin::port::port_g:
+        return GPIOG;
+    case pin::port::port_h:
+        return GPIOH;
+    case pin::port::port_i:
+        return GPIOI;
+    case pin::port::port_j:
+        return GPIOJ;
+    case pin::port::port_k:
+        return GPIOK;
     default:
         return nullptr;
     }

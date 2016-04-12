@@ -54,6 +54,11 @@ enum class port
     port_d,
     port_e,
     port_f,
+    port_g,
+    port_h,
+    port_i,
+    port_j,
+    port_k
 };
 
 // Type of pin
