@@ -1,0 +1,9 @@
+language: cpp
+sudo: required
+dist: trusty
+install:
+    - curl https://nixos.org/nix/install | sh
+    - . $HOME/.nix-profile/etc/profile.d/nix.sh
+    - nix-shell --pure --run true
+
+script: nix-shell --pure --run ./scripts/ci_test.sh
