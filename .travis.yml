@@ -1,6 +1,11 @@
 language: cpp
 sudo: required
 dist: trusty
+branches:
+    only:
+        - develop
+        - master
+
 install:
     - curl https://nixos.org/nix/install | sh
     - . $HOME/.nix-profile/etc/profile.d/nix.sh
