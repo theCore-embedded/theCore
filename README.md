@@ -1,5 +1,6 @@
 # The Core: C++ Embedded Framework
----
+
+[![Build Status](https://travis-ci.org/forGGe/theCore.svg?branch=master)](https://travis-ci.org/forGGe/theCore)
 ## Description
 
 The Core is highly configurable, straightforward C++ framework with minimum
