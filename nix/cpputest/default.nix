@@ -4,6 +4,7 @@
 , autoconf
 , automake
 , libtool
+, gcc5
 }:
 
 stdenv.mkDerivation {
@@ -14,7 +15,7 @@ stdenv.mkDerivation {
     ./configure --prefix=$out
   '';
 
-  buildInputs = [ autoconf automake libtool ];
+  buildInputs = [ gcc5 autoconf automake libtool ];
 
   src = fetchFromGitHub {
     owner = "cpputest";
