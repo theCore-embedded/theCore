@@ -21,7 +21,6 @@ endif()
 set(SRC_DIR freertos/FreeRTOS/Source/)
 
 # Obtain some processor info
-#get_property(TARGET_ARCH GLOBAL PROPERTY TARGET_PROCESSOR_ARCHITECTURE)
 set(TARGET_ARCH ${TARGET_PROCESSOR_ARCHITECTURE})
 
 # Compiler-dependent paths.
