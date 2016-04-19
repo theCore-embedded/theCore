@@ -13,12 +13,12 @@ bool in_isr();
 //!
 //! \brief Disables interrupt.
 //!
-void disable_interrupts();
+void disable_irq();
 
 //!
 //! \brief Enables interrupt.
 //!
-void enable_interrupts();
+void enable_irq();
 
 }
 
