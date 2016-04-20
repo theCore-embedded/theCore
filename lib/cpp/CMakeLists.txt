@@ -27,5 +27,5 @@ endif()
 target_link_libraries(libcpp PUBLIC ${CONFIG_CONSOLE_LIB})
 add_cppcheck(libcpp UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
 
-add_unit_host_test(NAME ostream_test SOURCES tests/ostream_unit.cpp
+add_unit_host_test(NAME iostream_test SOURCES tests/iostream_unit.cpp
                                      INC_DIRS export)

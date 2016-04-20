@@ -78,7 +78,6 @@ istream<IO_device>& istream< IO_device >::operator>>(int& value)
 
         else if(symbol_code == 45 && first == true) {
             sign = true;
-            first = false;
         }
 
         else if (in_character != '\n') {
@@ -88,6 +87,8 @@ istream<IO_device>& istream< IO_device >::operator>>(int& value)
         if(m_device->read((uint8_t*) &in_character, 1) < 0) {
             break;
         }
+
+        first = false;
     } while(in_character != '\n' && in_character != ' ');
 
     if(sign == true) {
@@ -142,7 +143,9 @@ istream<IO_device>& istream< IO_device >::operator>>(char& character)
         if(m_device->read((uint8_t*) &in_char_for_spaces, 1) < 0) {
             break;
         }
-    } while(in_char_for_spaces == ' ');
+    } while(in_char_for_spaces == ' ' ||
+            in_char_for_spaces == '\n' ||
+            in_char_for_spaces == '\t');
 
     character = in_char_for_spaces;
 
@@ -152,23 +155,29 @@ istream<IO_device>& istream< IO_device >::operator>>(char& character)
 template< class IO_device >
 istream<IO_device>& istream< IO_device >::operator>>(char *string)
 {
-    size_t i = 1;
+    size_t i = 0;
     char in_char_for_spaces;
 
     do{
         if(m_device->read((uint8_t*) &in_char_for_spaces, 1) < 0) {
             break;
         }
-    } while(in_char_for_spaces == ' ');
+    } while(in_char_for_spaces == ' ' ||
+            in_char_for_spaces == '\n' ||
+            in_char_for_spaces == '\t');
 
     string[0] = in_char_for_spaces;
 
     do {
+        i++;
         if(m_device->read((uint8_t *) &string[i], 1) < 0) {
             break; //FIXME: add error handling
         }
     }
-    while(string[i] != '\n' && string[i++] != ' ');
+    while(string[i] != '\n' &&
+          string[i] != ' ' &&
+          string[i] != '\t');
+    string[i] = '\0';
     return *this;
 }
 

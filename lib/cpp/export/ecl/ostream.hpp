@@ -78,15 +78,18 @@ ostream<IO_device>& ostream< IO_device >::operator<< (int value)
         value *= -1;
     }
 
+    int delim = higher_multiplicand;
+
     for (int i = 1; i <= higher_multiplicand; i *= 10) {
-        out_digit = value * i / higher_multiplicand;
+        out_digit = value / delim;
         out_character = out_digit + 48;
 
         if (m_device->write((uint8_t *) &out_character, 1) < 0) {
             break; //FIXME: add error handling
         }
 
-        value = value - out_digit * higher_multiplicand / i;
+        value = value - out_digit * delim;
+        delim /= 10;
     }
 
     return *this;
@@ -98,7 +101,7 @@ ostream<IO_device>& ostream< IO_device >::operator<< (unsigned int value)
 {
     int higher_multiplicand = 1;
     int out_digit = 0;
-    int val2 = value;
+    unsigned int val2 = value;
     char out_character;
 
     while(val2 / 10 != 0) {
@@ -106,15 +109,18 @@ ostream<IO_device>& ostream< IO_device >::operator<< (unsigned int value)
         val2 /= 10;
     }
 
+    int delim = higher_multiplicand;
+
     for (int i = 1; i <= higher_multiplicand; i *= 10) {
-        out_digit = value * i / higher_multiplicand;
+        out_digit = value / delim;
         out_character = out_digit + 48;
 
         if (m_device->write((uint8_t *) &out_character, 1) < 0) {
             break; //FIXME: add error handling
         }
 
-        value = value - out_digit * higher_multiplicand / i;
+        value = value - out_digit * delim;
+        delim /= 10;
     }
 
     return *this;
