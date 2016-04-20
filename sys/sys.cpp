@@ -27,11 +27,10 @@ void operator delete(void *, unsigned int)
 #endif
 
 // TODO: move this to toolchain-dependent module
-__attribute__((used))
 uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
 
 // TODO: move this to toolchain-dependent module
-extern "C" __attribute__((noreturn)) __attribute__((used))
+extern "C" __attribute__((noreturn))
 void __stack_chk_fail(void)
 {
     ecl::cout << "Fail!!!" << ecl::endl;
@@ -39,7 +38,7 @@ void __stack_chk_fail(void)
 }
 
 // TODO: move this to toolchain-dependent module
-extern "C" __attribute__((used))
+extern "C"
 int atexit (void (*func)(void))
 {
     (void) func;
@@ -47,23 +46,23 @@ int atexit (void (*func)(void))
 }
 
 // TODO: move this to toolchain-dependent module
-extern "C" __attribute__((used))
+extern "C"
 int __cxa_guard_acquire(int *gv)
 {
     // Disable interrupts to prevent concurent access
     ecl::disable_irq();
 
-    if ((*gv) & 1) {
+    if (*gv == 1) {
         // Already locked
         return 0;
     } else {
-        *gv |= 1;
+        *gv = 1;
         return 1;
     }
 }
 
 // TODO: move this to toolchain-dependent module
-extern "C" __attribute__((used))
+extern "C"
 void __cxa_guard_release(int *gv)
 {
     (void) gv;
@@ -86,16 +85,16 @@ extern "C" void core_main(void)
     board_init();
     kernel_init();
 
-	extern uint32_t ___init_array_start;
-	extern uint32_t ___init_array_end;
+    extern uint32_t ___init_array_start;
+    extern uint32_t ___init_array_end;
 
-	for (uint32_t *p = &___init_array_start; p < &___init_array_end; ++p) {
-		// Iterator points to a memory which contains an address of a
-		// initialization function.
-		// Equivalent of:
-		// void (*fn)() = p;
-		// fn();
-		((void (*)()) *p)();
+    for (uint32_t *p = &___init_array_start; p < &___init_array_end; ++p) {
+        // Iterator points to a memory which contains an address of a
+        // initialization function.
+        // Equivalent of:
+        // void (*fn)() = p;
+        // fn();
+        ((void (*)()) *p)();
     }
 
     IRQ_manager::init();
@@ -119,7 +118,7 @@ namespace std
 // TODO: move this to toolchain-dependent module
 void __throw_bad_function_call()
 {
-	// TODO: abort
-	for (;;);
+    // TODO: abort
+    for (;;);
 }
 }
