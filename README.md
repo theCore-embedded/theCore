@@ -1,5 +1,7 @@
 # The Core: C++ Embedded Framework
 
+[![Join the chat at https://gitter.im/forGGe/theCore](https://badges.gitter.im/forGGe/theCore.svg)](https://gitter.im/forGGe/theCore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/forGGe/theCore.svg?branch=master)](https://travis-ci.org/forGGe/theCore)
 ## Description
 
