@@ -53,16 +53,22 @@ set(CMAKE_CXX_FLAGS
 	CACHE STRING "C++ flags")
 
 # Release flags, optimization is on,
-set(CMAKE_C_FLAGS_RELEASE "-O3 -flto=4 -ffat-lto-objects " CACHE STRING "Debug C flags")
-set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+set(CMAKE_C_FLAGS_RELEASE "-O3 -flto=4 -ffat-lto-objects "
+	CACHE STRING "Release C flags")
+set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE}
+	CACHE STRING "Release C++ flags")
 
 # Minimum size release flags, LTO and minimum size
-set(CMAKE_C_FLAGS_MINSIZEREL "-Os -flto=4 -ffat-lto-objects ")
-set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL})
+set(CMAKE_C_FLAGS_MINSIZEREL "-Os -flto=4 -ffat-lto-objects "
+	CACHE STRING "Minsize C flags")
+set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL}
+	CACHE STRING "Minsize C++ flags")
 
 # Debug mode, no LTO and maximum debug info
-set(CMAKE_C_FLAGS_DEBUG  "-O0 -g3 " CACHE STRING "Debug C flags")
-set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG} CACHE STRING "Debug C++ flags")
+set(CMAKE_C_FLAGS_DEBUG  "-O0 -g3 "
+	CACHE STRING "Debug C flags")
+set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG}
+	CACHE STRING "Debug C++ flags")
 
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy CACHE STRING "Objcopy executable")
 

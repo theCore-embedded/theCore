@@ -26,7 +26,7 @@ ecl::os::thread_handle ecl::os::this_thread::get_handle()
     TaskHandle_t handle = NULL;
 
     if (!ecl::in_isr()) {
-        ecl::disable_interrupts();
+        ecl::disable_irq();
         handle = reinterpret_cast< TaskHandle_t >(pxCurrentTCB);
     }
 
