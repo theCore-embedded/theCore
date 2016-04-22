@@ -32,15 +32,9 @@ template< class PBus >
 class generic_bus
 {
 public:
-    //!
-    //! \brief Constructs a bus.
-    //!
-    generic_bus();
-
-    //!
-    //! \brief Destructs a bus.
-    //!
-    ~generic_bus();
+    //! Costruction is not allowed.
+    generic_bus() = delete;
+    ~generic_bus() = delete;
 
     //! \brief Inits a bus.
     //!
@@ -218,18 +212,6 @@ template< class PBus > std::atomic_flag         generic_bus< PBus >::m_cleaned{}
 template< class PBus > uint8_t                  generic_bus< PBus >::m_state{};
 
 //------------------------------------------------------------------------------
-
-template< class PBus >
-generic_bus< PBus >::generic_bus()
-{
-
-}
-
-template< class PBus >
-generic_bus< PBus >::~generic_bus()
-{
-    // TODO: what to do if bus is destroyed?
-}
 
 template< class PBus >
 err generic_bus< PBus >::init()
