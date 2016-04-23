@@ -85,7 +85,6 @@ public:
     ecl::err last_error() const;
 
 private:
-    GBus m_gbus;    //!< Generic bus.
     err  m_last;    //!< Last bus error.
 
     //!
@@ -99,7 +98,6 @@ private:
 
 template< class GBus >
 bus_pipe< GBus >::bus_pipe()
-    :m_gbus{}
 {
 
 }
@@ -113,7 +111,7 @@ bus_pipe< GBus >::~bus_pipe()
 template< class GBus >
 ecl::err bus_pipe< GBus >::init()
 {
-    return (m_last = m_gbus.init());
+    return (m_last = GBus::init());
 }
 
 template< class GBus >
@@ -127,12 +125,12 @@ ssize_t bus_pipe< GBus >::write(const uint8_t *data, size_t count)
     size_t sent = 0;
     ssize_t ret;
 
-    m_gbus.lock();
-    m_gbus.set_buffers(data, nullptr, count);
+    GBus::lock();
+    GBus::set_buffers(data, nullptr, count);
 
-    m_last = m_gbus.xfer(&sent);
+    m_last = GBus::xfer(&sent);
 
-    m_gbus.unlock();
+    GBus::unlock();
 
     ret = sent;
 
@@ -155,12 +153,12 @@ ssize_t bus_pipe< GBus >::read(uint8_t *buffer, size_t size)
     size_t read = 0;
     ssize_t ret;
 
-    m_gbus.lock();
-    m_gbus.set_buffers(nullptr, buffer, size);
+    GBus::lock();
+    GBus::set_buffers(nullptr, buffer, size);
 
-    m_last = m_gbus.xfer(nullptr, &read);
+    m_last = GBus::xfer(nullptr, &read);
 
-    m_gbus.unlock();
+    GBus::unlock();
 
     ret = read;
 
