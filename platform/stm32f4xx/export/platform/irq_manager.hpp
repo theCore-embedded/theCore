@@ -1,3 +1,7 @@
+//!
+//! \file
+//! \brief stm32f4xx IRQ manager.
+//!
 #ifndef PLATFORM_IRQ_MANAGER_HPP
 #define PLATFORM_IRQ_MANAGER_HPP
 
@@ -5,6 +9,10 @@
 #include <core_cm4.h>
 
 #include <functional>
+#include <type_traits>
+
+// TODO: wrap whole module into the namespace
+// TODO: convert it to the snake_case
 
 using IRQn_t = IRQn_Type;
 
@@ -13,96 +21,75 @@ using IRQn_t = IRQn_Type;
 class IRQ_manager
 {
 public:
+    using handler_type = std::function< void() >;
+
     // TODO: setup VTOR?
     IRQ_manager() = delete;
     ~IRQ_manager() = delete;
 
-    static void init()
-    {
-        for (auto &h : m_handlers) {
-            h = default_handler;
-        }
+    //! Initializes IRQ manager and setups default handlers for every IRQ.
+    static void init();
 
-        __enable_irq();
-    }
+    //!
+    //! \brief Subscribes to given IRQ.
+    //! \param[in] irqn     Valid IRQ number.
+    //! \param[in] handler  New IRQ handler for given IRQ.
+    //! \retval 0 Success.
+    //!
+    static int subscribe(IRQn_t irqn, const handler_type &handler);
 
-    static int subscribe(IRQn_t IRQn, const std::function< void() > &handler)
-    {
-        // TODO: error check
+    //!
+    //! \brief Unsubscribes from given IRQ.
+    //! \detail Default handler will be used for given IRQ if this call succeed.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static int unsubscribe(IRQn_t irqn);
 
-        __disable_irq();
+    //!
+    //! \brief Masks or disables given IRQ.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static int mask(IRQn_t irqn);
 
-        // Magic here.
-        // Logical priority of *any* user interrupt that use
-        // FreeRTOS API must not be greather than
-        // configMAX_SYSCALL_INTERRUPT_PRIORITY
-        NVIC_SetPriority(IRQn, CONFIG_MAX_ISR_PRIORITY);
-        m_handlers[IRQn] = handler;
-        __enable_irq();
-        return 0;
-    }
+    //!
+    //! \brief Unmasks or enables given IRQ.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static int unmask(IRQn_t irqn);
 
-    static int unsubscribe(IRQn_t IRQn)
-    {
-        __disable_irq();
-        m_handlers[IRQn] = default_handler;
-        __enable_irq();
-        return 0;
-    }
-
-    static int mask(IRQn_t IRQn)
-    {
-        // TODO: error check
-        NVIC_DisableIRQ(IRQn);
-        return 0;
-    }
-
-    static int unmask(IRQn_t IRQn)
-    {
-        // TODO: error check
-        NVIC_EnableIRQ(IRQn);
-        return 0;
-    }
-
-    static int clear(IRQn_t IRQn)
-    {
-        // TODO: error check
-        NVIC_ClearPendingIRQ(static_cast< IRQn_t > (IRQn));
-        return 0;
-    }
+    //!
+    //! \brief Clears pending interrupt of given IRQ.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static int clear(IRQn_t irqn);
 
 private:
+    //! Total IRQ count.
+    static constexpr auto irqs = 82;
+    using handler_storage =
+    std::aligned_storage< sizeof(handler_type), alignof(handler_type) >;
+
     // Prevent optimizing out an ISR routine
-    __attribute__ ((used)) static void ISR()
+    __attribute__ ((used)) void isr();
+
+    //! Default iRQ handler. Terminates execution if called.
+    static void default_handler();
+
+    //! Storage for registered IRQ handlers.
+    static handler_storage m_storage[irqs];
+    // Useful alias to the handler storage.
+    // static handler_type (&m_handlers)[irqs];
+
+
+    static constexpr auto extract_handlers()
     {
-        volatile int IRQn;
-
-        asm volatile (
-                    "mrs %0, ipsr" : "=r" (IRQn)
-                    );
-
-        // IPSR holds exception numbers starting from 0
-        // Valid IRQ number starts from -15
-        // See Cortex-M4 processors documentation
-        // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/CHDBIBGJ.html
-        IRQn -= 16;
-
-        // TODO: Is it needed?
-        mask(static_cast< IRQn_t >(IRQn));
-        m_handlers[IRQn]();
+        return reinterpret_cast< handler_type* >(&m_storage);
     }
-
-    static void default_handler()
-    {
-        __disable_irq();
-        for(;;);
-    }
-
-    // Registered IRQ handlers
-    // TODO: magic numbers
-    static std::function< void() > m_handlers[82];
 };
-
 
 
 #endif
