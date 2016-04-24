@@ -28,19 +28,17 @@ namespace ecl
 //! \li Define and simplify platform-level bus interface
 //! \tparam PBus Plaform-level bus driver (I2C, SPI, etc.)
 //!
+//! This class uses one of methods to prevent “static initialization order
+//! fiasco” to handle initialization of the static members.
+//! See https://isocpp.org/wiki/faq/ctors
+//!
 template< class PBus >
 class generic_bus
 {
 public:
-    //!
-    //! \brief Constructs a bus.
-    //!
-    generic_bus();
-
-    //!
-    //! \brief Destructs a bus.
-    //!
-    ~generic_bus();
+    //! Costruction is not allowed.
+    generic_bus() = delete;
+    ~generic_bus() = delete;
 
     //! \brief Inits a bus.
     //!
@@ -165,8 +163,7 @@ public:
     static err xfer(const bus_handler &handler);
 
 private:
-    using semaphore     = ecl::binary_semaphore;
-    using mutex         = ecl::mutex;
+    //! Convinient alias.
     using atomic_flag   = std::atomic_flag;
 
     //! \brief Event handler dedicated to the platform bus.
@@ -181,8 +178,21 @@ private:
     //!
     static bool bus_is_busy();
 
-    //! \brief Performs cleanup required after unlocking and delivering an event.
+    //! Performs cleanup required after unlocking and delivering an event.
     static void cleanup();
+
+    //! Lock proxy to protect a platform bus.
+    static mutex& mut();
+
+    //! Semaphore proxy to notify about end of the xfer.
+    static binary_semaphore& sem();
+
+    //! User-supplied handler proxy, used in async mode.
+    static bus_handler& cb();
+
+    //! Platform bus object proxy.
+    //! \todo Change platform bus, so it will be avaliable without an object
+    static PBus& pbus();
 
     // State flags.
     //! Bus init status: set - bus initialized, reset - bus not yet initialized
@@ -198,20 +208,12 @@ private:
     //! reset - no error occurred.
     static constexpr uint8_t xfer_error     = 0x10;
 
-    static PBus         m_bus;      //!< Platform bus object.
-    static mutex        m_lock;     //!< Lock to protect a platform bus.
-    static semaphore    m_complete; //!< Semaphore to notify about end of xfer.
-    static bus_handler  m_handler;  //!< User-supplied handler, used in async mode
     static size_t       m_received; //!< Bytes received during last blocking xfer.
     static size_t       m_sent;     //!< Bytes sent during last blocking xfer.
     static atomic_flag  m_cleaned;  //!< Cleanup is performed after xfer and unlock are done.
     static uint8_t      m_state;    //!< State flags.
 };
 
-template< class PBus > PBus                     generic_bus< PBus >::m_bus{};
-template< class PBus > ecl::mutex               generic_bus< PBus >::m_lock{};
-template< class PBus > ecl::binary_semaphore    generic_bus< PBus >::m_complete{};
-template< class PBus > bus_handler              generic_bus< PBus >::m_handler{};
 template< class PBus > size_t                   generic_bus< PBus >::m_received{};
 template< class PBus > size_t                   generic_bus< PBus >::m_sent{};
 template< class PBus > std::atomic_flag         generic_bus< PBus >::m_cleaned{};
@@ -220,27 +222,15 @@ template< class PBus > uint8_t                  generic_bus< PBus >::m_state{};
 //------------------------------------------------------------------------------
 
 template< class PBus >
-generic_bus< PBus >::generic_bus()
-{
-
-}
-
-template< class PBus >
-generic_bus< PBus >::~generic_bus()
-{
-    // TODO: what to do if bus is destroyed?
-}
-
-template< class PBus >
 err generic_bus< PBus >::init()
 {
     if (m_state & bus_inited) {
         return err::ok;
     }
 
-    m_bus.set_handler(platform_handler);
+    pbus().set_handler(platform_handler);
 
-    auto rc = m_bus.init();
+    auto rc = pbus().init();
 
     if (is_ok(rc)) {
         m_state |= bus_inited;
@@ -256,7 +246,7 @@ err generic_bus< PBus >::deinit()
         return err::perm;
     }
 
-    m_bus.reset_handler();
+    pbus().reset_handler();
     cleanup();
     m_state = 0;
 
@@ -269,14 +259,14 @@ void generic_bus< PBus >::lock()
     // If bus is not initialized then pre-conditions are violated.
     ecl_assert(m_state & bus_inited);
 
-    m_lock.lock();
+    mut().lock();
 
     m_state |= bus_locked;
 
     // Bus may be busy at this moment, wait until it finished most
     // recent transaction.
     if (m_state & async_mode) {
-        m_complete.wait();
+        sem().wait();
     }
 }
 
@@ -312,7 +302,7 @@ void generic_bus< PBus >::unlock()
         cleanup();
     }
 
-    m_lock.unlock();
+    mut().unlock();
 }
 
 template< class PBus >
@@ -330,9 +320,9 @@ ecl::err generic_bus< PBus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t
         return err::again;
     }
 
-    m_bus.reset_buffers();
-    m_bus.set_tx(tx, size);
-    m_bus.set_rx(rx, size);
+    pbus().reset_buffers();
+    pbus().set_tx(tx, size);
+    pbus().set_rx(rx, size);
 
     return err::ok;
 }
@@ -348,8 +338,8 @@ ecl::err generic_bus< PBus >::set_buffers(size_t size, uint8_t fill_byte)
         return err::again;
     }
 
-    m_bus.reset_buffers();
-    m_bus.set_tx(size, fill_byte);
+    pbus().reset_buffers();
+    pbus().set_tx(size, fill_byte);
     return err::ok;
 }
 
@@ -374,15 +364,15 @@ ecl::err generic_bus< PBus >::xfer(size_t *sent, size_t *received)
     m_state &= ~(xfer_error);
 
     // Reset binary semaphore counter
-    m_complete.try_wait();
+    sem().try_wait();
 
     // Reset transfer counters
     m_received = m_sent = 0;
 
-    auto rc = m_bus.do_xfer();
+    auto rc = pbus().do_xfer();
 
     if (!is_error(rc)) {
-        m_complete.wait();
+        sem().wait();
 
         // Errors can occur after transaction start, check this
         if (m_state & xfer_error) {
@@ -422,9 +412,9 @@ ecl::err generic_bus< PBus >::xfer(const bus_handler &handler)
 
     // Async mode xfer is provided
     m_state |= async_mode;
-    m_handler = handler;
+    cb() = handler;
 
-    auto rc = m_bus.do_xfer();
+    auto rc = pbus().do_xfer();
 
     if (is_error(rc)) {
         // Deem that xfer virtually occurs in blocking mode and thus
@@ -459,7 +449,7 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
     }
 
     if (m_state & async_mode) {
-        m_handler(ch, type, total);
+        cb()(ch, type, total);
 
         // Bus unlocked, it is time to check if bus cleaned.
         if (last_event && !(m_state & bus_locked)) {
@@ -489,7 +479,7 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
 
     if (last_event) {
         // Inform rest of the bus about event handling
-        m_complete.signal();
+        sem().signal();
     }
 }
 
@@ -500,14 +490,43 @@ bool generic_bus< PBus >::bus_is_busy()
     return (m_state & async_mode);
 }
 
-template< class Bus >
-void generic_bus< Bus >::cleanup()
+template< class PBus >
+void generic_bus< PBus >::cleanup()
 {
-    m_bus.reset_buffers();
-    m_handler = bus_handler{};
+    pbus().reset_buffers();
+    cb() = bus_handler{};
     // When bus will be locked agian, no need to wait for events.
     m_state &= ~(async_mode);
 }
+
+template< class PBus >
+mutex& generic_bus< PBus >::mut()
+{
+    static mutex m;
+    return m;
+}
+
+template< class PBus >
+binary_semaphore& generic_bus< PBus >::sem()
+{
+    static binary_semaphore s;
+    return s;
+}
+
+template< class PBus >
+bus_handler& generic_bus< PBus >::cb()
+{
+    static bus_handler bh;
+    return bh;
+}
+
+template< class PBus >
+PBus& generic_bus< PBus >::pbus()
+{
+    static PBus pb;
+    return pb;
+}
+
 
 }
 
