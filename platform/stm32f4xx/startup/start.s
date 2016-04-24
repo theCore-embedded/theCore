@@ -64,7 +64,7 @@ clear_bss_end:
 			.long  PendSV_Handler              /* PendSV Handler               */
 			.long  SysTick_Handler             /* SysTick Handler              */
 			.rept  81							@ Repeat ASM statement
-			.long  _ZN11IRQ_manager3ISREv		@ All other handlers
+			.long  _ZN11IRQ_manager3isrEv		@ All other handlers
 			.endr
 			.align
 
