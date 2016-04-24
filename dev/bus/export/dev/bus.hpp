@@ -4,7 +4,7 @@
 //!
 //! \file
 //! \brief      Generic bus interface module.
-//! \copyfirght
+//! \copyright
 //! \todo       Description and examples.
 
 
@@ -26,7 +26,7 @@ namespace ecl
 //! \li Encapsulate locking policy when multithreded environment is used.
 //! \li Hide differences between full-duplex and half-duplex busses.
 //! \li Define and simplify platform-level bus interface
-//! \tparam PBus Plaform-level bus driver (I2C, SPI, etc.)
+//! \tparam PBus Platform-level bus driver (I2C, SPI, etc.)
 //!
 //! This class uses one of methods to prevent “static initialization order
 //! fiasco” to handle initialization of the static members.
@@ -41,8 +41,7 @@ public:
     ~generic_bus() = delete;
 
     //! \brief Inits a bus.
-    //!
-    //! Lazy initialization. Inits an underlaying platform bus.
+    //! Lazy initialization. Inits an underlying platform bus.
     //! \todo introduce init counter.
     //! \return Status of operation.
     //!
@@ -71,7 +70,7 @@ public:
     //! Any operations beside lock() is not permitted after this method finishes.
     //! \par Side effects:
     //! \li In block mode all buffers provided with set_buffers() will be discarded
-    //! \li In async mode if opration still ongoing, buffers will be discarded
+    //! \li In async mode if operation still ongoing, buffers will be discarded
     //!     after operation will finish.
     //!
     //! \pre    Bus is locked.
@@ -103,11 +102,12 @@ public:
     //! \brief Sets TX buffer size and fills it with given byte.
     //!
     //! This will instruct a platform bus to send a byte given number of times.
-    //! It is implementation defined how bis is chunks in which data is sent.
+    //! It is implementation defined how bus is chunks in which data is sent.
     //! If possible, platform bus will just send single-byte buffer via DMA.
     //!
     //! In half-duplex case RX will not be performed. If platform bus is in
-    //! full duplex mode then RX will be exeucted but RX data will be ignored.
+    //! full duplex mode then RX will be executed but RX data will be ignored.
+    //!
     //! \par Side effects:
     //! \li Bus will remember a buffer, until unlock() or set_buffers()
     //!     will be called.
@@ -127,7 +127,7 @@ public:
     //! \warning Method uses a semaphore to wait for a bus event (most likely
     //! an IRQ event). It means that in bare-metal environment,
     //! without RTOS it is implemented as simple spin-lock. Likely that
-    //! such behaviour is unwanted. In order to control event handling,
+    //! such behavior is unwanted. In order to control event handling,
     //! consider using xfer(const handler_fn &handler) overload.
     //! \pre        Bus is locked and buffers are set.
     //! \post       Bus remains in the same state.
@@ -162,6 +162,11 @@ public:
     //!
     static err xfer(const bus_handler &handler);
 
+    //! \brief Returns a reference to underlying platform bus.
+    //! This allows to perform specific for underlying bus operations.
+    //! \retval    PBus&    Reference to underlying platform bus.
+    static PBus& platform_handle();
+
 private:
     //! Convinient alias.
     using atomic_flag   = std::atomic_flag;
@@ -189,10 +194,6 @@ private:
 
     //! User-supplied handler proxy, used in async mode.
     static bus_handler& cb();
-
-    //! Platform bus object proxy.
-    //! \todo Change platform bus, so it will be avaliable without an object
-    static PBus& pbus();
 
     // State flags.
     //! Bus init status: set - bus initialized, reset - bus not yet initialized
@@ -228,9 +229,9 @@ err generic_bus< PBus >::init()
         return err::ok;
     }
 
-    pbus().set_handler(platform_handler);
+    platform_handle().set_handler(platform_handler);
 
-    auto rc = pbus().init();
+    auto rc = platform_handle().init();
 
     if (is_ok(rc)) {
         m_state |= bus_inited;
@@ -246,7 +247,7 @@ err generic_bus< PBus >::deinit()
         return err::perm;
     }
 
-    pbus().reset_handler();
+    platform_handle().reset_handler();
     cleanup();
     m_state = 0;
 
@@ -320,9 +321,9 @@ ecl::err generic_bus< PBus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t
         return err::again;
     }
 
-    pbus().reset_buffers();
-    pbus().set_tx(tx, size);
-    pbus().set_rx(rx, size);
+    platform_handle().reset_buffers();
+    platform_handle().set_tx(tx, size);
+    platform_handle().set_rx(rx, size);
 
     return err::ok;
 }
@@ -338,8 +339,8 @@ ecl::err generic_bus< PBus >::set_buffers(size_t size, uint8_t fill_byte)
         return err::again;
     }
 
-    pbus().reset_buffers();
-    pbus().set_tx(size, fill_byte);
+    platform_handle().reset_buffers();
+    platform_handle().set_tx(size, fill_byte);
     return err::ok;
 }
 
@@ -369,7 +370,7 @@ ecl::err generic_bus< PBus >::xfer(size_t *sent, size_t *received)
     // Reset transfer counters
     m_received = m_sent = 0;
 
-    auto rc = pbus().do_xfer();
+    auto rc = platform_handle().do_xfer();
 
     if (!is_error(rc)) {
         sem().wait();
@@ -414,7 +415,11 @@ ecl::err generic_bus< PBus >::xfer(const bus_handler &handler)
     m_state |= async_mode;
     cb() = handler;
 
-    auto rc = pbus().do_xfer();
+    m_state &= ~(xfer_served);
+
+    m_cleaned.clear();
+
+    auto rc = platform_handle().do_xfer();
 
     if (is_error(rc)) {
         // Deem that xfer virtually occurs in blocking mode and thus
@@ -426,6 +431,7 @@ ecl::err generic_bus< PBus >::xfer(const bus_handler &handler)
         m_state &= ~(xfer_served);
     }
 
+    ecl_assert (m_state & xfer_served);
     return rc;
 }
 
@@ -434,7 +440,7 @@ ecl::err generic_bus< PBus >::xfer(const bus_handler &handler)
 template< class PBus >
 void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_t total)
 {
-    // Transfer complete accross all channels
+    // Transfer complete across all channels
     bool last_event = (ch == bus_channel::meta && type == bus_event::tc);
 
     if (type == bus_event::err) {
@@ -467,7 +473,7 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
             }
         }
     } else {
-        // In blocking mode a bus is responcible for bytes counting
+        // In blocking mode a bus is responsible for bytes counting
         if (ch == bus_channel::tx) {
             m_sent = total;
         } else if (ch == bus_channel::rx) {
@@ -493,9 +499,9 @@ bool generic_bus< PBus >::bus_is_busy()
 template< class PBus >
 void generic_bus< PBus >::cleanup()
 {
-    pbus().reset_buffers();
+    platform_handle().reset_buffers();
     cb() = bus_handler{};
-    // When bus will be locked agian, no need to wait for events.
+    // When bus will be locked again, no need to wait for events.
     m_state &= ~(async_mode);
 }
 
@@ -521,13 +527,11 @@ bus_handler& generic_bus< PBus >::cb()
 }
 
 template< class PBus >
-PBus& generic_bus< PBus >::pbus()
+PBus& generic_bus< PBus >::platform_handle()
 {
     static PBus pb;
     return pb;
 }
-
-
 }
 
 #endif
