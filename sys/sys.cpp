@@ -8,15 +8,15 @@
 // TODO: move it somewhere
 void operator delete(void *)
 {
-    // Abort - delete is forbidden
-    for (;;);
+    // TODO: call to abort routine
+    for(;;);
 }
 
 // TODO: move it somewhere
 void operator delete(void *, unsigned int)
 {
-    // Abort - delete is forbidden
-    for (;;);
+    // TODO: call to abort routine
+    for(;;);
 }
 
 // TODO: move this to toolchain-dependent module
@@ -33,7 +33,7 @@ uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
 extern "C" __attribute__((noreturn))
 void __stack_chk_fail(void)
 {
-    ecl::cout << "Fail!!!" << ecl::endl;
+    // TODO: call to abort routine
     for(;;);
 }
 
@@ -97,11 +97,8 @@ extern "C" void core_main(void)
         ((void (*)()) *p)();
     }
 
-    IRQ_manager::init();
-
     // Due to undefined static init order, this initialization is placed here
     ecl::console_device.init();
-
 
     kernel_main();
 }

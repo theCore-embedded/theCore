@@ -3,14 +3,15 @@
 #include <misc.h>
 #include <core_cm4.h>
 
-// TODO: move it elsewhere
-std::function< void() > IRQ_manager::m_handlers[82];
-
 // TODO: decide if to make as a class member or not
 extern "C" __attribute__((used)) void platform_init()
 {
     // Required for FreeRTOS
+    // TODO: find better place for it
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+
+    // IRQ must be ready before anything else will start work
+    IRQ_manager::init();
 }
 
 namespace ecl
