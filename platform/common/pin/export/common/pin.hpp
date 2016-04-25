@@ -18,6 +18,7 @@ enum class function
     pin_SPI3,
     pin_I2C1,
     pin_I2C2,
+    pin_I2C3,
     UART1,
     UART2,
     UART3,

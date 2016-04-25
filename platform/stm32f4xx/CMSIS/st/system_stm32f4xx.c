@@ -896,6 +896,7 @@ static void SetSysClock(void)
 
 #endif /* USE_HSE_BYPASS */
 #endif /* STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx */
+	SystemCoreClockUpdate();
 }
 
 /**
