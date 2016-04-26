@@ -22,18 +22,18 @@ template< i2c_device        dev,
           uint32_t          clock_speed,
           uint16_t          operation_mode,
           uint16_t          duty_cycle,
-          uint16_t          own_address1,
+          uint16_t          own_address,
           uint16_t          ack,
           uint16_t          acknowledged_address>
 struct i2c_config
 {
     static constexpr I2C_InitTypeDef m_init_obj = {
-            clock_speed,
-            operation_mode,
-            duty_cycle,
-            own_address1,
-            ack,
-            acknowledged_address
+            .I2C_ClockSpeed = clock_speed,
+            .I2C_Mode = operation_mode,
+            .I2C_DutyCycle = duty_cycle,
+            .I2C_OwnAddress1 = own_address,
+            .I2C_Ack = ack,
+            .I2C_AcknowledgedAddress = acknowledged_address
     };
 
     static constexpr i2c_device m_dev = dev;
@@ -156,6 +156,10 @@ private:
     //! Handles IRQ events (error) from a bus.
     void irq_er_handler();
 
+    //! Helper functions for byte receive/transmit
+    void receive_byte(size_t count);
+    void send_byte(size_t count);
+
     handler_fn      m_event_handler; //! Handler passed via set_handler().
     const uint8_t   *m_tx;           //! Transmit buffer.
     size_t          m_tx_size;       //! TX buffer size.
@@ -165,8 +169,8 @@ private:
     size_t          m_rx_left;       //! Left to receive in RX buffer.
     uint8_t         m_status;        //! Tracks device status.
 
-    uint16_t 		m_own_addr;		 //! device address in slave mode
-    uint16_t 		m_slave_addr;	 //! address of slave to communicate
+    uint16_t        m_own_addr;     //! device address in slave mode
+    uint16_t        m_slave_addr;   //! address of slave to communicate
 };
 
 template< class i2c_config >
@@ -233,7 +237,9 @@ ecl::err i2c_bus <i2c_config>::init()
 template< class i2c_config >
 void i2c_bus< i2c_config >::set_rx(uint8_t *rx, size_t size)
 {
-    ecl_assert(inited());
+    if (!inited()) {
+        return;
+    }
 
     m_rx = rx;
     m_rx_size = size;
@@ -243,7 +249,9 @@ void i2c_bus< i2c_config >::set_rx(uint8_t *rx, size_t size)
 template< class i2c_config >
 void i2c_bus< i2c_config >::set_tx(const uint8_t *tx, size_t size)
 {
-    ecl_assert(inited());
+    if (!inited()) {
+        return;
+    }
 
     m_tx = tx;
     m_tx_size = size;
@@ -253,8 +261,11 @@ void i2c_bus< i2c_config >::set_tx(const uint8_t *tx, size_t size)
 template< class i2c_config >
 void i2c_bus< i2c_config >::set_tx(size_t size, uint8_t fill_byte)
 {
-    ecl_assert(inited());
+    if (!inited()) {
+        return;
+    }
 
+    // TODO implement functionality for this method
     (void) size;
     (void) fill_byte;
 }
@@ -262,20 +273,22 @@ void i2c_bus< i2c_config >::set_tx(size_t size, uint8_t fill_byte)
 template< class i2c_config >
 ecl::err i2c_bus< i2c_config >::do_xfer()
 {
-    ecl_assert(inited());
+    if (!inited()) {
+        return ecl::err::generic;
+    }
 
     if (i2c_config::m_mode == i2c_mode::POLL) {
         if (m_tx) {
             i2c_transmit_poll();
-            m_event_handler(channel::tx, event::tc, 0);
+            m_event_handler(channel::tx, event::tc, m_tx_size);
         }
 
         if (m_rx) {
             i2c_receive_poll();
-            m_event_handler(channel::rx, event::tc, 0);
+            m_event_handler(channel::rx, event::tc, m_rx_size);
         }
 
-        m_event_handler(channel::meta, event::tc, 0);
+        m_event_handler(channel::meta, event::tc, m_rx_size | m_tx_size);
     } else if (i2c_config::m_mode == i2c_mode::IRQ) {
         // There are common interrupts for tx and rx.
         // If no tx is required then rx will be done,
@@ -316,10 +329,11 @@ ecl::err i2c_bus <i2c_config>::i2c_setup_xfer_irq()
     constexpr auto i2c = pick_i2c();
 
     while (I2C_GetFlagStatus(i2c, I2C_FLAG_BUSY) == SET);
-    I2C_GenerateSTART(i2c, ENABLE);
 
     // TODO Add error handling and enable error irq
     I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
+
+    I2C_GenerateSTART(i2c, ENABLE);
 
     return ecl::err::ok;
 }
@@ -496,6 +510,40 @@ constexpr auto i2c_bus< i2c_config >::pick_rcc_fn()
 }
 
 template< class i2c_config >
+void i2c_bus< i2c_config >::receive_byte(size_t count)
+{
+    constexpr auto i2c = pick_i2c();
+
+    if (!m_rx || !m_rx_left) {
+        return;
+    }
+
+    for (size_t i = 0; i < count && m_rx_left; i++) {
+        m_rx[m_rx_size - m_rx_left] = I2C_ReceiveData(i2c);
+        m_rx_left--;
+    }
+
+    return;
+}
+
+template< class i2c_config >
+void i2c_bus< i2c_config >::send_byte(size_t count)
+{
+    constexpr auto i2c = pick_i2c();
+
+    if (!m_tx || !m_tx_left) {
+        return;
+    }
+
+    for (size_t i = 0; i < count && m_tx_left; i++) {
+        I2C_SendData(i2c, m_tx[m_tx_size - m_tx_left]);
+        m_tx_left--;
+    }
+
+    return;
+}
+
+template< class i2c_config >
 void i2c_bus< i2c_config >::irq_ev_handler()
 {
     constexpr auto irqn  = pick_ev_irqn();
@@ -520,10 +568,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
         // this also clears ADDR bit
         if (i2c->SR2 & (I2C_FLAG_TRA >> 16)) {
             // master transmit mode
-            if (m_tx_left > 0) {
-                I2C_SendData(i2c, m_tx[m_tx_size - m_tx_left]);
-                m_tx_left--;
-            }
+            send_byte(1);
         } else {
             // single byte reception is special, see RM
             // it will be an additional interrupt when byte will be received
@@ -545,8 +590,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
     // byte was transmitted
     if (i2c->SR1 & I2C_FLAG_TXE) {
         if (m_tx_left > 0) {
-            I2C_SendData(i2c, m_tx[m_tx_size - m_tx_left]);
-            m_tx_left--;
+            send_byte(1);
         } else {
             // all bytes were transmitted
             I2C_GenerateSTOP(i2c, ENABLE);
@@ -557,7 +601,9 @@ void i2c_bus< i2c_config >::irq_ev_handler()
                 m_direction = MASTER_RX;
                 i2c_setup_xfer_irq();
             } else {
-                m_event_handler(channel::meta, event::tc, 0);
+                m_event_handler(channel::tx, event::tc, m_tx_size);
+                // transfer is complete
+                m_event_handler(channel::meta, event::tc, m_tx_size);
                 I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
                 return;
             }
@@ -567,17 +613,15 @@ void i2c_bus< i2c_config >::irq_ev_handler()
     // byte was received
     if (i2c->SR1 & I2C_FLAG_RXNE) {
         if (m_rx_left == 1 && m_rx_size == 1) { // single byte case
-            *m_rx = I2C_ReceiveData(i2c);
-            m_rx_left = 0;
+            receive_byte(1);
             I2C_GenerateSTOP(i2c, ENABLE);
         } else if (m_rx_size == 2) { // two byte case
             // here we need to check BTF, according to RM
             // if it is not set - it will interrupt
             if (i2c->SR1 & I2C_FLAG_BTF) {
                 I2C_GenerateSTOP(i2c, ENABLE);
-                m_rx[0] = I2C_ReceiveData(i2c);
-                m_rx[1] = I2C_ReceiveData(i2c);
-                m_rx_left = 0;
+                // N-1 and N
+                receive_byte(2);
             } else {
                 // disable TXE and RXNE interrupt while waiting for BTF
                 I2C_ITConfig(i2c, I2C_IT_BUF, DISABLE);
@@ -588,8 +632,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
                 if (i2c->SR1 & I2C_FLAG_BTF) {
                     I2C_AcknowledgeConfig(i2c, DISABLE);
                     // read data N-2
-                    m_rx[m_rx_size - m_rx_left] = I2C_ReceiveData(i2c);
-                    m_rx_left--;
+                    receive_byte(1);
                 } else {
                     // disable TXE and RXNE interrupt while waiting for BTF
                     I2C_ITConfig(i2c, I2C_IT_BUF, DISABLE);
@@ -598,28 +641,23 @@ void i2c_bus< i2c_config >::irq_ev_handler()
                 // check on BTF according to RM
                 if (i2c->SR1 & I2C_FLAG_BTF) {
                     I2C_GenerateSTOP(i2c, ENABLE);
-                    // read data N-1
-                    m_rx[m_rx_size - m_rx_left] = I2C_ReceiveData(i2c);
-                    m_rx_left--;
-                    // read data N
-                    m_rx[m_rx_size - m_rx_left] = I2C_ReceiveData(i2c);
-                    m_rx_left--;
+                    // read data N-1 and N
+                    receive_byte(2);
                 } else {
                     // disable TXE and RXNE interrupt while waiting for BTF
                     I2C_ITConfig(i2c, I2C_IT_BUF, DISABLE);
                 }
-            } else if (m_rx_left > 3 ) { // reception from 0 to N-2 bytes
-                m_rx[m_rx_size - m_rx_left] = I2C_ReceiveData(i2c);
-                m_rx_left--;
+            } else if (m_rx_left > 3) { // reception from 0 to N-2 bytes
+                receive_byte(1);
             }
         }
 
         // rx is done (as well as tx)
         if (m_rx_left == 0) {
-            m_event_handler(channel::rx, event::tc, 0);
+            m_event_handler(channel::rx, event::tc, m_rx_size);
 
             // rx always last, so transfer is complete
-            m_event_handler(channel::meta, event::tc, 0);
+            m_event_handler(channel::meta, event::tc, m_rx_size);
             I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
 
             return;
