@@ -1,4 +1,4 @@
-add_library(stm32f4xx STATIC platform.cpp)
+add_library(stm32f4xx STATIC platform.cpp irq_manager.cpp)
 add_library(stm32f4xx_utils STATIC utils.c)
 
 target_include_directories(stm32f4xx PUBLIC export)
@@ -29,15 +29,25 @@ set(TARGET_PROCESSOR_ARCHITECTURE "arm_cm4" CACHE STRING "Processor arch")
 # corresponds to smaller logical priorities)
 
 message(STATUS "Checking [CONFIG_MAX_ISR_PRIORITY]...")
-if (NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
+if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
 	set(CONFIG_MAX_ISR_PRIORITY 0xff)
 	message(STATUS "CONFIG_MAX_ISR_PRIORITY not set,"
 		" using default value: ${CONFIG_MAX_ISR_PRIORITY}")
-endif ()
+endif()
 
-target_compile_definitions(
-	stm32f4xx
-	PUBLIC
+message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
+if (CONFIG_PLATFORM_DEVICE STREQUAL STM32F40_41xxx)
+	# Count of user-overridable interrupts.
+	# For this particular platform it doesn't include system exceptions,
+	# but only peripheral interrupts. Yet.
+	target_compile_definitions(stm32f4xx PUBLIC -DCONFIG_IRQ_COUNT=82)
+else()
+	# Additional implementation will be required to cover unsupported
+	# devices from stm32f4xx line.
+	message(FATAL_ERROR "Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")
+endif()
+
+target_compile_definitions(stm32f4xx PUBLIC
 	-DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
 
 
