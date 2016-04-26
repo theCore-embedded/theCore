@@ -1,7 +1,7 @@
 #include <platform/irq_manager.hpp>
 #include <new>
 
-IRQ_manager::handler_storage IRQ_manager::m_storage[IRQ_manager::irqs];
+IRQ_manager::handler_storage IRQ_manager::m_storage[CONFIG_IRQ_COUNT];
 
 
 void IRQ_manager::init()
@@ -16,7 +16,11 @@ void IRQ_manager::init()
 
 int IRQ_manager::subscribe(IRQn_t irqn, const std::function< void() > &handler)
 {
-    // TODO: error check
+    // TODO: Use platform assert when it will be ready
+    if (irqn < 0) {
+        return -1;
+    }
+
     auto handlers = extract_handlers();
 
     __disable_irq();
@@ -33,6 +37,11 @@ int IRQ_manager::subscribe(IRQn_t irqn, const std::function< void() > &handler)
 
 int IRQ_manager::unsubscribe(IRQn_t irqn)
 {
+    // TODO: Use platform assert when it will be ready
+    if (irqn < 0) {
+        return -1;
+    }
+
     auto handlers = extract_handlers();
     __disable_irq();
     handlers[irqn] = default_handler;
@@ -42,13 +51,22 @@ int IRQ_manager::unsubscribe(IRQn_t irqn)
 
 int IRQ_manager::mask(IRQn_t irqn)
 {
-    // TODO: error check
+    // TODO: Use platform assert when it will be ready
+    if (irqn < 0) {
+        return -1;
+    }
+
     NVIC_DisableIRQ(irqn);
     return 0;
 }
 
 int IRQ_manager::unmask(IRQn_t irqn)
 {
+    // TODO: Use platform assert when it will be ready
+    if (irqn < 0) {
+        return -1;
+    }
+
     // TODO: error check
     NVIC_EnableIRQ(irqn);
     return 0;
@@ -56,6 +74,11 @@ int IRQ_manager::unmask(IRQn_t irqn)
 
 int IRQ_manager::clear(IRQn_t irqn)
 {
+    // TODO: Use platform assert when it will be ready
+    if (irqn < 0) {
+        return -1;
+    }
+
     // TODO: error check
     NVIC_ClearPendingIRQ(static_cast< IRQn_t > (irqn));
     return 0;

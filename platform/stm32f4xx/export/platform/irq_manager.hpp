@@ -68,8 +68,6 @@ public:
     static int clear(IRQn_t irqn);
 
 private:
-    //! Total IRQ count.
-    static constexpr auto irqs = 82;
     using handler_storage =
     std::aligned_storage< sizeof(handler_type), alignof(handler_type) >::type;
 
@@ -80,7 +78,7 @@ private:
     static void default_handler();
 
     //! Storage for registered IRQ handlers.
-    static handler_storage m_storage[irqs];
+    static handler_storage m_storage[CONFIG_IRQ_COUNT];
 
     static constexpr auto extract_handlers()
     {
