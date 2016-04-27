@@ -156,9 +156,9 @@ private:
     //! Handles IRQ events (error) from a bus.
     void irq_er_handler();
 
-    //! Helper functions for byte receive/transmit
-    void receive_byte(size_t count);
-    void send_byte(size_t count);
+    //! Helper functions for bytes receive/transmit
+    void receive_bytes(size_t count);
+    void send_bytes(size_t count);
 
     handler_fn      m_event_handler; //! Handler passed via set_handler().
     const uint8_t   *m_tx;           //! Transmit buffer.
@@ -387,7 +387,7 @@ ecl::err i2c_bus <i2c_config>::i2c_receive_poll()
         i2c->SR1; i2c->SR2;
 
         while (I2C_GetFlagStatus(i2c, I2C_FLAG_RXNE) == RESET);
-        *m_rx = I2C_ReceiveData(i2c);
+        receive_bytes(1);
 
         I2C_GenerateSTOP(i2c, ENABLE);
 
@@ -402,25 +402,22 @@ ecl::err i2c_bus <i2c_config>::i2c_receive_poll()
         I2C_GenerateSTOP(i2c, ENABLE);
 
         // read 1 and 2
-        m_rx[0] = I2C_ReceiveData(i2c);
-        m_rx[1] = I2C_ReceiveData(i2c);
+        receive_bytes(2);
     } else if (m_rx_size > 2){
         i2c->SR1; i2c->SR2;
 
         // for N > 2 byte reception from 0 to N-2 bytes
-        size_t i = 0;
-        for (; i < m_rx_size - 3; i++) {
+        while (m_rx_left > 3) {
             while (I2C_GetFlagStatus(i2c, I2C_FLAG_RXNE) == RESET);
-            m_rx[i] = I2C_ReceiveData(i2c);
+            receive_bytes(1);
         }
-
         // for N > 2 byte reception, from N-2 data reception
         while (I2C_GetFlagStatus(i2c, I2C_FLAG_BTF) == RESET);
 
         // set ACK low
         I2C_AcknowledgeConfig(i2c, DISABLE);
         // read data N-2
-        m_rx[i++] = I2C_ReceiveData(i2c);
+        receive_bytes(1);
 
         // wait until BTF = 1
         // (data N-1 in DR, data N in shift register,
@@ -431,8 +428,7 @@ ecl::err i2c_bus <i2c_config>::i2c_receive_poll()
         I2C_GenerateSTOP(i2c, ENABLE);
 
         // read data N-1 and N
-        m_rx[i++] = I2C_ReceiveData(i2c);
-        m_rx[i] = I2C_ReceiveData(i2c);
+        receive_bytes(2);
     }
 
     return ecl::err::ok;
@@ -510,7 +506,7 @@ constexpr auto i2c_bus< i2c_config >::pick_rcc_fn()
 }
 
 template< class i2c_config >
-void i2c_bus< i2c_config >::receive_byte(size_t count)
+void i2c_bus< i2c_config >::receive_bytes(size_t count)
 {
     constexpr auto i2c = pick_i2c();
 
@@ -522,12 +518,10 @@ void i2c_bus< i2c_config >::receive_byte(size_t count)
         m_rx[m_rx_size - m_rx_left] = I2C_ReceiveData(i2c);
         m_rx_left--;
     }
-
-    return;
 }
 
 template< class i2c_config >
-void i2c_bus< i2c_config >::send_byte(size_t count)
+void i2c_bus< i2c_config >::send_bytes(size_t count)
 {
     constexpr auto i2c = pick_i2c();
 
@@ -539,8 +533,6 @@ void i2c_bus< i2c_config >::send_byte(size_t count)
         I2C_SendData(i2c, m_tx[m_tx_size - m_tx_left]);
         m_tx_left--;
     }
-
-    return;
 }
 
 template< class i2c_config >
@@ -568,7 +560,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
         // this also clears ADDR bit
         if (i2c->SR2 & (I2C_FLAG_TRA >> 16)) {
             // master transmit mode
-            send_byte(1);
+            send_bytes(1);
         } else {
             // single byte reception is special, see RM
             // it will be an additional interrupt when byte will be received
@@ -590,7 +582,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
     // byte was transmitted
     if (i2c->SR1 & I2C_FLAG_TXE) {
         if (m_tx_left > 0) {
-            send_byte(1);
+            send_bytes(1);
         } else {
             // all bytes were transmitted
             I2C_GenerateSTOP(i2c, ENABLE);
@@ -613,7 +605,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
     // byte was received
     if (i2c->SR1 & I2C_FLAG_RXNE) {
         if (m_rx_left == 1 && m_rx_size == 1) { // single byte case
-            receive_byte(1);
+            receive_bytes(1);
             I2C_GenerateSTOP(i2c, ENABLE);
         } else if (m_rx_size == 2) { // two byte case
             // here we need to check BTF, according to RM
@@ -621,7 +613,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
             if (i2c->SR1 & I2C_FLAG_BTF) {
                 I2C_GenerateSTOP(i2c, ENABLE);
                 // N-1 and N
-                receive_byte(2);
+                receive_bytes(2);
             } else {
                 // disable TXE and RXNE interrupt while waiting for BTF
                 I2C_ITConfig(i2c, I2C_IT_BUF, DISABLE);
@@ -632,7 +624,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
                 if (i2c->SR1 & I2C_FLAG_BTF) {
                     I2C_AcknowledgeConfig(i2c, DISABLE);
                     // read data N-2
-                    receive_byte(1);
+                    receive_bytes(1);
                 } else {
                     // disable TXE and RXNE interrupt while waiting for BTF
                     I2C_ITConfig(i2c, I2C_IT_BUF, DISABLE);
@@ -642,13 +634,13 @@ void i2c_bus< i2c_config >::irq_ev_handler()
                 if (i2c->SR1 & I2C_FLAG_BTF) {
                     I2C_GenerateSTOP(i2c, ENABLE);
                     // read data N-1 and N
-                    receive_byte(2);
+                    receive_bytes(2);
                 } else {
                     // disable TXE and RXNE interrupt while waiting for BTF
                     I2C_ITConfig(i2c, I2C_IT_BUF, DISABLE);
                 }
             } else if (m_rx_left > 3) { // reception from 0 to N-2 bytes
-                receive_byte(1);
+                receive_bytes(1);
             }
         }
 
@@ -665,15 +657,12 @@ void i2c_bus< i2c_config >::irq_ev_handler()
     }
 
     IRQ_manager::unmask(irqn);
-
-    return;
 }
 
 template< class i2c_config >
 void i2c_bus< i2c_config >::irq_er_handler()
 {
     // TODO add error handling
-    return;
 }
 
 template< class i2c_config >
