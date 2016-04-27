@@ -52,7 +52,7 @@ template< class spi_config >
 class spi_bus
 {
 public:
-    // Convinient type aliases.
+    // Convenient type aliases.
     using channel       = bus_channel;
     using event         = bus_event;
     using handler_fn    = bus_handler;
@@ -68,7 +68,7 @@ public:
 
     //!
     //! \brief Lazy initialization.
-    //! \return Status of opeartion.
+    //! \return Status of operation.
     //!
     ecl::err init();
 
@@ -125,7 +125,7 @@ private:
     static constexpr auto pick_rcc_fn();
     //    static constexpr auto pick_IT();
 
-    // Depends on the evironment
+    // Depends on the environment
     static auto pick_pclk();
 
     // DMA init helper
@@ -168,7 +168,7 @@ private:
     } m_tx;
 
     size_t          m_tx_size;       //! TX buffer size.
-    uint8_t         *m_rx;           //! Recieve buffer.
+    uint8_t         *m_rx;           //! Receive buffer.
     size_t          m_rx_size;       //! RX buffer size.
     uint8_t         m_status;        //! Represents bus status.
 };
@@ -335,7 +335,7 @@ ecl::err spi_bus< spi_config >::do_xfer()
         return err::nobufs;
     }
 
-    // TODO: check if buffers are the same as in previous transacuib
+    // TODO: check if buffers are the same as in previous transaction
     // If so, do not reinitialize DMA but rather just update a data counter.
 
 
@@ -527,7 +527,7 @@ void spi_bus< spi_config >::irq_handler()
         IRQ_manager::clear(tx_irqn);
         IRQ_manager::unmask(tx_irqn);
 
-        // All transfers comepleted
+        // All transfers completed
         m_event_handler(channel::meta, event::tc, m_tx_size);
     }
 }
@@ -549,7 +549,7 @@ constexpr auto spi_bus< spi_config >::pick_spi()
     case spi_device::bus_6:
         return SPI6;
     default:
-        // TODO: clarfy
+        // TODO: clarify
         return static_cast< decltype(SPI1) >(nullptr);
     }
 }

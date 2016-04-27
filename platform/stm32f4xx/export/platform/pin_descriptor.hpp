@@ -225,6 +225,8 @@ static constexpr uint8_t pick_AF(pin::function purpose)
         return GPIO_AF_I2C1;
     case pin::function::pin_I2C2:
         return GPIO_AF_I2C2;
+    case pin::function::pin_I2C3:
+        return GPIO_AF_I2C3;
     case pin::function::pin_MCO:
     	return GPIO_AF_MCO;
 
