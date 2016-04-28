@@ -30,7 +30,7 @@ template< usart_device dev >
 class usart_bus
 {
 public:
-    // Convinient type aliases.
+    // Convenient type aliases.
     using channel       = ecl::bus_channel;
     using event         = ecl::bus_event;
     using handler_fn    = ecl::bus_handler;
@@ -46,7 +46,7 @@ public:
 
     //!
     //! \brief Lazy initialization.
-    //! \return Status of opeartion.
+    //! \return Status of operation.
     //!
     ecl::err init();
 
@@ -138,7 +138,7 @@ private:
     const uint8_t   *m_tx;           //! Transmit buffer.
     size_t          m_tx_size;       //! TX buffer size.
     size_t          m_tx_left;       //! Left to send in TX buffer.
-    uint8_t         *m_rx;           //! Recieve buffer.
+    uint8_t         *m_rx;           //! Receive buffer.
     size_t          m_rx_size;       //! RX buffer size.
     size_t          m_rx_left;       //! Left to receive in RX buffer.
     uint8_t         m_status;        //! Tracks device status.
@@ -450,7 +450,7 @@ void usart_bus< dev >::irq_handler()
             set_rx_done();
             USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
 
-            // 1 byte is recieved. No need to unmask interrupts.
+            // 1 byte is received. No need to unmask interrupts.
         }
     }
 

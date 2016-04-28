@@ -16,7 +16,7 @@ namespace ecl
 {
 
 //!
-//! \brief Channles of a bus.
+//! \brief Channels of a bus.
 //!
 enum class bus_channel
 {
@@ -55,7 +55,7 @@ class dummy_platform_bus
 public:
     //!
     //! \brief Lazy initialization.
-    //! \return Status of opeartion.
+    //! \return Status of operation.
     //!
     ecl::err init()
     { return ecl::err::nosys; }
