@@ -57,13 +57,23 @@ private:
     // for this class, must be added to this class
 };
 
+//!
+//! \brief Static initializer for every translation unit.
+//! \details [Nifty counter idiom](https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Nifty_Counter)
+//! is used here.
+//!
+static struct iostream_initializer
+{
+    iostream_initializer();
+    ~iostream_initializer();
+} stream_initializer;
 
 // Standard streams, defined elsewhere
 // These streams rely on specific driver, which name should be
 // the same accross all targets
-extern istream< console_driver > cin;
-extern ostream< console_driver > cout;
-extern ostream< console_driver > cerr;
+extern istream< console_driver > &cin;
+extern ostream< console_driver > &cout;
+extern ostream< console_driver > &cerr;
 
 
 //------------------------------------------------------------------------------

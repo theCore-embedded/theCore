@@ -3,7 +3,6 @@
 
 #include <platform/irq_manager.hpp>
 #include <platform/utils.hpp>
-#include <ecl/iostream.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *)
@@ -75,10 +74,6 @@ extern "C" void board_init();
 extern "C" void kernel_init();
 extern "C" void kernel_main();
 
-namespace ecl {
-extern typename istream< console_driver >::device_type console_device;
-}
-
 extern "C" void core_main(void)
 {
     platform_init();
@@ -96,9 +91,6 @@ extern "C" void core_main(void)
         // fn();
         ((void (*)()) *p)();
     }
-
-    // Due to undefined static init order, this initialization is placed here
-    ecl::console_device.init();
 
     kernel_main();
 }
