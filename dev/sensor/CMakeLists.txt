@@ -1,1 +1,1 @@
-add_subdirectory(htu21)
+add_subdirectory(htu21d)

@@ -1,0 +1,2 @@
+add_library(htu21d INTERFACE)
+target_include_directories(htu21d INTERFACE export)
