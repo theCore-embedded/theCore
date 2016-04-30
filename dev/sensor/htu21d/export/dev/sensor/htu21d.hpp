@@ -1,13 +1,28 @@
 //!
 //! \file
 //! \brief Driver for HTU21D digital humidity sensor with temperature output
-//! See, http://www.meas-spec.com/downloads/HTU21D.pdf
+//!  See, http://www.meas-spec.com/downloads/HTU21D.pdf
 //!
 
 #ifndef __DEV_SENSOR_HTU21D_HPP__
 #define __DEV_SENSOR_HTU21D_HPP__
 
 namespace sensor {
+
+//! \brief Defines resolution modes for HTU21D sensor.
+//! \details Possible modes are (RM here - relative humidity):
+//!  rm12_t14 - 12 bits for RM, 14 bits for temperature
+//!  rm8_t12 - 8 bits for RM, 12 bits for temperature
+//!  rm10_t13 - 10 bits for RM, 13 bits for temperature
+//!  rm11_t11 - 11 bits for RM, 11 bits for temperature
+//!
+enum class htu21d_resolution
+{
+    rm12_t14,
+    rm8_t12,
+    rm10_t13,
+    rm11_t11
+};
 
 //! \brief HTU21D sensor driver implementation.
 //! \tparam I2C generic bus driver
@@ -25,31 +40,38 @@ public:
 
     //! \brief Performs soft reset of the sensor.
     //! \note The soft reset takes around 15ms.
-    //! User code should wait at least 15ms to finish reset procedure.
+    //!  User code should wait at least 15ms to finish reset procedure.
+    //! \retval Status of the operation.
     //!
-    static void soft_reset();
+    static ecl::err soft_reset();
 
     //! \brief Reads raw temperature sample from sensor.
     //! \details Sample should be processed to receive physical value.
-    //! \retval Raw temperature sample.
+    //! \param[out] sample Variable in which raw temp. sample will be written.
+    //! \retval Status of the operation.
     //!
-    static uint16_t get_sample_temperature();
+    static ecl::err get_sample_temperature(uint16_t &sample);
 
     //! \brief Reads raw relative humidity sample from sensor.
     //! \details Sample should be processed to receive physical value.
-    //! \retval Raw relative humidity sample.
+    //! \param[out] sample Variable in which raw RM sample will be written.
+    //! \retval Status of the operation.
     //!
-    static uint16_t get_sample_humidity();
+    static ecl::err get_sample_humidity(uint16_t &sample);
 
     //! \brief Reads sample from sensor and converts to a physical value.
-    //! \retval Temperature in (1000 * (temperature in C degree)).
+    //! \param[out] temperature Temperature in (1000 * (temperature in C degree))
+    //!  will be written in this parameter.
+    //! \retval Status of the operation.
     //!
-    static int get_temperature();
+    static ecl::err get_temperature(int &temperature);
 
     //! \brief Reads sample from sensor and converts to a physical value.
-    //! \retval Relative humidity in (1000 * (humidity in %)).
+    //! \param[out] humidity Relative humidity in (1000 * (humidity in %))
+    //!  will be written in this parameter.
+    //! \retval Status of the operation.
     //!
-    static int get_humidity();
+    static ecl::err get_humidity(int &humidity);
 
     //! \brief Checks end of battery status (see RM for details)
     //! \retval True if battery power > 2.5V, False otherwise.
@@ -63,39 +85,30 @@ public:
 
     //! \brief Enables on-chip heater (see RM for details)
     //! \details The heater is intended to be used for functionality diagnosis:
-    //! relative humidity drops upon rising temperature. The heater consumes
-    //! about 5.5mW and provides a temperature increase of about 0.5-1.5°C
+    //!  relative humidity drops upon rising temperature. The heater consumes
+    //!  about 5.5mW and provides a temperature increase of about 0.5-1.5°C
+    //! \retval Status of the operation.
     //!
-    static void enable_heater();
+    static ecl::err enable_heater();
 
     //! \brief Disables on-chip heater (see RM for details)
+    //! \retval Status of the operation.
     //!
-    static void disable_heater();
-
-    //! \brief Describes possible resolution modes for sensor.
-    //!
-    typedef enum {
-        RESOLUTION_12_14BIT = 0x0,
-        RESOLUTION_8_12BIT = 0x1,
-        RESOLUTION_10_13BIT = 0x80,
-        RESOLUTION_11_11BIT = 0x81,
-    } resolution_t;
+    static ecl::err disable_heater();
 
     //! \brief Sets resolution mode for measuring
-    //! \details Possible modes are (RM here - relative humidity):
-    //!  RESOLUTION_12_14BIT - 12 bits for RM, 14 bits for temperature
-    //!  RESOLUTION_8_12BIT - 8 bits for RM, 12 bits for temperature
-    //!  RESOLUTION_10_13BIT - 10 bits for RM, 13 bits for temperature
-    //!  RESOLUTION_11_11BIT - 11 bits for RM, 11 bits for temperature
-    //!  Default mode (RESOLUTION_12_14BIT) is entered after power on
-    //! \tparams Can be value of type resolution_t
+    //!  Default mode (htu21d_resolution::rm12_t14) is entered after power on
+    //! \param[in] mode Can be value of type htu21d_resolution
+    //! \retval Status of the operation.
     //!
-    static void set_resolution_mode(resolution_t mode);
+    static ecl::err set_resolution_mode(htu21d_resolution mode);
 
     //! \brief Returns current resolution mode
-    //! \retval Can be value of type resolution_t
+    //! \param[out] mode The value in which result will be written.
+    //!  Can be value of type htu21d_resolution
+    //! \retval Status of the operation.
     //!
-    static resolution_t get_resolution_mode();
+    static ecl::err get_resolution_mode(htu21d_resolution &mode);
 
 private:
     //! Sensor I2C commands
@@ -112,28 +125,38 @@ private:
     //! Sensor I2C address. Cannot be changed.
     static constexpr uint8_t i2_addr = 0x80;
 
-    //! Should be user to clear resolution bits only
-    static constexpr uint8_t resolution_clear_mask = 0x7E;
-
     //! Used to get battery power status
     static constexpr uint8_t battery_low_bit = 0x40;
 
     //! Used to control on-chip heater
     static constexpr uint8_t on_chip_heater_bit = 0x4;
 
+    //! Should be user to clear resolution bits only
+    static constexpr uint8_t resolution_clear_mask = 0x7E;
+
+    //! Resolution modes masks
+    //! Used to enable rm12_t14 mode
+    static constexpr uint8_t rm12_t14_mask = 0x0;
+    //! Used to enable rm8_t12 mode
+    static constexpr uint8_t rm8_t12_mask = 0x1;
+    //! Used to enable rm10_t13 mode
+    static constexpr uint8_t rm10_t13_mask = 0x80;
+    //! Used to enable rm11_t11 mode
+    static constexpr uint8_t rm11_t11_mask = 0x81;
+
     //! Reads sample from sensor in I2C hold master mode.
     //! In this mode sensor holds SCL until measurements is finished
-    static uint16_t i2c_get_sample_hold_master(uint8_t cmd);
+    static ecl::err i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample);
 
     //! Reads sensor user register.
     //! Allows to get useful information about sensor state
     //!
-    static uint8_t read_user_register();
+    static ecl::err read_user_register(uint8_t &value);
 
     //! Writes to the sensor user register.
     //! Allows to configure sensor resolution.
     //!
-    static void write_user_register(uint8_t value);
+    static ecl::err write_user_register(uint8_t value);
 };
 
 template <class i2c_dev>
@@ -143,49 +166,58 @@ ecl::err htu21d<i2c_dev>::init()
 }
 
 template <class i2c_dev>
-void htu21d<i2c_dev>::soft_reset()
+ecl::err htu21d<i2c_dev>::soft_reset()
 {
     i2c_dev::platform_handle().set_slave_addr(i2_addr);
 
     uint8_t cmd = SOFT_RESET;
 
     i2c_dev::lock();
-    i2c_dev::set_buffers(&cmd, nullptr, 1);
-    i2c_dev::xfer();
+    ecl::err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
+    if (rc == ecl::err::ok) {
+        rc = i2c_dev::xfer();
+    }
     i2c_dev::unlock();
+
+    return rc;
 }
 
 template <class i2c_dev>
-uint8_t htu21d<i2c_dev>::read_user_register()
+ecl::err htu21d<i2c_dev>::read_user_register(uint8_t &value)
 {
-    uint8_t value = 0;
     uint8_t cmd = READ_USER_REG;
 
     i2c_dev::platform_handle().set_slave_addr(i2_addr);
 
     i2c_dev::lock();
-    i2c_dev::set_buffers(&cmd, &value, 1);
-    i2c_dev::xfer();
+    ecl::err rc = i2c_dev::set_buffers(&cmd, &value, 1);
+    if (rc == ecl::err::ok) {
+        i2c_dev::xfer();
+    }
     i2c_dev::unlock();
 
-    return value;
+    return rc;
 }
 
 template <class i2c_dev>
-void htu21d<i2c_dev>::write_user_register(uint8_t value)
+ecl::err htu21d<i2c_dev>::write_user_register(uint8_t value)
 {
     uint8_t tx_buff[] = {WRITE_USER_REG, value};
 
     i2c_dev::platform_handle().set_slave_addr(i2_addr);
 
     i2c_dev::lock();
-    i2c_dev::set_buffers(tx_buff, nullptr, sizeof(tx_buff));
-    i2c_dev::xfer();
+    ecl::err rc = i2c_dev::set_buffers(tx_buff, nullptr, sizeof(tx_buff));
+    if (rc == ecl::err::ok) {
+        i2c_dev::xfer();
+    }
     i2c_dev::unlock();
+
+    return rc;
 }
 
 template <class i2c_dev>
-uint16_t htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd)
+ecl::err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
 {
     // MSB, LSB, CRC
     uint8_t data[3] = {};
@@ -195,101 +227,155 @@ uint16_t htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd)
 
     // send command to start measuring
     i2c_dev::lock();
-    i2c_dev::set_buffers(&cmd, nullptr, 1);
-    i2c_dev::xfer();
+    ecl::err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
+    if (rc == ecl::err::ok) {
+        rc = i2c_dev::xfer();
+    }
     i2c_dev::unlock();
+
+    if (rc != ecl::err::ok) {
+        return rc;
+    }
 
     // read data, last byte is CRC
     i2c_dev::lock();
-    i2c_dev::set_buffers(nullptr, data, sizeof(data));
-    i2c_dev::xfer();
+    rc = i2c_dev::set_buffers(nullptr, data, sizeof(data));
+    if (rc == ecl::err::ok) {
+        rc = i2c_dev::xfer();
+    }
     i2c_dev::unlock();
 
-    return ((data[0] << 8) | data[1]);
+    sample = ((data[0] << 8) | data[1]);
+
+    return rc;
 }
 
 template <class i2c_dev>
-uint16_t htu21d<i2c_dev>::get_sample_temperature()
+ecl::err htu21d<i2c_dev>::get_sample_temperature(uint16_t &value)
 {
-    return i2c_get_sample_hold_master(TRIGGER_TEMPERATURE_HM);
+    return i2c_get_sample_hold_master(TRIGGER_TEMPERATURE_HM, value);
 }
 
 template <class i2c_dev>
-uint16_t htu21d<i2c_dev>::get_sample_humidity()
+ecl::err htu21d<i2c_dev>::get_sample_humidity(uint16_t &value)
 {
-    return i2c_get_sample_hold_master(TRIGGER_HUMIDITY_HM);
+    return i2c_get_sample_hold_master(TRIGGER_HUMIDITY_HM, value);
 }
 
 template <class i2c_dev>
-int htu21d<i2c_dev>::get_temperature()
+ecl::err htu21d<i2c_dev>::get_temperature(int &value)
 {
-    uint16_t sample = get_sample_temperature();
+    uint16_t sample = 0;
+
+    ecl::err rc = get_sample_temperature(sample);
+    if (rc != ecl::err::ok) {
+        return rc;
+    }
 
     // clear last 2 bits according to RM,
     // since they contain status information
     sample &= ~3;
 
-    return -46850 + ((175000 * (long long)sample) / (1 << 16));
+    value = -46850 + ((175000 * static_cast<long long>(sample)) / (1 << 16));
+
+    return rc;
 }
 
 template <class i2c_dev>
-int htu21d<i2c_dev>::get_humidity()
+ecl::err htu21d<i2c_dev>::get_humidity(int &value)
 {
-    uint16_t sample = get_sample_humidity();
+    uint16_t sample = 0;
+
+    ecl::err rc = get_sample_humidity(sample);
+    if (rc != ecl::err::ok) {
+        return rc;
+    }
 
     // clear last 2 bits according to RM,
     // since they contain status information
     sample &= ~3;
 
-    return -6000 + ((125000 * (long long)sample) / (1 << 16));
+    value = -6000 + ((125000 * static_cast<long long>(sample)) / (1 << 16));
+
+    return rc;
 }
 
 template <class i2c_dev>
-void htu21d<i2c_dev>::set_resolution_mode(resolution_t mode)
+ecl::err htu21d<i2c_dev>::set_resolution_mode(htu21d_resolution mode)
 {
-    uint8_t user_reg = read_user_register();
+    uint8_t user_reg = 0;
 
-    // switch here explicitly to avoid issues in case of
-    // casting to htu21d_resolution_t in caller function
+    ecl::err rc = read_user_register(user_reg);
+    if (rc != ecl::err::ok) {
+        return rc;
+    }
+
+    // clear resolution bits first
+    user_reg &= resolution_clear_mask;
+
     switch (mode) {
-    case RESOLUTION_12_14BIT:
-    case RESOLUTION_8_12BIT:
-    case RESOLUTION_10_13BIT:
-    case RESOLUTION_11_11BIT:
-        // clear resolution bits first
-        user_reg &= resolution_clear_mask;
-        // apply mode mask
-        user_reg |= mode;
+    case htu21d_resolution::rm12_t14:
+        user_reg |= rm12_t14_mask;
+        break;
+    case htu21d_resolution::rm8_t12:
+        user_reg |= rm8_t12_mask;
+        break;
+    case htu21d_resolution::rm10_t13:
+        user_reg |= rm10_t13_mask;
+        break;
+    case htu21d_resolution::rm11_t11:
+        user_reg |= rm11_t11_mask;
         break;
     default:
+        //default mode
+        user_reg |= rm12_t14_mask;
         break;
     }
 
-    write_user_register(user_reg);
+    rc = write_user_register(user_reg);
+
+    return ecl::err::ok;
 }
 
 template <class i2c_dev>
-typename htu21d<i2c_dev>::resolution_t htu21d<i2c_dev>::get_resolution_mode()
+ecl::err htu21d<i2c_dev>::get_resolution_mode(htu21d_resolution &mode)
 {
-    uint8_t user_reg = read_user_register();
+    uint8_t user_reg = 0;
+    ecl::err rc = read_user_register(user_reg);
+    if (rc != ecl::err::ok) {
+        return rc;
+    }
 
     user_reg &= ~resolution_clear_mask;
 
-    if (user_reg == RESOLUTION_11_11BIT) {
-        return RESOLUTION_11_11BIT;
-    } else if (user_reg == RESOLUTION_8_12BIT) {
-        return RESOLUTION_8_12BIT;
-    } else if (user_reg == RESOLUTION_10_13BIT) {
-        return RESOLUTION_10_13BIT;
-    } else {
-        return RESOLUTION_12_14BIT;
+    switch (user_reg) {
+    case rm12_t14_mask:
+        mode = htu21d_resolution::rm12_t14;
+        break;
+    case rm8_t12_mask:
+        mode = htu21d_resolution::rm8_t12;
+        break;
+    case rm10_t13_mask:
+        mode = htu21d_resolution::rm10_t13;
+        break;
+    case rm11_t11_mask:
+        mode = htu21d_resolution::rm11_t11;
+        break;
+    default:
+        // default mode
+        mode = htu21d_resolution::rm12_t14;
+        break;
     }
+
+    return rc;
 }
 
 template <class i2c_dev>
 bool htu21d<i2c_dev>::is_battery_low()
 {
-    uint8_t user_reg = read_user_register();
+    uint8_t user_reg = 0;
+
+    read_user_register(user_reg);
 
     return (user_reg & battery_low_bit);
 }
@@ -297,29 +383,43 @@ bool htu21d<i2c_dev>::is_battery_low()
 template <class i2c_dev>
 bool htu21d<i2c_dev>::is_heater_enabled()
 {
-    uint8_t user_reg = read_user_register();
+    uint8_t user_reg = 0;
+
+    read_user_register(user_reg);
 
     return (user_reg & on_chip_heater_bit);
 }
 
 template <class i2c_dev>
-void htu21d<i2c_dev>:: enable_heater()
+ecl::err htu21d<i2c_dev>:: enable_heater()
 {
-    uint8_t user_reg = read_user_register();
+    uint8_t user_reg = 0;
+    ecl::err rc = read_user_register(user_reg);
+    if (rc != ecl::err::ok) {
+        return rc;
+    }
 
     user_reg |= on_chip_heater_bit;
 
-    write_user_register(user_reg);
+    rc = write_user_register(user_reg);
+
+    return rc;
 }
 
 template <class i2c_dev>
-void htu21d<i2c_dev>::disable_heater()
+ecl::err htu21d<i2c_dev>::disable_heater()
 {
-    uint8_t user_reg = read_user_register();
+    uint8_t user_reg = 0;
+    ecl::err rc = read_user_register(user_reg);
+    if (rc != ecl::err::ok) {
+        return rc;
+    }
 
     user_reg &= ~on_chip_heater_bit;
 
-    write_user_register(user_reg);
+    rc = write_user_register(user_reg);
+
+    return rc;
 }
 
 } // namespace sensor
