@@ -34,7 +34,8 @@ enum class htu21d_resolution
 //! \tparam I2C generic bus driver
 //!
 template <class i2c_dev>
-class htu21d {
+class htu21d
+{
 public:
     htu21d() = delete;
     ~htu21d() = delete;
@@ -118,7 +119,8 @@ public:
 
 private:
     //! Sensor I2C commands
-    enum {
+    enum
+    {
         TRIGGER_TEMPERATURE_HM = 0xE3,
         TRIGGER_HUMIDITY_HM = 0xE5,
         TRIGGER_TEMPERATURE = 0xF3,
