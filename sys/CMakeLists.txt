@@ -4,7 +4,6 @@ target_include_directories(common_io INTERFACE export)
 
 add_library(sys STATIC sys.cpp)
 
-target_link_libraries(sys ${CONFIG_PROJECT_LIB})
 # IRQ manager is required that residing in platform
 target_link_libraries(sys ${PLATFORM_NAME})
 
