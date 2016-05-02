@@ -1,10 +1,13 @@
 #include <platform/irq_manager.hpp>
 #include <new>
 
-IRQ_manager::handler_storage IRQ_manager::m_storage[CONFIG_IRQ_COUNT];
+namespace ecl
+{
+
+irq_manager::handler_storage irq_manager::m_storage[CONFIG_IRQ_COUNT];
 
 
-void IRQ_manager::init()
+void irq_manager::init()
 {
     // Initialize storage
     for (auto &h : m_storage) {
@@ -14,7 +17,7 @@ void IRQ_manager::init()
     __enable_irq();
 }
 
-int IRQ_manager::subscribe(IRQn_t irqn, const std::function< void() > &handler)
+int irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
@@ -35,7 +38,7 @@ int IRQ_manager::subscribe(IRQn_t irqn, const std::function< void() > &handler)
     return 0;
 }
 
-int IRQ_manager::unsubscribe(IRQn_t irqn)
+int irq_manager::unsubscribe(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
@@ -49,7 +52,7 @@ int IRQ_manager::unsubscribe(IRQn_t irqn)
     return 0;
 }
 
-int IRQ_manager::mask(IRQn_t irqn)
+int irq_manager::mask(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
@@ -60,7 +63,7 @@ int IRQ_manager::mask(IRQn_t irqn)
     return 0;
 }
 
-int IRQ_manager::unmask(IRQn_t irqn)
+int irq_manager::unmask(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
@@ -72,7 +75,7 @@ int IRQ_manager::unmask(IRQn_t irqn)
     return 0;
 }
 
-int IRQ_manager::clear(IRQn_t irqn)
+int irq_manager::clear(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
@@ -80,13 +83,13 @@ int IRQ_manager::clear(IRQn_t irqn)
     }
 
     // TODO: error check
-    NVIC_ClearPendingIRQ(static_cast< IRQn_t > (irqn));
+    NVIC_ClearPendingIRQ(static_cast< irq_num > (irqn));
     return 0;
 }
 
 //------------------------------------------------------------------------------
 
-void IRQ_manager::isr()
+void irq_manager::isr()
 {
     volatile int irqn;
     auto handlers = extract_handlers();
@@ -102,12 +105,14 @@ void IRQ_manager::isr()
     irqn -= 16;
 
     // TODO: Is it needed?
-    mask(static_cast< IRQn_t >(irqn));
+    mask(static_cast< irq_num >(irqn));
     handlers[irqn]();
 }
 
-void IRQ_manager::default_handler()
+void irq_manager::default_handler()
 {
     __disable_irq();
     for(;;);
+}
+
 }

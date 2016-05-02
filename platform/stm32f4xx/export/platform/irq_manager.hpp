@@ -11,21 +11,21 @@
 #include <functional>
 #include <type_traits>
 
-// TODO: wrap whole module into the namespace
-// TODO: convert it to the snake_case
+namespace ecl
+{
 
-using IRQn_t = IRQn_Type;
+using irq_num = IRQn_Type;
 
 // Manages irqs
 // TODO: singleton obviously
-class IRQ_manager
+class irq_manager
 {
 public:
     using handler_type = std::function< void() >;
 
     // TODO: setup VTOR?
-    IRQ_manager() = delete;
-    ~IRQ_manager() = delete;
+    irq_manager() = delete;
+    ~irq_manager() = delete;
 
     //! Initializes IRQ manager and setups default handlers for every IRQ.
     static void init();
@@ -36,7 +36,7 @@ public:
     //! \param[in] handler  New IRQ handler for given IRQ.
     //! \retval 0 Success.
     //!
-    static int subscribe(IRQn_t irqn, const handler_type &handler);
+    static int subscribe(irq_num irqn, const handler_type &handler);
 
     //!
     //! \brief Unsubscribes from given IRQ.
@@ -44,28 +44,28 @@ public:
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int unsubscribe(IRQn_t irqn);
+    static int unsubscribe(irq_num irqn);
 
     //!
     //! \brief Masks or disables given IRQ.
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int mask(IRQn_t irqn);
+    static int mask(irq_num irqn);
 
     //!
     //! \brief Unmasks or enables given IRQ.
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int unmask(IRQn_t irqn);
+    static int unmask(irq_num irqn);
 
     //!
     //! \brief Clears pending interrupt of given IRQ.
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int clear(IRQn_t irqn);
+    static int clear(irq_num irqn);
 
 private:
     using handler_storage =
@@ -86,5 +86,6 @@ private:
     }
 };
 
+}
 
 #endif

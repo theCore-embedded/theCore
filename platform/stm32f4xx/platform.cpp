@@ -11,7 +11,7 @@ extern "C" __attribute__((used)) void platform_init()
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
     // IRQ must be ready before anything else will start work
-    IRQ_manager::init();
+    ecl::irq_manager::init();
 }
 
 namespace ecl

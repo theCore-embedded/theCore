@@ -201,7 +201,7 @@ ecl::err usart_bus< dev >::init()
         this->irq_handler();
     };
 
-    IRQ_manager::subscribe(irqn, lambda);
+    irq_manager::subscribe(irqn, lambda);
 
     // Enable UART
     USART_Cmd(usart, ENABLE);
@@ -309,7 +309,7 @@ ecl::err usart_bus< dev >::do_xfer()
         set_rx_done();
     }
 
-    IRQ_manager::unmask(irqn);
+    irq_manager::unmask(irqn);
 
     return ecl::err::ok;
 }
@@ -409,7 +409,7 @@ void usart_bus< dev >::irq_handler()
     constexpr auto irqn  = pick_irqn();
     ITStatus status;
 
-    IRQ_manager::clear(irqn);
+    irq_manager::clear(irqn);
 
     // TODO: comment about flags clear sequence
 
@@ -419,7 +419,7 @@ void usart_bus< dev >::irq_handler()
             if (m_tx_left) {
                 USART_SendData(usart, *(m_tx + (m_tx_size - m_tx_left)));
                 m_tx_left--;
-                IRQ_manager::unmask(irqn);
+                irq_manager::unmask(irqn);
             } else {
                 // Last interrupt occurred, need to notify.
                 m_event_handler(channel::tx, event::tc, m_tx_size);
