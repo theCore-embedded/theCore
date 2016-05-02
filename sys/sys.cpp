@@ -6,7 +6,6 @@
 #include <cstddef>
 
 #include <platform/irq_manager.hpp>
-#include <platform/utils.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *)
@@ -53,7 +52,7 @@ extern "C"
 int __cxa_guard_acquire(int *gv)
 {
     // Disable interrupts to prevent concurent access
-    ecl::disable_irq();
+    ecl::irq_manager::disable();
 
     if (*gv == 1) {
         // Already locked
@@ -70,7 +69,7 @@ void __cxa_guard_release(int *gv)
 {
     (void) gv;
     // Object constructed. It is safe to enable interrupts.
-    ecl::enable_irq();
+    ecl::irq_manager::enable();
 }
 
 extern "C" void platform_init();

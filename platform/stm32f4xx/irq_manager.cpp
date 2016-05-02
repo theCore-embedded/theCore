@@ -17,11 +17,11 @@ void irq_manager::init()
     __enable_irq();
 }
 
-int irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
+err irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     auto handlers = extract_handlers();
@@ -35,56 +35,71 @@ int irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
     NVIC_SetPriority(irqn, CONFIG_MAX_ISR_PRIORITY);
     handlers[irqn] = handler;
     __enable_irq();
-    return 0;
+    return err::ok;
 }
 
-int irq_manager::unsubscribe(irq_num irqn)
+err irq_manager::unsubscribe(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     auto handlers = extract_handlers();
     __disable_irq();
     handlers[irqn] = default_handler;
     __enable_irq();
-    return 0;
+    return err::ok;
 }
 
-int irq_manager::mask(irq_num irqn)
+err irq_manager::mask(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     NVIC_DisableIRQ(irqn);
-    return 0;
+    return err::ok;
 }
 
-int irq_manager::unmask(irq_num irqn)
+err irq_manager::unmask(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     // TODO: error check
     NVIC_EnableIRQ(irqn);
-    return 0;
+    return err::ok;
 }
 
-int irq_manager::clear(irq_num irqn)
+bool irq_manager::in_isr()
+{
+    return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
+}
+
+void irq_manager::disable()
+{
+    __disable_irq();
+}
+
+void irq_manager::enable()
+{
+    __enable_irq();
+}
+
+err irq_manager::clear(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     // TODO: error check
     NVIC_ClearPendingIRQ(static_cast< irq_num > (irqn));
-    return 0;
+    return err::ok;
 }
 
 //------------------------------------------------------------------------------
