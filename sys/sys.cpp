@@ -1,8 +1,11 @@
+//!
+//! \file
+//! \brief The Core system initialization module.
+//!
 #include <cstdint>
 #include <cstddef>
 
 #include <platform/irq_manager.hpp>
-#include <platform/utils.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *)
@@ -49,7 +52,7 @@ extern "C"
 int __cxa_guard_acquire(int *gv)
 {
     // Disable interrupts to prevent concurent access
-    ecl::disable_irq();
+    ecl::irq_manager::disable();
 
     if (*gv == 1) {
         // Already locked
@@ -66,20 +69,32 @@ void __cxa_guard_release(int *gv)
 {
     (void) gv;
     // Object constructed. It is safe to enable interrupts.
-    ecl::enable_irq();
+    ecl::irq_manager::enable();
 }
 
 extern "C" void platform_init();
 extern "C" void board_init();
-extern "C" void kernel_init();
 extern "C" void kernel_main();
+extern "C" int main();
 
-extern "C" void core_main(void)
+//! Lowest level C-routine inside the Core
+//! \details Performs essential initialization before construction of C++ objects
+//! and kernel initialization.
+extern "C" void core_main()
 {
     platform_init();
     board_init();
-    kernel_init();
+    kernel_main();
+}
 
+//! Early-main routine performs final initialization steps.
+//! \details All global objects must be constructed before entering user's
+//! main routine.
+//! Kernel in responsible for calling early_main() after it (kernel) will be
+//! completely ready.
+//! \todo Consider specifying it with noreturn attribute.
+extern "C" void early_main()
+{
     extern uint32_t ___init_array_start;
     extern uint32_t ___init_array_end;
 
@@ -92,7 +107,8 @@ extern "C" void core_main(void)
         ((void (*)()) *p)();
     }
 
-    kernel_main();
+    main();
+    for(;;); // TODO: call to the abort routine
 }
 
 // TODO: move this to toolchain-dependent module

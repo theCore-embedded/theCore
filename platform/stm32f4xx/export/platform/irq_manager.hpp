@@ -7,65 +7,77 @@
 
 #include <stm32f4xx.h>
 #include <core_cm4.h>
+#include <ecl/err.hpp>
 
 #include <functional>
 #include <type_traits>
 
-// TODO: wrap whole module into the namespace
-// TODO: convert it to the snake_case
+namespace ecl
+{
 
-using IRQn_t = IRQn_Type;
+using irq_num = IRQn_Type;
 
 // Manages irqs
 // TODO: singleton obviously
-class IRQ_manager
+class irq_manager
 {
 public:
     using handler_type = std::function< void() >;
 
     // TODO: setup VTOR?
-    IRQ_manager() = delete;
-    ~IRQ_manager() = delete;
+    irq_manager() = delete;
+    ~irq_manager() = delete;
 
-    //! Initializes IRQ manager and setups default handlers for every IRQ.
+    //! Initializes IRQ manager and setups default handler for every IRQ.
     static void init();
 
     //!
-    //! \brief Subscribes to given IRQ.
+    //! Subscribes to the given IRQ.
     //! \param[in] irqn     Valid IRQ number.
     //! \param[in] handler  New IRQ handler for given IRQ.
     //! \retval 0 Success.
     //!
-    static int subscribe(IRQn_t irqn, const handler_type &handler);
+    static err subscribe(irq_num irqn, const handler_type &handler);
 
     //!
-    //! \brief Unsubscribes from given IRQ.
-    //! \detail Default handler will be used for given IRQ if this call succeed.
+    //! Unsubscribes from the given IRQ.
+    //! \details Default handler will be used for given IRQ if this call succeed.
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int unsubscribe(IRQn_t irqn);
+    static err unsubscribe(irq_num irqn);
 
     //!
-    //! \brief Masks or disables given IRQ.
+    //! Masks or disables the given IRQ.
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int mask(IRQn_t irqn);
+    static err mask(irq_num irqn);
 
     //!
-    //! \brief Unmasks or enables given IRQ.
+    //! Unmasks or enables the given IRQ.
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int unmask(IRQn_t irqn);
+    static err unmask(irq_num irqn);
+
+    //! Checks if a processor is in handler mode of execution at this time.
+    //! \retval true Processor is in handler mode. I.e. servicing IRQ or exception.
+    //! \retval false Processor is in thread mode.
+    static bool in_isr();
+
+    //! Disables interrupts globally.
+    static void disable();
+
+    //! Enables interrupts globally.
+    static void enable();
 
     //!
-    //! \brief Clears pending interrupt of given IRQ.
+    //! Clears pending interrupt of the given IRQ.
     //! \param[in] irqn Valid IRQ number.
     //! \retval 0 Success.
     //!
-    static int clear(IRQn_t irqn);
+    static err clear(irq_num irqn);
 
 private:
     using handler_storage =
@@ -86,5 +98,6 @@ private:
     }
 };
 
+}
 
 #endif

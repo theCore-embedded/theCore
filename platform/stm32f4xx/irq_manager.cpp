@@ -1,10 +1,13 @@
 #include <platform/irq_manager.hpp>
 #include <new>
 
-IRQ_manager::handler_storage IRQ_manager::m_storage[CONFIG_IRQ_COUNT];
+namespace ecl
+{
+
+irq_manager::handler_storage irq_manager::m_storage[CONFIG_IRQ_COUNT];
 
 
-void IRQ_manager::init()
+void irq_manager::init()
 {
     // Initialize storage
     for (auto &h : m_storage) {
@@ -14,11 +17,11 @@ void IRQ_manager::init()
     __enable_irq();
 }
 
-int IRQ_manager::subscribe(IRQn_t irqn, const std::function< void() > &handler)
+err irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     auto handlers = extract_handlers();
@@ -32,61 +35,76 @@ int IRQ_manager::subscribe(IRQn_t irqn, const std::function< void() > &handler)
     NVIC_SetPriority(irqn, CONFIG_MAX_ISR_PRIORITY);
     handlers[irqn] = handler;
     __enable_irq();
-    return 0;
+    return err::ok;
 }
 
-int IRQ_manager::unsubscribe(IRQn_t irqn)
+err irq_manager::unsubscribe(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     auto handlers = extract_handlers();
     __disable_irq();
     handlers[irqn] = default_handler;
     __enable_irq();
-    return 0;
+    return err::ok;
 }
 
-int IRQ_manager::mask(IRQn_t irqn)
+err irq_manager::mask(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     NVIC_DisableIRQ(irqn);
-    return 0;
+    return err::ok;
 }
 
-int IRQ_manager::unmask(IRQn_t irqn)
+err irq_manager::unmask(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     // TODO: error check
     NVIC_EnableIRQ(irqn);
-    return 0;
+    return err::ok;
 }
 
-int IRQ_manager::clear(IRQn_t irqn)
+bool irq_manager::in_isr()
+{
+    return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
+}
+
+void irq_manager::disable()
+{
+    __disable_irq();
+}
+
+void irq_manager::enable()
+{
+    __enable_irq();
+}
+
+err irq_manager::clear(irq_num irqn)
 {
     // TODO: Use platform assert when it will be ready
     if (irqn < 0) {
-        return -1;
+        return err::inval;
     }
 
     // TODO: error check
-    NVIC_ClearPendingIRQ(static_cast< IRQn_t > (irqn));
-    return 0;
+    NVIC_ClearPendingIRQ(static_cast< irq_num > (irqn));
+    return err::ok;
 }
 
 //------------------------------------------------------------------------------
 
-void IRQ_manager::isr()
+void irq_manager::isr()
 {
     volatile int irqn;
     auto handlers = extract_handlers();
@@ -102,12 +120,14 @@ void IRQ_manager::isr()
     irqn -= 16;
 
     // TODO: Is it needed?
-    mask(static_cast< IRQn_t >(irqn));
+    mask(static_cast< irq_num >(irqn));
     handlers[irqn]();
 }
 
-void IRQ_manager::default_handler()
+void irq_manager::default_handler()
 {
     __disable_irq();
     for(;;);
+}
+
 }

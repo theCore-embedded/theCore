@@ -1,8 +1,8 @@
 #include <os/utils.hpp>
+#include <platform/irq_manager.hpp>
 
 #include <FreeRTOS.h>
 #include <task.h>
-#include <platform/utils.hpp>
 
 // Thread Control Block, here is just used as an opaque type
 typedef struct TCB TCB_t;
@@ -25,8 +25,8 @@ ecl::os::thread_handle ecl::os::this_thread::get_handle()
 {
     TaskHandle_t handle = NULL;
 
-    if (!ecl::in_isr()) {
-        ecl::disable_irq();
+    if (!ecl::irq_manager::in_isr()) {
+        ecl::irq_manager::disable();
         handle = reinterpret_cast< TaskHandle_t >(pxCurrentTCB);
     }
 

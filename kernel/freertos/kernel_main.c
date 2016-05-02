@@ -1,15 +1,17 @@
+//! \file
+//! \brief FreeRTOS main module
 #include <FreeRTOS.h>
 #include <task.h>
 
 #include <ecl/assert.h>
 
-extern int main();
+extern int early_main();
 
 // Somehow linker drops this function if LTO is enabled
 __attribute__((used))
 void vTaskSwitchContext( void );
 
-// TODO: find better place for this handlers?
+// TODO: find better place for these handlers?
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                     signed char *pcTaskName )
 {
@@ -33,20 +35,11 @@ void vAssertCalled(const char *file, int line)
     for(;;);
 }
 
-// FreeRTOS doesn't require special init procedure
-void kernel_init()
-{
-    return;
-}
-
-// Required since main prototype is not suitable for xTaskCreate
+// Required since main prototype is not suitable for xTaskCreate()
 void freertos_main_runner(void *arg)
 {
     (void) arg;
-    main();
-
-    // Shouldn't get here TODO: improve error handling
-    for(;;);
+    early_main();
 }
 
 void kernel_main()

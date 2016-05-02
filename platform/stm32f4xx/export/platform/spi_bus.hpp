@@ -522,10 +522,10 @@ void spi_bus< spi_config >::irq_handler()
         SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
 
         // Clear/enable NVIC interrupts
-        IRQ_manager::clear(rx_irqn);
-        IRQ_manager::unmask(rx_irqn);
-        IRQ_manager::clear(tx_irqn);
-        IRQ_manager::unmask(tx_irqn);
+        irq_manager::clear(rx_irqn);
+        irq_manager::unmask(rx_irqn);
+        irq_manager::clear(tx_irqn);
+        irq_manager::unmask(tx_irqn);
 
         // All transfers completed
         m_event_handler(channel::meta, event::tc, m_tx_size);
