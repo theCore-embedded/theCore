@@ -10,9 +10,10 @@
 namespace ecl
 {
 
-// Give a star for this!
-// Taken from https://gist.github.com/graphitemaster/494f21190bb2c63c5516
-/// \todo move this to right module
+//! Obtains offset of the given member within given type.
+//! \details Give a star for this!
+//! Taken from https://gist.github.com/graphitemaster/494f21190bb2c63c5516
+//! \todo move this to right module
 template< typename T1, typename T2 >
 inline typename std::enable_if< std::is_literal_type< T2 >::value, size_t >::type
 constexpr offset_of(T1 T2::*member) {
@@ -20,10 +21,11 @@ constexpr offset_of(T1 T2::*member) {
     return size_t(&(object.*member)) - size_t(&object);
 }
 
-/// \todo move this to right module
+//! Obtains offset of the given member within given type.
+//! \todo move this to right module
 template< typename T1, typename T2 >
 inline size_t constexpr offset_of(T1 T2::*member) {
-    return reinterpret_cast< size_t >(&(((T2*)0)->*member));
+    return reinterpret_cast< size_t >(&(((T2*)nullptr)->*member));
 }
 
 //! Intrusive, double-linked, circular list node.
@@ -62,25 +64,21 @@ private:
     list_node *m_prev; //!< Previous node in a list. Equals to this if the list is empty.
 };
 
-
 //------------------------------------------------------------------------------
 
-
-list_node::list_node()
+inline list_node::list_node()
     :m_next{this}
     ,m_prev{this}
 {
 
 }
 
-
-list_node::~list_node()
+inline list_node::~list_node()
 {
     unlink();
 }
 
-
-void list_node::add_after(list_node &node)
+inline void list_node::add_after(list_node &node)
 {
     node.m_next = m_next;
     node.m_prev = this;
@@ -88,8 +86,7 @@ void list_node::add_after(list_node &node)
     m_next = &node;
 }
 
-
-void list_node::add_before(list_node &node)
+inline void list_node::add_before(list_node &node)
 {
     node.m_prev = m_prev;
     node.m_next = this;
@@ -97,27 +94,24 @@ void list_node::add_before(list_node &node)
     m_prev = &node;
 }
 
-
-bool list_node::linked() const
+inline bool list_node::linked() const
 {
     return m_next != this;
 }
 
-void list_node::unlink()
+inline void list_node::unlink()
 {
     m_next->m_prev = m_prev;
     m_prev->m_next = m_next;
     m_next = m_prev = this;
 }
 
-
-list_node* list_node::next() const
+inline list_node* list_node::next() const
 {
     return m_next;
 }
 
-
-list_node* list_node::prev() const
+inline list_node* list_node::prev() const
 {
     return m_prev;
 }
@@ -129,6 +123,8 @@ class list_iter;
 
 //! Intrusive, double-linked, circular list head.
 //! \details Any class can use intrusive list node by composing it. \sa list_node
+//! \tparam T     The type of enclosing class or struct.
+//! \tparam Mptr  The member-pointer of the list node inside enclosing class.
 template< typename T, list_node T::* Mptr >
 class list
 {
@@ -182,7 +178,8 @@ void list< T, Mptr >::push_back(T &t)
 
 //! Intrusive list's specific, safe iterator
 //! \details It is safe to delete a node or an item and move this iterator after.
-//! \tparam T Type of embedding class.
+//! \tparam T     The type of enclosing class or struct.
+//! \tparam Mptr  The member-pointer of the list node inside enclosing class.
 template< typename T, list_node T::* Mptr >
 class list_iter
 {
@@ -198,11 +195,6 @@ public:
     //! Postfix version of the operatoris.
     list_iter operator ++(int);
 
-    //! Moves back to the previous item in a list.
-    list_iter& operator --();
-    //! Postfix version of the operator.
-    list_iter operator --(int);
-
     //! Accesses an object.
     T* operator ->();
 
@@ -214,12 +206,14 @@ public:
     //! \return True if iterators point to the same object within the same list.
     bool operator ==(const list_iter& other);
 
-    //! \copydoc opeator==().
+    //! Compares two iterators.
+    //! \warning Comparing iterators from different lists is illegal.
+    //! \return False if iterators point to the same object within the same list.
     bool operator !=(const list_iter< T, Mptr >& other);
 
 private:
     list_node *m_cur; //! Current list node.
-    list_node *m_tmp; //! Temporary list node. Used to when deleting nodes.
+    list_node *m_tmp; //! Temporary list node. Used for deleting nodes.
 };
 
 //------------------------------------------------------------------------------
@@ -250,7 +244,7 @@ template< typename T, list_node T::* Mptr >
 list_iter< T, Mptr > list_iter< T, Mptr >::operator ++(int)
 {
     list_iter tmp{*this};
-    operator++();
+    ++*this;
     return tmp;
 }
 
@@ -279,6 +273,6 @@ bool list_iter< T, Mptr >::operator !=(const list_iter& other)
     return m_cur != other.m_cur;
 }
 
-}
+} // namespace ecl
 
 #endif // ECL_INTRUSIVE_LIST_
