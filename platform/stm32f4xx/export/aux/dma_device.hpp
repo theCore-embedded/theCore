@@ -55,7 +55,7 @@ constexpr auto get_stream_number()
 template< std::uintptr_t dma_stream >
 constexpr auto get_err_flag()
 {
-    constexpr auto stream_no = get_stream< dma_stream >();
+    constexpr auto stream_no = get_stream_number< dma_stream >();
 
     switch (stream_no) {
     case 0:
@@ -85,7 +85,7 @@ constexpr auto get_err_flag()
 template< std::uintptr_t dma_stream >
 constexpr auto get_ht_flag()
 {
-    constexpr auto stream_no = get_stream< dma_stream >();
+    constexpr auto stream_no = get_stream_number< dma_stream >();
 
     switch (stream_no) {
     case 0:
