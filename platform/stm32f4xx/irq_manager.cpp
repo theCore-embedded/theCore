@@ -1,6 +1,8 @@
 #include <platform/irq_manager.hpp>
 #include <new>
 
+#include "misc.h"
+
 namespace ecl
 {
 

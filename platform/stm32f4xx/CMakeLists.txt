@@ -1,4 +1,4 @@
-add_library(stm32f4xx STATIC platform.cpp irq_manager.cpp)
+add_library(stm32f4xx STATIC platform.cpp irq_manager.cpp exti_manager.cpp)
 add_library(stm32f4xx_utils STATIC utils.c)
 
 target_include_directories(stm32f4xx PUBLIC export)
@@ -9,13 +9,14 @@ add_subdirectory(SPL)
 add_subdirectory(CMSIS)
 
 # TODO: clarify essential libraries
-target_link_libraries(stm32f4xx spl)
-target_link_libraries(stm32f4xx common_spi)
-target_link_libraries(stm32f4xx common_pin)
-target_link_libraries(stm32f4xx common_usart)
-target_link_libraries(stm32f4xx common_i2c)
-target_link_libraries(stm32f4xx common_bus)
-target_link_libraries(stm32f4xx types)
+target_link_libraries(stm32f4xx PUBLIC spl)
+target_link_libraries(stm32f4xx PUBLIC common_spi)
+target_link_libraries(stm32f4xx PUBLIC common_pin)
+target_link_libraries(stm32f4xx PUBLIC common_usart)
+target_link_libraries(stm32f4xx PUBLIC common_i2c)
+target_link_libraries(stm32f4xx PUBLIC common_bus)
+target_link_libraries(stm32f4xx PUBLIC types)
+target_link_libraries(stm32f4xx PUBLIC containers)
 
 add_cppcheck(stm32f4xx)
 
