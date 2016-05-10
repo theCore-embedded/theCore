@@ -1,0 +1,4 @@
+add_library(dbg assert.cpp)
+target_include_directories(dbg PUBLIC export)
+target_link_libraries(dbg PRIVATE libcpp)
+target_link_libraries(dbg INTERFACE types)
