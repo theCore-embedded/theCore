@@ -237,6 +237,12 @@ err generic_bus< PBus >::init()
         m_state |= bus_inited;
     }
 
+    // Call these methods here to guarantee that
+    // all static objects were allocated before first use
+    mut();
+    cb();
+    sem();
+
     return rc;
 }
 
