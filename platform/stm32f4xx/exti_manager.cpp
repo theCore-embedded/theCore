@@ -1,41 +1,49 @@
 #include <platform/exti_manager.hpp>
 #include <platform/irq_manager.hpp>
-#include <common/pin.hpp>
-
 #include "stm32f4xx_exti.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_syscfg.h"
 #include "misc.h"
+
+#include <common/pin.hpp>
+
+#include <utility>
 
 namespace ecl
 {
 
 exti_manager::mapping exti_manager::m_irq_to_exti;
 
-
 void exti_manager::init()
 {
-    // TODO: static init fiasco of m_irq_to_exti?
+    // TODO: avoid static init fiasco of m_irq_to_exti
 
-    // Direct IRQs
-    irq_manager::subscribe(EXTI0_IRQn, direct_isr< 0, EXTI0_IRQn >);
-    irq_manager::subscribe(EXTI1_IRQn, direct_isr< 1, EXTI1_IRQn >);
-    irq_manager::subscribe(EXTI2_IRQn, direct_isr< 2, EXTI2_IRQn >);
-    irq_manager::subscribe(EXTI3_IRQn, direct_isr< 3, EXTI3_IRQn >);
-    irq_manager::subscribe(EXTI4_IRQn, direct_isr< 4, EXTI4_IRQn >);
+    // Maps IRQ into appropriate handler call
+    static constexpr std::pair< size_t, irq_num > irq_mapping[] =
+    {
+        // Direct IRQs
+        { 0, EXTI0_IRQn     },
+        { 1, EXTI1_IRQn     },
+        { 2, EXTI2_IRQn     },
+        { 3, EXTI3_IRQn     },
+        { 4, EXTI4_IRQn     },
 
-    // Grouped EXTI IRQs
-    irq_manager::subscribe(EXTI9_5_IRQn, group_isr< 0, EXTI9_5_IRQn >);
-    irq_manager::subscribe(EXTI15_10_IRQn, group_isr< 1, EXTI15_10_IRQn >);
+        // Grouped EXTI IRQs
+        { 0, EXTI9_5_IRQn   },
+        { 1, EXTI15_10_IRQn },
+    };
 
-    // Interrupts will be always on, at least at this stage of development
-    irq_manager::unmask(EXTI0_IRQn);
-    irq_manager::unmask(EXTI1_IRQn);
-    irq_manager::unmask(EXTI2_IRQn);
-    irq_manager::unmask(EXTI3_IRQn);
-    irq_manager::unmask(EXTI4_IRQn);
-    irq_manager::unmask(EXTI9_5_IRQn);
-    irq_manager::unmask(EXTI15_10_IRQn);
+    for (auto &p : irq_mapping)
+    {
+        irq_manager::subscribe(p.second, [&p]{
+            p.second > EXTI4_IRQn
+                    ? group_isr(p.first, p.second)
+                    : direct_isr(p.first, p.second);
+        });
+
+        // Interrupts will be always on, at least at this stage of development
+        irq_manager::unmask(p.second);
+    }
 
     // Supply clocks for SYSCFG subsystem
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
@@ -76,9 +84,38 @@ void exti_manager::unmask(handler &h)
 
 //------------------------------------------------------------------------------
 
-void exti_manager::irq_handler()
+void exti_manager::direct_isr(size_t idx, irq_num irqn)
 {
-    // TODO
+    auto *h = m_irq_to_exti.direct[idx];
+
+    if (!h) {
+        // TODO Abort: IRQ must not be raised if direct EXTI handler isn't present.
+        for(;;);
+    }
+
+    mask(*h);
+    EXTI_ClearFlag(h->m_exti_line);
+    h->operator ()();
+
+    irq_manager::clear(irqn);
+    irq_manager::unmask(irqn);
+}
+
+void exti_manager::group_isr(size_t idx, irq_num irqn)
+{
+    auto &handlers = m_irq_to_exti.grouped[idx];
+    for (auto &h : handlers.lst) {
+        auto exti = h.m_exti_line;
+        // TODO: check EXTI and execute appropriate handler
+        if ((EXTI->IMR | exti) && EXTI_GetITStatus(exti) == SET) {
+            mask(h);
+            EXTI_ClearFlag(h.m_exti_line);
+            h();
+        }
+    }
+
+    irq_manager::clear(irqn);
+    irq_manager::unmask(irqn);
 }
 
 //------------------------------------------------------------------------------
