@@ -12,12 +12,10 @@
 namespace ecl
 {
 
-exti_manager::mapping exti_manager::m_irq_to_exti;
+exti_manager::mapping_storage exti_manager::m_storage;
 
 void exti_manager::init()
 {
-    // TODO: avoid static init fiasco of m_irq_to_exti
-
     // Maps IRQ into appropriate handler call
     static constexpr std::pair< size_t, irq_num > irq_mapping[] =
     {
@@ -47,6 +45,9 @@ void exti_manager::init()
 
     // Supply clocks for SYSCFG subsystem
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+    // Init mapping storage
+    new (&m_storage) mapping{};
 }
 
 
@@ -95,7 +96,7 @@ void exti_manager::unmask(handler &h)
 
 void exti_manager::direct_isr(size_t idx, irq_num irqn)
 {
-    auto *h = m_irq_to_exti.direct[idx];
+    auto *h = map()->direct[idx];
 
     if (!h) {
         // TODO Abort: IRQ must not be raised if direct EXTI handler isn't present.
@@ -112,8 +113,8 @@ void exti_manager::direct_isr(size_t idx, irq_num irqn)
 
 void exti_manager::group_isr(size_t idx, irq_num irqn)
 {
-    auto &handlers = m_irq_to_exti.grouped[idx];
-    for (auto &h : handlers.lst) {
+    auto &handlers = map()->grouped[idx];
+    for (auto &h : handlers) {
         auto exti = h.m_exti_line;
         // TODO: check EXTI and execute appropriate handler
         if ((EXTI->IMR | exti) && EXTI_GetITStatus(exti) == SET) {

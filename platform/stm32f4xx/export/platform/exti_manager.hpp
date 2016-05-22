@@ -104,11 +104,7 @@ public:
 
 private:
     //! Type of a grouped EXTI handlers container.
-    struct handlers
-    {
-        list< handler, &handler::m_node > lst; //!< List of handlers.
-        ecl::irq_num irqn;                     //!< IRQ request for this EXTI line.
-    };
+    using handlers = list< handler, &handler::m_node >;
 
     //! Maps interrupts to EXTI lines.
     struct mapping
@@ -136,9 +132,6 @@ private:
 
     //! Gets direct array index associated with GPIO.
     static constexpr auto exti_to_idx(uint32_t exti);
-
-    //! IRQ to EXTI handlers mapping.
-    static mapping m_irq_to_exti;
 
     //! Handles IRQs from direct EXTI.
     //! \param[in] idx  Index inside direct handlers array.
@@ -184,6 +177,16 @@ private:
     template< typename Gpio >
     static std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() >= EXTI_Line5, bool >
     save_handler(handler &h);
+
+    //! Type of POD storage that holds mapping structure.
+    using mapping_storage =
+    std::aligned_storage< sizeof(mapping), alignof(mapping) >::type;
+
+    //! Storage holding IRQ to EXTI mapping.
+    static mapping_storage m_storage;
+
+    //! Obtains map from storage
+    static constexpr auto map();
 };
 
 //------------------------------------------------------------------------------
@@ -267,7 +270,7 @@ exti_manager::exti_used()
     constexpr auto exti = gpio_to_exti< Gpio >();
     constexpr auto idx = exti_to_idx(exti);
 
-    return m_irq_to_exti.direct[idx] != nullptr;
+    return map()->direct[idx] != nullptr;
 }
 
 template< typename Gpio >
@@ -280,7 +283,7 @@ exti_manager::exti_used()
     constexpr auto exti = gpio_to_exti< Gpio >();
     constexpr auto idx = exti_to_idx(exti);
 
-    for (auto &h : m_irq_to_exti.grouped[idx].lst) {
+    for (auto &h : map()->grouped[idx]) {
         if (h.m_exti_line == exti) {
             return true;
         }
@@ -333,7 +336,7 @@ exti_manager::save_handler(handler &h)
     constexpr auto idx = exti_to_idx(exti);
 
     h.m_exti_line = exti;
-    m_irq_to_exti.direct[idx] = &h;
+    map()->direct[idx] = &h;
 }
 
 template< typename Gpio >
@@ -344,7 +347,12 @@ exti_manager::save_handler(handler &h)
     constexpr auto idx = exti_to_idx(exti);
 
     h.m_exti_line = exti;
-    m_irq_to_exti.grouped[idx].lst.push_back(h);
+    map()->grouped[idx].push_back(h);
+}
+
+constexpr auto exti_manager::map()
+{
+    return reinterpret_cast< mapping* >(&m_storage);
 }
 
 } // namespace ecl

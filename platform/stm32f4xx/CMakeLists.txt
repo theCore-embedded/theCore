@@ -17,6 +17,7 @@ target_link_libraries(stm32f4xx PUBLIC common_i2c)
 target_link_libraries(stm32f4xx PUBLIC common_bus)
 target_link_libraries(stm32f4xx PUBLIC types)
 target_link_libraries(stm32f4xx PUBLIC containers)
+target_link_libraries(stm32f4xx PUBLIC emc) # For memset
 
 add_cppcheck(stm32f4xx)
 
