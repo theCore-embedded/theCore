@@ -1,8 +1,6 @@
 //! \file
 //! \brief External interrupt manager for stm32f4xx platform.
 //! \todo Detailed description.
-//! \todo Mention about collision on the GPIO EXTI lines, when 2+ buttons
-//! generates interrupt on the same line.
 #ifndef PLATFORM_EXTI_MANAGER_HPP_
 #define PLATFORM_EXTI_MANAGER_HPP_
 
@@ -78,24 +76,23 @@ public:
     static void init();
 
     //! Subscribes to event on the given GPIO.
-    //! \note It is safe to call this method if handler was already subscribed
-    //! to an event. In that case, this method will have no effect.
+    //! \details User should retain handler object in the valid state in order
+    //! to receive any events associated with given EXTI. Upon deletion of the
+    //! handler object unsubscription will be executed by itself.
     //! \pre Initialized EXTI manager.
-    //! \param[in] h Handler of GPIO event.
-    //! \param[in] t Trigger which will produce event.
+    //! \pre Unused handler.
+    //! \warn If handler was already subscribed to EXTI events then
+    //! behaviour is undefined.
+    //! \sa unsubscribe()
+    //! \param[out] h Unsubscribed handler of a GPIO event.
+    //! \param[in]  t Trigger which will produce event.
     template< typename Gpio >
     static void subscribe(handler &h, trigger t);
 
     //! Unsubscribes handler from any event.
-    //! \note It is safe to call this method, even if handler was not
-    //! subscribed to an event previously.
     //! \pre Initialized EXTI manager.
-    //! \param[in] h Handler, may be previously subscribed.
+    //! \param[in] h Handler, must be previously subscribed.
     static void unsubscribe(handler &h);
-
-    //! Clears pending EXTI request.
-    //! \param[in] h Previously subscribed handler.
-    static void clear(handler &h);
 
     //! Masks (disables) pending EXTI request.
     //! \param[in] h Previously subscribed handler.

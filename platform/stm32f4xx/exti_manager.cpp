@@ -52,16 +52,25 @@ void exti_manager::init()
 
 void exti_manager::unsubscribe(handler &h)
 {
-    (void)h;
     __disable_irq();
-    // TODO
-    __enable_irq();
-}
 
-void exti_manager::clear(handler &h)
-{
-    __disable_irq();
+    // Will not appear in the exti list anymore
+    h.m_node.unlink();
+
+    // De-configure line
+
+    EXTI_InitTypeDef exti;
+
+    exti.EXTI_Line     = h.m_exti_line;
+    exti.EXTI_Mode     = EXTI_Mode_Interrupt;
+    exti.EXTI_Trigger  = EXTI_Trigger_Rising_Falling;
+    exti.EXTI_LineCmd  = DISABLE;
+    EXTI_Init(&exti);
+
+    // Prevent expose of the old events into the IRQ line
+    mask(h);
     EXTI_ClearFlag(h.m_exti_line);
+
     __enable_irq();
 }
 
@@ -124,6 +133,7 @@ exti_manager::handler::handler()
     :m_node{}
     ,m_ctx{nullptr}
     ,m_cb{nullptr}
+    ,m_exti_line{0}
 {
 
 }
