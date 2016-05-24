@@ -1,63 +1,82 @@
+//! \file
+//! \brief GPIO device interface for stm32f4xx platform
+//! \todo Detailed explanation.
 #ifndef PLATFORM_GPIO_DEVICE_HPP
 #define PLATFORM_GPIO_DEVICE_HPP
 
 #include <common/pin.hpp>
 #include "pin_descriptor.hpp"
 
-// TODO: support for output port as well
-// Incapsulate pin usage
-template< pin::port port, pin::number pin >
-class GPIO
+namespace ecl
+{
+
+// Incapsulates pin usage
+//! GPIO class incapsulates pin usage.
+//! \tparam Port GPIO port on stm32f4xx.
+//! \tparam Pin  Pin within given port.
+template< pin::port Port, pin::number Pin >
+class gpio
 {
 public:
-    // Set pin to 1
+    static constexpr auto port = Port;
+    static constexpr auto pin = Pin;
+
+    //! Sets output pin level to high.
     static void set();
 
-    // Set pin to 0
+    //! Sets output pin level to low.
     static void reset();
 
-    // Toggle pin
+    //! Toggles pin level.
     static void toggle();
 
-    // Get input data
-    static uint8_t get();
+    //! Gets level on a pin.
+    //! \return True if level is high, false if level is low.
+    static bool get();
 };
 
-template< pin::port port, pin::number pin >
-void GPIO< port, pin >::set()
-{
-    constexpr auto m_port = pick_port(port);
-    constexpr auto m_pin  = pick_pin(pin);
+//------------------------------------------------------------------------------
 
-    GPIO_WriteBit(m_port, m_pin, Bit_SET);
+template< pin::port Port, pin::number Pin >
+void gpio< Port, Pin >::set()
+{
+    constexpr auto hw_port = pick_port(Port);
+    constexpr auto hw_pin  = pick_pin(Pin);
+
+    GPIO_WriteBit(hw_port, hw_pin, Bit_SET);
 }
 
-template< pin::port port, pin::number pin >
-void GPIO< port, pin >::reset()
+template< pin::port Port, pin::number Pin >
+void gpio< Port, Pin >::reset()
 {
-    constexpr auto m_port = pick_port(port);
-    constexpr auto m_pin  = pick_pin(pin);
+    constexpr auto hw_port = pick_port(Port);
+    constexpr auto hw_pin  = pick_pin(Pin);
 
-    GPIO_WriteBit(m_port, m_pin, Bit_RESET);
+    GPIO_WriteBit(hw_port, hw_pin, Bit_RESET);
 }
 
-template< pin::port port, pin::number pin >
-void GPIO< port, pin >::toggle()
+template< pin::port Port, pin::number Pin >
+void gpio< Port, Pin >::toggle()
 {
-    constexpr auto m_port = pick_port(port);
-    constexpr auto m_pin  = pick_pin(pin);
+    constexpr auto hw_port = pick_port(Port);
+    constexpr auto hw_pin  = pick_pin(Pin);
 
-    GPIO_ToggleBits(m_port, m_pin);
+    GPIO_ToggleBits(hw_port, hw_pin);
 }
 
-template< pin::port port, pin::number pin >
-uint8_t GPIO< port, pin >::get()
+template< pin::port Port, pin::number Pin >
+bool gpio< Port, Pin >::get()
 {
-    constexpr auto m_port = pick_port(port);
-    constexpr auto m_pin  = pick_pin(pin);
+    constexpr auto hw_port = pick_port(Port);
+    constexpr auto hw_pin  = pick_pin(Pin);
 
-    return static_cast< uint8_t >(GPIO_ReadInputDataBit(m_port, m_pin));
+    if (GPIO_ReadInputDataBit(hw_port, hw_pin) == Bit_SET) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
+} // namespace ecl
 
 #endif

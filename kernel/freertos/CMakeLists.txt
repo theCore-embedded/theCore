@@ -63,3 +63,5 @@ target_include_directories(freertos PUBLIC
 	${CONFIG_FREERTOS_HEADERS_PATH}/
 	${SRC_DIR}portable/${PORT_DIR}/
 )
+
+target_link_libraries(freertos PRIVATE emc)
