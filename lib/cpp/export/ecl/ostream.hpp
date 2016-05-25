@@ -19,7 +19,7 @@ template< class IO_device >
 class ostream
 {
 public:
-    // Provides type information of the underlaying device
+    // Provides type information of the underlying device
     using device_type = IO_device;
 
     // Initializes a stream with given device
@@ -82,7 +82,7 @@ ostream<IO_device>& ostream< IO_device >::operator<< (int value)
         out_digit = value * i / higher_multiplicand;
         out_character = out_digit + 48;
 
-        if (m_device->write((uint8_t *) &out_character, 1) < 0) {
+        if (m_device->write(reinterpret_cast< uint8_t* >(&out_character), 1) < 0) {
             break; //FIXME: add error handling
         }
 
@@ -136,7 +136,7 @@ template< class IO_device >
 ostream<IO_device>& ostream< IO_device >::operator<<(const char *string)
 {
     // TODO: improve this function in a way it can write a string
-    // to a device with chunks that are splitted by '\n' symbol
+    // to a device with chunks that are split by '\n' symbol
     // What about somehow move it to the platform layer?
 
     size_t i = 0;

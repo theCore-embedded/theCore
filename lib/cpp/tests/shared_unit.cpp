@@ -124,7 +124,7 @@ static dummy_allocator< dummy_type > alloc;
 
 //------------------------------------------------------------------------------
 // Test group with tests dedicated to empty shared poitners and their
-// interractions
+// interactions
 
 TEST_GROUP(empty_shared)
 {

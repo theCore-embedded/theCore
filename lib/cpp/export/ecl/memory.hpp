@@ -250,7 +250,7 @@ shared_ptr< T >& shared_ptr< T >::operator=(const shared_ptr &other)
         m_aux = other.m_aux;
         m_obj = other.m_obj;
 
-        // Empty shared pointer assigment can be allowed, too.
+        // Empty shared pointer assignment can be allowed, too.
         if (m_aux) {
             m_aux->inc();
         }
@@ -361,9 +361,9 @@ void shared_ptr< T >::release()
         if (unique()) {
             // Release the resource
             m_obj->~T();
-            // Object of T can contain weak reference of the same resourse.
+            // Object of T can contain weak reference of the same resource.
             // Thus it is prohibited to decrease counter before
-            // object desctruction.
+            // object destruction.
             m_aux->dec();
             m_aux->destroy();
         } else {
@@ -387,7 +387,7 @@ shared_ptr< T > allocate_shared(const Alloc &alloc, Args... args)
     auto *ptr = allocator.allocate(1);
     ecl_assert(ptr); // TODO: add here valid check
 
-    // Init auxilary object
+    // Init auxiliary object
     new (ptr) Aux{alloc, args...};
 
     // Construct a pointer
@@ -411,12 +411,13 @@ struct shared_allocation_size
 
 //------------------------------------------------------------------------------
 
-// Comparsion routines
+// Comparison routines
 
 template< typename T >
 bool operator ==(const shared_ptr< T > &shr, std::nullptr_t nullp)
 {
-    return shr.get() == nullp;
+    // gcc version 6.1.1 20160501 produces warning if parenthesis aren't used.
+    return shr.get() == (nullp);
 }
 
 template< typename T >

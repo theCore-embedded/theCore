@@ -43,7 +43,7 @@ function(add_unit_host_test)
 
 		cmake_parse_arguments(
 			UNIT_TEST
-			"OPTIONAL"
+			""
 			"NAME"
 			"SOURCES;DEPENDS;INC_DIRS"
 			${ARGN}
@@ -76,6 +76,7 @@ function(add_unit_host_test)
 				${UNIT_TEST_INC_DIRS})
 		endif()
 
+		message(STATUS "CPPUTEST INC: ${CPPUTEST_INCLUDE_DIRS}")
 		target_include_directories(${UNIT_TEST_NAME} PRIVATE ${CPPUTEST_INCLUDE_DIRS})
 		message("-----------------------------------------------")
 	endif()

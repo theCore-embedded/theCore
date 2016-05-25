@@ -18,10 +18,9 @@ void ecl::common::semaphore::wait()
 
 ecl::err ecl::common::semaphore::try_wait()
 {
-    int cnt;
     err rc = err::ok;
 
-    if ((cnt = m_counter.fetch_sub(1)) <= 0) {
+    if (m_counter.fetch_sub(1) <= 0) {
         m_counter++;
         rc = err::again;
     }
