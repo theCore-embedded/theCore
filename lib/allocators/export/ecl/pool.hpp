@@ -391,7 +391,7 @@ public:
     //! \brief Constructs pool allocator with memory pool given.
     //! \param[in] Memory pool to use with this allocator.
     //!
-    pool_allocator(pool_base *pool);
+    explicit pool_allocator(pool_base *pool);
 
     //! Deallocates allocator.
     ~pool_allocator();
