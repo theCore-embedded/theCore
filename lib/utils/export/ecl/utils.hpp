@@ -26,21 +26,11 @@ for_each(std::tuple<Tp...>& t, FuncT f)
 }
 
 //! Obtains offset of the given member within given type.
-//! \details Give a star for this!
-//! Taken from https://gist.github.com/graphitemaster/494f21190bb2c63c5516
-//! \todo move this to right module
-template< typename T1, typename T2 >
-inline typename std::enable_if< std::is_literal_type< T2 >::value, size_t >::type
-constexpr offset_of(T1 T2::*member) {
-    constexpr T2 object {};
-    return size_t(&(object.*member)) - size_t(&object);
-}
-
-//! Obtains offset of the given member within given type.
-//! \todo move this to right module
-template< typename T1, typename T2 >
-inline size_t constexpr offset_of(T1 T2::*member) {
-    return reinterpret_cast< size_t >(&(((T2*)nullptr)->*member));
+template <typename T1, typename T2>
+inline constexpr size_t offset_of(T1 T2::*member) {
+    std::aligned_storage<sizeof(T2), alignof(T2)> object;
+    T2 *ptr = reinterpret_cast<T2 *>(&object);
+    return reinterpret_cast<uint8_t *>(&(ptr->*member)) - reinterpret_cast<uint8_t *>(ptr);
 }
 
 }
