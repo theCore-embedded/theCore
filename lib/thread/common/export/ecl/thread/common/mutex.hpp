@@ -10,7 +10,7 @@ namespace common
 class mutex
 {
 public:
-    constexpr mutex();
+    mutex() = default;
 
     void lock();
     void unlock();
