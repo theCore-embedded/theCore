@@ -27,3 +27,24 @@ ecl::err ecl::common::semaphore::try_wait()
 
     return rc;
 }
+
+//------------------------------------------------------------------------------
+
+void ecl::common::binary_semaphore::signal()
+{
+    m_flag = true;
+}
+
+void ecl::common::binary_semaphore::wait()
+{
+    while (!m_flag);
+}
+
+ecl::err ecl::common::binary_semaphore::try_wait()
+{
+    if (m_flag.exchange(false)) {
+        return err::ok;
+    }
+
+    return err::again;
+}
