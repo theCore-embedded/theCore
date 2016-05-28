@@ -15,9 +15,7 @@
 namespace ecl
 {
 
-//!
-//! \brief Channels of a bus.
-//!
+//! Channels of a bus.
 enum class bus_channel
 {
     rx,         //!< Receive channel.
@@ -25,14 +23,19 @@ enum class bus_channel
     meta,       //!< Meta-channel.
 };
 
-//!
-//! \brief Various events.
-//!
+//! Various events.
 enum class bus_event
 {
     ht,         //!< Half transfer event.
     tc,         //!< Transfer complete event.
     err,        //!< Error event.
+};
+
+//! Defines async xfer types.
+enum class async_type
+{
+    deferred,   //!< Xfer going to be deferred until user asks.
+    immediate,  //!< Xfer will be executed as soon as possible.
 };
 
 //!

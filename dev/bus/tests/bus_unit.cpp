@@ -266,7 +266,54 @@ TEST(bus_is_ready, async_xfer_valid)
     mock().checkExpectations();
 }
 
+TEST(bus_is_ready, async_deffered)
+{
+    auto   expected_event    = ecl::bus_event::ht;
+    size_t expected_total    = 100500;
+    auto   expected_channel  = ecl::bus_channel::tx;
 
+    auto handler = [&](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
+        CHECK_TRUE(expected_event    == e);
+        CHECK_TRUE(expected_total    == total);
+        CHECK_TRUE(expected_channel  == ch);
+        mock("handler").actualCall("call");
+    };
+
+    ecl::err expected_ret = ecl::err::ok;
+
+    auto ret = bus_t::xfer(handler, ecl::async_type::deferred);
+    CHECK_EQUAL(expected_ret, ret);
+
+    // Platform bus xfer shouldn't be called.
+    mock().checkExpectations();
+
+    // Fire a xfer
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast< int >(expected_ret));
+
+    ret = bus_t::trigger_xfer();
+    CHECK_EQUAL(expected_ret, ret);
+
+    // Bus now busy transferring data
+    ret = bus_t::xfer(handler);
+    CHECK_EQUAL(ecl::err::busy, ret);
+
+    // Now, trigger the xfer event and see what happens
+
+    mock("handler").expectNCalls(2, "call");
+
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // Small cleanup. TC event is required.
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    mock().checkExpectations();
+}
 
 int main(int argc, char *argv[])
 {
