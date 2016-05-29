@@ -40,7 +40,7 @@ The installation guide could be found
 
 After `nix` installation, run:
 ```bash
-nix-shell core --pure
+nix-shell --pure
 ...
 ```
 
