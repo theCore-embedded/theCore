@@ -2,7 +2,7 @@
 #define DEV_PCD8544_HPP
 
 #include <ecl/thread/semaphore.hpp>
-#include <os/utils.hpp>
+#include <ecl/thread/utils.hpp>
 
 #include <utility>
 
@@ -171,7 +171,7 @@ err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::init()
     Cs_gpio::set();
     Rst_gpio::reset();
 
-    ecl::os::this_thread::sleep_for(1000);
+    ecl::this_thread::sleep_for(1000);
 
     Rst_gpio::set();
     Spi::unlock();

@@ -193,7 +193,7 @@ ecl::err bh1750<i2c_dev, address>::get_illuminance_sample(uint16_t &sample)
         return rc;
     }
 
-    ecl::os::this_thread::sleep_for(delay);
+    ecl::this_thread::sleep_for(delay);
 
     uint8_t data[2] = {};
 

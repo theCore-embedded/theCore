@@ -1,4 +1,4 @@
-#include <os/signal.hpp>
+#include <ecl/thread/signal.hpp>
 
 #include <FreeRTOS.h>
 #include <task.h>
