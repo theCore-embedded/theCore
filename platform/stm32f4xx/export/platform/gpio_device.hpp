@@ -5,7 +5,7 @@
 #define PLATFORM_GPIO_DEVICE_HPP
 
 #include <common/pin.hpp>
-#include "pin_descriptor.hpp"
+#include "aux/pin_descriptor.hpp"
 
 namespace ecl
 {
