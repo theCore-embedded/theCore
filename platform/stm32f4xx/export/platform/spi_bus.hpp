@@ -1,10 +1,11 @@
 #ifndef PLATFORM_SPI_BUS_HPP_
 #define PLATFORM_SPI_BUS_HPP_
 
+#include "aux/dma_device.hpp"
+
 #include <common/spi.hpp>
 #include <platform/common/bus.hpp>
 #include <platform/irq_manager.hpp>
-#include <platform/dma_device.hpp>
 
 #include <sys/types.h>
 

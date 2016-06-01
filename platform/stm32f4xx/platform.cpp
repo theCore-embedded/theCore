@@ -2,6 +2,7 @@
 #include <platform/exti_manager.hpp>
 #include <misc.h>
 #include <core_cm4.h>
+#include <stm32f4xx.h>
 
 // TODO: decide if to make as a class member or not
 extern "C" __attribute__((used)) void platform_init()
@@ -13,4 +14,10 @@ extern "C" __attribute__((used)) void platform_init()
     // IRQ must be ready before anything else will start work
     ecl::irq_manager::init();
     ecl::exti_manager::init();
+
+    // Initialize DWT, used by platform to count ticks.
+    // See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }

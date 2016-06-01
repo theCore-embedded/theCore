@@ -1,5 +1,5 @@
 #include <ecl/thread/semaphore.hpp>
-#include <os/utils.hpp>
+#include <ecl/thread/utils.hpp>
 #include <ecl/assert.h>
 
 #include <platform/irq_manager.hpp>
@@ -26,7 +26,7 @@ void ecl::semaphore::signal()
     // Idea is to postpone a giving until consumer will free some space for us.
     if (!ecl::irq_manager::in_isr()) {
         while (xSemaphoreGive(m_semaphore) != pdTRUE) {
-            os::this_thread::sleep_for(100);
+            this_thread::sleep_for(100);
         }
     } else {
         // Can't block an ISR, event will be lost

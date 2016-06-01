@@ -7,9 +7,6 @@
 namespace ecl
 {
 
-namespace os
-{
-
 //! OS-specific handle.
 //! Yet we know that FreeRTOS uses void * as a typedef for TaskHandle_t
 //! this will stay here.
@@ -38,8 +35,6 @@ void sleep_for(uint32_t msesc);
 thread_handle get_handle();
 
 } // namespace this_thread
-
-} // namespace os
 
 } // namespace ecl
 
