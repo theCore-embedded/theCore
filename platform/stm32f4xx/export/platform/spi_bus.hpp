@@ -62,7 +62,7 @@ struct i2s_config
         I2S_Cmd(i2s, ENABLE);
     }
 
-    static constexpr auto bus_type = spi_bus_type::i2s;
+    static constexpr auto m_bus_type = spi_bus_type::i2s;
 };
 
 //! \brief Defines configuration for SPI bus.
@@ -99,7 +99,7 @@ struct spi_config
         SPI_Cmd(spi, ENABLE);
     }
 
-    static constexpr auto bus_type = spi_bus_type::spi;
+    static constexpr auto m_bus_type = spi_bus_type::spi;
 };
 
 //! \brief Defines common configuration for driver.
@@ -110,7 +110,7 @@ template < spi_device        dev,
            uint32_t          dma_tx_channel,
            std::uintptr_t    dma_rx_stream,
            uint32_t          dma_rx_channel,
-           class             config >
+           class             bus_config >
 struct spi_i2s_config
 {
     static constexpr spi_device         m_dev              = dev;
@@ -118,11 +118,12 @@ struct spi_i2s_config
     static constexpr std::uintptr_t     m_dma_tx_stream    = dma_tx_stream;
     static constexpr uint32_t           m_dma_rx_channel   = dma_rx_channel;
     static constexpr std::uintptr_t     m_dma_rx_stream    = dma_rx_stream;
-    static constexpr auto               m_bus_type         = config::bus_type;
+    static constexpr auto               m_bus_type         = bus_config::m_bus_type;
+    static constexpr auto               m_bus_cfg          = bus_config::m_init_obj;
 
     static void init(SPI_TypeDef *spi)
     {
-        config::interface_init(spi);
+        bus_config::interface_init(spi);
     }
 };
 
@@ -787,19 +788,21 @@ ecl::err spi_i2s_bus< spi_i2s_config >::i2s_set_audio_frequency_private(uint32_t
     // Disable I2S before changing any parameters according to RM
     I2S_Cmd(spi, DISABLE);
 
-    I2S_InitTypeDef i2s_init;
-    I2S_StructInit(&i2s_init);
-
     // There is a complex procedure of setting correct
     // prescaler to achieve necessary frequency.
     // It is done in I2S_Init(), so we can reuse it.
-    // So, save current parameters first
-    i2s_init.I2S_MCLKOutput = spi->I2SPR & SPI_I2SPR_MCKOE;
-    i2s_init.I2S_Mode = spi->I2SCFGR & SPI_I2SCFGR_I2SCFG;
-    i2s_init.I2S_Standard = spi->I2SCFGR & SPI_I2SCFGR_I2SSTD;
-    i2s_init.I2S_CPOL = spi->I2SCFGR & SPI_I2SCFGR_CKPOL;
-    i2s_init.I2S_DataFormat = spi->I2SCFGR & SPI_I2SCFGR_DATLEN;
 
+    // can be a little confusing, we cannot use i2s_init = spi_i2s_config::m_bus_cfg,
+    // since spi_i2s_config::m_bus_cfg is calculated in compile time, so the structure
+    // itself is not created. Linker is very upset about it.
+    I2S_InitTypeDef i2s_init;
+    i2s_init.I2S_Standard = spi_i2s_config::m_bus_cfg.I2S_DataFormat;
+    i2s_init.I2S_CPOL = spi_i2s_config::m_bus_cfg.I2S_CPOL;
+    i2s_init.I2S_MCLKOutput = spi_i2s_config::m_bus_cfg.I2S_MCLKOutput;
+    i2s_init.I2S_Mode = spi_i2s_config::m_bus_cfg.I2S_Mode;
+
+    // Data format can be changed by i2s_set_data_format()
+    i2s_init.I2S_DataFormat = spi->I2SCFGR & SPI_I2SCFGR_DATLEN;
     // change audio frequency
     i2s_init.I2S_AudioFreq = value;
 
