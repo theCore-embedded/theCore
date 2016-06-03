@@ -24,6 +24,15 @@ macro(register_project project_name path_to_exe_file)
 	add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
 endmacro()
 
+
+# Add test only if not cross-compiling
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+	find_package(CppUTest)
+	if(NOT ${CPPUTEST_FOUND})
+		message(WARNING "CppUTest library not present. Tests are disabled.")
+	endif()
+endif()
+
 # Creates a host unit test with name unit_test_${test_name}
 # TODO: move this to separate module
 #
@@ -36,11 +45,8 @@ function(add_unit_host_test)
 	# All test can use most recent standart
 	set(CMAKE_CXX_STANDARD 14)
 
-	# Add test only if not cross-compiling
-	if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
-
-		find_package(CppUTest REQUIRED)
-
+	# Protect from missing test utilities
+	if(${CPPUTEST_FOUND})
 		cmake_parse_arguments(
 			UNIT_TEST
 			""
@@ -76,7 +82,6 @@ function(add_unit_host_test)
 				${UNIT_TEST_INC_DIRS})
 		endif()
 
-		message(STATUS "CPPUTEST INC: ${CPPUTEST_INCLUDE_DIRS}")
 		target_include_directories(${UNIT_TEST_NAME} PRIVATE ${CPPUTEST_INCLUDE_DIRS})
 		message("-----------------------------------------------")
 	endif()
