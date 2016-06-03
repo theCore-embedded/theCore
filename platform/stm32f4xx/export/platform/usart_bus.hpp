@@ -23,7 +23,51 @@
 namespace ecl
 {
 
+//! Base template class for the usart configuration
+//! \details User must create template specialization for required USART device.
+//! Usart configuration class must contain following constexpr fields:
+//! - uint32_t **baudrate** - Configures the USART communication baud rate
+//! - uint16_t **word_len** - Specifies the number of data bits transmitted
+//!                           or received. This member can be a value of
+//!                           \ref USART_Word_Length (see STM32 SPL).
+//! - uint16_t **stop_bit** - Specifies the number of stop bits transmitted.
+//!                           This member can be a value of
+//!                           \ref USART_Stop_Bits (see STM32 SPL).
+//! - uint16_t **parity**   - Specifies the parity mode. This member can be
+//!                           a value of \ref USART_Parity (see STM32 SPL).
+//! - uint16_t **mode**     - Specifies wether the Receive or Transmit mode is
+//!                           enabled or disabled. This member can be a value
+//!                           of \ref USART_Modes (see STM32 SPL).
+//! - uint16_t **hw_flow**  - Specifies wether the hardware flow control mode
+//!                           is enabled or disabled. This member can be a value
+//!                           of \ref USART_Hardware_Flow_Control (see STM32 SPL).
 //!
+//! \par USART configuration example.
+//! In order to use this configuration class one must create configuration class
+//! in the `ecl` namespace before any acccess to \ref usart_bus instance.
+//! \code{.cpp}
+//!    template<>
+//!    struct usart_cfg< usart_device::dev_3 >
+//!    {
+//!        static auto constexpr baudrate  = 115200;
+//!        static auto constexpr word_len  = USART_WordLength_8b;
+//!        static auto constexpr stop_bit  = USART_StopBits_1;
+//!        static auto constexpr parity    = USART_Parity_No;
+//!        static auto constexpr mode      = USART_Mode_Rx | USART_Mode_Tx;
+//!        static auto constexpr hw_flow   = USART_HardwareFlowControl_None;
+//!    };
+//! \endcode
+//! \warning To avoid potential problems with multiple configurations for single
+//! USART bus, **make sure that full specialization is placed in the
+//! header included (directly or indirectly) by all dependent modules.**.
+//! Thus, redefinition of the config class for given USART will result in
+//! compilation errors. *Good practice is to place all USART configuration
+//! class in the single target-related header.*
+template< usart_device dev >
+struct usart_cfg
+{
+};
+
 //! \brief STM32F4 USART bus
 //!
 template< usart_device dev >
@@ -174,6 +218,19 @@ ecl::err usart_bus< dev >::init()
         return ecl::err::ok;
     }
 
+    // SPL-like checks, but in compile time.
+
+    static_assert(IS_USART_WORD_LENGTH(usart_cfg< dev >::word_len),
+                  "Word length configuration is invalid");
+    static_assert(IS_USART_STOPBITS(usart_cfg< dev >::stop_bit),
+                  "Stop bits configuration is invalid");
+    static_assert(IS_USART_PARITY(usart_cfg< dev >::parity),
+                  "Parity configuration is invalid");
+    static_assert(IS_USART_MODE(usart_cfg< dev >::mode),
+                  "USART mode is invalid");
+    static_assert(IS_USART_HARDWARE_FLOW_CONTROL(usart_cfg< dev >::hw_flow),
+                  "Flow control configuration is invalid");
+
     // Must be optimized at compile time
     constexpr auto rcc_periph = pick_rcc();
     constexpr auto rcc_fn     = pick_rcc_fn();
@@ -184,13 +241,12 @@ ecl::err usart_bus< dev >::init()
     rcc_fn(rcc_periph, ENABLE);
 
     // Configure UART
-    // TODO: make configuration values be chosen at compile time
-    init_struct.USART_BaudRate             = 115200;
-    init_struct.USART_WordLength           = USART_WordLength_8b;
-    init_struct.USART_StopBits             = USART_StopBits_1;
-    init_struct.USART_Parity               = USART_Parity_No;
-    init_struct.USART_Mode                 = USART_Mode_Rx | USART_Mode_Tx;
-    init_struct.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
+    init_struct.USART_BaudRate             = usart_cfg< dev >::baudrate;
+    init_struct.USART_WordLength           = usart_cfg< dev >::word_len;
+    init_struct.USART_StopBits             = usart_cfg< dev >::stop_bit;
+    init_struct.USART_Parity               = usart_cfg< dev >::parity;
+    init_struct.USART_Mode                 = usart_cfg< dev >::mode;
+    init_struct.USART_HardwareFlowControl  = usart_cfg< dev >::hw_flow;
 
     // Init UART
     USART_Init(usart, &init_struct);
