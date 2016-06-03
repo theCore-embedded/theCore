@@ -1,6 +1,7 @@
 #include "assert.h"
 
 #include <ecl/iostream.hpp>
+#include <platform/execution.h>
 
 extern "C"
 void ecl_assert_failed(const char *assertion,
@@ -11,13 +12,15 @@ void ecl_assert_failed(const char *assertion,
 {
     ecl::cout << file << ':' << line << ": ";
 
-    if (func)
+    if (func) {
         ecl::cout << func << ": ";
+    }
 
     ecl::cout << "assertion failed: " << assertion << ecl::endl;
 
-    if (message)
+    if (message) {
         ecl::cout << "-> " << message << ecl::endl;
+    }
 
-    for(;;);
+    ecl_abort();
 }

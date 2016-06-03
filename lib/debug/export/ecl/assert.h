@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+#ifndef NDEBUG // No-debug switch
+
 #if __STDC_HOSTED__
 // Assert itself
 #define ecl_assert(cond) \
@@ -17,7 +19,9 @@ extern "C" {
 // Prints some useful message before asserting
 #define ecl_assert_msg(cond, message) \
     do { if (!(cond)) { puts(message); assert(cond); } } while (0)
-#else
+
+#else // __STDC_HOSTED__
+
 // These two is same as above but just works without libc implementation
 
 #define ecl_assert(COND) \
@@ -41,7 +45,14 @@ void ecl_assert_failed(const char *assertion,
                        const char *func,
                        unsigned int line);
 
-#endif
+#endif // __STDC_HOSTED__
+
+#else // NDEBUG
+
+#define ecl_assert(cond) ((void)(cond))
+#define ecl_assert_msg(cond, message) ((void)(cond))
+
+#endif // NDEBUG
 
 #ifdef __cplusplus
 }

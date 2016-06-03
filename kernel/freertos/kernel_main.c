@@ -23,16 +23,16 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 
 void vAssertCalled(const char *file, int line)
 {
-    (void) file;
-    (void) line;
-
+#ifndef NDEBUG
     ecl_assert_failed("",
                       "<see FreeRTOS sources>\n",
                       file,
                       NULL,
                       line);
-
-    for(;;);
+#else
+    (void)file;
+    (void)line;
+#endif
 }
 
 // Required since main prototype is not suitable for xTaskCreate()

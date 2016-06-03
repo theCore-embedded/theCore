@@ -1,22 +1,20 @@
 //! \file
 //! \brief Module aggregates routines that are control execution flow of the MCU.
 //!
-#ifndef THE_CORE_EXECUTION_HPP
-#define THE_CORE_EXECUTION_HPP
+#ifndef THE_CORE_EXECUTION_H
+#define THE_CORE_EXECUTION_H
 
 #include <stm32f4xx.h>
-
-namespace ecl
-{
+#include <core_cm4.h>
 
 //! \brief Waits in loop for a given amount of milliseconds.
 //! \details Uses DWT register.
 //! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
 //! \param[in] ms Milliseconds to wait
-void spin_wait(uint32_t ms)
+static inline void ecl_spin_wait(uint32_t ms)
 {
-    auto start = DWT->CYCCNT;
-    auto to_wait = ms * (SystemCoreClock / 1000L);
+    uint32_t start = DWT->CYCCNT;
+    uint32_t to_wait = ms * (SystemCoreClock / 1000L);
 
     // Handles wraparound as well.
     do { } while (DWT->CYCCNT - start < to_wait);
@@ -24,6 +22,12 @@ void spin_wait(uint32_t ms)
 
 // TODO #72: add add suspend() and resume() routines
 
+//! \brief Aborts execution of currently running code. Never return.
+static inline void ecl_abort()
+{
+    __disable_irq();
+    for(;;);
 }
 
-#endif //THE_CORE_EXECUTION_HPP
+
+#endif //THE_CORE_EXECUTION_H
