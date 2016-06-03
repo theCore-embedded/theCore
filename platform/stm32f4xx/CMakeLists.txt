@@ -1,5 +1,8 @@
-add_library(stm32f4xx STATIC platform.cpp irq_manager.cpp exti_manager.cpp)
-add_library(stm32f4xx_utils STATIC utils.c)
+add_library(stm32f4xx STATIC
+		platform.cpp
+		irq_manager.cpp
+		exti_manager.cpp
+		utils.c)
 
 target_include_directories(stm32f4xx PUBLIC export)
 

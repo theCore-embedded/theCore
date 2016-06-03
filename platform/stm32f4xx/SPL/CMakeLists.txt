@@ -10,11 +10,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CXX_NO_EXTRA_WARNINGS}")
 # list of modules not included:
 # ./src/stm32f4xx_fmc.c
 
-## Qt creator hack
-file(GLOB_RECURSE ALL_SPL_HEADERS *.h)
-add_custom_target(spl_dummy_target SOURCES "${ALL_SPL_HEADERS}")
-## EO hack
-
 add_library(spl STATIC
 ./src/stm32f4xx_dbgmcu.c
 ./src/stm32f4xx_cryp_tdes.c
@@ -61,5 +56,5 @@ add_library(spl STATIC
 # STM32 peripherial library headers
 target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/inc)
 
-target_link_libraries(spl stm32f4xx_utils)
+target_link_libraries(spl stm32f4xx) # Let it be circular dependency for sake of simplicity
 target_link_libraries(spl cmsis)
