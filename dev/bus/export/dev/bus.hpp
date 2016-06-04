@@ -505,7 +505,7 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
         // TODO: assert that user start new xfer _only_ during last event handling.
         // TODO #27: platform assert here is required since this routine
         // is likely will be executed in IRQ context
-        last_event = (m_state | xfer_served);
+        last_event = (m_state & xfer_served);
 
         if (last_event && !(m_state & bus_locked)) {
             // Bus is unlocked, it is time to check if bus cleaned.
