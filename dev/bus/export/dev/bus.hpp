@@ -343,7 +343,7 @@ ecl::err generic_bus< PBus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t
     }
 
     if (bus_is_busy()) {
-        return err::again;
+        return err::busy;
     }
 
     platform_handle().reset_buffers();
@@ -361,7 +361,7 @@ ecl::err generic_bus< PBus >::set_buffers(size_t size, uint8_t fill_byte)
     ecl_assert(m_state & bus_locked);
 
     if (bus_is_busy()) {
-        return err::again;
+        return err::busy;
     }
 
     platform_handle().reset_buffers();
