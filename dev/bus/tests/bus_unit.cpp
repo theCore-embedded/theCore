@@ -71,6 +71,99 @@ TEST(bus, lock_unlock)
     mock().checkExpectations();
 }
 
+TEST(bus, continuation_mode_xfer)
+{
+    mock().disable();
+    bus_t::init();
+    bus_t::lock();
+    mock().enable();
+
+    auto   expected_event    = ecl::bus_event::ht;
+    size_t expected_total    = 100500;
+    auto   expected_channel  = ecl::bus_channel::tx;
+    bool   call_xfer         = true;
+
+    auto handler = [&](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
+        mock("handler").actualCall("call");
+        CHECK_TRUE(expected_event    == e);
+        CHECK_TRUE(expected_total    == total);
+        CHECK_TRUE(expected_channel  == ch);
+
+        if (call_xfer && ch == ecl::bus_channel::meta && e == ecl::bus_event::tc) {
+            bus_t::trigger_xfer();
+            // Test logic is to trigger only one consequent xfer.
+            call_xfer = false;
+        }
+    };
+
+    ecl::err expected_ret = ecl::err::ok;
+
+    auto ret = bus_t::xfer(handler, ecl::async_type::deferred);
+    CHECK_EQUAL(expected_ret, ret);
+
+    // First xfer, triggered from current execution context
+    mock("platform_bus")
+    .expectOneCall("do_xfer")
+    .andReturnValue(static_cast< int >(expected_ret));
+
+    ret = bus_t::trigger_xfer();
+    CHECK_EQUAL(expected_ret, ret);
+
+    // Bus now busy transferring data
+    ret = bus_t::xfer(handler);
+    CHECK_EQUAL(ecl::err::busy, ret);
+
+    // Consequent xfer will be started as soon as TC event will be delivered
+    mock("platform_bus")
+    .expectOneCall("do_xfer")
+    .andReturnValue(static_cast< int >(expected_ret));
+
+    // 1st event - tx, ht
+    // 2nd event - meta, tc
+    // 3rd event - tx, ht
+    // 4th event - meta, tc - last for this test
+    mock("handler").expectNCalls(4, "call");
+
+    // Now, trigger the xfer event and see what happens
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // Provide TC event.
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    // Request for unlock. Bus must remain locked, since continuation xfer
+    // is requested.
+
+    mock().disable();
+    bus_t::unlock();
+    mock().enable();
+
+    // Trigger new event as a result of xfer continuation.
+
+    expected_event    = ecl::bus_event::ht;
+    expected_total    = 100500;
+    expected_channel  = ecl::bus_channel::tx;
+
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    // TC event not yet shipped for continuation mode. Bus must remain in busy
+    // state, but unlocked state. Deliver TC event in order to complete xfer
+    // chains.
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // As a result of cleanup
+    mock("platform_bus").expectOneCall("reset_buffers");
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    mock().checkExpectations();
+}
+
 // -----------------------------------------------------------------------------
 
 TEST_GROUP(bus_is_ready)
