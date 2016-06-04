@@ -1,0 +1,30 @@
+//!
+//! \file
+//! \brief Header provides template of console driver configuration
+
+#ifndef STM32F4XX_CONSOLE_DRIVER_HPP_
+#define STM32F4XX_CONSOLE_DRIVER_HPP_
+
+#include <platform/usart_bus.hpp>
+
+namespace ecl
+{
+
+// USART console configuration
+
+template<>
+struct usart_cfg< usart_device::dev_3 >
+{
+    static auto constexpr baudrate  = 115200;
+    static auto constexpr word_len  = USART_WordLength_8b;
+    static auto constexpr stop_bit  = USART_StopBits_1;
+    static auto constexpr parity    = USART_Parity_No;
+    static auto constexpr mode      = USART_Mode_Rx | USART_Mode_Tx;
+    static auto constexpr hw_flow   = USART_HardwareFlowControl_None;
+};
+
+using platform_console = ecl::usart_bus< ecl::usart_device::dev_3 >;
+
+}
+
+#endif // STM32F4XX_CONSOLE_DRIVER_HPP_

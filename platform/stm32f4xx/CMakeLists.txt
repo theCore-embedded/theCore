@@ -56,4 +56,10 @@ endif()
 target_compile_definitions(stm32f4xx PUBLIC
 	-DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
 
-
+# Pick console driver
+message(STATUS "STM32F4XX: Checking [CONFIG_USE_CONSOLE]...")
+if(${CONFIG_USE_CONSOLE})
+	configure_file(templates/platform_console.hpp.in
+			${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
+	target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+endif()
