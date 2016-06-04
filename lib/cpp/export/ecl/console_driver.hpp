@@ -27,17 +27,20 @@ namespace ecl
 
 // Do nothing class. Must be used in case if console driver doesn't needed.
 // Must have the same interface as platform's console driver has
-class console_driver {
+class console_driver
+{
 public:
     ecl::err init() { return ecl::err::ok; }
 
-    ssize_t write(const uint8_t *data, size_t count) {
+    ssize_t write(const uint8_t *data, size_t count)
+    {
         (void) data;
         (void) count;
         return 0;
     }
 
-    ssize_t read(uint8_t *data, size_t count) {
+    ssize_t read(uint8_t *data, size_t count)
+    {
         (void) data;
         (void) count;
         return 0;
