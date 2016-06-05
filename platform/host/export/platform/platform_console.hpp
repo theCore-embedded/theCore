@@ -6,6 +6,7 @@
 
 #include <platform/common/bus.hpp>
 #include <ecl/err.hpp>
+#include <stdio.h>
 
 namespace ecl
 {
@@ -107,6 +108,14 @@ private:
     size_t            m_rx_size;
     handler_fn        m_fn;
 };
+
+//! Bypasses console drivers and puts data directly to the UART
+//! \details Required to print debug of the failed asserts. Check other platforms
+//! to get idea why this function is provided.
+static inline void bypass_putc(char c)
+{
+    putchar(c);
+}
 
 }
 

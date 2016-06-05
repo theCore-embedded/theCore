@@ -25,11 +25,11 @@ struct usart_cfg< ECL_CONSOLE_DEVICE >
     static auto constexpr hw_flow   = USART_HardwareFlowControl_None;
 };
 
-using platform_console = ecl::usart_bus< ecl::usart_device::dev_3 >;
+using platform_console = ecl::usart_bus< ECL_CONSOLE_DEVICE >;
 
 //! Bypasses console drivers and puts data directly to the UART
-//! \details Required to print debug messages and failed assertions including
-//! messages that must be printed from ISR context
+//! \details Required to print debug of the failed asserts including one that
+//! executed during ISR.
 void bypass_putc(char c);
 
 }

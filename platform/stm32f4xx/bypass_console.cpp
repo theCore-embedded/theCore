@@ -32,7 +32,10 @@ struct bypass_console
 
     static void putc(char c)
     {
-        (void) c;
+        constexpr auto usart = platform_console::pick_usart();
+
+        while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == SET);
+        USART_SendData(usart, c);
     }
 };
 
@@ -45,7 +48,7 @@ void bypass_console_init()
 
 void ecl::bypass_putc(char c)
 {
-    (void) c;
+    ecl::bypass_console::putc(c);
 }
 
 
