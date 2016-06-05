@@ -12,7 +12,7 @@ namespace ecl
 
 // USART console configuration
 
-#define ECL_CONSOLE_DEVICE (usart_device::dev_ ## @CONFIG_CONSOLE_DEVICE_NUM@)
+#define ECL_CONSOLE_DEVICE (ecl::usart_device::dev_ ## @CONFIG_CONSOLE_DEVICE_NUM@)
 
 template<>
 struct usart_cfg< ECL_CONSOLE_DEVICE >
@@ -26,6 +26,11 @@ struct usart_cfg< ECL_CONSOLE_DEVICE >
 };
 
 using platform_console = ecl::usart_bus< ecl::usart_device::dev_3 >;
+
+//! Bypasses console drivers and puts data directly to the UART
+//! \details Required to print debug messages and failed assertions including
+//! messages that must be printed from ISR context
+void bypass_putc(char c);
 
 }
 

@@ -59,7 +59,25 @@ target_compile_definitions(stm32f4xx PUBLIC
 # Pick console driver
 message(STATUS "STM32F4XX: Checking [CONFIG_USE_CONSOLE]...")
 if(${CONFIG_USE_CONSOLE})
+	if(NOT DEFINED CONFIG_CONSOLE_DEVICE_NUM)
+		message(FATAL_ERROR "CONFIG_CONSOLE_DEVICE_NUM must be set in order to use console")
+	endif()
+
+	if(NOT DEFINED CONFIG_CONSOLE_BAUD)
+		message(FATAL_ERROR "CONFIG_CONSOLE_BAUD must be set in order to use console")
+	endif()
+
 	configure_file(templates/platform_console.hpp.in
+			${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
+	target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+
+	# Helps to determine if bypass driver must be enabled and inited
+	target_compile_definitions(stm32f4xx PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
+	# Bypass console implementation
+	target_sources(stm32f4xx PRIVATE bypass_console.cpp)
+	message(STATUS "Bypass console is supported and enabled by the platform")
+else()
+	configure_file(templates/platform_console_stub.hpp.in
 			${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
 	target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
 endif()

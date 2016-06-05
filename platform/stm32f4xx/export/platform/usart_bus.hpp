@@ -68,11 +68,15 @@ struct usart_cfg
 {
 };
 
+struct bypass_console;
+
 //! \brief STM32F4 USART bus
 //!
 template< usart_device dev >
 class usart_bus
 {
+    // Reuses usart_bus in order to initialize bypass console driver
+    friend struct bypass_console;
 public:
     // Convenient type aliases.
     using channel       = ecl::bus_channel;
