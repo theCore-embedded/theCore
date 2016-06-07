@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include <functional>
+#include <type_traits>
 
 namespace ecl
 {
@@ -66,6 +67,11 @@ namespace ecl
 template< usart_device dev >
 struct usart_cfg
 {
+    // Always assert
+    static_assert(std::is_integral<decltype(dev)>::value,
+                  "The instance of this generic class should never be "
+                  "instantiated. Please write your own template specialization "
+                  "of this class. See documentation.");
 };
 
 //! \brief STM32F4 USART bus
