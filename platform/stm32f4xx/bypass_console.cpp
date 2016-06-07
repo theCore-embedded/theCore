@@ -34,7 +34,7 @@ struct bypass_console
     {
         constexpr auto usart = platform_console::pick_usart();
 
-        while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == SET);
+        while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET);
         USART_SendData(usart, c);
     }
 };

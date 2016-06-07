@@ -59,6 +59,7 @@ target_compile_definitions(stm32f4xx PUBLIC
 # Pick console driver
 message(STATUS "STM32F4XX: Checking [CONFIG_USE_CONSOLE]...")
 if(${CONFIG_USE_CONSOLE})
+	# TODO: #83 - config name must be reviewed
 	if(NOT DEFINED CONFIG_CONSOLE_DEVICE_NUM)
 		message(FATAL_ERROR "CONFIG_CONSOLE_DEVICE_NUM must be set in order to use console")
 	endif()
