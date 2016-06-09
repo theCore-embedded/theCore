@@ -4,6 +4,10 @@
 #include <core_cm4.h>
 #include <stm32f4xx.h>
 
+#if CONFIG_BYPASS_CONSOLE_ENABLED
+extern void bypass_console_init();
+#endif // CONFIG_BYPASS_CONSOLE_ENABLED
+
 // TODO: decide if to make as a class member or not
 extern "C" __attribute__((used)) void platform_init()
 {
@@ -20,4 +24,8 @@ extern "C" __attribute__((used)) void platform_init()
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
     DWT->CYCCNT = 0;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+#if CONFIG_BYPASS_CONSOLE_ENABLED
+    bypass_console_init();
+#endif // CONFIG_BYPASS_CONSOLE_ENABLED
 }

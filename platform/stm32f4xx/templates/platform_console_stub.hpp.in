@@ -1,0 +1,20 @@
+//! \file
+//! \brief Provides stubs of the platform console driver, when console is not
+//! enabled at all
+
+#ifndef STM32F4XX_CONSOLE_DRIVER_STUB_HPP_
+#define STM32F4XX_CONSOLE_DRIVER_STUB_HPP_
+
+namespace ecl
+{
+
+//! Does nothing if console and consequenlty bypass isn't enabled.
+void bypass_putc(char c)
+{
+    (void) c;
+}
+
+}
+
+
+#endif // STM32F4XX_CONSOLE_DRIVER_STUB_HPP_
