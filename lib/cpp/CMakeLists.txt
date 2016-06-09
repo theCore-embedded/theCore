@@ -1,31 +1,21 @@
 add_library(libcpp STATIC arm_eabi.cpp streams.cpp)
 target_include_directories(libcpp PUBLIC export)
 
-message(STATUS "Checking [CONFIG_USE_CONSOLE]...")
-
-# Pick console driver
-if (${CONFIG_USE_CONSOLE})
-	message(STATUS "Checking [CONFIG_CONSOLE_LIB]...")
-	if (DEFINED CONFIG_CONSOLE_LIB)
-		if (TARGET "${CONFIG_CONSOLE_LIB}")
-			message(STATUS "Console library \"${CONFIG_CONSOLE_LIB}\" "
-				"is provided by the project")
-		else()
-			message(FATAL_ERROR "${CONFIG_CONSOLE_LIB} is not a valid console library!")
-		endif()
-	else()
-		message(FATAL_ERROR "Provide a console configuration library"
-			"if you want to use console.")
-	endif()
+message(STATUS "CORE: Checking [CONFIG_USE_CONSOLE]...")
+# Generate stub
+if(${CONFIG_USE_CONSOLE})
+	message(STATUS "Console is enabled.")
+	# Console is enabled and driver is provided by the platform.
+	# Work here is to create aliases of bus/bus_pipe classes tied with console.
+	target_link_libraries(libcpp PUBLIC ${PLATFORM_NAME})
+	target_compile_definitions(libcpp PUBLIC -DUSE_CONSOLE=1)
 else()
 	message(STATUS "Console is not enabled.")
-	add_subdirectory(default)
-	set(CONFIG_CONSOLE_LIB default_console_driver)
 endif()
 
-# Some of the includes are provided by the project itself
-target_link_libraries(libcpp PUBLIC ${CONFIG_CONSOLE_LIB})
 add_cppcheck(libcpp UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
+target_link_libraries(libcpp PUBLIC types)
+target_link_libraries(libcpp PUBLIC bus)
 
 # Unit testing
 add_subdirectory(tests)

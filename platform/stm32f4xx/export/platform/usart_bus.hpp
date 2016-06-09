@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include <functional>
+#include <type_traits>
 
 namespace ecl
 {
@@ -66,13 +67,22 @@ namespace ecl
 template< usart_device dev >
 struct usart_cfg
 {
+    // Always assert
+    static_assert(std::is_integral<decltype(dev)>::value,
+                  "The instance of this generic class should never be "
+                  "instantiated. Please write your own template specialization "
+                  "of this class. See documentation.");
 };
+
+struct bypass_console;
 
 //! \brief STM32F4 USART bus
 //!
 template< usart_device dev >
 class usart_bus
 {
+    // Reuses usart_bus in order to initialize bypass console driver
+    friend struct bypass_console;
 public:
     // Convenient type aliases.
     using channel       = ecl::bus_channel;

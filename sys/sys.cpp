@@ -6,6 +6,7 @@
 #include <cstddef>
 
 #include <platform/irq_manager.hpp>
+#include <platform_console.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *)
@@ -95,6 +96,9 @@ extern "C" void core_main()
 //! \todo Consider specifying it with noreturn attribute.
 extern "C" void early_main()
 {
+    // Platform console subsystem is ready at this stage
+    for (auto c : "Welcome to theCore\r\n") { ecl::bypass_putc(c); }
+
     extern uint32_t ___init_array_start;
     extern uint32_t ___init_array_end;
 
