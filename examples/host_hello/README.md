@@ -1,5 +1,14 @@
 # The Core _Hello World_ host example
 
+ ```
+
+ target:            host
+ external HW:       none
+ toolchain:         GNU v.5.2 or greather
+ additional SW:     none
+ ```
+
+
 This application shows The Core running on the host target.
 By _host_ target is understood an environment capable to compile and run
 theCore applications.
