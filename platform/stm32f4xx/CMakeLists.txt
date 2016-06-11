@@ -68,6 +68,9 @@ if(${CONFIG_USE_CONSOLE})
 		message(FATAL_ERROR "CONFIG_CONSOLE_BAUD must be set in order to use console")
 	endif()
 
+	message(STATUS "Console device:  ${CONFIG_CONSOLE_DEVICE_NUM}")
+	message(STATUS "Console baud rate: ${CONFIG_CONSOLE_BAUD}")
+
 	configure_file(templates/platform_console.hpp.in
 			${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
 	target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
