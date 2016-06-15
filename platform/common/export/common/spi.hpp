@@ -52,6 +52,6 @@ enum class data_format
 
 
 
-}
+} // namespace ecl
 
 #endif // PLATFORM_COMMON_SPI_HPP_

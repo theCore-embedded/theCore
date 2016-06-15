@@ -1,11 +1,10 @@
 #include <platform/exti_manager.hpp>
 #include <platform/irq_manager.hpp>
+
 #include "stm32f4xx_exti.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_syscfg.h"
 #include "misc.h"
-
-#include <common/pin.hpp>
 
 #include <utility>
 
