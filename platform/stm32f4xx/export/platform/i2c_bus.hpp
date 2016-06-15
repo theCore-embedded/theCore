@@ -466,11 +466,11 @@ template< class i2c_config >
 constexpr auto i2c_bus< i2c_config >::pick_i2c()
 {
     switch (i2c_config::m_dev) {
-    case i2c_device::bus_1:
+    case i2c_device::bus1:
         return I2C1;
-    case i2c_device::bus_2:
+    case i2c_device::bus2:
         return I2C2;
-    case i2c_device::bus_3:
+    case i2c_device::bus3:
         return I2C3;
     default:
         return static_cast< decltype(I2C1) >(nullptr);
@@ -481,11 +481,11 @@ template< class i2c_config >
 constexpr auto i2c_bus< i2c_config >::pick_rcc()
 {
     switch (i2c_config::m_dev) {
-    case i2c_device::bus_1:
+    case i2c_device::bus1:
         return RCC_APB1Periph_I2C1;
-    case i2c_device::bus_2:
+    case i2c_device::bus2:
         return RCC_APB1Periph_I2C2;
-    case i2c_device::bus_3:
+    case i2c_device::bus3:
         return RCC_APB1Periph_I2C3;
     default:
         return static_cast< decltype(RCC_APB1Periph_I2C1) >(-1);
@@ -496,9 +496,9 @@ template< class i2c_config >
 constexpr auto i2c_bus< i2c_config >::pick_rcc_fn()
 {
     switch (i2c_config::m_dev) {
-    case i2c_device::bus_1:
-    case i2c_device::bus_2:
-    case i2c_device::bus_3:
+    case i2c_device::bus1:
+    case i2c_device::bus2:
+    case i2c_device::bus3:
         return RCC_APB1PeriphClockCmd;
     default:
         return static_cast< decltype(&RCC_APB1PeriphClockCmd) >(nullptr);

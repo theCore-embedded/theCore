@@ -48,7 +48,7 @@ namespace ecl
 //! in the `ecl` namespace before any acccess to \ref usart_bus instance.
 //! \code{.cpp}
 //!    template<>
-//!    struct usart_cfg< usart_device::dev_3 >
+//!    struct usart_cfg< usart_device::dev3 >
 //!    {
 //!        static auto constexpr baudrate  = 115200;
 //!        static auto constexpr word_len  = USART_WordLength_8b;
@@ -450,17 +450,17 @@ template< usart_device dev >
 constexpr auto usart_bus< dev >::pick_usart()
 {
     switch (dev) {
-    case usart_device::dev_1:
+    case usart_device::dev1:
         return USART1;
-    case usart_device::dev_2:
+    case usart_device::dev2:
         return USART2;
-    case usart_device::dev_3:
+    case usart_device::dev3:
         return USART3;
-    case usart_device::dev_4:
+    case usart_device::dev4:
         return UART4;
-    case usart_device::dev_5:
+    case usart_device::dev5:
         return UART5;
-    case usart_device::dev_6:
+    case usart_device::dev6:
         return USART6;
         // TODO: clarify
     default:

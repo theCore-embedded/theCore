@@ -652,17 +652,17 @@ template< class spi_i2s_config >
 constexpr auto spi_i2s_bus< spi_i2s_config >::pick_spi()
 {
     switch (spi_i2s_config::m_dev) {
-    case spi_device::bus_1:
+    case spi_device::bus1:
         return SPI1;
-    case spi_device::bus_2:
+    case spi_device::bus2:
         return SPI2;
-    case spi_device::bus_3:
+    case spi_device::bus3:
         return SPI3;
-    case spi_device::bus_4:
+    case spi_device::bus4:
         return SPI4;
-    case spi_device::bus_5:
+    case spi_device::bus5:
         return SPI5;
-    case spi_device::bus_6:
+    case spi_device::bus6:
         return SPI6;
     default:
         // TODO: clarify
@@ -675,17 +675,17 @@ constexpr auto spi_i2s_bus< spi_i2s_config >::pick_rcc()
 {
     // TODO: comments
     switch (spi_i2s_config::m_dev) {
-    case spi_device::bus_1:
+    case spi_device::bus1:
         return RCC_APB2Periph_SPI1;
-    case spi_device::bus_2:
+    case spi_device::bus2:
         return RCC_APB1Periph_SPI2;
-    case spi_device::bus_3:
+    case spi_device::bus3:
         return RCC_APB1Periph_SPI3;
-    case spi_device::bus_4:
+    case spi_device::bus4:
         return RCC_APB2Periph_SPI4;
-    case spi_device::bus_5:
+    case spi_device::bus5:
         return RCC_APB2Periph_SPI5;
-    case spi_device::bus_6:
+    case spi_device::bus6:
         return RCC_APB2Periph_SPI6;
     default:
         // TODO: clarify
@@ -699,13 +699,13 @@ constexpr auto spi_i2s_bus< spi_i2s_config >::pick_rcc_fn()
     // APB1 - SPI3 SPI2
     // APB2 - SPI5 SPI6 SPI1 SPI4
     switch (spi_i2s_config::m_dev) {
-    case spi_device::bus_1:
-    case spi_device::bus_5:
-    case spi_device::bus_4:
-    case spi_device::bus_6:
+    case spi_device::bus1:
+    case spi_device::bus5:
+    case spi_device::bus4:
+    case spi_device::bus6:
         return RCC_APB2PeriphClockCmd;
-    case spi_device::bus_2:
-    case spi_device::bus_3:
+    case spi_device::bus2:
+    case spi_device::bus3:
         return RCC_APB1PeriphClockCmd;
     default:
         // TODO: clarify

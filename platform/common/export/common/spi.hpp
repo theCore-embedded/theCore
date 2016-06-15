@@ -10,14 +10,14 @@ namespace ecl
 // Represents distinct peripheral devices
 enum class spi_device
 {
-    bus_1,
-    bus_2,
-    bus_3,
-    bus_4,
-    bus_5,
-    bus_6,
-    bus_7,
-    bus_8
+    bus1,
+    bus2,
+    bus3,
+    bus4,
+    bus5,
+    bus6,
+    bus7,
+    bus8
 };
 
 //! I2S specific parameters

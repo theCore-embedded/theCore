@@ -8,14 +8,14 @@ namespace ecl
 // Represents distinct peripheral devices
 enum class usart_device
 {
-    dev_1,
-    dev_2,
-    dev_3,
-    dev_4,
-    dev_5,
-    dev_6,
-    dev_7,
-    dev_8
+    dev1,
+    dev2,
+    dev3,
+    dev4,
+    dev5,
+    dev6,
+    dev7,
+    dev8
 };
 
 }
