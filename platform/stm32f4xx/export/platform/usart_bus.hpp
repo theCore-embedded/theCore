@@ -6,7 +6,7 @@
 #ifndef PLATFORM_USART_BUS_HPP_
 #define PLATFORM_USART_BUS_HPP_
 
-#include <platform/common/bus.hpp>
+#include <common/bus.hpp>
 #include <common/usart.hpp>
 #include <ecl/err.hpp>
 

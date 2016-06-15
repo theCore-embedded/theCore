@@ -13,11 +13,7 @@ add_subdirectory(CMSIS)
 
 # TODO: clarify essential libraries
 target_link_libraries(stm32f4xx PUBLIC spl)
-target_link_libraries(stm32f4xx PUBLIC common_spi)
-target_link_libraries(stm32f4xx PUBLIC common_pin)
-target_link_libraries(stm32f4xx PUBLIC common_usart)
-target_link_libraries(stm32f4xx PUBLIC common_i2c)
-target_link_libraries(stm32f4xx PUBLIC common_bus)
+target_link_libraries(stm32f4xx PUBLIC platform_common)
 target_link_libraries(stm32f4xx PUBLIC types)
 target_link_libraries(stm32f4xx PUBLIC containers)
 target_link_libraries(stm32f4xx PUBLIC emc) # For memset

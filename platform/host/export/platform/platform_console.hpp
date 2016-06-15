@@ -4,7 +4,7 @@
 #include <iostream>
 #include <functional>
 
-#include <platform/common/bus.hpp>
+#include <common/bus.hpp>
 #include <ecl/err.hpp>
 #include <stdio.h>
 

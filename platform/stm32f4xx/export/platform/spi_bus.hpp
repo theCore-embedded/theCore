@@ -9,7 +9,7 @@
 #include "aux/dma_device.hpp"
 
 #include <common/spi.hpp>
-#include <platform/common/bus.hpp>
+#include <common/bus.hpp>
 #include <platform/irq_manager.hpp>
 
 #include <sys/types.h>

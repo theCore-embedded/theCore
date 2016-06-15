@@ -6,7 +6,8 @@
 namespace ecl
 {
 // Represents distinct peripheral devices
-enum class i2c_device {
+enum class i2c_device
+{
     bus_1,
     bus_2,
     bus_3
