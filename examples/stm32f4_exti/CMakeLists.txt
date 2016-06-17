@@ -36,5 +36,8 @@ set(CONFIG_CONSOLE_DEVICE_NUM 3)
 # Baud rate of the console
 set(CONFIG_CONSOLE_BAUD 115200)
 
-# Notify core about our project.
-register_project(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR}/exti)
+# Include The Core into the build process
+add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
+
+# Produce complete binary, suitable for flashing to the target
+strip_executable(exti)
