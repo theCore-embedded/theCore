@@ -5,7 +5,7 @@
 #define PLATFORM_EXTI_MANAGER_HPP_
 
 #include <ecl/list.hpp>
-#include <common/gpio.hpp>
+#include <aux/pin_descriptor.hpp>
 
 #include "irq_manager.hpp"
 
@@ -25,7 +25,8 @@ public:
     //! Useful alias.
     using callback = void(*)(void*);
 
-    //! External interrupt handler.
+    //! External in
+    //! terrupt handler.
     //! \details An object of this class is linked into the intrusive list of
     //! EXTI handlers. Client must retain the object and make sure that it
     //! will not be destroyed without deregistering.
