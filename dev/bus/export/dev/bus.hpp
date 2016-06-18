@@ -13,7 +13,7 @@
 #include <ecl/thread/semaphore.hpp>
 #include <ecl/assert.h>
 
-#include <platform/common/bus.hpp>
+#include <common/bus.hpp>
 
 #include <atomic>
 

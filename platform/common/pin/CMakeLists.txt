@@ -1,2 +1,0 @@
-add_library(common_pin INTERFACE)
-target_include_directories(common_pin INTERFACE export)

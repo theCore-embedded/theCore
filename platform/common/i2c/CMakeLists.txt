@@ -1,2 +1,0 @@
-add_library(common_i2c INTERFACE)
-target_include_directories(common_i2c INTERFACE export)

@@ -4,17 +4,16 @@
 #ifndef PLATFORM_GPIO_DEVICE_HPP
 #define PLATFORM_GPIO_DEVICE_HPP
 
-#include <common/pin.hpp>
 #include "aux/pin_descriptor.hpp"
 
 namespace ecl
 {
 
-// Incapsulates pin usage
+// Encapsulates pin usage
 //! GPIO class incapsulates pin usage.
 //! \tparam Port GPIO port on stm32f4xx.
 //! \tparam Pin  Pin within given port.
-template< pin::port Port, pin::number Pin >
+template< gpio_port Port, gpio_num Pin >
 class gpio
 {
 public:
@@ -37,7 +36,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-template< pin::port Port, pin::number Pin >
+template< gpio_port Port, gpio_num Pin >
 void gpio< Port, Pin >::set()
 {
     constexpr auto hw_port = pick_port(Port);
@@ -46,7 +45,7 @@ void gpio< Port, Pin >::set()
     GPIO_WriteBit(hw_port, hw_pin, Bit_SET);
 }
 
-template< pin::port Port, pin::number Pin >
+template< gpio_port Port, gpio_num Pin >
 void gpio< Port, Pin >::reset()
 {
     constexpr auto hw_port = pick_port(Port);
@@ -55,7 +54,7 @@ void gpio< Port, Pin >::reset()
     GPIO_WriteBit(hw_port, hw_pin, Bit_RESET);
 }
 
-template< pin::port Port, pin::number Pin >
+template< gpio_port Port, gpio_num Pin >
 void gpio< Port, Pin >::toggle()
 {
     constexpr auto hw_port = pick_port(Port);
@@ -64,17 +63,13 @@ void gpio< Port, Pin >::toggle()
     GPIO_ToggleBits(hw_port, hw_pin);
 }
 
-template< pin::port Port, pin::number Pin >
+template< gpio_port Port, gpio_num Pin >
 bool gpio< Port, Pin >::get()
 {
     constexpr auto hw_port = pick_port(Port);
     constexpr auto hw_pin  = pick_pin(Pin);
 
-    if (GPIO_ReadInputDataBit(hw_port, hw_pin) == Bit_SET) {
-        return true;
-    } else {
-        return false;
-    }
+    return GPIO_ReadInputDataBit(hw_port, hw_pin) == Bit_SET;
 }
 
 } // namespace ecl

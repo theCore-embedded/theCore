@@ -12,6 +12,6 @@
 void gpio_init();
 
 // User button
-using usr_btn = ecl::gpio<pin::port::port_a, pin::number::pin_0>;
+using usr_btn = ecl::gpio<ecl::gpio_port::a, ecl::gpio_num::pin0>;
 
 #endif // EXAMPLE_EXTI_UART_TARGET_HPP_

@@ -5,7 +5,7 @@
 #define PLATFORM_EXTI_MANAGER_HPP_
 
 #include <ecl/list.hpp>
-#include <common/pin.hpp>
+#include <aux/pin_descriptor.hpp>
 
 #include "irq_manager.hpp"
 
@@ -25,7 +25,8 @@ public:
     //! Useful alias.
     using callback = void(*)(void*);
 
-    //! External interrupt handler.
+    //! External in
+    //! terrupt handler.
     //! \details An object of this class is linked into the intrusive list of
     //! EXTI handlers. Client must retain the object and make sure that it
     //! will not be destroyed without deregistering.
@@ -217,7 +218,7 @@ constexpr auto exti_manager::gpio_to_exti()
     // Hackish, but fast.
     // TODO: rich comment about it.
     constexpr auto shift =
-            static_cast< typename std::underlying_type< pin::number >::type >
+            static_cast< typename std::underlying_type< gpio_num >::type >
             (Gpio::pin);
 
     return 1 << shift;
@@ -296,9 +297,9 @@ template< typename Gpio >
 void exti_manager::configure_line(trigger t)
 {
     constexpr auto pinsource
-        = static_cast< std::underlying_type< pin::number >::type >(Gpio::pin);
+        = static_cast< std::underlying_type< gpio_num >::type >(Gpio::pin);
     constexpr auto portsource
-        = static_cast< std::underlying_type< pin::port >::type >(Gpio::port);
+        = static_cast< std::underlying_type< gpio_port >::type >(Gpio::port);
     constexpr auto exti = gpio_to_exti< Gpio >();
 
     EXTI_InitTypeDef    exti_init;

@@ -30,6 +30,5 @@ target_link_libraries(hello host)
 # Enable console.
 set(CONFIG_USE_CONSOLE 1)
 
-# Notify core about our project.
-register_project(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR}/hello)
-
+# Include The Core into the build process
+add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)

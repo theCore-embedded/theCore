@@ -12,7 +12,7 @@ namespace ecl
 
 // USART console configuration
 
-#define ECL_CONSOLE_DEVICE (ecl::usart_device::dev_ ## @CONFIG_CONSOLE_DEVICE_NUM@)
+#define ECL_CONSOLE_DEVICE (ecl::usart_device::dev ## @CONFIG_CONSOLE_DEVICE_NUM@)
 
 template<>
 struct usart_cfg< ECL_CONSOLE_DEVICE >
