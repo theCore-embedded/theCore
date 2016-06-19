@@ -1,3 +1,6 @@
 [submodule "kernel/freertos/freertos"]
 	path = kernel/freertos/freertos
 	url = https://github.com/cjlano/freertos.git
+[submodule "lib/cmsis/CMSIS"]
+	path = lib/cmsis/CMSIS
+	url = https://github.com/ARM-software/CMSIS.git
