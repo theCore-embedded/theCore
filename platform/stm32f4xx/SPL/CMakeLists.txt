@@ -56,5 +56,4 @@ add_library(spl STATIC
 # STM32 peripherial library headers
 target_include_directories(spl SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/inc)
 
-target_link_libraries(spl PRIVATE stm32f4xx) # Let it be circular dependency for sake of simplicity
-target_link_libraries(spl PUBLIC system_stm32f4xx)
+target_link_libraries(spl PUBLIC stm32f4xx) # Let it be circular dependency for sake of simplicity

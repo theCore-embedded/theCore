@@ -18,6 +18,7 @@ target_link_libraries(stm32f4xx PUBLIC platform_common)
 target_link_libraries(stm32f4xx PUBLIC types)
 target_link_libraries(stm32f4xx PUBLIC containers)
 target_link_libraries(stm32f4xx PUBLIC emc) # For memset
+target_link_libraries(stm32f4xx PUBLIC system_stm32f4xx)
 
 add_cppcheck(stm32f4xx)
 
