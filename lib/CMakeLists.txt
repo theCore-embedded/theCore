@@ -9,3 +9,6 @@ add_subdirectory(debug)
 add_subdirectory(types)
 add_subdirectory(thread)
 add_subdirectory(containers)
+add_subdirectory(cmsis)
+add_subdirectory(stm32-spl)
+
