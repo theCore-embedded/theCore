@@ -48,9 +48,9 @@ SECTIONS
     . = ALIGN(4);
     .init_array :
     {
-        ___init_array_start = .;
+        __init_array_start = .;
         KEEP (*(.init_array*))
-        ___init_array_end = .;
+        __init_array_end = .;
     } > flash
 
     /* Read only data goes to flash */
