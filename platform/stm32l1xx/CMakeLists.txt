@@ -1,4 +1,7 @@
-add_library(stm32l1xx platform.cpp)
+add_library(stm32l1xx
+        platform.cpp
+        console.cpp
+        irq_manager.cpp)
 add_subdirectory(startup)
 
 message(STATUS "Checking [CONFIG_MAX_ISR_PRIORITY]...")
@@ -15,8 +18,7 @@ target_compile_definitions(stm32l1xx PUBLIC
 target_include_directories(stm32l1xx PUBLIC export)
 target_link_libraries(stm32l1xx PUBLIC cmsis)
 target_link_libraries(stm32l1xx PUBLIC types)
+target_link_libraries(stm32l1xx PUBLIC stm32l1xx_spl)
 
-
-target_include_directories(stm32l1xx PUBLIC .) # TODO: temporary solution
 target_compile_definitions(stm32l1xx PUBLIC -DSTM32L1XX_XL) # TODO: temporary solution
 
