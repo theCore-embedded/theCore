@@ -6,7 +6,7 @@
 #include <cstddef>
 
 #include <platform/irq_manager.hpp>
-#include <platform_console.hpp>
+#include <platform/console.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *)

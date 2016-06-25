@@ -1,4 +1,3 @@
-#include "platform_console.hpp"
 #include "platform/execution.h"
 
 #include <stm32l1xx_rcc.h>

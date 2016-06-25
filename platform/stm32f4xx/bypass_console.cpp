@@ -1,4 +1,4 @@
-#include <platform_console.hpp>
+#include <platform/console.hpp>
 
 namespace ecl
 {

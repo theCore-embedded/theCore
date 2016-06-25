@@ -4,7 +4,7 @@
 #include <stm32l1xx_rcc.h>
 #include <stm32l1xx_usart.h>
 
-#include "platform_console.hpp"
+#include "platform/console.hpp"
 
 namespace ecl
 {

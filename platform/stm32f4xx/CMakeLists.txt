@@ -68,9 +68,9 @@ if(${CONFIG_USE_CONSOLE})
     message(STATUS "Console device:  ${CONFIG_CONSOLE_DEVICE_NUM}")
     message(STATUS "Console baud rate: ${CONFIG_CONSOLE_BAUD}")
 
-    configure_file(templates/platform_console.hpp.in
-            ${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
-    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+    configure_file(templates/console.hpp.in
+            ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
+    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 
     # Helps to determine if bypass driver must be enabled and inited
     target_compile_definitions(stm32f4xx PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
@@ -78,7 +78,7 @@ if(${CONFIG_USE_CONSOLE})
     target_sources(stm32f4xx PRIVATE bypass_console.cpp)
     message(STATUS "Bypass console is supported and enabled by the platform")
 else()
-    configure_file(templates/platform_console_stub.hpp.in
-            ${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
-    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+    configure_file(templates/console_stub.hpp.in
+            ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
+    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 endif()
