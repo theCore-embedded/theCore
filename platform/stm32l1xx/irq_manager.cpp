@@ -3,6 +3,26 @@
 
 #include "misc.h"
 
+//! Encapsultaes entry point of the IRQ service routine
+struct irq_manager_entry_point : public ecl::irq_manager
+{
+    //! Bypasses encapsulation, but hides it from a user of the IRQ manager itself
+    static void isr()
+    {
+        ecl::irq_manager::isr();
+    }
+};
+
+//! Handles IRQ and visible to startup code
+extern "C" __attribute__ ((used))
+void core_isr()
+{
+    irq_manager_entry_point::isr();
+}
+
+
+//------------------------------------------------------------------------------
+
 namespace ecl
 {
 

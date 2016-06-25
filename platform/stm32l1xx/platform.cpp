@@ -4,6 +4,10 @@
 #include <stm32l1xx_rcc.h>
 #include <stm32l1xx_usart.h>
 
+#if CONFIG_BYPASS_CONSOLE_ENABLED
+extern void bypass_console_init();
+#endif // CONFIG_BYPASS_CONSOLE_ENABLED
+
 
 /* Required for STM32 Peripherial library */
 extern "C"
@@ -18,13 +22,11 @@ void assert_param(int exp)
 #endif
 }
 
-namespace ecl
-{
-    extern void bypass_console_init();
-}
-
 extern "C" void platform_init()
 {
-    ecl::bypass_console_init();
+
+#if CONFIG_BYPASS_CONSOLE_ENABLED
+    bypass_console_init();
+#endif // CONFIG_BYPASS_CONSOLE_ENABLED
 }
 

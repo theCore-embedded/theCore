@@ -1,6 +1,5 @@
 add_library(stm32l1xx
         platform.cpp
-        console.cpp
         irq_manager.cpp)
 add_subdirectory(startup)
 
@@ -19,6 +18,36 @@ target_include_directories(stm32l1xx PUBLIC export)
 target_link_libraries(stm32l1xx PUBLIC cmsis)
 target_link_libraries(stm32l1xx PUBLIC types)
 target_link_libraries(stm32l1xx PUBLIC stm32l1xx_spl)
+target_link_libraries(stm32l1xx PUBLIC platform_common)
 
 target_compile_definitions(stm32l1xx PUBLIC -DSTM32L1XX_XL) # TODO: temporary solution
 
+# Pick console driver
+message(STATUS "STM32L1XX: Checking [CONFIG_USE_CONSOLE]...")
+if(${CONFIG_USE_CONSOLE})
+    # TODO: #83 - config name must be reviewed
+    if(NOT DEFINED CONFIG_CONSOLE_DEVICE_NUM)
+        message(FATAL_ERROR "CONFIG_CONSOLE_DEVICE_NUM must be set in order to use console")
+    endif()
+
+    if(NOT DEFINED CONFIG_CONSOLE_BAUD)
+        message(FATAL_ERROR "CONFIG_CONSOLE_BAUD must be set in order to use console")
+    endif()
+
+    message(STATUS "Console device:  ${CONFIG_CONSOLE_DEVICE_NUM}")
+    message(STATUS "Console baud rate: ${CONFIG_CONSOLE_BAUD}")
+
+    configure_file(templates/platform_console.hpp.in
+            ${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
+    target_include_directories(stm32l1xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+
+    # Helps to determine if bypass driver must be enabled and inited
+    target_compile_definitions(stm32l1xx PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
+    # Bypass console implementation
+    target_sources(stm32l1xx PRIVATE console.cpp)
+    message(STATUS "Bypass console is supported and enabled by the platform")
+else()
+    configure_file(templates/platform_console_stub.hpp.in
+            ${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
+    target_include_directories(stm32l1xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+endif()

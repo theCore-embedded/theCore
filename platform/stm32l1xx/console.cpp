@@ -4,34 +4,57 @@
 #include <stm32l1xx_rcc.h>
 #include <stm32l1xx_usart.h>
 
+#include "platform_console.hpp"
+
 namespace ecl
 {
 
+struct bypass_console
+{
+    static void init()
+    {
+        // TODO: Duplicates usart_bus::init(), but it is ok for this moment
+
+        USART_InitTypeDef init_struct;
+        constexpr auto rcc_periph = platform_console::pick_rcc();
+        constexpr auto rcc_fn = platform_console::pick_rcc_fn();
+        constexpr auto usart = platform_console::pick_usart();
+
+        // Enable peripheral clock
+        rcc_fn(rcc_periph, ENABLE);
+
+        // Configure UART
+        init_struct.USART_BaudRate = usart_cfg<ECL_CONSOLE_DEVICE>::baudrate;
+        init_struct.USART_WordLength = usart_cfg<ECL_CONSOLE_DEVICE>::word_len;
+        init_struct.USART_StopBits = usart_cfg<ECL_CONSOLE_DEVICE>::stop_bit;
+        init_struct.USART_Parity = usart_cfg<ECL_CONSOLE_DEVICE>::parity;
+        init_struct.USART_Mode = usart_cfg<ECL_CONSOLE_DEVICE>::mode;
+        init_struct.USART_HardwareFlowControl
+                = usart_cfg<ECL_CONSOLE_DEVICE>::hw_flow;
+
+        USART_Init(usart, &init_struct);
+        USART_Cmd(usart, ENABLE);
+    }
+
+    static void putc(char c)
+    {
+        constexpr auto usart = platform_console::pick_usart();
+
+        while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET);
+        USART_SendData(usart, c);
+    }
+};
+
+} // namespace ecl
+
 void bypass_console_init()
 {
-    // Debug platform console
-
-    USART_InitTypeDef usart_init;
-    USART_StructInit(&usart_init);
-
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-
-    usart_init.USART_BaudRate               = 115200;
-    usart_init.USART_WordLength             = USART_WordLength_8b;
-    usart_init.USART_StopBits               = USART_StopBits_1;
-    usart_init.USART_Parity                 = USART_Parity_No;
-    usart_init.USART_Mode                   = USART_Mode_Rx | USART_Mode_Tx;
-    usart_init.USART_HardwareFlowControl    = USART_HardwareFlowControl_None;
-
-    USART_Init(USART3, &usart_init);
-    USART_Cmd(USART3, ENABLE);
-
+    ecl::bypass_console::init();
 }
 
-void bypass_putc(char c)
+void ecl::bypass_putc(char c)
 {
-    while (USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
-    USART_SendData(USART3, c);
+    ecl::bypass_console::putc(c);
 }
 
-}
+

@@ -78,12 +78,12 @@ public:
     //!
     static err clear(irq_num irqn);
 
-private:
+protected:
     using handler_storage =
     std::aligned_storage< sizeof(handler_type), alignof(handler_type) >::type;
 
-    // Prevent optimizing out an ISR routine
-    __attribute__ ((used)) void isr();
+    //! Handles IRQ
+    static void isr();
 
     //! Default iRQ handler. Terminates execution if called.
     static void default_handler();

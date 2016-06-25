@@ -4,6 +4,8 @@
 #ifndef THE_CORE_EXECUTION_H_
 #define THE_CORE_EXECUTION_H_
 
+#include <cstdint>
+
 
 //! \brief Waits in loop for a given amount of milliseconds.
 //! \details Uses DWT register.
