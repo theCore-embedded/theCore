@@ -6,7 +6,7 @@
 #include <cstddef>
 
 #include <platform/irq_manager.hpp>
-#include <platform_console.hpp>
+#include <platform/console.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *)
@@ -99,10 +99,10 @@ extern "C" void early_main()
     // Platform console subsystem is ready at this stage
     for (auto c : "Welcome to theCore\r\n") { ecl::bypass_putc(c); }
 
-    extern uint32_t ___init_array_start;
-    extern uint32_t ___init_array_end;
+    extern uint32_t __init_array_start;
+    extern uint32_t __init_array_end;
 
-    for (uint32_t *p = &___init_array_start; p < &___init_array_end; ++p) {
+    for (uint32_t *p = &__init_array_start; p < &__init_array_end; ++p) {
         // Iterator points to a memory which contains an address of a
         // initialization function.
         // Equivalent of:

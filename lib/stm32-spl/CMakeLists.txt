@@ -1,3 +1,5 @@
 if("${CONFIG_PLATFORM}" STREQUAL "stm32f4xx")
     include(stm32f4xx_spl.cmake)
+elseif("${CONFIG_PLATFORM}" STREQUAL "stm32l1xx")
+    include(stm32l1xx_spl.cmake)
 endif()
