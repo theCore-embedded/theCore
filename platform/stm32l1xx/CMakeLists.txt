@@ -1,6 +1,8 @@
 add_library(stm32l1xx
         platform.cpp
-        irq_manager.cpp)
+        irq_manager.cpp
+        system_stm32l1xx.c)
+
 add_subdirectory(startup)
 
 message(STATUS "Checking [CONFIG_MAX_ISR_PRIORITY]...")
@@ -20,7 +22,10 @@ target_link_libraries(stm32l1xx PUBLIC types)
 target_link_libraries(stm32l1xx PUBLIC stm32l1xx_spl)
 target_link_libraries(stm32l1xx PUBLIC platform_common)
 
-target_compile_definitions(stm32l1xx PUBLIC -DSTM32L1XX_XL) # TODO: temporary solution
+# TODO: check that configuration values are defined
+target_compile_definitions(stm32l1xx PUBLIC
+        -D${CONFIG_PLATFORM_DEVICE}
+        -DHSE_VALUE=${CONFIG_PLATFORM_HSE_VAL})
 
 # Pick console driver
 message(STATUS "STM32L1XX: Checking [CONFIG_USE_CONSOLE]...")

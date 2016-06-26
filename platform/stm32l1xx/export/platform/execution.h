@@ -6,6 +6,9 @@
 
 #include <cstdint>
 
+#include <stm32l1xx.h>
+#include <core_cm3.h>
+
 
 //! \brief Waits in loop for a given amount of milliseconds.
 //! \details Uses DWT register.
@@ -13,9 +16,11 @@
 //! \param[in] ms Milliseconds to wait
 static inline void ecl_spin_wait(uint32_t ms)
 {
-    // TODO: implement this routine
-    (void) ms;
-    for(;;);
+    uint32_t start = DWT->CYCCNT;
+    uint32_t to_wait = ms * (SystemCoreClock / 1000L);
+
+    // Handles wraparound as well.
+    do { } while (DWT->CYCCNT - start < to_wait);
 }
 
 // TODO #72: add add suspend() and resume() routines
