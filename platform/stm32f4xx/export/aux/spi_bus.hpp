@@ -110,7 +110,7 @@ struct spi_i2c_cfg_common
 {
     static constexpr spi_device         m_dev              = dev;
     static constexpr uint32_t           m_dma_tx_channel   = dma_tx_channel;
-    static constexpr std::uintptr_t     m_dma_tx_stream    = dma_tx_stream;
+    static constexpr std::uintptr_t     m_dma_tx_stream    = dma_tx_stream;#
     static constexpr uint32_t           m_dma_rx_channel   = dma_rx_channel;
     static constexpr std::uintptr_t     m_dma_rx_stream    = dma_rx_stream;
     static constexpr auto               bus_type         = bus_config::bus_type;
@@ -487,13 +487,13 @@ void spi_i2s_bus< dev >::prepare_tx()
 
     m_status &= ~(tx_complete);
 
-    constexpr auto tx_dma   = dma::get_stream< config::streams::tx >();
-    constexpr auto spi      = pick_spi();
+    auto tx_dma         = dma::get_stream< config::streams::tx >();
+    constexpr auto spi  = pick_spi();
 
     DMA_InitTypeDef dma_init;
     DMA_StructInit(&dma_init);
 
-    dma_init.DMA_Channel             = config::dma_channels::tx;
+    dma_init.DMA_Channel             = config::channels::tx;
     dma_init.DMA_DIR                 = DMA_DIR_MemoryToPeripheral;
     dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
     dma_init.DMA_PeripheralInc       = DMA_PeripheralInc_Disable;
@@ -529,13 +529,13 @@ void spi_i2s_bus< dev >::prepare_rx()
 
     m_status &= ~(rx_complete);
 
-    constexpr auto rx_dma   = dma::get_stream< config::streams::rx >();
-    constexpr auto spi      = pick_spi();
+    auto rx_dma        = dma::get_stream< config::streams::rx >();
+    constexpr auto spi = pick_spi();
 
     DMA_InitTypeDef dma_init;
     DMA_StructInit(&dma_init);
 
-    dma_init.DMA_Channel             = config::dma_channels::rx;
+    dma_init.DMA_Channel             = config::channels::rx;
     dma_init.DMA_DIR                 = DMA_DIR_PeripheralToMemory;
     dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
     dma_init.DMA_MemoryInc           = DMA_MemoryInc_Enable;
@@ -556,9 +556,9 @@ void spi_i2s_bus< dev >::prepare_rx()
 template< spi_device dev >
 void spi_i2s_bus< dev >::start_xfer()
 {
-    constexpr auto rx_dma = dma::get_stream< config::streams::rx >();
-    constexpr auto tx_dma = dma::get_stream< config::streams::tx >();
-    constexpr auto spi    = pick_spi();
+    auto rx_dma = dma::get_stream< config::streams::rx >();
+    auto tx_dma = dma::get_stream< config::streams::tx >();
+    constexpr auto spi = pick_spi();
 
     // After all directions configured, streams may be enabled
     if (m_tx_size) {
@@ -579,8 +579,8 @@ void spi_i2s_bus< dev >::irq_handler()
     constexpr auto rx_irqn = dma::get_irqn< config::streams::rx >();
     constexpr auto tx_irqn = dma::get_irqn< config::streams::tx >();
 
-    constexpr auto tx_dma   = dma::get_stream< config::streams::tx >();
-    constexpr auto rx_dma   = dma::get_stream< config::streams::rx >();
+    auto tx_dma = dma::get_stream< config::streams::tx >();
+    auto rx_dma = dma::get_stream< config::streams::rx >();
 
     constexpr auto tx_tc_if = dma::get_tc_if< config::streams::tx >();
     constexpr auto rx_tc_if = dma::get_tc_if< config::streams::rx >();
@@ -795,8 +795,8 @@ spi_i2s_bus< dev >::init_interface()
 template< spi_device dev >
 void spi_i2s_bus< dev >::init_dma()
 {
-    dma::init_rcc< config::streams::rx >();
-    dma::init_rcc< config::streams::tx >();
+    dma::init_rcc<config::streams::rx>();
+    dma::init_rcc<config::streams::tx>();
 
     auto handler = [this]() {
         this->irq_handler();
