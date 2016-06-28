@@ -62,7 +62,7 @@ struct i2s_config
         I2S_Cmd(i2s, ENABLE);
     }
 
-    static constexpr auto m_bus_type = spi_bus_type::i2s;
+    static constexpr auto bus_type = spi_bus_type::i2s;
 };
 
 //! \brief Defines configuration for SPI bus.
@@ -99,26 +99,21 @@ struct spi_config
         SPI_Cmd(spi, ENABLE);
     }
 
-    static constexpr auto m_bus_type = spi_bus_type::spi;
+    static constexpr auto bus_type = spi_bus_type::spi;
 };
 
+#if 0
 //! \brief Defines common configuration for driver.
 //!  Provides init function which is used to initialize low-level interface.
 //!
-template < spi_device        dev,
-           std::uintptr_t    dma_tx_stream,
-           uint32_t          dma_tx_channel,
-           std::uintptr_t    dma_rx_stream,
-           uint32_t          dma_rx_channel,
-           class             bus_config >
-struct spi_i2s_config
+struct spi_i2c_cfg_common
 {
     static constexpr spi_device         m_dev              = dev;
     static constexpr uint32_t           m_dma_tx_channel   = dma_tx_channel;
     static constexpr std::uintptr_t     m_dma_tx_stream    = dma_tx_stream;
     static constexpr uint32_t           m_dma_rx_channel   = dma_rx_channel;
     static constexpr std::uintptr_t     m_dma_rx_stream    = dma_rx_stream;
-    static constexpr auto               m_bus_type         = bus_config::m_bus_type;
+    static constexpr auto               bus_type         = bus_config::bus_type;
     static constexpr auto               m_bus_cfg          = bus_config::m_init_obj;
 
     static void init(SPI_TypeDef *spi)
@@ -127,10 +122,35 @@ struct spi_i2s_config
     }
 };
 
+#endif
+
+struct spi_i2c_cfg_dma_streams
+{
+    DMA_Stream_TypeDef tx;
+    DMA_Stream_TypeDef rx;
+};
+
+struct spi_i2c_cfg_dma_channels
+{
+    uint32_t tx;
+    uint32_t rx;
+};
+
+template< spi_device dev >
+struct spi_i2c_cfg
+{
+    // Always assert
+    static_assert(std::is_integral<decltype(dev)>::value,
+                  "The instance of this generic class should never be "
+                          "instantiated. Please write your own template specialization "
+                          "of this class. See documentation.");
+};
+
+
 //! \brief Driver implementation for SPI and I2S
 //! \tparam spi_i2s_config common configuration
 //!
-template< class spi_i2s_config >
+template< spi_device dev >
 class spi_i2s_bus
 {
 public:
@@ -138,6 +158,7 @@ public:
     using channel       = bus_channel;
     using event         = bus_event;
     using handler_fn    = bus_handler;
+    using config        = spi_i2c_cfg<dev>;
 
     //!
     //! \brief Constructs a bus.
@@ -208,8 +229,8 @@ public:
     //! \tparam Iface_cfg Used for correct enable_if mechanism. Must not be passed by user.
     //! \return Status of operation.
     //!
-    template < ecl::i2s::audio_frequency frequency, class Iface_cfg = spi_i2s_config >
-    std::enable_if_t< Iface_cfg::m_bus_type == spi_bus_type::i2s, ecl::err >
+    template < ecl::i2s::audio_frequency frequency, class Iface_cfg = config >
+    std::enable_if_t< Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err >
     i2s_set_audio_frequency();
 
     //!
@@ -219,8 +240,8 @@ public:
     //! \tparam Iface_cfg Used for correct enable_if mechanism. Must not be passed by user.
     //! \return Status of operation.
     //!
-    template < ecl::i2s::data_format format, class Iface_cfg = spi_i2s_config >
-    std::enable_if_t< Iface_cfg::m_bus_type == spi_bus_type::i2s, ecl::err >
+    template < ecl::i2s::data_format format, class Iface_cfg = config >
+    std::enable_if_t< Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err >
     i2s_set_data_format();
 
 private:
@@ -232,6 +253,14 @@ private:
 
     ecl::err i2s_set_audio_frequency_private(uint32_t value);
     ecl::err i2s_set_data_format_private(uint32_t value);
+
+    template < class Iface_cfg = config >
+    std::enable_if_t< Iface_cfg::bus_type == spi_bus_type::i2s, void >
+    init_interface();
+
+    template < class Iface_cfg = config >
+    std::enable_if_t< Iface_cfg::bus_type == spi_bus_type::spi, void >
+    init_interface();
 
     // DMA init helper
     void init_dma();
@@ -278,9 +307,9 @@ private:
     uint8_t         m_status;        //! Represents bus status.
 };
 
-template< class spi_i2s_config >
-spi_i2s_bus< spi_i2s_config >::spi_i2s_bus()
-    :m_event_handler{false}
+template< spi_device dev >
+spi_i2s_bus< dev >::spi_i2s_bus()
+    :m_event_handler{}
     ,m_tx{nullptr}
     ,m_tx_size{0}
     ,m_rx{nullptr}
@@ -290,14 +319,14 @@ spi_i2s_bus< spi_i2s_config >::spi_i2s_bus()
 
 }
 
-template< class spi_i2s_config >
-spi_i2s_bus< spi_i2s_config >::~spi_i2s_bus()
+template< spi_device dev >
+spi_i2s_bus< dev >::~spi_i2s_bus()
 {
 
 }
 
-template< class spi_i2s_config >
-ecl::err spi_i2s_bus< spi_i2s_config >::init()
+template< spi_device dev >
+ecl::err spi_i2s_bus< dev >::init()
 {
     if (m_status & inited) {
         return ecl::err::ok;
@@ -311,15 +340,15 @@ ecl::err spi_i2s_bus< spi_i2s_config >::init()
 
     init_dma();
 
-    spi_i2s_config::init(spi);
+    init_interface();
 
     m_status |= inited;
 
     return ecl::err::ok;
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::set_rx(uint8_t *rx, size_t size)
+template< spi_device dev >
+void spi_i2s_bus< dev >::set_rx(uint8_t *rx, size_t size)
 {
     if (!(m_status & inited)) {
         return;
@@ -335,8 +364,8 @@ void spi_i2s_bus< spi_i2s_config >::set_rx(uint8_t *rx, size_t size)
     m_rx_size = size;
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::set_tx(size_t size, uint8_t fill_byte)
+template< spi_device dev >
+void spi_i2s_bus< dev >::set_tx(size_t size, uint8_t fill_byte)
 {
     if (!(m_status & inited)) {
         return;
@@ -348,8 +377,8 @@ void spi_i2s_bus< spi_i2s_config >::set_tx(size_t size, uint8_t fill_byte)
     m_tx_size   = size;
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::set_tx(const uint8_t *tx, size_t size)
+template< spi_device dev >
+void spi_i2s_bus< dev >::set_tx(const uint8_t *tx, size_t size)
 {
     if (!(m_status & inited)) {
         return;
@@ -371,15 +400,15 @@ void spi_i2s_bus< spi_i2s_config >::set_tx(const uint8_t *tx, size_t size)
 }
 
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::set_handler(const handler_fn &handler)
+template< spi_device dev >
+void spi_i2s_bus< dev >::set_handler(const handler_fn &handler)
 {
     m_event_handler = handler;
 }
 
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::reset_buffers()
+template< spi_device dev >
+void spi_i2s_bus< dev >::reset_buffers()
 {
     m_status    &= ~(mode_fill);
     m_tx.buf    = nullptr;
@@ -388,14 +417,14 @@ void spi_i2s_bus< spi_i2s_config >::reset_buffers()
     m_rx_size   = 0;
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::reset_handler()
+template< spi_device dev >
+void spi_i2s_bus< dev >::reset_handler()
 {
     m_event_handler = handler_fn{};
 }
 
-template< class spi_i2s_config >
-ecl::err spi_i2s_bus< spi_i2s_config >::do_xfer()
+template< spi_device dev >
+ecl::err spi_i2s_bus< dev >::do_xfer()
 {
     if (!(m_status & inited)) {
         return err::perm;
@@ -424,8 +453,8 @@ ecl::err spi_i2s_bus< spi_i2s_config >::do_xfer()
 
 //------------------------------------------------------------------------------
 
-template< class spi_i2s_config >
-bool spi_i2s_bus< spi_i2s_config >::valid_sizes()
+template< spi_device dev >
+bool spi_i2s_bus< dev >::valid_sizes()
 {
     // Bus is in full-duplex mode. Different sizes are not permitted.
     if (m_tx_size && m_rx_size) {
@@ -437,8 +466,8 @@ bool spi_i2s_bus< spi_i2s_config >::valid_sizes()
     return true;
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::prepare_tx()
+template< spi_device dev >
+void spi_i2s_bus< dev >::prepare_tx()
 {
     if (m_status & tx_hidden) {
         // TX is not requested by user but it is required to setup this stream
@@ -458,13 +487,13 @@ void spi_i2s_bus< spi_i2s_config >::prepare_tx()
 
     m_status &= ~(tx_complete);
 
-    constexpr auto tx_dma   = dma::get_stream< spi_i2s_config::m_dma_tx_stream >();
+    constexpr auto tx_dma   = dma::get_stream< config::streams::tx >();
     constexpr auto spi      = pick_spi();
 
     DMA_InitTypeDef dma_init;
     DMA_StructInit(&dma_init);
 
-    dma_init.DMA_Channel             = spi_i2s_config::m_dma_tx_channel;
+    dma_init.DMA_Channel             = config::dma_channels::tx;
     dma_init.DMA_DIR                 = DMA_DIR_MemoryToPeripheral;
     dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
     dma_init.DMA_PeripheralInc       = DMA_PeripheralInc_Disable;
@@ -477,7 +506,7 @@ void spi_i2s_bus< spi_i2s_config >::prepare_tx()
         dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(m_tx.buf);
     }
 
-    if (spi_i2s_config::m_bus_type == spi_bus_type::i2s) {
+    if (config::bus_type == spi_bus_type::i2s) {
         dma_init.DMA_MemoryDataSize      = DMA_MemoryDataSize_HalfWord;
         dma_init.DMA_PeripheralDataSize  = DMA_PeripheralDataSize_HalfWord;
         dma_init.DMA_BufferSize          = m_tx_size / 2;
@@ -489,8 +518,8 @@ void spi_i2s_bus< spi_i2s_config >::prepare_tx()
     DMA_ITConfig(tx_dma, DMA_IT_TC | DMA_IT_HT, ENABLE);
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::prepare_rx()
+template< spi_device dev >
+void spi_i2s_bus< dev >::prepare_rx()
 {
     if (!m_rx_size) {
         // Preventing event routine from waiting RX complete event.
@@ -500,19 +529,19 @@ void spi_i2s_bus< spi_i2s_config >::prepare_rx()
 
     m_status &= ~(rx_complete);
 
-    constexpr auto rx_dma   = dma::get_stream< spi_i2s_config::m_dma_rx_stream >();
+    constexpr auto rx_dma   = dma::get_stream< config::streams::rx >();
     constexpr auto spi      = pick_spi();
 
     DMA_InitTypeDef dma_init;
     DMA_StructInit(&dma_init);
 
-    dma_init.DMA_Channel             = spi_i2s_config::m_dma_rx_channel;
+    dma_init.DMA_Channel             = config::dma_channels::rx;
     dma_init.DMA_DIR                 = DMA_DIR_PeripheralToMemory;
     dma_init.DMA_PeripheralBaseAddr  = reinterpret_cast< uint32_t >(&spi->DR);
     dma_init.DMA_MemoryInc           = DMA_MemoryInc_Enable;
     dma_init.DMA_Memory0BaseAddr     = reinterpret_cast< uint32_t >(m_rx);
 
-    if (spi_i2s_config::m_bus_type == spi_bus_type::i2s) {
+    if (config::bus_type == spi_bus_type::i2s) {
         dma_init.DMA_MemoryDataSize      = DMA_MemoryDataSize_HalfWord;
         dma_init.DMA_PeripheralDataSize  = DMA_PeripheralDataSize_HalfWord;
         dma_init.DMA_BufferSize          = m_rx_size / 2;
@@ -524,11 +553,11 @@ void spi_i2s_bus< spi_i2s_config >::prepare_rx()
     DMA_ITConfig(rx_dma, DMA_IT_TC | DMA_IT_HT, ENABLE);
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::start_xfer()
+template< spi_device dev >
+void spi_i2s_bus< dev >::start_xfer()
 {
-    constexpr auto rx_dma = dma::get_stream< spi_i2s_config::m_dma_rx_stream >();
-    constexpr auto tx_dma = dma::get_stream< spi_i2s_config::m_dma_tx_stream >();
+    constexpr auto rx_dma = dma::get_stream< config::streams::rx >();
+    constexpr auto tx_dma = dma::get_stream< config::streams::tx >();
     constexpr auto spi    = pick_spi();
 
     // After all directions configured, streams may be enabled
@@ -544,27 +573,27 @@ void spi_i2s_bus< spi_i2s_config >::start_xfer()
     SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx , ENABLE);
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::irq_handler()
+template< spi_device dev >
+void spi_i2s_bus< dev >::irq_handler()
 {
-    constexpr auto rx_irqn = dma::get_irqn< spi_i2s_config::m_dma_rx_stream >();
-    constexpr auto tx_irqn = dma::get_irqn< spi_i2s_config::m_dma_tx_stream >();
+    constexpr auto rx_irqn = dma::get_irqn< config::streams::rx >();
+    constexpr auto tx_irqn = dma::get_irqn< config::streams::tx >();
 
-    constexpr auto tx_dma   = dma::get_stream< spi_i2s_config::m_dma_tx_stream >();
-    constexpr auto rx_dma   = dma::get_stream< spi_i2s_config::m_dma_rx_stream >();
+    constexpr auto tx_dma   = dma::get_stream< config::streams::tx >();
+    constexpr auto rx_dma   = dma::get_stream< config::streams::rx >();
 
-    constexpr auto tx_tc_if = dma::get_tc_if< spi_i2s_config::m_dma_tx_stream >();
-    constexpr auto rx_tc_if = dma::get_tc_if< spi_i2s_config::m_dma_rx_stream >();
+    constexpr auto tx_tc_if = dma::get_tc_if< config::streams::tx >();
+    constexpr auto rx_tc_if = dma::get_tc_if< config::streams::rx >();
 
-    constexpr auto tx_ht_if = dma::get_ht_if< spi_i2s_config::m_dma_tx_stream >();
-    constexpr auto rx_ht_if = dma::get_ht_if< spi_i2s_config::m_dma_rx_stream >();
+    constexpr auto tx_ht_if = dma::get_ht_if< config::streams::tx >();
+    constexpr auto rx_ht_if = dma::get_ht_if< config::streams::rx >();
 
     constexpr auto spi = pick_spi();
 
     if (!(m_status & tx_complete)) {
         if (DMA_GetITStatus(tx_dma, tx_tc_if)) {
             // Complete TX transaction
-            constexpr auto tx_tc_flag = dma::get_tc_flag< spi_i2s_config::m_dma_tx_stream >();
+            constexpr auto tx_tc_flag = dma::get_tc_flag< config::streams::tx >();
 
             if (!(m_status & tx_hidden)) {
                 m_event_handler(channel::tx, event::tc, m_tx_size);
@@ -576,11 +605,11 @@ void spi_i2s_bus< spi_i2s_config >::irq_handler()
 
             m_status |= tx_complete;
         } else if (DMA_GetITStatus(tx_dma, tx_ht_if)) {
-            constexpr auto tx_ht_flag = dma::get_ht_flag< spi_i2s_config::m_dma_tx_stream >();
+            constexpr auto tx_ht_flag = dma::get_ht_flag< config::streams::tx >();
 
             uint32_t tx_left = DMA_GetCurrDataCounter(tx_dma);
 
-            if (spi_i2s_config::m_bus_type == spi_bus_type::i2s) {
+            if (config::bus_type == spi_bus_type::i2s) {
                 tx_left *= 2;
             }
 
@@ -599,7 +628,7 @@ void spi_i2s_bus< spi_i2s_config >::irq_handler()
     if (!(m_status & rx_complete)) {
         if (DMA_GetITStatus(rx_dma, rx_tc_if)) {
             // Complete TX transaction
-            constexpr auto rx_tc_flag = dma::get_tc_flag< spi_i2s_config::m_dma_rx_stream >();
+            constexpr auto rx_tc_flag = dma::get_tc_flag< config::streams::rx >();
 
             m_event_handler(channel::rx, event::tc, m_rx_size);
 
@@ -609,11 +638,11 @@ void spi_i2s_bus< spi_i2s_config >::irq_handler()
 
             m_status |= rx_complete;
         } else if (DMA_GetITStatus(rx_dma, rx_ht_if)) {
-            constexpr auto rx_ht_flag = dma::get_ht_flag< spi_i2s_config::m_dma_tx_stream >();
+            constexpr auto rx_ht_flag = dma::get_ht_flag< config::streams::tx >();
 
             uint32_t rx_left = DMA_GetCurrDataCounter(rx_dma);
 
-            if (spi_i2s_config::m_bus_type == spi_bus_type::i2s) {
+            if (config::bus_type == spi_bus_type::i2s) {
                 rx_left *= 2;
             }
 
@@ -648,10 +677,10 @@ void spi_i2s_bus< spi_i2s_config >::irq_handler()
     }
 }
 
-template< class spi_i2s_config >
-constexpr auto spi_i2s_bus< spi_i2s_config >::pick_spi()
+template< spi_device dev >
+constexpr auto spi_i2s_bus< dev >::pick_spi()
 {
-    switch (spi_i2s_config::m_dev) {
+    switch (dev) {
     case spi_device::bus1:
         return SPI1;
     case spi_device::bus2:
@@ -670,11 +699,11 @@ constexpr auto spi_i2s_bus< spi_i2s_config >::pick_spi()
     }
 }
 
-template< class spi_i2s_config >
-constexpr auto spi_i2s_bus< spi_i2s_config >::pick_rcc()
+template< spi_device dev >
+constexpr auto spi_i2s_bus< dev >::pick_rcc()
 {
     // TODO: comments
-    switch (spi_i2s_config::m_dev) {
+    switch (dev) {
     case spi_device::bus1:
         return RCC_APB2Periph_SPI1;
     case spi_device::bus2:
@@ -693,12 +722,12 @@ constexpr auto spi_i2s_bus< spi_i2s_config >::pick_rcc()
     }
 }
 
-template< class spi_i2s_config >
-constexpr auto spi_i2s_bus< spi_i2s_config >::pick_rcc_fn()
+template< spi_device dev >
+constexpr auto spi_i2s_bus< dev >::pick_rcc_fn()
 {
     // APB1 - SPI3 SPI2
     // APB2 - SPI5 SPI6 SPI1 SPI4
-    switch (spi_i2s_config::m_dev) {
+    switch (dev) {
     case spi_device::bus1:
     case spi_device::bus5:
     case spi_device::bus4:
@@ -713,8 +742,8 @@ constexpr auto spi_i2s_bus< spi_i2s_config >::pick_rcc_fn()
     }
 }
 
-template< class spi_i2s_config >
-constexpr uint32_t spi_i2s_bus< spi_i2s_config >::pick_i2s_audio_frequency(ecl::i2s::audio_frequency value)
+template< spi_device dev >
+constexpr uint32_t spi_i2s_bus< dev >::pick_i2s_audio_frequency(ecl::i2s::audio_frequency value)
 {
     switch (value) {
     case ecl::i2s::audio_frequency::k8:
@@ -740,8 +769,8 @@ constexpr uint32_t spi_i2s_bus< spi_i2s_config >::pick_i2s_audio_frequency(ecl::
     }
 }
 
-template< class spi_i2s_config >
-constexpr uint32_t spi_i2s_bus< spi_i2s_config >::pick_i2s_data_format(ecl::i2s::data_format value)
+template< spi_device dev >
+constexpr uint32_t spi_i2s_bus< dev >::pick_i2s_data_format(ecl::i2s::data_format value)
 {
     switch (value) {
     case ecl::i2s::data_format::b16:
@@ -755,32 +784,40 @@ constexpr uint32_t spi_i2s_bus< spi_i2s_config >::pick_i2s_data_format(ecl::i2s:
     }
 }
 
-template< class spi_i2s_config >
-void spi_i2s_bus< spi_i2s_config >::init_dma()
+template< spi_device dev >
+template < class Iface_cfg >
+std::enable_if_t< Iface_cfg::bus_type == spi_bus_type::i2s, void >
+spi_i2s_bus< dev >::init_interface()
 {
-    dma::init_rcc< spi_i2s_config::m_dma_rx_stream >();
-    dma::init_rcc< spi_i2s_config::m_dma_tx_stream >();
+
+}
+
+template< spi_device dev >
+void spi_i2s_bus< dev >::init_dma()
+{
+    dma::init_rcc< config::streams::rx >();
+    dma::init_rcc< config::streams::tx >();
 
     auto handler = [this]() {
         this->irq_handler();
     };
 
-    dma::subscribe_irq< spi_i2s_config::m_dma_rx_stream >(handler);
-    dma::subscribe_irq< spi_i2s_config::m_dma_tx_stream >(handler);
+    dma::subscribe_irq< config::streams::rx >(handler);
+    dma::subscribe_irq< config::streams::tx >(handler);
 }
 
-template< class spi_i2s_config >
+template< spi_device dev >
 template< ecl::i2s::audio_frequency frequency, class Iface_cfg >
-std::enable_if_t< Iface_cfg::m_bus_type == spi_bus_type::i2s, ecl::err >
-spi_i2s_bus< spi_i2s_config >::i2s_set_audio_frequency()
+std::enable_if_t< Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err >
+spi_i2s_bus< dev >::i2s_set_audio_frequency()
 {
     static_assert(frequency != ecl::i2s::audio_frequency::k88, "frequency is not supported by a platform");
 
     return i2s_set_audio_frequency_private(pick_i2s_audio_frequency(frequency));
 }
 
-template< class spi_i2s_config >
-ecl::err spi_i2s_bus< spi_i2s_config >::i2s_set_audio_frequency_private(uint32_t value)
+template< spi_device dev >
+ecl::err spi_i2s_bus< dev >::i2s_set_audio_frequency_private(uint32_t value)
 {
     constexpr auto spi = pick_spi();
     // TODO check if spi is inited
@@ -792,14 +829,14 @@ ecl::err spi_i2s_bus< spi_i2s_config >::i2s_set_audio_frequency_private(uint32_t
     // prescaler to achieve necessary frequency.
     // It is done in I2S_Init(), so we can reuse it.
 
-    // can be a little confusing, we cannot use i2s_init = spi_i2s_config::m_bus_cfg,
-    // since spi_i2s_config::m_bus_cfg is calculated in compile time, so the structure
+    // can be a little confusing, we cannot use i2s_init = config::init_obj,
+    // since config::init_obj is calculated in compile time, so the structure
     // itself is not created. Linker is very upset about it.
     I2S_InitTypeDef i2s_init;
-    i2s_init.I2S_Standard = spi_i2s_config::m_bus_cfg.I2S_DataFormat;
-    i2s_init.I2S_CPOL = spi_i2s_config::m_bus_cfg.I2S_CPOL;
-    i2s_init.I2S_MCLKOutput = spi_i2s_config::m_bus_cfg.I2S_MCLKOutput;
-    i2s_init.I2S_Mode = spi_i2s_config::m_bus_cfg.I2S_Mode;
+    i2s_init.I2S_Standard = config::init_obj.I2S_DataFormat;
+    i2s_init.I2S_CPOL = config::init_obj.I2S_CPOL;
+    i2s_init.I2S_MCLKOutput = config::init_obj.I2S_MCLKOutput;
+    i2s_init.I2S_Mode = config::init_obj.I2S_Mode;
 
     // Data format can be changed by i2s_set_data_format()
     i2s_init.I2S_DataFormat = spi->I2SCFGR & SPI_I2SCFGR_DATLEN;
@@ -814,18 +851,18 @@ ecl::err spi_i2s_bus< spi_i2s_config >::i2s_set_audio_frequency_private(uint32_t
     return ecl::err::ok;
 }
 
-template< class spi_i2s_config >
+template< spi_device dev >
 template< ecl::i2s::data_format format, class Iface_cfg >
-std::enable_if_t< Iface_cfg::m_bus_type == spi_bus_type::i2s, ecl::err >
-spi_i2s_bus< spi_i2s_config >::i2s_set_data_format()
+std::enable_if_t< Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err >
+spi_i2s_bus< dev >::i2s_set_data_format()
 {
     static_assert(format != ecl::i2s::data_format::b8, "format is not supported by a platform");
 
     return i2s_set_data_format_private(pick_i2s_data_format(format));
 }
 
-template< class spi_i2s_config >
-ecl::err spi_i2s_bus< spi_i2s_config >::i2s_set_data_format_private(uint32_t value)
+template< spi_device dev >
+ecl::err spi_i2s_bus< dev >::i2s_set_data_format_private(uint32_t value)
 {
     constexpr auto spi = pick_spi();
     // TODO check if spi is inited
