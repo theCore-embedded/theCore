@@ -5,8 +5,8 @@ if(DOXYGEN_FOUND)
 	set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 	set(EXCLUDE_DIRS
 		"${CORE_DIR}/kernel/freertos/freertos/ \
-		${CORE_DIR}/platform/stm32f4xx/CMSIS \
-		${CORE_DIR}/platform/stm32f4xx/SPL")
+		${CORE_DIR}/lib/stm32-spl \
+		${CORE_DIR}/lib/cmsis")
 
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doxygen.cfg.in
 	${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg @ONLY)

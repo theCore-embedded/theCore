@@ -1,3 +1,6 @@
+//!
+//! \file
+//! \brief DMA STM32F4XX helpers
 #ifndef PLATFORM_DMA_DEVICE
 #define PLATFORM_DMA_DEVICE
 
@@ -14,7 +17,9 @@ namespace ecl
 namespace dma
 {
 
-// High-order byte represents DMA number, low order - stream number
+//! DMA streams present, according to the RM.
+//! \details High-order byte represents DMA number, low order - stream number
+//!
 enum class streams
 {
     dma1_0 = 0x100,
@@ -84,23 +89,6 @@ template< streams dma_stream >
 constexpr auto get_stream_number()
 {
     return 0xff & static_cast<std::underlying_type_t<streams>>(dma_stream);
-//    if (stream == DMA1_Stream0 || stream == DMA2_Stream0) {
-//        return 0;
-//    } else if (stream == DMA1_Stream1 || stream == DMA2_Stream1) {
-//        return 1;
-//    } else if (stream == DMA1_Stream2 || stream == DMA2_Stream2) {
-//        return 2;
-//    } else if (stream == DMA1_Stream3 || stream == DMA2_Stream3) {
-//        return 3;
-//    } else if (stream == DMA1_Stream4 || stream == DMA2_Stream4) {
-//        return 4;
-//    } else if (stream == DMA1_Stream5 || stream == DMA2_Stream5) {
-//        return 5;
-//    } else if (stream == DMA1_Stream6 || stream == DMA2_Stream6) {
-//        return 6;
-//    } else if (stream == DMA1_Stream7 || stream == DMA2_Stream7) {
-//        return 7;
-//    }
 }
 
 //!

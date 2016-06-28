@@ -7,17 +7,14 @@
 #define PLATFORM_SPI_BUS_HPP_
 
 #include "aux/dma_device.hpp"
+#include "platform/irq_manager.hpp"
 
 #include <common/spi.hpp>
 #include <common/bus.hpp>
-#include <platform/irq_manager.hpp>
-
-#include <sys/types.h>
 
 #include <stm32f4xx_spi.h>
-#include <stm32f4xx_rcc.h>
 
-#include <type_traits>
+#include <sys/types.h>
 
 namespace ecl
 {
@@ -30,8 +27,121 @@ enum class spi_bus_type
     i2s
 };
 
+//! Base template class for the SPI/I2S configuration
+//! \details In order to advertise configuration parameters user must create
+//! template specialization for required SPI/I2S device. Since STM32F4XX devices
+//! support either the SPI protocol or the I2S audio protocol there are two sets
+//! of parameters:
+//!     - common parameters for I2S and SPI modes
+//!     - special parameters for concrete mode.
+//! An example is given below parameter specification. Refer to it to get
+//! general idea how to configure SPI/I2S bus.
+//!
+//! Common parameters:
+//! - ecl::spi_bus_type **bus_type** - Defines which bus mode is required,
+//!   SPI or I2S. \sa ecl::spi_bus_type
+//! - struct **dma** - Specifies DMA streams and channels. It must contain
+//!   following static members:
+//!     - ecl::dma::streams **tx_stream** - TX DMA stream number. Make sure right
+//!       DMA stream is used for given SPI/I2S device. See "Table 42. DMA1 request
+//!       mapping" and "Table 43. DMA2 request mapping" in the RM.
+//!       \sa ecl::dma::streams
+//!     - ecl::dma::streams **rx_stream** - RX DMA stream number. Make sure right
+//!       DMA stream is used for given SPI/I2S device. See "Table 42. DMA1 request
+//!       mapping" and "Table 43. DMA2 request mapping" in the RM.
+//!       \sa ecl::dma::streams
+//!     - uint32_t **tx_channel** - TX DMA channel. See "Table 42. DMA1 request
+//!       mapping" and "Table 43. DMA2 request mapping" in the RM"
+//!     - uint32_t **rx_channel** - RX RMA channel. See "Table 42. DMA1 request
+//!       mapping" and "Table 43. DMA2 request mapping" in the RM.
+//!
+//! I2S-specific parameters:
+//! - I2S_InitTypeDef **init_obj** - Configuraion structure required for I2S mode.
+//!   Refer to STM32 SPL documentation or check examples below to find
+//!   I2S_InitTypeDef's fields.
+//!
+//! SPI-specific parameters:
+//! - SPI_InitTypeDef **init_obj** - Configuration structure required for SPI mode.
+//!   Refer to STM32 SPL documentation or check examples below to find
+//!   I2S_InitTypeDef's fields.
+//!
+//! \par SPI configuration example.
+//! In order to use this configuration class one must create configuration class
+//! in the `ecl` namespace before any acccess to \ref spi_i2s_bus instance.
+//! \code{.cpp}
+//! namespace ecl
+//! {
+//!
+//! template<>
+//! struct spi_i2s_cfg<spi_device::bus2>
+//! {
+//!     static constexpr auto bus_type = spi_bus_type::spi;
+//!
+//!     struct dma
+//!     {
+//!         static constexpr auto tx_stream  = ecl::dma::streams::dma1_4;
+//!         static constexpr auto tx_channel = 0;
+//!         static constexpr auto rx_stream  = ecl::dma::streams::dma1_3;
+//!         static constexpr auto rx_channel = 0;
+//!     };
+//!
+//!     static constexpr SPI_InitTypeDef init_obj = {
+//!             .SPI_Direction          = SPI_Direction_2Lines_FullDuplex,
+//!             .SPI_Mode               = SPI_Mode_Master,
+//!             .SPI_DataSize           = SPI_DataSize_8b,
+//!             .SPI_CPOL               = SPI_CPOL_High,
+//!             .SPI_CPHA               = SPI_CPHA_2Edge,
+//!             .SPI_NSS                = SPI_NSS_Soft,
+//!             .SPI_BaudRatePrescaler  = SPI_BaudRatePrescaler_4,
+//!             .SPI_FirstBit           = SPI_FirstBit_MSB,
+//!             .SPI_CRCPolynomial      = 7,
+//!     };
+//! };
+//!
+//! } // namespace ecl
+//! \endcode
+//!
+//! \par I2S configuration example.
+//! In order to use this configuration class one must create configuration class
+//! in the `ecl` namespace before any acccess to \ref spi_i2s_bus instance.
+//! \code{.cpp}
+//! namespace ecl
+//! {
+//!
+//! template<>
+//! struct spi_i2s_cfg<spi_device::bus2>
+//! {
+//!     static constexpr auto bus_type = spi_bus_type::i2s;
+//!
+//!     struct dma
+//!     {
+//!         static constexpr auto tx_stream  = ecl::dma::streams::dma1_4;
+//!         static constexpr auto tx_channel = 0;
+//!         static constexpr auto rx_stream  = ecl::dma::streams::dma1_3;
+//!         static constexpr auto rx_channel = 0;
+//!     };
+//!
+//!     static constexpr I2S_InitTypeDef init_obj = {
+//!             .I2S_Mode          = I2S_Mode_MasterTx,
+//!             .I2S_Standard      = I2S_Standard_Phillips,
+//!             .I2S_DataFormat    = I2S_DataFormat_16b,
+//!             .I2S_MCLKOutput    = I2S_MCLKOutput_Enable,
+//!             .I2S_AudioFreq     = I2S_AudioFreq_44k,
+//!             .I2S_CPOL          = I2S_CPOL_High,
+//!     };
+//! };
+//!
+//! } // namespace ecl
+//! \endcode
+//!
+//! \warning To avoid potential problems with multiple configurations for single
+//! SPI/I2S bus, **make sure that full specialization is placed in the
+//! header included (directly or indirectly) by all dependent modules.**.
+//! Thus, redefinition of the config class for given USART will result in
+//! compilation errors. *Good practice is to place all USART configuration
+//! class in the single target-related header.*
 template<spi_device dev>
-struct spi_i2c_cfg
+struct spi_i2s_cfg
 {
     // Always assert
     static_assert(std::is_integral<decltype(dev)>::value,
@@ -52,7 +162,7 @@ public:
     using channel       = bus_channel;
     using event         = bus_event;
     using handler_fn    = bus_handler;
-    using config        = spi_i2c_cfg<dev>;
+    using config        = spi_i2s_cfg<dev>;
 
     //!
     //! \brief Constructs a bus.
@@ -691,7 +801,7 @@ spi_i2s_bus<dev>::init_interface()
     RCC_PLLI2SCmd(ENABLE);
 
     constexpr auto i2s = pick_spi();
-    auto init_obj = spi_i2c_cfg<dev>::init_obj;
+    auto init_obj = spi_i2s_cfg<dev>::init_obj;
     I2S_Init(i2s, &init_obj);
 
     // TODO: disable I2S when there in no XFER
@@ -705,7 +815,7 @@ std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::spi, void>
 spi_i2s_bus<dev>::init_interface()
 {
     constexpr auto spi = pick_spi();
-    auto init_obj = spi_i2c_cfg<dev>::init_obj;
+    auto init_obj = spi_i2s_cfg<dev>::init_obj;
     SPI_Init(spi, &init_obj);
 
     // TODO: disable SPI when there in no XFER
