@@ -6,7 +6,6 @@
 #define PLATFORM_IRQ_MANAGER_HPP
 
 #include <stm32f4xx.h>
-#include <core_cm4.h>
 #include <ecl/err.hpp>
 
 #include <functional>
@@ -79,12 +78,13 @@ public:
     //!
     static err clear(irq_num irqn);
 
+protected:
+    //! Handles IRQ
+    static void isr();
+
 private:
     using handler_storage =
     std::aligned_storage< sizeof(handler_type), alignof(handler_type) >::type;
-
-    // Prevent optimizing out an ISR routine
-    __attribute__ ((used)) void isr();
 
     //! Default iRQ handler. Terminates execution if called.
     static void default_handler();
