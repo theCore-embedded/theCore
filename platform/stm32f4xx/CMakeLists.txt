@@ -75,7 +75,7 @@ if(${CONFIG_USE_CONSOLE})
     # Helps to determine if bypass driver must be enabled and inited
     target_compile_definitions(stm32f4xx PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
     # Bypass console implementation
-    target_sources(stm32f4xx PRIVATE bypass_console.cpp)
+    target_sources(stm32f4xx PRIVATE console.cpp)
     message(STATUS "Bypass console is supported and enabled by the platform")
 else()
     configure_file(templates/console_stub.hpp.in

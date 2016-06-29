@@ -3,7 +3,7 @@
 #ifndef EXAMPLE_EXTI_TARGET_HPP_
 #define EXAMPLE_EXTI_TARGET_HPP_
 
-#include <platform/usart_bus.hpp>
+#include <aux/usart_bus.hpp>
 #include <platform/gpio_device.hpp>
 #include <stm32f4xx_gpio.h>
 

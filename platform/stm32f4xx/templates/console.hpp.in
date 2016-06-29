@@ -5,7 +5,7 @@
 #ifndef STM32F4XX_CONSOLE_DRIVER_HPP_
 #define STM32F4XX_CONSOLE_DRIVER_HPP_
 
-#include <platform/usart_bus.hpp>
+#include <aux/usart_bus.hpp>
 
 namespace ecl
 {
