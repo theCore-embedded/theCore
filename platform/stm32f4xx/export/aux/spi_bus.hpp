@@ -290,15 +290,15 @@ private:
     void irq_handler();
 
     //! Bus is inited if this flag is set.
-    static constexpr uint8_t inited = 0x1;
+    static constexpr uint8_t inited         = 0x1;
     //! Bus is in fill mode if this flag is set.
-    static constexpr uint8_t mode_fill = 0x2;
+    static constexpr uint8_t mode_fill      = 0x2;
     //! TX is finished if this flag is set.
-    static constexpr uint8_t tx_complete = 0x4;
+    static constexpr uint8_t tx_complete    = 0x4;
     //! User will not be notified about TX events if this flag is set.
-    static constexpr uint8_t tx_hidden = 0x8;
+    static constexpr uint8_t tx_hidden      = 0x8;
     //! RX is finished if this flag is set.
-    static constexpr uint8_t rx_complete = 0x10;
+    static constexpr uint8_t rx_complete    = 0x10;
 
     handler_fn m_event_handler; //! Handler passed via set_handler().
     union
@@ -499,25 +499,25 @@ void spi_i2s_bus<dev>::prepare_tx()
     DMA_InitTypeDef dma_init;
     DMA_StructInit(&dma_init);
 
-    dma_init.DMA_Channel = config::dma::tx_channel;
-    dma_init.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+    dma_init.DMA_Channel            = config::dma::tx_channel;
+    dma_init.DMA_DIR                = DMA_DIR_MemoryToPeripheral;
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast< uint32_t >(&spi->DR);
-    dma_init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
 
     if (m_status & mode_fill) {
-        dma_init.DMA_MemoryInc = DMA_MemoryInc_Disable;
+        dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
         dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(&m_tx.byte);
     } else {
-        dma_init.DMA_MemoryInc = DMA_MemoryInc_Enable;
+        dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
         dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(m_tx.buf);
     }
 
     if (config::bus_type == spi_bus_type::i2s) {
-        dma_init.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+        dma_init.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
         dma_init.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-        dma_init.DMA_BufferSize = m_tx_size / 2;
+        dma_init.DMA_BufferSize         = m_tx_size / 2;
     } else {
-        dma_init.DMA_BufferSize = m_tx_size;
+        dma_init.DMA_BufferSize         = m_tx_size;
     }
 
     DMA_Init(tx_dma, &dma_init);
@@ -541,16 +541,16 @@ void spi_i2s_bus<dev>::prepare_rx()
     DMA_InitTypeDef dma_init;
     DMA_StructInit(&dma_init);
 
-    dma_init.DMA_Channel = config::dma::rx_channel;
-    dma_init.DMA_DIR = DMA_DIR_PeripheralToMemory;
+    dma_init.DMA_Channel            = config::dma::rx_channel;
+    dma_init.DMA_DIR                = DMA_DIR_PeripheralToMemory;
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast< uint32_t >(&spi->DR);
-    dma_init.DMA_MemoryInc = DMA_MemoryInc_Enable;
-    dma_init.DMA_Memory0BaseAddr = reinterpret_cast< uint32_t >(m_rx);
+    dma_init.DMA_MemoryInc          = DMA_MemoryInc_Enable;
+    dma_init.DMA_Memory0BaseAddr    = reinterpret_cast< uint32_t >(m_rx);
 
     if (config::bus_type == spi_bus_type::i2s) {
-        dma_init.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+        dma_init.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
         dma_init.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-        dma_init.DMA_BufferSize = m_rx_size / 2;
+        dma_init.DMA_BufferSize         = m_rx_size / 2;
     } else {
         dma_init.DMA_BufferSize = m_rx_size;
     }
@@ -662,9 +662,7 @@ void spi_i2s_bus<dev>::irq_handler()
         }
     }
 
-    if ((m_status & (rx_complete | tx_complete)) ==
-        (rx_complete | tx_complete)) {
-
+    if ((m_status & (rx_complete | tx_complete)) == (rx_complete | tx_complete)) {
         DMA_Cmd(tx_dma, DISABLE);
         DMA_DeInit(tx_dma);
 
