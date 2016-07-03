@@ -14,7 +14,7 @@ endif()
 
 target_compile_definitions(stm32l1xx PUBLIC
         -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY}
-        -DCONFIG_IRQ_COUNT=53) # TODO: differntiate it for other devices
+        -DCONFIG_IRQ_COUNT=57) # TODO: differntiate it for other devices
 
 target_include_directories(stm32l1xx PUBLIC export)
 target_link_libraries(stm32l1xx PUBLIC cmsis)
