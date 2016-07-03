@@ -3,7 +3,8 @@ add_library(stm32l1xx
         irq_manager.cpp
         system_stm32l1xx.c)
 
-add_subdirectory(startup)
+# Get proper MCU definitions
+include(mcu_cfg.cmake)
 
 message(STATUS "Checking [CONFIG_MAX_ISR_PRIORITY]...")
 if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
@@ -12,20 +13,20 @@ if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
             " using default value: ${CONFIG_MAX_ISR_PRIORITY}")
 endif()
 
-target_compile_definitions(stm32l1xx PUBLIC
-        -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY}
-        -DCONFIG_IRQ_COUNT=57) # TODO: differntiate it for other devices
-
 target_include_directories(stm32l1xx PUBLIC export)
 target_link_libraries(stm32l1xx PUBLIC cmsis)
 target_link_libraries(stm32l1xx PUBLIC types)
 target_link_libraries(stm32l1xx PUBLIC stm32l1xx_spl)
 target_link_libraries(stm32l1xx PUBLIC platform_common)
 
+target_compile_definitions(stm32l1xx PUBLIC
+        -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
+
 # TODO: check that configuration values are defined
 target_compile_definitions(stm32l1xx PUBLIC
-        -D${CONFIG_PLATFORM_DEVICE}
-        -DHSE_VALUE=${CONFIG_PLATFORM_HSE_VAL})
+        -D${ST_DEVICE}
+        -DHSE_VALUE=${CONFIG_PLATFORM_HSE_VAL}
+        -DCONFIG_IRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 
 # Pick console driver
 message(STATUS "STM32L1XX: Checking [CONFIG_USE_CONSOLE]...")
