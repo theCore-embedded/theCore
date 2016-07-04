@@ -40,8 +40,6 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
-# TODO: move this dependency somewhere?
-target_link_libraries(${PROJECT_NAME} INTERFACE arch)
 target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME})
 
 # Platform is added in the first place in order to expose platform definitions

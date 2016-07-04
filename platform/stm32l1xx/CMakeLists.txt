@@ -18,6 +18,7 @@ target_link_libraries(stm32l1xx PUBLIC cmsis)
 target_link_libraries(stm32l1xx PUBLIC types)
 target_link_libraries(stm32l1xx PUBLIC stm32l1xx_spl)
 target_link_libraries(stm32l1xx PUBLIC platform_common)
+target_link_libraries(stm32f4xx PUBLIC arch)
 
 target_compile_definitions(stm32l1xx PUBLIC
         -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
