@@ -1,3 +1,4 @@
+# Library provides platform headers, definitiions and code
 add_library(stm32f4xx STATIC
         platform.cpp
         irq_manager.cpp
@@ -7,8 +8,10 @@ add_library(stm32f4xx STATIC
 
 target_include_directories(stm32f4xx PUBLIC export)
 
+# Find out particular MCU configuration
+include(mcu_cfg.cmake)
+
 # Platform submodules
-add_subdirectory(startup)
 add_subdirectory(f4)
 
 # TODO: clarify essential libraries
@@ -18,14 +21,12 @@ target_link_libraries(stm32f4xx PUBLIC types)
 target_link_libraries(stm32f4xx PUBLIC containers)
 target_link_libraries(stm32f4xx PUBLIC emc) # For memset
 target_link_libraries(stm32f4xx PUBLIC system_stm32f4xx)
+target_link_libraries(stm32f4xx PUBLIC arch)
 
 add_cppcheck(stm32f4xx)
 
-# Notify whole system about which processor is used
-set(TARGET_PROCESSOR_ARCHITECTURE "arm_cm4" CACHE STRING "Processor arch")
-
-# Maximum priority of user ISRs can be redefined,
-# but be careful: it heavily depends on RTOS constraits.
+# Maximum priority of user ISRs can be redefined, but be careful:
+# it heavily depends on RTOS constraits.
 # I.e. for FreeRTOS maximum user priorities should be logically
 # less or equal than configMAX_SYSCALL_INTERRUPT_PRIORITY
 # (numerical priority representation of M4 is such that higher numbers
@@ -38,20 +39,9 @@ if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
             " using default value: ${CONFIG_MAX_ISR_PRIORITY}")
 endif()
 
-message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
-if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F40_41xxx)
-    # Count of user-overridable interrupts.
-    # For this particular platform it doesn't include system exceptions,
-    # but only peripheral interrupts. Yet.
-    target_compile_definitions(stm32f4xx PUBLIC -DCONFIG_IRQ_COUNT=82)
-else()
-    # Additional implementation will be required to cover unsupported
-    # devices from stm32f4xx line.
-    message(FATAL_ERROR "Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")
-endif()
-
 target_compile_definitions(stm32f4xx PUBLIC
         -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
+target_compile_definitions(stm32f4xx PUBLIC -DCONFIG_IRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 
 # Pick console driver
 message(STATUS "STM32F4XX: Checking [CONFIG_USE_CONSOLE]...")
