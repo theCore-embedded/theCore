@@ -2,7 +2,8 @@
 add_library(arch STATIC startup_arm_cm.S)
 
 # By default CMake do not pass compile definitions to ASM files.
-# Probably due to the fact that
+# Probably due to the fact that it depends on assembler used and some of the
+# assemblers may not support preprocessing.
 # This command forces use of gcc instead of as. It allows to pass compile definitions
 set_source_files_properties(startup_arm_cm.S PROPERTIES LANGUAGE C)
 

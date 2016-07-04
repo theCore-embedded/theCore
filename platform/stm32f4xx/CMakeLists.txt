@@ -25,7 +25,7 @@ target_link_libraries(stm32f4xx PUBLIC arch)
 
 add_cppcheck(stm32f4xx)
 
-# Maximum priority of user ISRs can be redefined, # but be careful:
+# Maximum priority of user ISRs can be redefined, but be careful:
 # it heavily depends on RTOS constraits.
 # I.e. for FreeRTOS maximum user priorities should be logically
 # less or equal than configMAX_SYSCALL_INTERRUPT_PRIORITY
