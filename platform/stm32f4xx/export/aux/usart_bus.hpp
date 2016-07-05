@@ -267,7 +267,7 @@ ecl::err usart_bus< dev >::init()
         this->irq_handler();
     };
 
-    irq_manager::subscribe(irqn, lambda);
+    irq::subscribe(irqn, lambda);
 
     // Enable UART
     USART_Cmd(usart, ENABLE);

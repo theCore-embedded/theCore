@@ -32,7 +32,7 @@ void exti_manager::init()
 
     for (auto &p : irq_mapping)
     {
-        irq_manager::subscribe(p.second, [&p]{
+        irq::subscribe(p.second, [&p]{
             p.second > EXTI4_IRQn
                     ? group_isr(p.first, p.second)
                     : direct_isr(p.first, p.second);

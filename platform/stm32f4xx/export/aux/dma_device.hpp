@@ -360,7 +360,7 @@ void subscribe_irq(const std::function< void () > &handler)
     irq::clear(dma_irqn);
 
     // Subscribe, actually
-    irq_manager::subscribe(dma_irqn, handler);
+    irq::subscribe(dma_irqn, handler);
 
     // Go on
     // TODO: think about letting user to decide when to unmask interrupts

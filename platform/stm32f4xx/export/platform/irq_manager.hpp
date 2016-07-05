@@ -15,57 +15,27 @@
 namespace ecl
 {
 
-//using irq::irq_num;
-
-// Manages irqs
-// TODO: singleton obviously
-class irq_manager
+namespace irq
 {
-public:
-    using handler_type = std::function< void() >;
 
-    // TODO: setup VTOR?
-    irq_manager() = delete;
-    ~irq_manager() = delete;
+using handler_type = std::function< void() >;
 
-    //! Initializes IRQ manager and setups default handler for every IRQ.
-    static void init();
+//! Initializes storage for callbacks and setups default handler for every IRQ.
+void init_storage();
 
-    //!
-    //! Subscribes to the given IRQ.
-    //! \param[in] irqn     Valid IRQ number.
-    //! \param[in] handler  New IRQ handler for given IRQ.
-    //! \retval 0 Success.
-    //!
-    static err subscribe(irq_num irqn, const handler_type &handler);
+//! Subscribes to the given IRQ.
+//! \param[in] irqn     Valid IRQ number.
+//! \param[in] handler  New IRQ handler for given IRQ.
+//!
+void subscribe(irq_num irqn, const irq::handler_type &handler);
 
-    //!
-    //! Unsubscribes from the given IRQ.
-    //! \details Default handler will be used for given IRQ if this call succeed.
-    //! \param[in] irqn Valid IRQ number.
-    //! \retval 0 Success.
-    //!
-    static err unsubscribe(irq_num irqn);
+//! Unsubscribes from the given IRQ.
+//! \details Default handler will be used for given IRQ if this call succeed.
+//! \param[in] irqn Valid IRQ number.
+//!
+void unsubscribe(irq_num irqn);
 
-protected:
-    //! Handles IRQ
-    static void isr();
-
-private:
-    using handler_storage =
-    std::aligned_storage< sizeof(handler_type), alignof(handler_type) >::type;
-
-    //! Default iRQ handler. Terminates execution if called.
-    static void default_handler();
-
-    //! Storage for registered IRQ handlers.
-    static handler_storage m_storage[CONFIG_IRQ_COUNT];
-
-    static constexpr auto extract_handlers()
-    {
-        return reinterpret_cast< handler_type* >(&m_storage);
-    }
-};
+}
 
 }
 

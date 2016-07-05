@@ -225,8 +225,8 @@ ecl::err i2c_bus <i2c_config>::init()
             this->irq_er_handler();
         };
 
-        irq_manager::subscribe(irqn_ev, lambda_ev);
-        irq_manager::subscribe(irqn_er, lambda_er);
+        irq::subscribe(irqn_ev, lambda_ev);
+        irq::subscribe(irqn_er, lambda_er);
     }
 
     set_inited();

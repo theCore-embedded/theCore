@@ -15,8 +15,15 @@ extern "C" __attribute__((used)) void platform_init()
     // TODO: find better place for it
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
+    // Magic here.
+    // Logical priority of *any* user interrupt that use FreeRTOS API
+    // must not be greater than configMAX_SYSCALL_INTERRUPT_PRIORITY
+    for (int irqn = WWDG_IRQn; irqn < CONFIG_IRQ_COUNT; ++irqn) {
+        NVIC_SetPriority(static_cast<IRQn_Type>(irqn), CONFIG_MAX_ISR_PRIORITY);
+    }
+
     // IRQ must be ready before anything else will start work
-    ecl::irq_manager::init();
+    ecl::irq::init_storage();
     ecl::exti_manager::init();
 
     // Initialize DWT, used by platform to count ticks.
