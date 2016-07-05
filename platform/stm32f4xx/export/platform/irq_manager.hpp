@@ -10,11 +10,12 @@
 
 #include <functional>
 #include <type_traits>
+#include "irq.hpp"
 
 namespace ecl
 {
 
-using irq_num = IRQn_Type;
+//using irq::irq_num;
 
 // Manages irqs
 // TODO: singleton obviously

@@ -1,7 +1,9 @@
-#include <platform/irq_manager.hpp>
+#include "platform/irq_manager.hpp"
+#include "platform/irq.hpp"
+#include "misc.h"
+
 #include <new>
 
-#include "misc.h"
 
 //! Encapsultaes entry point of the IRQ service routine
 struct irq_manager_entry_point : public ecl::irq_manager
@@ -35,7 +37,7 @@ void irq_manager::init()
         new (&h) handler_type{default_handler};
     }
 
-    __enable_irq();
+    irq::enable();
 }
 
 err irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
@@ -47,7 +49,7 @@ err irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
 
     auto handlers = extract_handlers();
 
-    __disable_irq();
+    irq::disable();
 
     // Magic here.
     // Logical priority of *any* user interrupt that use
@@ -55,7 +57,7 @@ err irq_manager::subscribe(irq_num irqn, const std::function< void() > &handler)
     // configMAX_SYSCALL_INTERRUPT_PRIORITY
     NVIC_SetPriority(irqn, CONFIG_MAX_ISR_PRIORITY);
     handlers[irqn] = handler;
-    __enable_irq();
+    irq::enable();
     return err::ok;
 }
 
@@ -67,9 +69,9 @@ err irq_manager::unsubscribe(irq_num irqn)
     }
 
     auto handlers = extract_handlers();
-    __disable_irq();
+    irq::disable();
     handlers[irqn] = default_handler;
-    __enable_irq();
+    irq::enable();
     return err::ok;
 }
 
@@ -92,23 +94,23 @@ err irq_manager::unmask(irq_num irqn)
     }
 
     // TODO: error check
-    NVIC_EnableIRQ(irqn);
+    irq::unmask(irqn);
     return err::ok;
 }
 
 bool irq_manager::in_isr()
 {
-    return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
+    return irq::in_isr();
 }
 
 void irq_manager::disable()
 {
-    __disable_irq();
+    irq::disable();
 }
 
 void irq_manager::enable()
 {
-    __enable_irq();
+    irq::enable();
 }
 
 err irq_manager::clear(irq_num irqn)
@@ -119,7 +121,7 @@ err irq_manager::clear(irq_num irqn)
     }
 
     // TODO: error check
-    NVIC_ClearPendingIRQ(static_cast< irq_num > (irqn));
+    clear(irqn);
     return err::ok;
 }
 
@@ -127,27 +129,17 @@ err irq_manager::clear(irq_num irqn)
 
 void irq_manager::isr()
 {
-    volatile int irqn;
-    auto handlers = extract_handlers();
-
-    asm volatile (
-                "mrs %0, ipsr" : "=r" (irqn)
-                );
-
-    // IPSR holds exception numbers starting from 0
-    // Valid IRQ number starts from -15
-    // See Cortex-M4 processors documentation
-    // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/CHDBIBGJ.html
-    irqn -= 16;
+    volatile int irqn = irq::get_current_irqn();
+    auto handlers     = extract_handlers();
 
     // TODO: Is it needed?
-    mask(static_cast< irq_num >(irqn));
+    irq::mask(static_cast< irq_num >(irqn));
     handlers[irqn]();
 }
 
 void irq_manager::default_handler()
 {
-    __disable_irq();
+    irq::disable();
     for(;;);
 }
 
