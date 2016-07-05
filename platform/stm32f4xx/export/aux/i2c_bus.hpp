@@ -302,7 +302,7 @@ ecl::err i2c_bus< i2c_config >::do_xfer()
 
         constexpr auto irqn = pick_ev_irqn();
         i2c_setup_xfer_irq();
-        irq_manager::unmask(irqn);
+        irq::unmask(irqn);
     }
 
     return ecl::err::ok;
@@ -541,7 +541,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
     constexpr auto irqn  = pick_ev_irqn();
     constexpr auto i2c = pick_i2c();
 
-    irq_manager::clear(irqn);
+    irq::clear(irqn);
 
     // master mode selected
     if (i2c->SR1 & I2C_FLAG_SB) {
@@ -552,7 +552,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
                         I2C_Direction_Transmitter);
 
         // ? goto will be good here, but it is some sort of bad style in C++
-        irq_manager::unmask(irqn);
+        irq::unmask(irqn);
         return;
     }
 
@@ -575,7 +575,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
             }
         }
 
-        irq_manager::unmask(irqn);
+        irq::unmask(irqn);
         return;
     }
 
@@ -656,7 +656,7 @@ void i2c_bus< i2c_config >::irq_ev_handler()
         }
     }
 
-    irq_manager::unmask(irqn);
+    irq::unmask(irqn);
 }
 
 template< class i2c_config >

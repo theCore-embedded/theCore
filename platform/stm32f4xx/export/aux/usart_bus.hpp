@@ -375,7 +375,7 @@ ecl::err usart_bus< dev >::do_xfer()
         set_rx_done();
     }
 
-    irq_manager::unmask(irqn);
+    irq::unmask(irqn);
 
     return ecl::err::ok;
 }
@@ -475,7 +475,7 @@ void usart_bus< dev >::irq_handler()
     constexpr auto irqn  = pick_irqn();
     ITStatus status;
 
-    irq_manager::clear(irqn);
+    irq::clear(irqn);
 
     // TODO: comment about flags clear sequence
 
@@ -485,7 +485,7 @@ void usart_bus< dev >::irq_handler()
             if (m_tx_left) {
                 USART_SendData(usart, *(m_tx + (m_tx_size - m_tx_left)));
                 m_tx_left--;
-                irq_manager::unmask(irqn);
+                irq::unmask(irqn);
             } else {
                 // Last interrupt occurred, need to notify.
                 m_event_handler(channel::tx, event::tc, m_tx_size);

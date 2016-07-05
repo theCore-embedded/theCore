@@ -75,56 +75,6 @@ err irq_manager::unsubscribe(irq_num irqn)
     return err::ok;
 }
 
-err irq_manager::mask(irq_num irqn)
-{
-    // TODO: Use platform assert when it will be ready
-    if (irqn < 0) {
-        return err::inval;
-    }
-
-    NVIC_DisableIRQ(irqn);
-    return err::ok;
-}
-
-err irq_manager::unmask(irq_num irqn)
-{
-    // TODO: Use platform assert when it will be ready
-    if (irqn < 0) {
-        return err::inval;
-    }
-
-    // TODO: error check
-    irq::unmask(irqn);
-    return err::ok;
-}
-
-bool irq_manager::in_isr()
-{
-    return irq::in_isr();
-}
-
-void irq_manager::disable()
-{
-    irq::disable();
-}
-
-void irq_manager::enable()
-{
-    irq::enable();
-}
-
-err irq_manager::clear(irq_num irqn)
-{
-    // TODO: Use platform assert when it will be ready
-    if (irqn < 0) {
-        return err::inval;
-    }
-
-    // TODO: error check
-    clear(irqn);
-    return err::ok;
-}
-
 //------------------------------------------------------------------------------
 
 void irq_manager::isr()

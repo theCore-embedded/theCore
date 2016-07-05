@@ -47,38 +47,6 @@ public:
     //!
     static err unsubscribe(irq_num irqn);
 
-    //!
-    //! Masks or disables the given IRQ.
-    //! \param[in] irqn Valid IRQ number.
-    //! \retval 0 Success.
-    //!
-    static err mask(irq_num irqn);
-
-    //!
-    //! Unmasks or enables the given IRQ.
-    //! \param[in] irqn Valid IRQ number.
-    //! \retval 0 Success.
-    //!
-    static err unmask(irq_num irqn);
-
-    //! Checks if a processor is in handler mode of execution at this time.
-    //! \retval true Processor is in handler mode. I.e. servicing IRQ or exception.
-    //! \retval false Processor is in thread mode.
-    static bool in_isr();
-
-    //! Disables interrupts globally.
-    static void disable();
-
-    //! Enables interrupts globally.
-    static void enable();
-
-    //!
-    //! Clears pending interrupt of the given IRQ.
-    //! \param[in] irqn Valid IRQ number.
-    //! \retval 0 Success.
-    //!
-    static err clear(irq_num irqn);
-
 protected:
     //! Handles IRQ
     static void isr();

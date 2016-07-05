@@ -60,7 +60,7 @@ void ecl::binary_semaphore::signal()
     // a binary semaphore. If signal called multiple times without waiting
     // for a semaphore it is expected that only one event will be delivered to
     // a task when it will call wait()
-    if (!ecl::irq_manager::in_isr()) {
+    if (!ecl::irq::in_isr()) {
         xSemaphoreGive(m_semaphore);
     } else {
         // Don't care about priority inversion thus skipping second argument

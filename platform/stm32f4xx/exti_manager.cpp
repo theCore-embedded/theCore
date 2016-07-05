@@ -39,7 +39,7 @@ void exti_manager::init()
         });
 
         // Interrupts will be always on, at least at this stage of development
-        irq_manager::unmask(p.second);
+        irq::unmask(p.second);
     }
 
     // Supply clocks for SYSCFG subsystem
@@ -106,8 +106,8 @@ void exti_manager::direct_isr(size_t idx, irq_num irqn)
     EXTI_ClearFlag(h->m_exti_line);
     h->operator ()();
 
-    irq_manager::clear(irqn);
-    irq_manager::unmask(irqn);
+    irq::clear(irqn);
+    irq::unmask(irqn);
 }
 
 void exti_manager::group_isr(size_t idx, irq_num irqn)
@@ -123,8 +123,8 @@ void exti_manager::group_isr(size_t idx, irq_num irqn)
         }
     }
 
-    irq_manager::clear(irqn);
-    irq_manager::unmask(irqn);
+    irq::clear(irqn);
+    irq::unmask(irqn);
 }
 
 //------------------------------------------------------------------------------
@@ -141,9 +141,9 @@ exti_manager::handler::handler()
 exti_manager::handler::~handler()
 {
     // TODO
-    irq_manager::disable();
+    irq::disable();
     m_node.unlink();
-    irq_manager::enable();
+    irq::enable();
 }
 
 void exti_manager::handler::set_cb(callback cb)

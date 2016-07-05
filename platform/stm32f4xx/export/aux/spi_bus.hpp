@@ -626,8 +626,8 @@ void spi_i2s_bus<dev>::irq_handler()
             DMA_ClearFlag(tx_dma, tx_ht_flag);
             DMA_ClearITPendingBit(tx_dma, tx_ht_if);
 
-            irq_manager::clear(tx_irqn);
-            irq_manager::unmask(tx_irqn);
+            irq::clear(tx_irqn);
+            irq::unmask(tx_irqn);
         }
     }
 
@@ -657,8 +657,8 @@ void spi_i2s_bus<dev>::irq_handler()
             DMA_ClearFlag(rx_dma, rx_ht_flag);
             DMA_ClearITPendingBit(rx_dma, rx_ht_if);
 
-            irq_manager::clear(rx_irqn);
-            irq_manager::unmask(rx_irqn);
+            irq::clear(rx_irqn);
+            irq::unmask(rx_irqn);
         }
     }
 
@@ -672,10 +672,10 @@ void spi_i2s_bus<dev>::irq_handler()
         SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
 
         // Clear/enable NVIC interrupts
-        irq_manager::clear(rx_irqn);
-        irq_manager::unmask(rx_irqn);
-        irq_manager::clear(tx_irqn);
-        irq_manager::unmask(tx_irqn);
+        irq::clear(rx_irqn);
+        irq::unmask(rx_irqn);
+        irq::clear(tx_irqn);
+        irq::unmask(tx_irqn);
 
         // All transfers completed
         m_event_handler(channel::meta, event::tc, m_tx_size);

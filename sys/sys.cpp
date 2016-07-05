@@ -53,7 +53,7 @@ extern "C"
 int __cxa_guard_acquire(int *gv)
 {
     // Disable interrupts to prevent concurent access
-    ecl::irq_manager::disable();
+    ecl::irq::disable();
 
     if (*gv == 1) {
         // Already locked
@@ -70,7 +70,7 @@ void __cxa_guard_release(int *gv)
 {
     (void) gv;
     // Object constructed. It is safe to enable interrupts.
-    ecl::irq_manager::enable();
+    ecl::irq::enable();
 }
 
 extern "C" void platform_init();
