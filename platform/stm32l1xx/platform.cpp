@@ -1,5 +1,5 @@
 #include "platform/execution.h"
-#include "platform/irq_manager.hpp"
+#include "common/irq.hpp"
 
 #include <stm32l1xx_rcc.h>
 #include <stm32l1xx_usart.h>
@@ -25,7 +25,7 @@ void assert_param(int exp)
 extern "C" void platform_init()
 {
     // IRQ must be ready before anything else will start work
-    ecl::irq_manager::init();
+    ecl::irq::init_storage();
 
     // Update clocks so it is visible to the rest of the system
     SystemCoreClockUpdate();
