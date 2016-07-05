@@ -1,16 +1,14 @@
-//!
 //! \file
-//! \brief stm32f4xx IRQ manager.
+//! \brief IRQ common module.
 //!
-#ifndef PLATFORM_IRQ_MANAGER_HPP
-#define PLATFORM_IRQ_MANAGER_HPP
+#ifndef COMMON_IRQ_HPP
+#define COMMON_IRQ_HPP
 
-#include <stm32f4xx.h>
+#include <platform/irq.hpp>
 #include <ecl/err.hpp>
 
 #include <functional>
 #include <type_traits>
-#include "irq.hpp"
 
 namespace ecl
 {
@@ -18,7 +16,7 @@ namespace ecl
 namespace irq
 {
 
-using handler_type = std::function< void() >;
+using handler_type = std::function<void()>;
 
 //! Initializes storage for callbacks and setups default handler for every IRQ.
 void init_storage();
@@ -35,8 +33,8 @@ void subscribe(irq_num irqn, const irq::handler_type &handler);
 //!
 void unsubscribe(irq_num irqn);
 
-}
+} // namespace ecl
 
-}
+} // namespace irq
 
-#endif
+#endif // COMMON_IRQ_HPP

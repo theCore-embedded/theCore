@@ -1,7 +1,6 @@
 # Library provides platform headers, definitiions and code
 add_library(stm32f4xx STATIC
         platform.cpp
-        irq_manager.cpp
         exti_manager.cpp
         utils.c
         )
@@ -22,7 +21,6 @@ target_link_libraries(stm32f4xx PUBLIC containers)
 target_link_libraries(stm32f4xx PUBLIC emc) # For memset
 target_link_libraries(stm32f4xx PUBLIC system_stm32f4xx)
 target_link_libraries(stm32f4xx PUBLIC arch)
-target_link_libraries(stm32f4xx PUBLIC dbg)
 
 add_cppcheck(stm32f4xx)
 
@@ -40,9 +38,9 @@ if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
             " using default value: ${CONFIG_MAX_ISR_PRIORITY}")
 endif()
 
-target_compile_definitions(stm32f4xx PUBLIC
+target_compile_definitions(stm32f4xx PRIVATE
+        -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT}
         -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
-target_compile_definitions(stm32f4xx PUBLIC -DCONFIG_IRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 
 # Pick console driver
 message(STATUS "STM32F4XX: Checking [CONFIG_USE_CONSOLE]...")

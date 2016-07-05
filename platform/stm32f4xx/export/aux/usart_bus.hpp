@@ -13,7 +13,7 @@
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_rcc.h>
 
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 
 #include <cstdint>
 #include <unistd.h>

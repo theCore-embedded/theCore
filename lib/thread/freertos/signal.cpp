@@ -3,7 +3,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 #include <ecl/assert.h>
 
 namespace ecl

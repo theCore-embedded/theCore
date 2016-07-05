@@ -7,7 +7,7 @@
 #define PLATFORM_SPI_BUS_HPP_
 
 #include "aux/dma_device.hpp"
-#include "platform/irq_manager.hpp"
+#include "common/irq.hpp"
 
 #include <common/spi.hpp>
 #include <common/bus.hpp>

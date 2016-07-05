@@ -1,4 +1,4 @@
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 #include <platform/exti_manager.hpp>
 #include <misc.h>
 #include <core_cm4.h>
@@ -18,7 +18,7 @@ extern "C" __attribute__((used)) void platform_init()
     // Magic here.
     // Logical priority of *any* user interrupt that use FreeRTOS API
     // must not be greater than configMAX_SYSCALL_INTERRUPT_PRIORITY
-    for (int irqn = WWDG_IRQn; irqn < CONFIG_IRQ_COUNT; ++irqn) {
+    for (int irqn = WWDG_IRQn; irqn < IRQ_COUNT; ++irqn) {
         NVIC_SetPriority(static_cast<IRQn_Type>(irqn), CONFIG_MAX_ISR_PRIORITY);
     }
 

@@ -1,18 +1,23 @@
-#include "platform/irq_manager.hpp"
-#include "platform/irq.hpp"
-#include "platform/execution.h"
-#include "misc.h"
+//! \file
+//! \brief Common IRQ implementation
+
+#include "common/irq.hpp"
 
 #include <ecl/assert.h>
+#include <platform/irq.hpp>
+#include <platform/execution.h>
+
 #include <new>
 
 namespace ecl
 {
 
+//! Storage type for the IRQ handlers
 using handler_storage =
 std::aligned_storage_t<sizeof(irq::handler_type), alignof(irq::handler_type)>;
 
-static handler_storage storage[CONFIG_IRQ_COUNT];
+//! IRQ storage itself
+static handler_storage storage[IRQ_COUNT];
 
 //! Unhandled interrupt must cause the abort
 static void default_handler()
@@ -26,7 +31,9 @@ static constexpr auto extract_handlers()
     return reinterpret_cast<irq::handler_type *>(&storage);
 }
 
-//! Handles IRQ and visible to startup code
+//------------------------------------------------------------------------------
+
+//! Handles IRQ and visible to the startup code
 extern "C" __attribute__ ((used))
 void core_isr()
 {
@@ -37,6 +44,8 @@ void core_isr()
     irq::mask(static_cast< irq_num >(irqn));
     handlers[irqn]();
 }
+
+//------------------------------------------------------------------------------
 
 namespace irq
 {

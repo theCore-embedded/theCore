@@ -1,5 +1,5 @@
 #include <ecl/thread/utils.hpp>
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 
 #include <FreeRTOS.h>
 #include <task.h>

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstddef>
 
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 #include <platform/console.hpp>
 
 // TODO: move it somewhere

@@ -4,7 +4,7 @@
 #include <stm32f4xx_i2c.h>
 #include <stm32f4xx_rcc.h>
 
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 
 #include <common/i2c.hpp>
 

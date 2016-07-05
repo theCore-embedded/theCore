@@ -2,7 +2,7 @@
 #include <ecl/thread/utils.hpp>
 #include <ecl/assert.h>
 
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 
 ecl::semaphore::semaphore()
         :m_semaphore{}

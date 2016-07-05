@@ -7,7 +7,7 @@
 #include <ecl/list.hpp>
 #include <aux/pin_descriptor.hpp>
 
-#include "irq_manager.hpp"
+#include "../../../common/export/common/irq.hpp"
 
 #include "stm32f4xx_exti.h"
 #include "stm32f4xx_syscfg.h"

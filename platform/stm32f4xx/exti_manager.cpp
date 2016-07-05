@@ -1,5 +1,5 @@
 #include <platform/exti_manager.hpp>
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 
 #include "stm32f4xx_exti.h"
 #include "stm32f4xx_rcc.h"
