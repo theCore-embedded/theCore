@@ -354,17 +354,17 @@ void subscribe_irq(const std::function< void () > &handler)
     constexpr auto dma_irqn = get_irqn< dma_stream >();
 
     // Prevent spurious interrupts from occurrence
-    irq_manager::mask(dma_irqn);
+    irq::mask(dma_irqn);
 
     // Do not expose old, not yet handled interrupts
-    irq_manager::clear(dma_irqn);
+    irq::clear(dma_irqn);
 
     // Subscribe, actually
-    irq_manager::subscribe(dma_irqn, handler);
+    irq::subscribe(dma_irqn, handler);
 
     // Go on
     // TODO: think about letting user to decide when to unmask interrupts
-    irq_manager::unmask(dma_irqn);
+    irq::unmask(dma_irqn);
 }
 
 } // namespace dma
