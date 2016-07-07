@@ -14,7 +14,7 @@ include(mcu_cfg.cmake)
 add_subdirectory(f4)
 
 # TODO: clarify essential libraries
-target_link_libraries(stm32f4xx PUBLIC stm32f4xx_spl)
+target_link_libraries(stm32f4xx PUBLIC stm32_spl)
 target_link_libraries(stm32f4xx PUBLIC platform_common)
 target_link_libraries(stm32f4xx PUBLIC types)
 target_link_libraries(stm32f4xx PUBLIC containers)

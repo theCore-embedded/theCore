@@ -15,7 +15,7 @@ endif()
 target_include_directories(stm32l1xx PUBLIC export)
 target_link_libraries(stm32l1xx PUBLIC cmsis)
 target_link_libraries(stm32l1xx PUBLIC types)
-target_link_libraries(stm32l1xx PUBLIC stm32l1xx_spl)
+target_link_libraries(stm32l1xx PUBLIC stm32_spl)
 target_link_libraries(stm32l1xx PUBLIC platform_common)
 target_link_libraries(stm32l1xx PUBLIC arch)
 
