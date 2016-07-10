@@ -438,7 +438,7 @@ ecl::err generic_bus< PBus >::xfer(const bus_handler &handler, async_type type)
     cb() = handler;
 
     if (type == async_type::deferred) {
-        // Xfer will be executed when upon user's will.
+        // Xfer will be executed upon user's will.
         return err::ok;
     }
 
