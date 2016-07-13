@@ -5,6 +5,11 @@
 //!  low power stereo DAC with headphone and ClassD speaker amplifiers
 //!  See: https://www.cirrus.com/cn/pubs/proDatasheet/CS43L22_F2.pdf
 //!
+//!  Restrictions: Current implementation supports only I2S audio format.
+//!  Sample size is fixed and equal to 16 bits. Also, DAC requires external clock (MCLK)
+//!  to operate correctly. In many implementations, I2S interface can output MCLK.
+//!  It can be used as external clock for DAC.
+//!
 
 #ifndef DEV_CS43L22_HPP
 #define DEV_CS43L22_HPP
@@ -101,7 +106,7 @@ public:
     {
         single    = 0x40, // Play one beep
         multiple  = 0x80, // Play beep for on_time, mute for off_time
-        continuos = 0xC0, // Play continuously
+        continuous = 0xC0, // Play continuously
     };
 
     //!  Maximum value of the master volume.
@@ -134,34 +139,34 @@ public:
     //!  before any operations with codec.
     //! \retval Status of the operation.
     //!
-    static ecl::err init();
+    static err init();
 
-    //!  Codec power up sequence.
+    //!  Codec power up sequence. Must not be called if codec is already powered.
     //! \details This method performs power up sequence of the
     //!  codec which is recommended by CS43L22 Reference Manual (RM).
     //!  To use this method, the init() method must be called previously.
     //! \retval Status of the operation.
     //!
-    static ecl::err power_up();
+    static err power_up();
 
-    //!  Codec power down sequence.
+    //!  Codec power down sequence. Must not be called if codec is not powered.
     //! \details This method performs power down sequence of the
     //!  codec which is recommended by CS43L22 Reference Manual (RM).
     //!  To use this method, the init() method must be called previously.
     //! \retval Status of the operation.
     //!
-    static ecl::err power_down();
+    static err power_down();
 
     //!  Send PCM buffer to the codec.
     //! \details This method blocks until all data is transferred.
     //!  The PCM data contains audio samples. Sample size is constant and equal to 16 bit.
     //!  Sampling frequency can be changed with cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency() method.
     //!  The buffer format is next: LRLR.... Where L - left channel and R - right channel.
-    //! \param buffer The buffer which contains PCM data.
-    //! \param count Number of samples in PCM buffer.
+    //! \param buffer The buffer which contains PCM data. Must not be null.
+    //! \param count Number of samples in PCM buffer. Must not be null.
     //! \retval Status of the operation.
     //!
-    static ecl::err send_pcm_buffer(uint16_t *buffer, size_t count);
+    static err send_pcm_buffer(const uint16_t *buffer, size_t count);
 
     //!  Starts stream of the PCM buffer to the codec.
     //! \details When stream is started, the user callback is called on two events:
@@ -175,89 +180,89 @@ public:
     //!  The PCM data contains audio samples. Sample size is constant and equal to 16 bit.
     //!  Sampling frequency can be changed with cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency() method.
     //!  The buffer format is next: LRLR.... Where L - left channel and R - right channel.
-    //! \param buffer The buffer which contains PCM data.
-    //! \param count Number of samples in PCM buffer. Must be multiple of 2 and less of equal to 0xFFFF.
+    //! \param buffer The buffer which contains PCM data. Must not be null.
+    //! \param count Number of samples in PCM buffer. Must not be null. Must be multiple of 2 and less of equal to 0xFFFF.
     //! \param callback User callback is called on HT and TC events.
     //! \retval Status of the operation.
     //!
-    static ecl::err pcm_stream_start(uint16_t *buffer, size_t count, user_callback callback);
+    static err pcm_stream_start(const uint16_t *buffer, size_t count, user_callback callback);
 
-    //!  Stop active stream.
+    //!  Stop active stream. Must not be called if stream is not active.
     //! \details This method stops active PCM stream. It is recommended to call this method
     //!  during processing of the HT or TC event. In case this method is called during
     //!  processing of the TC event the steam will be stopped immediately. Otherwise, it
     //!  will be stopped after next TC event.
     //! \retval Status of the operation.
     //!
-    static ecl::err pcm_stream_stop();
+    static err pcm_stream_stop();
 
     //!  Set master volume for specific channel.
     //! \param ch Audio channel.
     //! \param volume The volume value. Must be in range [0, cs43l22< I2c, I2s, Rst_gpio >::max_master_volume]
     //! \retval Status of the operation.
     //!
-    static ecl::err set_master_volume(uint8_t volume, channel ch = channel::all);
+    static err set_master_volume(uint8_t volume, channel ch = channel::all);
 
     //!  Set headphone volume for specific channel.
     //! \param ch Audio channel.
     //! \param volume The volume value. Must be in range [0, cs43l22< I2c, I2s, Rst_gpio >::max_headphone_volume]
     //! \retval Status of the operation.
     //!
-    static ecl::err set_headphone_volume(uint8_t volume, channel ch = channel::all);
+    static err set_headphone_volume(uint8_t volume, channel ch = channel::all);
 
     //!  Mute headphone channel.
     //! \param ch Audio channel.
     //! \retval Status of the operation.
     //!
-    static ecl::err headphone_mute_on(channel ch = channel::all);
+    static err headphone_mute(channel ch = channel::all);
 
     //!  Unmute headphone channel.
     //! \param ch Audio channel.
     //! \retval Status of the operation.
     //!
-    static ecl::err headphone_mute_off(channel ch = channel::all);
+    static err headphone_unmute(channel ch = channel::all);
 
     //!  Set beep on time. Must not be called if beep is enabled. See RM for details.
     //! \param value The value of beep on time.
     //! \retval Status of the operation.
     //!
-    static ecl::err set_beep_on_time(beep_on_time value);
+    static err set_beep_on_time(beep_on_time value);
 
     //!  Set beep off time. Must not be called if beep is enabled. See RM for details.
     //! \param value The value of beep off time.
     //! \retval Status of the operation.
     //!
-    static ecl::err set_beep_off_time(beep_off_time value);
+    static err set_beep_off_time(beep_off_time value);
 
     //!  Set beep frequency. Must not be called if beep is enabled. See RM for details.
     //! \param value The value of beep frequency.
     //! \retval Status of the operation.
     //!
-    static ecl::err set_beep_frequency(beep_frequency value);
+    static err set_beep_frequency(beep_frequency value);
 
     //!  Set beep Volume. Must not be called if beep is enabled. See RM for details.
-    //! \param value The value of beep volume. Must be in range [0,
+    //! \param value The value of beep volume. Must be in range [0, cs43l22< I2c, I2s, Rst_gpio >::max_beep_volume]
     //! \retval Status of the operation.
     //!
-    static ecl::err set_beep_volume(uint8_t volume);
+    static err set_beep_volume(uint8_t volume);
 
     //!  Enable beep generator.
     //! \param mode The operation mode for beep generator.
     //! \retval Status of the operation.
     //!
-    static ecl::err beep_generator_enable(beep_mode mode = beep_mode::multiple);
+    static err beep_enable(beep_mode mode = beep_mode::multiple);
 
     //!  Disable beep generator.
     //! \retval Status of the operation.
     //!
-    static ecl::err beep_generator_disable();
+    static err beep_disable();
 
     //!  Set sampling frequency for PCM audio data.
     //! \tparam frequency Audio frequency.
     //! \retval Status of the operation.
     //!
-    template < ecl::i2s::audio_frequency frequency>
-    static ecl::err set_sampling_frequency();
+    template <ecl::i2s::audio_frequency frequency>
+    static err set_sampling_frequency();
 
 private:
     // The I2C slave address of the codec.
@@ -307,10 +312,10 @@ private:
     };
 
     // Writes value into internal codec register
-    static ecl::err register_write(codec_register reg, uint8_t value);
+    static err register_write(codec_register reg, uint8_t value);
 
     // Reads internal codec register over I2C
-    static ecl::err register_read(codec_register reg, uint8_t &value);
+    static err register_read(codec_register reg, uint8_t &value);
 
     // Returns user callback
     static user_callback &tx_cplt_cb();
@@ -320,17 +325,17 @@ private:
 
     // State flags.
     // This bit is set when coded in inited.
-    static constexpr uint8_t inited       = 0x1;
+    static constexpr uint8_t inited          = 0x1;
     // This bit is set when coded is powered.
-    static constexpr uint8_t powered      = 0x2;
+    static constexpr uint8_t powered         = 0x2;
     // This bit is set when there is an active data stream.
-    static constexpr uint8_t tx_active    = 0x4;
+    static constexpr uint8_t stream_active   = 0x4;
     // This bit is set when user stopped data streams.
-    // Note, that when this bit is set, the tx_active can also be set,
+    // Note, that when this bit is set, the stream_active can also be set,
     // until next TC event will be processed.
-    static constexpr uint8_t tx_stopped   = 0x8;
+    static constexpr uint8_t stream_stopped  = 0x8;
     // This bit is set when beep generator is enabled.
-    static constexpr uint8_t beep_enabled = 0x10;
+    static constexpr uint8_t beep_enabled    = 0x10;
 
     // Represents the state of the codec.
     static uint8_t m_state;
@@ -339,12 +344,14 @@ private:
 template < class I2c, class I2s, class Rst_gpio > uint8_t cs43l22< I2c, I2s, Rst_gpio >::m_state{0};
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::init()
+err cs43l22< I2c, I2s, Rst_gpio >::init()
 {
+    ecl_assert(!(m_state & inited));
+
     tx_cplt_cb();
 
-    ecl::err rc = I2c::init();
-    if (rc != ecl::err::ok) {
+    err rc = I2c::init();
+    if (rc != err::ok) {
         return rc;
     }
 
@@ -358,17 +365,18 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::init()
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::power_up()
+err cs43l22< I2c, I2s, Rst_gpio >::power_up()
 {
     ecl_assert(m_state & inited);
+    ecl_assert(!(m_state & powered));
 
     Rst_gpio::set();
 
     uint8_t value {0};
 
     // power up sequence according to RM
-    ecl::err rc = register_write(pwr_ctrl1, 0x01);
-    //TODO add error checking.
+    err rc = register_write(pwr_ctrl1, 0x01);
+    //TODO #113 add error checking.
     register_write(init_sequence_reg1, 0x99);
     register_write(init_sequence_reg3, 0x80);
 
@@ -396,15 +404,16 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::power_up()
         m_state |= powered;
     }
 
-    return ecl::err::ok;
+    return err::ok;
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::power_down()
+err cs43l22< I2c, I2s, Rst_gpio >::power_down()
 {
     ecl_assert(m_state & inited);
+    ecl_assert(m_state & powered);
 
-    ecl::err rc = register_write(pwr_ctrl1, 0x9f);
+    err rc = register_write(pwr_ctrl1, 0x9f);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -417,53 +426,41 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::power_down()
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::send_pcm_buffer(uint16_t *buffer, size_t count)
+err cs43l22< I2c, I2s, Rst_gpio >::send_pcm_buffer(const uint16_t *buffer, size_t count)
 {
     ecl_assert(m_state & inited);
-
-    if (!buffer || !count) {
-        return ecl::err::inval;
-    }
-    if (m_state & tx_active) {
-        return ecl::err::busy;
-    }
-
-    m_state |= tx_active;
+    ecl_assert(buffer && count);
 
     I2s::lock();
 
-    I2s::set_buffers((uint8_t *)buffer, nullptr, count * sizeof(*buffer));
-    ecl::err rc = I2s::xfer();
+    I2s::set_buffers(reinterpret_cast< const uint8_t *>(buffer), nullptr, count * sizeof(*buffer));
+    err rc = I2s::xfer();
 
     I2s::unlock();
-
-    m_state &= ~tx_active;
 
     return rc;
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_start(uint16_t *buffer, size_t count, user_callback cb)
+err cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_start(const uint16_t *buffer, size_t count, user_callback cb)
 {
     ecl_assert(m_state & inited);
+    ecl_assert(buffer && count);
+    ecl_assert(cb);
 
-    if (!buffer || !count) {
-        return ecl::err::inval;
+    if (m_state & stream_active) {
+        return err::busy;
     }
 
-    if (m_state & tx_active) {
-        return ecl::err::busy;
-    }
-
-    m_state |= tx_active;
+    m_state |= stream_active;
 
     tx_cplt_cb() = cb;
 
     I2s::lock();
 
     I2s::platform_handle().enable_circular_mode();
-    I2s::set_buffers((uint8_t *)buffer, nullptr, count * sizeof(*buffer));
-    ecl::err rc = I2s::xfer(internal_tx_cplt_cb);
+    I2s::set_buffers(reinterpret_cast< const uint8_t *>(buffer), nullptr, count * sizeof(*buffer));
+    err rc = I2s::xfer(internal_tx_cplt_cb);
 
     I2s::unlock();
 
@@ -471,32 +468,32 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_start(uint16_t *buffer, size_
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_stop()
+err cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_stop()
 {
     ecl_assert(m_state & inited);
+    ecl_assert(m_state & stream_active);
 
-    if (m_state & tx_active) {
-        // disable circular mode for I2S bus
-        I2s::platform_handle().disable_circular_mode();
 
-        m_state |= tx_stopped;
-    }
+    // disable circular mode for I2S bus
+    I2s::platform_handle().disable_circular_mode();
 
-    return ecl::err::ok;
+    m_state |= stream_stopped;
+
+    return err::ok;
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::register_write(codec_register reg, uint8_t value)
+err cs43l22< I2c, I2s, Rst_gpio >::register_write(codec_register reg, uint8_t value)
 {
     ecl_assert(m_state & inited);
 
-    uint8_t buffer[] = {(uint8_t)reg, value};
+    uint8_t buffer[] = {static_cast< uint8_t >(reg), value};
 
     I2c::lock();
 
     I2c::platform_handle().set_slave_addr(i2c_address);
     I2c::set_buffers(buffer, 0, sizeof(buffer));
-    ecl::err rc = I2c::xfer();
+    err rc = I2c::xfer();
 
     I2c::unlock();
 
@@ -504,15 +501,15 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::register_write(codec_register reg, uint8
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::register_read(codec_register reg, uint8_t &value)
+err cs43l22< I2c, I2s, Rst_gpio >::register_read(codec_register reg, uint8_t &value)
 {
     ecl_assert(m_state & inited);
 
     I2c::lock();
 
     I2c::platform_handle().set_slave_addr(i2c_address);
-    I2c::set_buffers((uint8_t *)&reg, &value, sizeof(uint8_t));
-    ecl::err rc = I2c::xfer();
+    I2c::set_buffers(reinterpret_cast< uint8_t *>(&reg), &value, sizeof(uint8_t));
+    err rc = I2c::xfer();
 
     I2c::unlock();
 
@@ -525,8 +522,8 @@ void cs43l22< I2c, I2s, Rst_gpio >::internal_tx_cplt_cb(ecl::bus_channel ch, ecl
     (void) total;
 
     if (ch == ecl::bus_channel::tx) {
-        if ((m_state & tx_stopped) && type == ecl::bus_event::tc) {
-            m_state &= ~(tx_active | tx_stopped);
+        if ((m_state & stream_stopped) && type == ecl::bus_event::tc) {
+            m_state &= ~(stream_active | stream_stopped);
             // Reset user callback
             tx_cplt_cb() = user_callback {};
         } else {
@@ -544,15 +541,12 @@ typename cs43l22< I2c, I2s, Rst_gpio >::user_callback &cs43l22< I2c, I2s, Rst_gp
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_master_volume(uint8_t volume, channel ch)
+err cs43l22< I2c, I2s, Rst_gpio >::set_master_volume(uint8_t volume, channel ch)
 {
     ecl_assert(m_state & inited);
-    ecl::err rc = ecl::err::ok;
+    ecl_assert(volume <= max_master_volume);
 
-    // max_master_volume +12dB volume according to RM
-    if (volume > max_master_volume) {
-        return ecl::err::inval;
-    }
+    err rc = err::ok;
 
     // Represents 0dB volume according to RM
     const uint8_t zero_level = 0xCC;
@@ -583,11 +577,12 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_master_volume(uint8_t volume, channe
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_headphone_volume(uint8_t volume, channel ch)
+err cs43l22< I2c, I2s, Rst_gpio >::set_headphone_volume(uint8_t volume, channel ch)
 {
     ecl_assert(m_state & inited);
+    ecl_assert(volume <= max_headphone_volume);
 
-    ecl::err rc = ecl::err::ok;
+    err rc = err::ok;
 
     // Volume to bits mapping, see RM for details
     uint8_t bitmask = 0xFF;
@@ -613,12 +608,12 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_headphone_volume(uint8_t volume, cha
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::headphone_mute_on(channel ch)
+err cs43l22< I2c, I2s, Rst_gpio >::headphone_mute(channel ch)
 {
     ecl_assert(m_state & inited);
 
     uint8_t value = 0;
-    ecl::err rc = register_read(playback_ctrl2, value);
+    err rc = register_read(playback_ctrl2, value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -638,12 +633,12 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::headphone_mute_on(channel ch)
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::headphone_mute_off(channel ch)
+err cs43l22< I2c, I2s, Rst_gpio >::headphone_unmute(channel ch)
 {
     ecl_assert(m_state & inited);
 
     uint8_t value = 0;
-    ecl::err rc = register_read(playback_ctrl2, value);
+    err rc = register_read(playback_ctrl2, value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -663,13 +658,13 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::headphone_mute_off(channel ch)
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_on_time(beep_on_time value)
+err cs43l22< I2c, I2s, Rst_gpio >::set_beep_on_time(beep_on_time value)
 {
     ecl_assert(m_state & inited);
     ecl_assert(!(m_state & beep_enabled));
 
     uint8_t register_value = 0;
-    ecl::err rc = register_read(beep_freq_ontime, register_value);
+    err rc = register_read(beep_freq_ontime, register_value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -689,13 +684,13 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_on_time(beep_on_time value)
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_off_time(beep_off_time value)
+err cs43l22< I2c, I2s, Rst_gpio >::set_beep_off_time(beep_off_time value)
 {
     ecl_assert(m_state & inited);
     ecl_assert(!(m_state & beep_enabled));
 
     uint8_t register_value = 0;
-    ecl::err rc = register_read(beep_vol_offtime, register_value);
+    err rc = register_read(beep_vol_offtime, register_value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -715,13 +710,13 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_off_time(beep_off_time value)
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_frequency(beep_frequency value)
+err cs43l22< I2c, I2s, Rst_gpio >::set_beep_frequency(beep_frequency value)
 {
     ecl_assert(m_state & inited);
     ecl_assert(!(m_state & beep_enabled));
 
     uint8_t register_value = 0;
-    ecl::err rc = register_read(beep_freq_ontime, register_value);
+    err rc = register_read(beep_freq_ontime, register_value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -741,16 +736,13 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_frequency(beep_frequency value)
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_volume(uint8_t volume)
+err cs43l22< I2c, I2s, Rst_gpio >::set_beep_volume(uint8_t volume)
 {
     ecl_assert(m_state & inited);
-
-    if (volume > max_beep_volume) {
-        return ecl::err::inval;
-    }
+    ecl_assert(volume <= max_beep_volume);
 
     uint8_t register_value = 0;
-    ecl::err rc = register_read(beep_vol_offtime, register_value);
+    err rc = register_read(beep_vol_offtime, register_value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -779,12 +771,13 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_beep_volume(uint8_t volume)
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::beep_generator_enable(beep_mode mode)
+err cs43l22< I2c, I2s, Rst_gpio >::beep_enable(beep_mode mode)
 {
     ecl_assert(m_state & inited);
+    ecl_assert(!(m_state & beep_enabled));
 
     uint8_t register_value = 0;
-    ecl::err rc = register_read(beep_tone_cfg, register_value);
+    err rc = register_read(beep_tone_cfg, register_value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -803,12 +796,13 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::beep_generator_enable(beep_mode mode)
 }
 
 template < class I2c, class I2s, class Rst_gpio >
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::beep_generator_disable()
+err cs43l22< I2c, I2s, Rst_gpio >::beep_disable()
 {
     ecl_assert(m_state & inited);
+    ecl_assert(m_state & beep_enabled);
 
     uint8_t register_value = 0;
-    ecl::err rc = register_read(beep_tone_cfg, register_value);
+    err rc = register_read(beep_tone_cfg, register_value);
     if (!is_ok(rc)) {
         return rc;
     }
@@ -826,7 +820,7 @@ ecl::err cs43l22< I2c, I2s, Rst_gpio >::beep_generator_disable()
 
 template < class I2c, class I2s, class Rst_gpio >
 template < ecl::i2s::audio_frequency frequency>
-ecl::err cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency()
+err cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency()
 {
     ecl_assert(m_state & inited);
 
