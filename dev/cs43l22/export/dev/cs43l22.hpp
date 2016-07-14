@@ -563,7 +563,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::set_master_volume(uint8_t volume, channel ch)
 
     if (ch == channel::left) {
         rc = register_write(master_a_vol, bitmask);
-    } else if (ch == channel::right){
+    } else if (ch == channel::right) {
         rc = register_write(master_b_vol, bitmask);
     } else { // channel::all
         rc = register_write(master_a_vol, bitmask);
@@ -594,7 +594,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::set_headphone_volume(uint8_t volume, channel 
 
     if (ch == channel::left) {
         rc = register_write(hp_a_vol, bitmask);
-    } else if (ch == channel::right){
+    } else if (ch == channel::right) {
         rc = register_write(hp_b_vol, bitmask);
     } else { // channel::all
         rc = register_write(hp_a_vol, bitmask);
@@ -621,7 +621,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::headphone_mute(channel ch)
     // Set HP mute bits. See RM for details.
     if (ch == channel::left) {
         value |= 0x40;
-    } else if (ch == channel::right){
+    } else if (ch == channel::right) {
         value |= 0x80;
     } else { // channel::all
         value |= 0xC0;
@@ -646,7 +646,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::headphone_unmute(channel ch)
     // Reset HP mute bits. See RM for details.
     if (ch == channel::left) {
         value &= ~0x40;
-    } else if (ch == channel::right){
+    } else if (ch == channel::right) {
         value &= ~0x80;
     } else { // channel::all
         value &= ~0xC0;
