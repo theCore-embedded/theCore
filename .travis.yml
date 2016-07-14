@@ -5,6 +5,7 @@ branches:
     only:
         - develop
         - master
+        - release
 
 install:
     - travis_retry curl https://nixos.org/nix/install -o nix_install.sh
