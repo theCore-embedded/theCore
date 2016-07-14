@@ -1,0 +1,2 @@
+add_subdirectory(htu21d)
+add_subdirectory(bh1750)

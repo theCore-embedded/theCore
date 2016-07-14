@@ -1,108 +1,103 @@
+//!
+//! \file
+//! \brief stm32f4xx IRQ manager.
+//!
 #ifndef PLATFORM_IRQ_MANAGER_HPP
 #define PLATFORM_IRQ_MANAGER_HPP
 
 #include <stm32f4xx.h>
 #include <core_cm4.h>
+#include <ecl/err.hpp>
 
 #include <functional>
+#include <type_traits>
 
-using IRQn_t = IRQn_Type;
+namespace ecl
+{
+
+using irq_num = IRQn_Type;
 
 // Manages irqs
 // TODO: singleton obviously
-class IRQ_manager
+class irq_manager
 {
 public:
+    using handler_type = std::function< void() >;
+
     // TODO: setup VTOR?
-    IRQ_manager() = delete;
-    ~IRQ_manager() = delete;
+    irq_manager() = delete;
+    ~irq_manager() = delete;
 
-    static void init()
-    {
-        for (auto &h : m_handlers) {
-            h = default_handler;
-        }
+    //! Initializes IRQ manager and setups default handler for every IRQ.
+    static void init();
 
-        __enable_irq();
-    }
+    //!
+    //! Subscribes to the given IRQ.
+    //! \param[in] irqn     Valid IRQ number.
+    //! \param[in] handler  New IRQ handler for given IRQ.
+    //! \retval 0 Success.
+    //!
+    static err subscribe(irq_num irqn, const handler_type &handler);
 
-    static int subscribe(IRQn_t IRQn, const std::function< void() > &handler)
-    {
-        // TODO: error check
+    //!
+    //! Unsubscribes from the given IRQ.
+    //! \details Default handler will be used for given IRQ if this call succeed.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static err unsubscribe(irq_num irqn);
 
-        __disable_irq();
+    //!
+    //! Masks or disables the given IRQ.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static err mask(irq_num irqn);
 
-        // Magic here.
-        // Logical priority of *any* user interrupt that use
-        // FreeRTOS API must not be greather than
-        // configMAX_SYSCALL_INTERRUPT_PRIORITY
-        NVIC_SetPriority(IRQn, CONFIG_MAX_ISR_PRIORITY);
-        m_handlers[IRQn] = handler;
-        __enable_irq();
-        return 0;
-    }
+    //!
+    //! Unmasks or enables the given IRQ.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static err unmask(irq_num irqn);
 
-    static int unsubscribe(IRQn_t IRQn)
-    {
-        __disable_irq();
-        m_handlers[IRQn] = default_handler;
-        __enable_irq();
-        return 0;
-    }
+    //! Checks if a processor is in handler mode of execution at this time.
+    //! \retval true Processor is in handler mode. I.e. servicing IRQ or exception.
+    //! \retval false Processor is in thread mode.
+    static bool in_isr();
 
-    static int mask(IRQn_t IRQn)
-    {
-        // TODO: error check
-        NVIC_DisableIRQ(IRQn);
-        return 0;
-    }
+    //! Disables interrupts globally.
+    static void disable();
 
-    static int unmask(IRQn_t IRQn)
-    {
-        // TODO: error check
-        NVIC_EnableIRQ(IRQn);
-        return 0;
-    }
+    //! Enables interrupts globally.
+    static void enable();
 
-    static int clear(IRQn_t IRQn)
-    {
-        // TODO: error check
-        NVIC_ClearPendingIRQ(static_cast< IRQn_t > (IRQn));
-        return 0;
-    }
+    //!
+    //! Clears pending interrupt of the given IRQ.
+    //! \param[in] irqn Valid IRQ number.
+    //! \retval 0 Success.
+    //!
+    static err clear(irq_num irqn);
 
 private:
+    using handler_storage =
+    std::aligned_storage< sizeof(handler_type), alignof(handler_type) >::type;
+
     // Prevent optimizing out an ISR routine
-    __attribute__ ((used)) static void ISR()
+    __attribute__ ((used)) void isr();
+
+    //! Default iRQ handler. Terminates execution if called.
+    static void default_handler();
+
+    //! Storage for registered IRQ handlers.
+    static handler_storage m_storage[CONFIG_IRQ_COUNT];
+
+    static constexpr auto extract_handlers()
     {
-        volatile int IRQn;
-
-        asm volatile (
-                    "mrs %0, ipsr" : "=r" (IRQn)
-                    );
-
-        // IPSR holds exception numbers starting from 0
-        // Valid IRQ number starts from -15
-        // See Cortex-M4 processors documentation
-        // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/CHDBIBGJ.html
-        IRQn -= 16;
-
-        // TODO: Is it needed?
-        mask(static_cast< IRQn_t >(IRQn));
-        m_handlers[IRQn]();
+        return reinterpret_cast< handler_type* >(&m_storage);
     }
-
-    static void default_handler()
-    {
-        __disable_irq();
-        for(;;);
-    }
-
-    // Registered IRQ handlers
-    // TODO: magic numbers
-    static std::function< void() > m_handlers[82];
 };
 
-
+}
 
 #endif

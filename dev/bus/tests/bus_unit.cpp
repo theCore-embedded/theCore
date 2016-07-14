@@ -18,20 +18,16 @@ static SimpleString StringFrom(ecl::err err)
 
 TEST_GROUP(bus)
 {
-    bus_t *test_bus;
-
     void setup()
     {
-        test_bus = new bus_t;
     }
 
     void teardown()
     {
         mock().disable();
-        test_bus->deinit();
+        bus_t::deinit();
         mock().enable();
 
-        delete test_bus;
         mock().clear();
     }
 };
@@ -44,7 +40,7 @@ TEST(bus, init)
             .andReturnValue(static_cast< int >(expected_ret));
     mock("platform_bus").expectOneCall("set_handler");
 
-    auto ret = test_bus->init();
+    auto ret = bus_t::init();
 
     // Retval must be the same as produced by platform counterpart
     CHECK_EQUAL(expected_ret, ret);
@@ -62,15 +58,108 @@ TEST(bus, lock_unlock)
     // TODO: async mode not yet covered
 
     mock().disable();
-    test_bus->init();
+    bus_t::init();
     mock().enable();
 
     mock("mutex").expectOneCall("lock");
     mock("platform_bus").expectOneCall("reset_buffers");
     mock("mutex").expectOneCall("unlock");
 
-    test_bus->lock();
-    test_bus->unlock();
+    bus_t::lock();
+    bus_t::unlock();
+
+    mock().checkExpectations();
+}
+
+TEST(bus, continuation_mode_xfer)
+{
+    mock().disable();
+    bus_t::init();
+    bus_t::lock();
+    mock().enable();
+
+    auto   expected_event    = ecl::bus_event::ht;
+    size_t expected_total    = 100500;
+    auto   expected_channel  = ecl::bus_channel::tx;
+    bool   call_xfer         = true;
+
+    auto handler = [&](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
+        mock("handler").actualCall("call");
+        CHECK_TRUE(expected_event    == e);
+        CHECK_TRUE(expected_total    == total);
+        CHECK_TRUE(expected_channel  == ch);
+
+        if (call_xfer && ch == ecl::bus_channel::meta && e == ecl::bus_event::tc) {
+            bus_t::trigger_xfer();
+            // Test logic is to trigger only one consequent xfer.
+            call_xfer = false;
+        }
+    };
+
+    ecl::err expected_ret = ecl::err::ok;
+
+    auto ret = bus_t::xfer(handler, ecl::async_type::deferred);
+    CHECK_EQUAL(expected_ret, ret);
+
+    // First xfer, triggered from current execution context
+    mock("platform_bus")
+    .expectOneCall("do_xfer")
+    .andReturnValue(static_cast< int >(expected_ret));
+
+    ret = bus_t::trigger_xfer();
+    CHECK_EQUAL(expected_ret, ret);
+
+    // Bus now busy transferring data
+    ret = bus_t::xfer(handler);
+    CHECK_EQUAL(ecl::err::busy, ret);
+
+    // Consequent xfer will be started as soon as TC event will be delivered
+    mock("platform_bus")
+    .expectOneCall("do_xfer")
+    .andReturnValue(static_cast< int >(expected_ret));
+
+    // 1st event - tx, ht
+    // 2nd event - meta, tc
+    // 3rd event - tx, ht
+    // 4th event - meta, tc - last for this test
+    mock("handler").expectNCalls(4, "call");
+
+    // Now, trigger the xfer event and see what happens
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // Provide TC event.
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    // Request for unlock. Bus must remain locked, since continuation xfer
+    // is requested.
+
+    mock().disable();
+    bus_t::unlock();
+    mock().enable();
+
+    // Trigger new event as a result of xfer continuation.
+
+    expected_event    = ecl::bus_event::ht;
+    expected_total    = 100500;
+    expected_channel  = ecl::bus_channel::tx;
+
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    // TC event not yet shipped for continuation mode. Bus must remain in busy
+    // state, but unlocked state. Deliver TC event in order to complete xfer
+    // chains.
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // As a result of cleanup
+    mock("platform_bus").expectOneCall("reset_buffers");
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
 
     mock().checkExpectations();
 }
@@ -84,33 +173,28 @@ TEST_GROUP(bus_is_ready)
     uint8_t tx_buf[buf_size];
     uint8_t rx_buf[buf_size];
 
-    bus_t *test_bus;
-
     void setup()
     {
-        test_bus = new bus_t;
-
         mock().disable();
-        test_bus->init();
-        test_bus->lock();
+        bus_t::init();
+        bus_t::lock();
         mock().enable();
     }
 
     void teardown()
     {
         mock().disable();
-        test_bus->unlock();
-        test_bus->deinit();
+        bus_t::unlock();
+        bus_t::deinit();
         mock().enable();
 
-        delete test_bus;
         mock().clear();
     }
 };
 
 TEST(bus_is_ready, set_buffers_invalid)
 {
-    auto rc = test_bus->set_buffers(nullptr, nullptr, 1);
+    auto rc = bus_t::set_buffers(nullptr, nullptr, 1);
     CHECK_EQUAL(ecl::err::inval, rc);
     mock().checkExpectations();
 }
@@ -128,7 +212,7 @@ TEST(bus_is_ready, set_buffers)
             .withParameter("rx_buf", rx_buf)
             .withParameter("size", buf_size);
 
-    auto rc = test_bus->set_buffers(tx_buf, rx_buf, buf_size);
+    auto rc = bus_t::set_buffers(tx_buf, rx_buf, buf_size);
     CHECK_EQUAL(ecl::err::ok, rc);
 
     mock().checkExpectations();
@@ -148,7 +232,7 @@ TEST(bus_is_ready, size_is_zero)
             .withParameter("rx_buf", rx_buf)
             .withParameter("size", zero_size);
 
-    auto rc = test_bus->set_buffers(tx_buf, rx_buf, zero_size);
+    auto rc = bus_t::set_buffers(tx_buf, rx_buf, zero_size);
     CHECK_EQUAL(ecl::err::ok, rc);
 
     mock().checkExpectations();
@@ -163,7 +247,7 @@ TEST(bus_is_ready, consequent_calls_and_buffers_reset)
     mock("platform_bus").expectOneCall("reset_buffers");
     mock("platform_bus").ignoreOtherCalls();
 
-    auto rc = test_bus->set_buffers(tx_buf, rx_buf, zero_size);
+    auto rc = bus_t::set_buffers(tx_buf, rx_buf, zero_size);
     CHECK_EQUAL(ecl::err::ok, rc);
 
     mock().checkExpectations();
@@ -173,7 +257,7 @@ TEST(bus_is_ready, consequent_calls_and_buffers_reset)
     mock("platform_bus").expectOneCall("reset_buffers");
     mock("platform_bus").ignoreOtherCalls();
 
-    rc = test_bus->set_buffers(tx_buf, rx_buf, non_zero_size);
+    rc = bus_t::set_buffers(tx_buf, rx_buf, non_zero_size);
     CHECK_EQUAL(ecl::err::ok, rc);
 
     mock().checkExpectations();
@@ -190,7 +274,7 @@ TEST(bus_is_ready, fill_tx)
             .withParameter("rx_size", fill_size)
             .withParameter("fill_byte", fill_byte);
 
-    auto rc = test_bus->set_buffers(fill_size, fill_byte);
+    auto rc = bus_t::set_buffers(fill_size, fill_byte);
     CHECK_EQUAL(ecl::err::ok, rc);
 
     mock().checkExpectations();
@@ -203,7 +287,7 @@ TEST(bus_is_ready, xfer_error)
             .expectOneCall("do_xfer")
             .andReturnValue(static_cast< int >(expected_ret));
 
-    auto ret = test_bus->xfer();
+    auto ret = bus_t::xfer();
 
     // Retval must be the same as produced by platform counterpart
     CHECK_EQUAL(expected_ret, ret);
@@ -226,7 +310,7 @@ TEST(bus_is_ready, async_xfer_error)
             .expectOneCall("do_xfer")
             .andReturnValue(static_cast< int >(expected_ret));
 
-    auto ret = test_bus->xfer(handler);
+    auto ret = bus_t::xfer(handler);
 
     // Retval must be the same as produced by platform counterpart
     CHECK_EQUAL(expected_ret, ret);
@@ -252,7 +336,7 @@ TEST(bus_is_ready, async_xfer_valid)
             .expectOneCall("do_xfer")
             .andReturnValue(static_cast< int >(expected_ret));
 
-    auto ret = test_bus->xfer(handler);
+    auto ret = bus_t::xfer(handler);
 
     // Retval must be the same as produced by platform counterpart
     CHECK_EQUAL(expected_ret, ret);
@@ -275,7 +359,54 @@ TEST(bus_is_ready, async_xfer_valid)
     mock().checkExpectations();
 }
 
+TEST(bus_is_ready, async_deffered)
+{
+    auto   expected_event    = ecl::bus_event::ht;
+    size_t expected_total    = 100500;
+    auto   expected_channel  = ecl::bus_channel::tx;
 
+    auto handler = [&](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
+        CHECK_TRUE(expected_event    == e);
+        CHECK_TRUE(expected_total    == total);
+        CHECK_TRUE(expected_channel  == ch);
+        mock("handler").actualCall("call");
+    };
+
+    ecl::err expected_ret = ecl::err::ok;
+
+    auto ret = bus_t::xfer(handler, ecl::async_type::deferred);
+    CHECK_EQUAL(expected_ret, ret);
+
+    // Platform bus xfer shouldn't be called.
+    mock().checkExpectations();
+
+    // Fire a xfer
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast< int >(expected_ret));
+
+    ret = bus_t::trigger_xfer();
+    CHECK_EQUAL(expected_ret, ret);
+
+    // Bus now busy transferring data
+    ret = bus_t::xfer(handler);
+    CHECK_EQUAL(ecl::err::busy, ret);
+
+    // Now, trigger the xfer event and see what happens
+
+    mock("handler").expectNCalls(2, "call");
+
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    expected_event    = ecl::bus_event::tc;
+    expected_total    = 0;
+    expected_channel  = ecl::bus_channel::meta;
+
+    // Small cleanup. TC event is required.
+    platform_mock::invoke(expected_channel, expected_event, expected_total);
+
+    mock().checkExpectations();
+}
 
 int main(int argc, char *argv[])
 {

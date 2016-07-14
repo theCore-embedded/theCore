@@ -1,34 +1,31 @@
 #include <platform/irq_manager.hpp>
-#include <platform/utils.hpp>
+#include <platform/exti_manager.hpp>
 #include <misc.h>
 #include <core_cm4.h>
+#include <stm32f4xx.h>
 
-// TODO: move it elsewhere
-std::function< void() > IRQ_manager::m_handlers[82];
+#if CONFIG_BYPASS_CONSOLE_ENABLED
+extern void bypass_console_init();
+#endif // CONFIG_BYPASS_CONSOLE_ENABLED
 
 // TODO: decide if to make as a class member or not
 extern "C" __attribute__((used)) void platform_init()
 {
     // Required for FreeRTOS
+    // TODO: find better place for it
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-}
 
-namespace ecl
-{
+    // IRQ must be ready before anything else will start work
+    ecl::irq_manager::init();
+    ecl::exti_manager::init();
 
-bool in_isr()
-{
-    return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
-}
+    // Initialize DWT, used by platform to count ticks.
+    // See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-void disable_irq()
-{
-    __disable_irq();
-}
-
-void enable_irq()
-{
-    __enable_irq();
-}
-
+#if CONFIG_BYPASS_CONSOLE_ENABLED
+    bypass_console_init();
+#endif // CONFIG_BYPASS_CONSOLE_ENABLED
 }

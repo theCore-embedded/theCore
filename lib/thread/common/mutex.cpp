@@ -1,9 +1,5 @@
 #include <ecl/thread/common/mutex.hpp>
 
-constexpr ecl::common::mutex::mutex()
-{
-}
-
 void ecl::common::mutex::lock()
 {
 }

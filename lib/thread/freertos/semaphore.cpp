@@ -1,49 +1,43 @@
 #include <ecl/thread/semaphore.hpp>
-#include <os/utils.hpp>
+#include <ecl/thread/utils.hpp>
 #include <ecl/assert.h>
 
-#include <platform/utils.hpp>
+#include <platform/irq_manager.hpp>
 
 ecl::semaphore::semaphore()
-    :m_semaphore{nullptr}
+        :m_semaphore{}
+        ,m_cnt{0}
 {
-    // TODO: find better way to implement semaphore, rather than via
-    // xSemaphoreCreateCounting(). Problem is that xSemaphoreCreateCounting()
-    // limits maximum count of a semaphore. See FreeRTOS docs for details.
-    m_semaphore = xSemaphoreCreateCounting(10, 0);
-    ecl_assert(m_semaphore);
 }
 
 ecl::semaphore::~semaphore()
 {
-    vSemaphoreDelete(m_semaphore);
 }
 
 void ecl::semaphore::signal()
 {
-    // HACK:
-    // Give operation fails if there is no more room in FreeRTOS queue.
-    // Idea is to postpone a giving until consumer will free some space for us.
-    if (!ecl::in_isr()) {
-        while (xSemaphoreGive(m_semaphore) != pdTRUE) {
-            os::this_thread::sleep_for(100);
-        }
-    } else {
-        // Can't block an ISR, event will be lost
-        xSemaphoreGiveFromISR(m_semaphore, nullptr);
+    if (m_cnt.fetch_add(1) < 0) {
+        m_semaphore.signal();
     }
 }
 
 void ecl::semaphore::wait()
 {
-    auto rc = xSemaphoreTake(m_semaphore, portMAX_DELAY);
-    ecl_assert(rc == pdTRUE);
+    if (m_cnt.fetch_sub(1) <= 0) {
+        m_semaphore.wait();
+    }
 }
 
 ecl::err ecl::semaphore::try_wait()
 {
-    auto rc = xSemaphoreTake(m_semaphore, 0);
-    return rc == pdTRUE ? ecl::err::ok : ecl::err::again;
+    if (m_cnt.fetch_sub(1) > 0) {
+        return err::ok; // Got semaphore.
+    }
+
+    // Bring counter back
+    ++m_cnt;
+
+    return err::again;
 }
 
 //------------------------------------------------------------------------------
@@ -66,7 +60,7 @@ void ecl::binary_semaphore::signal()
     // a binary semaphore. If signal called multiple times without waiting
     // for a semaphore it is expected that only one event will be delivered to
     // a task when it will call wait()
-    if (!ecl::in_isr()) {
+    if (!ecl::irq_manager::in_isr()) {
         xSemaphoreGive(m_semaphore);
     } else {
         // Don't care about priority inversion thus skipping second argument

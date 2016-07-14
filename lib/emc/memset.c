@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-// Hack to avoid errors when using LTO
 __attribute__((used))
 void * LIBC_FUNCTION(memset) (void *s, int c, size_t n)
 {

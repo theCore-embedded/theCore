@@ -1,4 +1,2 @@
-add_library(utils assert.cpp)
-target_include_directories(utils PUBLIC export)
-target_link_libraries(utils PRIVATE libcpp)
-target_link_libraries(utils INTERFACE types)
+add_library(utils INTERFACE)
+target_include_directories(utils INTERFACE export)

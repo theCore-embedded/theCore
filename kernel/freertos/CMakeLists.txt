@@ -1,6 +1,5 @@
 add_library(freertos_main kernel_main.c)
-#target_link_libraries(freertos_main PRIVATE main)
-target_link_libraries(freertos_main PRIVATE utils)
+target_link_libraries(freertos_main PRIVATE dbg)
 
 set(MAIN_STACK_SIZE)
 if (DEFINED CONFIG_FREERTOS_MAIN_THREAD_STACK)
@@ -21,7 +20,6 @@ endif()
 set(SRC_DIR freertos/FreeRTOS/Source/)
 
 # Obtain some processor info
-#get_property(TARGET_ARCH GLOBAL PROPERTY TARGET_PROCESSOR_ARCHITECTURE)
 set(TARGET_ARCH ${TARGET_PROCESSOR_ARCHITECTURE})
 
 # Compiler-dependent paths.
@@ -65,3 +63,5 @@ target_include_directories(freertos PUBLIC
 	${CONFIG_FREERTOS_HEADERS_PATH}/
 	${SRC_DIR}portable/${PORT_DIR}/
 )
+
+target_link_libraries(freertos PRIVATE emc)

@@ -6,7 +6,7 @@
 #ifndef PLATFORM_USART_BUS_HPP_
 #define PLATFORM_USART_BUS_HPP_
 
-#include <platform/common/bus.hpp>
+#include <common/bus.hpp>
 #include <common/usart.hpp>
 #include <ecl/err.hpp>
 
@@ -19,18 +19,72 @@
 #include <unistd.h>
 
 #include <functional>
+#include <type_traits>
 
 namespace ecl
 {
 
+//! Base template class for the usart configuration
+//! \details User must create template specialization for required USART device.
+//! Usart configuration class must contain following constexpr fields:
+//! - uint32_t **baudrate** - Configures the USART communication baud rate
+//! - uint16_t **word_len** - Specifies the number of data bits transmitted
+//!                           or received. This member can be a value of
+//!                           \ref USART_Word_Length (see STM32 SPL).
+//! - uint16_t **stop_bit** - Specifies the number of stop bits transmitted.
+//!                           This member can be a value of
+//!                           \ref USART_Stop_Bits (see STM32 SPL).
+//! - uint16_t **parity**   - Specifies the parity mode. This member can be
+//!                           a value of \ref USART_Parity (see STM32 SPL).
+//! - uint16_t **mode**     - Specifies wether the Receive or Transmit mode is
+//!                           enabled or disabled. This member can be a value
+//!                           of \ref USART_Modes (see STM32 SPL).
+//! - uint16_t **hw_flow**  - Specifies wether the hardware flow control mode
+//!                           is enabled or disabled. This member can be a value
+//!                           of \ref USART_Hardware_Flow_Control (see STM32 SPL).
 //!
+//! \par USART configuration example.
+//! In order to use this configuration class one must create configuration class
+//! in the `ecl` namespace before any acccess to \ref usart_bus instance.
+//! \code{.cpp}
+//!    template<>
+//!    struct usart_cfg< usart_device::dev3 >
+//!    {
+//!        static auto constexpr baudrate  = 115200;
+//!        static auto constexpr word_len  = USART_WordLength_8b;
+//!        static auto constexpr stop_bit  = USART_StopBits_1;
+//!        static auto constexpr parity    = USART_Parity_No;
+//!        static auto constexpr mode      = USART_Mode_Rx | USART_Mode_Tx;
+//!        static auto constexpr hw_flow   = USART_HardwareFlowControl_None;
+//!    };
+//! \endcode
+//! \warning To avoid potential problems with multiple configurations for single
+//! USART bus, **make sure that full specialization is placed in the
+//! header included (directly or indirectly) by all dependent modules.**.
+//! Thus, redefinition of the config class for given USART will result in
+//! compilation errors. *Good practice is to place all USART configuration
+//! class in the single target-related header.*
+template< usart_device dev >
+struct usart_cfg
+{
+    // Always assert
+    static_assert(std::is_integral<decltype(dev)>::value,
+                  "The instance of this generic class should never be "
+                  "instantiated. Please write your own template specialization "
+                  "of this class. See documentation.");
+};
+
+struct bypass_console;
+
 //! \brief STM32F4 USART bus
 //!
 template< usart_device dev >
 class usart_bus
 {
+    // Reuses usart_bus in order to initialize bypass console driver
+    friend struct bypass_console;
 public:
-    // Convinient type aliases.
+    // Convenient type aliases.
     using channel       = ecl::bus_channel;
     using event         = ecl::bus_event;
     using handler_fn    = ecl::bus_handler;
@@ -46,7 +100,7 @@ public:
 
     //!
     //! \brief Lazy initialization.
-    //! \return Status of opeartion.
+    //! \return Status of operation.
     //!
     ecl::err init();
 
@@ -138,7 +192,7 @@ private:
     const uint8_t   *m_tx;           //! Transmit buffer.
     size_t          m_tx_size;       //! TX buffer size.
     size_t          m_tx_left;       //! Left to send in TX buffer.
-    uint8_t         *m_rx;           //! Recieve buffer.
+    uint8_t         *m_rx;           //! Receive buffer.
     size_t          m_rx_size;       //! RX buffer size.
     size_t          m_rx_left;       //! Left to receive in RX buffer.
     uint8_t         m_status;        //! Tracks device status.
@@ -174,6 +228,19 @@ ecl::err usart_bus< dev >::init()
         return ecl::err::ok;
     }
 
+    // SPL-like checks, but in compile time.
+
+    static_assert(IS_USART_WORD_LENGTH(usart_cfg< dev >::word_len),
+                  "Word length configuration is invalid");
+    static_assert(IS_USART_STOPBITS(usart_cfg< dev >::stop_bit),
+                  "Stop bits configuration is invalid");
+    static_assert(IS_USART_PARITY(usart_cfg< dev >::parity),
+                  "Parity configuration is invalid");
+    static_assert(IS_USART_MODE(usart_cfg< dev >::mode),
+                  "USART mode is invalid");
+    static_assert(IS_USART_HARDWARE_FLOW_CONTROL(usart_cfg< dev >::hw_flow),
+                  "Flow control configuration is invalid");
+
     // Must be optimized at compile time
     constexpr auto rcc_periph = pick_rcc();
     constexpr auto rcc_fn     = pick_rcc_fn();
@@ -184,13 +251,12 @@ ecl::err usart_bus< dev >::init()
     rcc_fn(rcc_periph, ENABLE);
 
     // Configure UART
-    // TODO: make configuration values be chosen at compile time
-    init_struct.USART_BaudRate             = 115200;
-    init_struct.USART_WordLength           = USART_WordLength_8b;
-    init_struct.USART_StopBits             = USART_StopBits_1;
-    init_struct.USART_Parity               = USART_Parity_No;
-    init_struct.USART_Mode                 = USART_Mode_Rx | USART_Mode_Tx;
-    init_struct.USART_HardwareFlowControl  = USART_HardwareFlowControl_None;
+    init_struct.USART_BaudRate             = usart_cfg< dev >::baudrate;
+    init_struct.USART_WordLength           = usart_cfg< dev >::word_len;
+    init_struct.USART_StopBits             = usart_cfg< dev >::stop_bit;
+    init_struct.USART_Parity               = usart_cfg< dev >::parity;
+    init_struct.USART_Mode                 = usart_cfg< dev >::mode;
+    init_struct.USART_HardwareFlowControl  = usart_cfg< dev >::hw_flow;
 
     // Init UART
     USART_Init(usart, &init_struct);
@@ -201,7 +267,7 @@ ecl::err usart_bus< dev >::init()
         this->irq_handler();
     };
 
-    IRQ_manager::subscribe(irqn, lambda);
+    irq_manager::subscribe(irqn, lambda);
 
     // Enable UART
     USART_Cmd(usart, ENABLE);
@@ -309,7 +375,7 @@ ecl::err usart_bus< dev >::do_xfer()
         set_rx_done();
     }
 
-    IRQ_manager::unmask(irqn);
+    irq_manager::unmask(irqn);
 
     return ecl::err::ok;
 }
@@ -384,17 +450,17 @@ template< usart_device dev >
 constexpr auto usart_bus< dev >::pick_usart()
 {
     switch (dev) {
-    case usart_device::dev_1:
+    case usart_device::dev1:
         return USART1;
-    case usart_device::dev_2:
+    case usart_device::dev2:
         return USART2;
-    case usart_device::dev_3:
+    case usart_device::dev3:
         return USART3;
-    case usart_device::dev_4:
+    case usart_device::dev4:
         return UART4;
-    case usart_device::dev_5:
+    case usart_device::dev5:
         return UART5;
-    case usart_device::dev_6:
+    case usart_device::dev6:
         return USART6;
         // TODO: clarify
     default:
@@ -409,7 +475,7 @@ void usart_bus< dev >::irq_handler()
     constexpr auto irqn  = pick_irqn();
     ITStatus status;
 
-    IRQ_manager::clear(irqn);
+    irq_manager::clear(irqn);
 
     // TODO: comment about flags clear sequence
 
@@ -419,7 +485,7 @@ void usart_bus< dev >::irq_handler()
             if (m_tx_left) {
                 USART_SendData(usart, *(m_tx + (m_tx_size - m_tx_left)));
                 m_tx_left--;
-                IRQ_manager::unmask(irqn);
+                irq_manager::unmask(irqn);
             } else {
                 // Last interrupt occurred, need to notify.
                 m_event_handler(channel::tx, event::tc, m_tx_size);
@@ -450,7 +516,7 @@ void usart_bus< dev >::irq_handler()
             set_rx_done();
             USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
 
-            // 1 byte is recieved. No need to unmask interrupts.
+            // 1 byte is received. No need to unmask interrupts.
         }
     }
 

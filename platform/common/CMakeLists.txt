@@ -1,4 +1,2 @@
-add_subdirectory(pin)
-add_subdirectory(spi)
-add_subdirectory(usart)
-add_subdirectory(bus)
+add_library(platform_common INTERFACE)
+target_include_directories(platform_common INTERFACE export)

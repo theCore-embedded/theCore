@@ -6,6 +6,7 @@
 namespace ecl
 {
     using semaphore = common::semaphore;
+    using binary_semaphore = common::binary_semaphore;
 }
 
 #endif //LIB_THREAD_DEFAULT_SEMAPHORE_

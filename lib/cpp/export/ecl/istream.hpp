@@ -9,7 +9,7 @@ template< class IO_device >
 class istream
 {
 public:
-    // Provides type information of the underlaying device
+    // Provides type information of the underlying device
     using device_type = IO_device;
 
     // Initializes a stream with given device

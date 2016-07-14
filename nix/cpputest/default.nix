@@ -1,21 +1,15 @@
-# TODO: comments
-{ stdenv
-, fetchFromGitHub
-, autoconf
-, automake
-, libtool
-, gcc5
-}:
+{ stdenv, fetchFromGitHub, autoconf, automake, libtool }:
 
 stdenv.mkDerivation {
   name = "cpputest-3.7.2";
 
-  configurePhase = ''
+  preConfigure = ''
     autoreconf -i
-    ./configure --prefix=$out
   '';
 
-  buildInputs = [ gcc5 autoconf automake libtool ];
+  enableParallelBuilding = true;
+
+  buildInputs = [ autoconf automake libtool ];
 
   src = fetchFromGitHub {
     owner = "cpputest";
@@ -24,5 +18,9 @@ stdenv.mkDerivation {
     sha256 = "0slljbkzmjhplg36ml1jpilbhvh4kccsbjmmhdimm3hrh2m465zg";
   };
 
-  # TODO: add metadata
+  meta = {
+    description = "Unit testing and mocking framework for C/C++";
+    homepage = "http://cpputest.github.io/";
+    license = stdenv.lib.licenses.bsd3;
+  };
 }
