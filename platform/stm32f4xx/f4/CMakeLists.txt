@@ -5,7 +5,7 @@ target_link_libraries(system_stm32f4xx PUBLIC cmsis)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-function")
 
 # TODO: check if variables are defined
-target_compile_definitions(system_stm32f4xx PUBLIC "-D${CONFIG_PLATFORM_DEVICE}")
+target_compile_definitions(system_stm32f4xx PUBLIC "-D${ST_DEVICE}")
 target_compile_definitions(system_stm32f4xx PUBLIC "-DHSE_VALUE=${CONFIG_PLATFORM_HSE_VAL}")
 
 # RCC related defines.

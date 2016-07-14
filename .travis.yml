@@ -4,6 +4,7 @@ dist: trusty
 branches:
     only:
         - develop
+        - /^develop-.*$/
         - master
         - release
 

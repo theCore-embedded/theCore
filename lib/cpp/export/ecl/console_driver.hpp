@@ -3,7 +3,7 @@
 
 #if USE_CONSOLE
 
-#include <platform_console.hpp>
+#include <platform/console.hpp>
 #include <dev/bus.hpp>
 #include <dev/bus_pipe.hpp>
 

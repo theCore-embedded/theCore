@@ -5,8 +5,8 @@
 #include <cstdint>
 #include <cstddef>
 
-#include <platform/irq_manager.hpp>
-#include <platform_console.hpp>
+#include <common/irq.hpp>
+#include <platform/console.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *)
@@ -53,7 +53,7 @@ extern "C"
 int __cxa_guard_acquire(int *gv)
 {
     // Disable interrupts to prevent concurent access
-    ecl::irq_manager::disable();
+    ecl::irq::disable();
 
     if (*gv == 1) {
         // Already locked
@@ -70,7 +70,7 @@ void __cxa_guard_release(int *gv)
 {
     (void) gv;
     // Object constructed. It is safe to enable interrupts.
-    ecl::irq_manager::enable();
+    ecl::irq::enable();
 }
 
 extern "C" void platform_init();
@@ -99,10 +99,10 @@ extern "C" void early_main()
     // Platform console subsystem is ready at this stage
     for (auto c : "Welcome to theCore\r\n") { ecl::bypass_putc(c); }
 
-    extern uint32_t ___init_array_start;
-    extern uint32_t ___init_array_end;
+    extern uint32_t __init_array_start;
+    extern uint32_t __init_array_end;
 
-    for (uint32_t *p = &___init_array_start; p < &___init_array_end; ++p) {
+    for (uint32_t *p = &__init_array_start; p < &__init_array_end; ++p) {
         // Iterator points to a memory which contains an address of a
         // initialization function.
         // Equivalent of:
