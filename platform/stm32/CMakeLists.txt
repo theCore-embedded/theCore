@@ -37,7 +37,7 @@ if(${CONFIG_USE_CONSOLE})
 
     configure_file(templates/console.hpp.in
             ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
-    target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated//)
+    target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 
     # Helps to determine if bypass driver must be enabled and inited
     target_compile_definitions(stm32 PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
@@ -47,5 +47,5 @@ if(${CONFIG_USE_CONSOLE})
 else()
     configure_file(templates/console_stub.hpp.in
             ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
-    target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated//)
+    target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 endif()
