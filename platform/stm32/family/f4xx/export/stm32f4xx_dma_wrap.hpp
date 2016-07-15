@@ -384,7 +384,12 @@ void dma_wrap<Stream, Channel>::clear_err()
 template<dma_stream Stream, dma_channel Channel>
 auto dma_wrap<Stream, Channel>::bytes_left()
 {
-    return 0;
+    constexpr auto stream = get_stream();
+    auto items_left = DMA_GetCurrDataCounter(stream);
+    auto reg = stream->CR & 0x6000; // Fetch data size
+    auto div = get_size_div(reg);
+
+    return reg * div;
 }
 
 //------------------------------------------------------------------------------
