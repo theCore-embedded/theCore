@@ -2,7 +2,7 @@
 
 #include <ecl/iostream.hpp>
 #include <platform/execution.h>
-#include <platform_console.hpp>
+#include <platform/console.hpp>
 
 using ecl::bypass_putc;
 

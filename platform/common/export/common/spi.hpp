@@ -1,8 +1,6 @@
 #ifndef PLATFORM_COMMON_SPI_HPP_
 #define PLATFORM_COMMON_SPI_HPP_
 
-#include <ecl/thread/mutex.hpp>
-
 namespace ecl
 {
 
@@ -49,8 +47,6 @@ enum class data_format
 };
 
 } // namespace i2s
-
-
 
 } // namespace ecl
 

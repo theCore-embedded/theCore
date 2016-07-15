@@ -40,11 +40,10 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
-target_link_libraries(${PROJECT_NAME} INTERFACE startup)
 target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME})
 
-# In order to pick proper definitions from the platform it is required
-# that platform will be added in first place
+# Platform is added in the first place in order to expose platform definitions
+# to the rest of the system
 add_subdirectory(platform)
 
 # Required layer only when cross-compiling
@@ -53,6 +52,7 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 
 # Rest of modules
+add_subdirectory(arch)
 add_subdirectory(lib)
 add_subdirectory(dev)
 add_subdirectory(kernel)

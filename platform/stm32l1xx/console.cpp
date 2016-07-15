@@ -1,4 +1,10 @@
-#include <platform_console.hpp>
+//! \file
+//! \brief Platform console implementation
+
+#include <stm32l1xx_rcc.h>
+#include <stm32l1xx_usart.h>
+
+#include "platform/console.hpp"
 
 namespace ecl
 {
@@ -50,7 +56,5 @@ void ecl::bypass_putc(char c)
 {
     ecl::bypass_console::putc(c);
 }
-
-
 
 

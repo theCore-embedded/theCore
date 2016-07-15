@@ -1,0 +1,38 @@
+//!
+//! \file
+//! \brief Header provides template of console driver configuration
+
+#ifndef STM32L1XX_CONSOLE_DRIVER_HPP_
+#define STM32L1XX_CONSOLE_DRIVER_HPP_
+
+#include <aux/usart_bus.hpp>
+
+namespace ecl
+{
+
+// USART console configuration
+
+#define ECL_CONSOLE_DEVICE (ecl::usart_device::dev ## @CONFIG_CONSOLE_DEVICE_NUM@)
+
+template<>
+struct usart_cfg< ECL_CONSOLE_DEVICE >
+{
+static auto constexpr baudrate  = @CONFIG_CONSOLE_BAUD@;
+static auto constexpr word_len  = USART_WordLength_8b;
+static auto constexpr stop_bit  = USART_StopBits_1;
+static auto constexpr parity    = USART_Parity_No;
+static auto constexpr mode      = USART_Mode_Rx | USART_Mode_Tx;
+static auto constexpr hw_flow   = USART_HardwareFlowControl_None;
+};
+
+using platform_console = ecl::usart_bus< ECL_CONSOLE_DEVICE >;
+
+//! Bypasses console drivers and puts data directly to the UART
+//! \details Required to print debug of the failed asserts including one that
+//! executed during ISR.
+void bypass_putc(char c);
+
+}
+
+
+#endif // STM32L1XX_CONSOLE_DRIVER_HPP_
