@@ -143,5 +143,13 @@ void ecl::native_thread::thread_runner(void *arg)
     rarg->start_flag = true;
 
     fn(fn_arg);
+
+    // According to the FreeRTOS convention, task that wants exit, must `delete`
+    // itself explicitly.
+    // Task deletion is a complex process though and FreeRTOS may not support it
+    // under certain configuration. For example,  memory management that isn't
+    // capable of memory will abort if someone will try to delete memory associated
+    // with a task.
+    vTaskDelete(NULL);
 }
 

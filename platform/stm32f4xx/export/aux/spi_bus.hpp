@@ -248,6 +248,34 @@ public:
     std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err>
     i2s_set_data_format();
 
+    //!
+    //!  Enables circular mode for the bus.
+    //! \details In circular mode when xfer is finished, the new xfer is started
+    //!  automatically without interruption. The same buffer is used.
+    //!  The process continues until circular mode is disabled.
+    //!  This method must not be called during xfer().
+    //!
+    void enable_circular_mode();
+
+    //!
+    //!  Disables circular mode for the bus.
+    //! \details This method allows to stop xfer() that was started with circular mode.
+    //!  It is recommended to call this method in event handler during processing of the HT or TC event.
+    //!  The xfer is always stopped after TC.
+    //!  If circular mode is disabled during processing of the TC (or between HT and TC),
+    //!  the xfer will be stopped immediately after current TC will be processed.
+    //!  If circular mode is disabled during processing of the HT (or between TC and HT),
+    //!  the xfer will be finished after next TC will be processed.
+    //!  This method also can be called when xfer() is not active.
+    //!
+    void disable_circular_mode();
+
+    //!
+    //!  Returns the circular mode state.
+    //! \return true if circular mode is enabled, false otherwise
+    //!
+    bool is_circular_mode();
+
 private:
     static constexpr auto pick_spi();
     static constexpr auto pick_rcc();
@@ -255,6 +283,7 @@ private:
 
     static constexpr uint32_t pick_i2s_audio_frequency(ecl::i2s::audio_frequency value);
     static constexpr uint32_t pick_i2s_data_format(ecl::i2s::data_format value);
+
     ecl::err i2s_set_audio_frequency_private(uint32_t value);
     ecl::err i2s_set_data_format_private(uint32_t value);
 
@@ -283,22 +312,28 @@ private:
     // Starts transaction, if needed
     void start_xfer();
 
-    // IRQ init helper. TODO: decide if this needed or not
-    // void init_irq();
+    // RCC init helper
+    void init_rcc();
 
-    // Handles both DMA and SPI IRQ events. (for now it handles DMA only)
+    // IRQ init helper
+    void init_irq();
+
+    // Handles DMA events
+    // TODO Implement IRQ mode #102
     void irq_handler();
 
     //! Bus is inited if this flag is set.
     static constexpr uint8_t inited         = 0x1;
     //! Bus is in fill mode if this flag is set.
     static constexpr uint8_t mode_fill      = 0x2;
+    //! Bus DMA is in circular mode if this flag is set.
+    static constexpr uint8_t mode_circular  = 0x4;
     //! TX is finished if this flag is set.
-    static constexpr uint8_t tx_complete    = 0x4;
+    static constexpr uint8_t tx_complete    = 0x8;
     //! User will not be notified about TX events if this flag is set.
-    static constexpr uint8_t tx_hidden      = 0x8;
+    static constexpr uint8_t tx_hidden      = 0x10;
     //! RX is finished if this flag is set.
-    static constexpr uint8_t rx_complete    = 0x10;
+    static constexpr uint8_t rx_complete    = 0x20;
 
     handler_fn m_event_handler; //! Handler passed via set_handler().
     union
@@ -320,7 +355,7 @@ spi_i2s_bus<dev>::spi_i2s_bus()
     ,m_tx_size{0}
     ,m_rx{nullptr}
     ,m_rx_size{0}
-    ,m_status{0}
+    ,m_status{rx_complete | tx_complete}
 {
 
 }
@@ -338,13 +373,8 @@ ecl::err spi_i2s_bus<dev>::init()
         return ecl::err::ok;
     }
 
-    constexpr auto spi = pick_spi();
-    constexpr auto rcc_periph = pick_rcc();
-    constexpr auto rcc_fn = pick_rcc_fn();
-
-    rcc_fn(rcc_periph, ENABLE);
-
-    init_dma();
+    init_rcc();
+    init_irq();
 
     init_interface();
 
@@ -416,11 +446,11 @@ void spi_i2s_bus<dev>::set_handler(const handler_fn &handler)
 template<spi_device dev>
 void spi_i2s_bus<dev>::reset_buffers()
 {
-    m_status &= ~(mode_fill);
-    m_tx.buf = nullptr;
-    m_tx_size = 0;
-    m_rx = nullptr;
-    m_rx_size = 0;
+    m_status    &= ~(mode_fill);
+    m_tx.buf    = nullptr;
+    m_tx_size   = 0;
+    m_rx        = nullptr;
+    m_rx_size   = 0;
 }
 
 template<spi_device dev>
@@ -439,16 +469,6 @@ ecl::err spi_i2s_bus<dev>::do_xfer()
     if (!valid_sizes()) {
         return err::nobufs;
     }
-
-    // TODO: check if buffers are the same as in previous transaction
-    // If so, do not reinitialize DMA but rather just update a data counter.
-
-
-    // TODO: wait for BSY flag before we go
-    //    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_TXE) == RESET)
-    //    {}
-    //    while (SPI_I2S_GetFlagStatus(spi, SPI_FLAG_BSY) == SET)
-    //    {}
 
     prepare_tx();
     prepare_rx();
@@ -486,9 +506,9 @@ void spi_i2s_bus<dev>::prepare_tx()
             for (;;);
         }
 
-        m_status |= mode_fill;
-        m_tx_size = m_rx_size;
-        m_tx.byte = 0xff;
+        m_status    |= mode_fill;
+        m_tx_size   = m_rx_size;
+        m_tx.byte   = 0xff;
     }
 
     m_status &= ~(tx_complete);
@@ -503,6 +523,10 @@ void spi_i2s_bus<dev>::prepare_tx()
     dma_init.DMA_DIR                = DMA_DIR_MemoryToPeripheral;
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast< uint32_t >(&spi->DR);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
+
+    if (is_circular_mode()) {
+        dma_init.DMA_Mode = DMA_Mode_Circular;
+    }
 
     if (m_status & mode_fill) {
         dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
@@ -607,9 +631,14 @@ void spi_i2s_bus<dev>::irq_handler()
 
             DMA_ClearFlag(tx_dma, tx_tc_flag);
             DMA_ClearITPendingBit(tx_dma, tx_tc_if);
-            DMA_ITConfig(tx_dma, DMA_IT_TC | DMA_IT_HT, DISABLE);
 
-            m_status |= tx_complete;
+            if (is_circular_mode()) {
+                irq::clear(tx_irqn);
+                irq::unmask(tx_irqn);
+            } else {
+                DMA_ITConfig(tx_dma, DMA_IT_TC | DMA_IT_HT, DISABLE);
+                m_status |= tx_complete;
+            }
         } else if (DMA_GetITStatus(tx_dma, tx_ht_if)) {
             constexpr auto tx_ht_flag = dma::get_ht_flag<config::dma::tx_stream>();
 
@@ -640,9 +669,14 @@ void spi_i2s_bus<dev>::irq_handler()
 
             DMA_ClearFlag(rx_dma, rx_tc_flag);
             DMA_ClearITPendingBit(rx_dma, rx_tc_if);
-            DMA_ITConfig(rx_dma, DMA_IT_TC | DMA_IT_HT, DISABLE);
 
-            m_status |= rx_complete;
+            if (is_circular_mode()) {
+                irq::clear(rx_irqn);
+                irq::unmask(rx_irqn);
+            } else {
+                DMA_ITConfig(rx_dma, DMA_IT_TC | DMA_IT_HT, DISABLE);
+                m_status |= rx_complete;
+            }
         } else if (DMA_GetITStatus(rx_dma, rx_ht_if)) {
             constexpr auto rx_ht_flag = dma::get_ht_flag<config::dma::tx_stream>();
 
@@ -663,22 +697,23 @@ void spi_i2s_bus<dev>::irq_handler()
     }
 
     if ((m_status & (rx_complete | tx_complete)) == (rx_complete | tx_complete)) {
-        DMA_Cmd(tx_dma, DISABLE);
-        DMA_DeInit(tx_dma);
+        // All transfers completed
+        m_event_handler(channel::meta, event::tc, m_tx_size);
 
-        DMA_Cmd(rx_dma, DISABLE);
-        DMA_DeInit(rx_dma);
+        if (!is_circular_mode()) {
+            DMA_Cmd(tx_dma, DISABLE);
+            DMA_DeInit(tx_dma);
 
-        SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
+            DMA_Cmd(rx_dma, DISABLE);
+            DMA_DeInit(rx_dma);
 
+            SPI_I2S_DMACmd(spi, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
+        }
         // Clear/enable NVIC interrupts
         irq::clear(rx_irqn);
         irq::unmask(rx_irqn);
         irq::clear(tx_irqn);
         irq::unmask(tx_irqn);
-
-        // All transfers completed
-        m_event_handler(channel::meta, event::tc, m_tx_size);
     }
 }
 
@@ -792,6 +827,29 @@ spi_i2s_bus<dev>::pick_i2s_data_format(ecl::i2s::data_format value)
 }
 
 template<spi_device dev>
+void spi_i2s_bus<dev>::init_rcc()
+{
+    constexpr auto rcc_periph = pick_rcc();
+    constexpr auto rcc_fn     = pick_rcc_fn();
+
+    rcc_fn(rcc_periph, ENABLE);
+
+    dma::init_rcc<config::dma::rx_stream>();
+    dma::init_rcc<config::dma::tx_stream>();
+}
+
+template<spi_device dev>
+void spi_i2s_bus<dev>::init_irq()
+{
+    auto handler = [this]() {
+        this->irq_handler();
+    };
+
+    dma::subscribe_irq<config::dma::rx_stream>(handler);
+    dma::subscribe_irq<config::dma::tx_stream>(handler);
+}
+
+template<spi_device dev>
 template<class Iface_cfg>
 std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, void>
 spi_i2s_bus<dev>::init_interface()
@@ -799,7 +857,8 @@ spi_i2s_bus<dev>::init_interface()
     RCC_PLLI2SCmd(ENABLE);
 
     constexpr auto i2s = pick_spi();
-    auto init_obj = spi_i2s_cfg<dev>::init_obj;
+    constexpr auto cinit_obj = spi_i2s_cfg<dev>::init_obj;
+    auto init_obj = init_obj;
     I2S_Init(i2s, &init_obj);
 
     // TODO: disable I2S when there in no XFER
@@ -813,26 +872,14 @@ std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::spi, void>
 spi_i2s_bus<dev>::init_interface()
 {
     constexpr auto spi = pick_spi();
-    auto init_obj = spi_i2s_cfg<dev>::init_obj;
+    constexpr auto cinit_obj = spi_i2s_cfg<dev>::init_obj;
+    auto init_obj = cinit_obj;
     SPI_Init(spi, &init_obj);
 
     // TODO: disable SPI when there in no XFER
     SPI_Cmd(spi, ENABLE);
 }
 
-template<spi_device dev>
-void spi_i2s_bus<dev>::init_dma()
-{
-    dma::init_rcc<config::dma::rx_stream>();
-    dma::init_rcc<config::dma::tx_stream>();
-
-    auto handler = [this]() {
-        this->irq_handler();
-    };
-
-    dma::subscribe_irq<config::dma::rx_stream>(handler);
-    dma::subscribe_irq<config::dma::tx_stream>(handler);
-}
 
 template<spi_device dev>
 template<ecl::i2s::audio_frequency frequency, class Iface_cfg>
@@ -905,6 +952,27 @@ ecl::err spi_i2s_bus<dev>::i2s_set_data_format_private(uint32_t value)
     I2S_Cmd(spi, ENABLE);
 
     return ecl::err::ok;
+}
+
+template<spi_device dev>
+void spi_i2s_bus<dev>::enable_circular_mode()
+{
+    // Cannot enable circular mode if transfer is ongoing
+    ecl_assert((m_status & tx_complete) && (m_status & rx_complete));
+
+    m_status |= mode_circular;
+}
+
+template<spi_device dev>
+void spi_i2s_bus<dev>::disable_circular_mode()
+{
+    m_status &= ~mode_circular;
+}
+
+template<spi_device dev>
+bool spi_i2s_bus<dev>::is_circular_mode()
+{
+    return m_status & mode_circular;
 }
 
 } // namespace ecl

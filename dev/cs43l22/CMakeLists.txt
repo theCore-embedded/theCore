@@ -1,0 +1,3 @@
+add_library(cs43l22 INTERFACE)
+target_link_libraries(cs43l22 INTERFACE types)
+target_include_directories(cs43l22 INTERFACE export)

@@ -5,8 +5,10 @@
 
 ## Description
 
-The Core is highly configurable, straightforward C++ framework with minimum set of development dependencies. It aimed to reduce development efforts for embedded applications.
-The main idea of The Core is to make as much as possible in the compile time. This affects the way how the device drivers and peripherals are represented. In fact, each driver is the template class that is instantiated with all the dependencies in a distinct type by user of The Core in compile-time.
+The Core is highly configurable and straightforward C++ framework aimed to reduce development efforts for embedded applications.
+The main idea of The Core is to make as much as possible in the compile time.
+This affects the way how the device drivers and peripherals are represented.
+In fact, each driver is the template class that is instantiated with all the dependencies in a distinct type by user of The Core in the compile time.
 
 You can check out more directly in the code of [the SPI driver](platform/stm32f4xx/export/platform/spi_bus.hpp) or  [the USART bus](platform/stm32f4xx/export/platform/usart_bus.hpp).
 
@@ -22,8 +24,9 @@ The project is at the initial stage. But something is already in there:
 
 ## Getting started
 
-If you are interested in the simplest, ready-made demo project based on The Core,
-refer to [the blinky example project](https://github.com/forGGe/theCore-blinky).
+If you are interested in the simplest, ready-made demo project based on The Core, refer to [the blinky example project](https://github.com/forGGe/theCore-blinky).
+
+You may also check [examples within theCore source tree](examples/).
 
 In order to proceed with The Core itself, start cloning this repository:
 ```
@@ -33,10 +36,7 @@ git clone https://github.com/forGGe/theCore.git
 When the code is received, you have to download and install all the dependencies.
 The process can take some time.
 To make it easier, I’d strongly recommend to download and install `nix`.
-The installation guide could be found
-[on the official website](https://nixos.org/nixos/manual/index.html#ch-installation) or
-[Domenkozar's blog](https://www.domenkozar.com/2014/01/02/getting-started-with-nix-package-manager/)
-.
+The installation guide can be found [on the official website](https://nixos.org/nixos/manual/index.html#ch-installation) or [Domenkozar's blog](https://www.domenkozar.com/2014/01/02/getting-started-with-nix-package-manager/).
 
 After `nix` installation, run:
 ```bash
@@ -69,13 +69,14 @@ Currently, the stm32f4xx platform is supported and available for further develop
 
 ## Documentation
 
-The current documentation of The Core is completely stated in the code (as doxygen comments). To generate the HTML pages from Doxygen is quite enough to run:
+The current documentation of The Core is completely stated in the code (as doxygen comments).
+To generate the HTML pages from Doxygen is quite enough to run:
 
 ```bash
 make core_doc
 ```
 
-in the build directory (see [units](#unit-tests)).
+in the build directory (see [unit tests section](#unit-tests)).
 
 ## License
 
@@ -84,6 +85,10 @@ The source code is distributed under LGPL v3.0 License.
 
 ## Contribution & Using
 
-The project is on its very beginning, so any help is more than welcome and highly appreciated. If you'd like to take a part in the project growth and (or) have any questions – feel free to email me at forgge@gmail.com, leave message at [gitter](https://gitter.im/forGGe/theCore) or simply check out [a list of issues](https://github.com/forGGe/theCore/issues). If you have any suggestions on The Core improvement or just like it how it is, don’t keep silence! I’ll be happy to read your reviews.
+The project is on its very beginning, so any help is more than welcome and highly appreciated.
+If you'd like to take a part in the project growth and (or) have any questions – feel free to email me at forgge@gmail.com, leave message at [gitter](https://gitter.im/forGGe/theCore) or simply check out [a list of issues](https://github.com/forGGe/theCore/issues).
+If you have any suggestions on The Core improvement or just like it how it is, don’t keep silence! I’ll be happy to read your reviews.
 
-You are welcome to use The Core in your own projects. If there is something that it’s not enough for this, please let me know via email or open some issues and we will do our best to handle this ASAP. Good luck!
+You are welcome to use The Core in your own projects.
+If there is something that it’s not enough for this, please let me know via email or open some issues and we will do our best to handle this ASAP.
+Good luck!
