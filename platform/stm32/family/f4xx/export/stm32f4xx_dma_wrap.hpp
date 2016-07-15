@@ -52,9 +52,9 @@ enum class dma_channel
 
 enum class dma_data_sz
 {
-    byte,
-    word,
-    hword,
+    byte = DMA_MemoryDataSize_Byte,
+    word = DMA_MemoryDataSize_Word,
+    hword = DMA_MemoryDataSize_HalfWord,
 };
 
 enum class dma_mode
@@ -440,7 +440,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_size_div(uint32_t data_size)
     // DMA_MemoryDataSize encodes data size in a specific way, so shift can be
     // applied and divider can be obtained.
     // However, this can be possibly changed in SPL.
-    return data_size >> 12;
+    return data_size == DMA_MemoryDataSize_Byte ? 1 : data_size >> 12;
 }
 
 template<dma_stream Stream, dma_channel Channel>
