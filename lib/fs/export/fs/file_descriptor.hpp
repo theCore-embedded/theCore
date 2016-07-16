@@ -3,13 +3,19 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <sys/io.hpp>
 #include <sys/types.h>
 
 #include "types.hpp"
 
 namespace fs
 {
+
+enum class seekdir
+{
+	beg,
+	cur,
+	end
+};
 
 class file_descriptor
 {
