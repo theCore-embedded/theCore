@@ -10,126 +10,10 @@
 #include <functional>
 #include <type_traits>
 
-//------------------------------------------------------------------------------
+#include "stm32f4xx_dma_wrap_interface.hpp"
 
 namespace ecl
 {
-
-//! DMA streams present, according to the RM.
-//! \details High-order byte represents DMA number, low order - stream number
-//!
-enum class dma_stream
-{
-    dma1_0 = 0x100,
-    dma1_1 = 0x101,
-    dma1_2 = 0x102,
-    dma1_3 = 0x103,
-    dma1_4 = 0x104,
-    dma1_5 = 0x105,
-    dma1_6 = 0x106,
-    dma1_7 = 0x107,
-    dma2_0 = 0x200,
-    dma2_1 = 0x201,
-    dma2_2 = 0x202,
-    dma2_3 = 0x203,
-    dma2_4 = 0x204,
-    dma2_5 = 0x205,
-    dma2_6 = 0x206,
-    dma2_7 = 0x207,
-};
-
-enum class dma_channel
-{
-    ch0 = DMA_Channel_0,
-    ch1 = DMA_Channel_1,
-    ch2 = DMA_Channel_2,
-    ch3 = DMA_Channel_3,
-    ch4 = DMA_Channel_4,
-    ch5 = DMA_Channel_5,
-    ch6 = DMA_Channel_6,
-    ch7 = DMA_Channel_7,
-};
-
-enum class dma_data_sz
-{
-    byte = DMA_MemoryDataSize_Byte,
-    word = DMA_MemoryDataSize_Word,
-    hword = DMA_MemoryDataSize_HalfWord,
-};
-
-enum class dma_mode
-{
-    normal = DMA_Mode_Normal,
-    circular = DMA_Mode_Circular,
-};
-
-//------------------------------------------------------------------------------
-
-template<dma_stream Stream, dma_channel Channel>
-class dma_wrap
-{
-public:
-    dma_wrap() = delete;
-    dma_wrap(dma_wrap &) = delete;
-
-    static constexpr auto get_irqn();
-
-    static void init();
-
-    template<dma_data_sz Size = dma_data_sz::byte, dma_mode Mode = dma_mode::normal>
-    static void
-    mem_to_periph(const uint8_t *src, size_t size, volatile uint16_t *periph);
-
-    template<dma_data_sz Size = dma_data_sz::byte, dma_mode Mode = dma_mode::normal>
-    static void
-    mem_to_periph(uint16_t filler, size_t cnt, volatile uint16_t *periph);
-
-    template<dma_data_sz Size = dma_data_sz::byte, dma_mode Mode = dma_mode::normal>
-    static void
-    periph_to_mem(volatile uint16_t *periph, uint8_t *dst, size_t size);
-
-    // TODO: consider merging all routines below into `start()` and `stop()` methods
-    template<bool EnableTC = true, bool EnableHT = false, bool EnableErr = false>
-    static void enable_events();
-
-    template<bool DisableTC = true, bool DisableHT = false, bool DisableErr = false>
-    static void disable_events();
-
-    static void enable();
-
-    static void disable();
-
-    static bool tc();
-
-    static bool ht();
-
-    static bool err();
-
-    static void clear_tc();
-
-    static void clear_ht();
-
-    static void clear_err();
-
-    static auto bytes_left();
-
-private:
-    constexpr static auto get_stream();
-    constexpr static auto get_stream_number();
-    constexpr static auto get_size_div(uint32_t data_size);
-
-    constexpr static auto get_rcc();
-
-    constexpr static auto get_err_flag();
-    constexpr static auto get_ht_flag();
-    constexpr static auto get_tc_flag();
-
-    constexpr static auto get_err_if();
-    constexpr static auto get_ht_if();
-    constexpr static auto get_tc_if();
-};
-
-//------------------------------------------------------------------------------
 
 template<dma_stream Stream, dma_channel Channel>
 constexpr auto dma_wrap<Stream, Channel>::get_irqn()
@@ -173,7 +57,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_irqn()
 template<dma_stream Stream, dma_channel Channel>
 void dma_wrap<Stream, Channel>::init()
 {
-    RCC_AHB1PeriphClockCmd(get_rcc(), ENABLE);
+    RCC_AHB1PeriphClockCmd(priv::get_rcc(), ENABLE);
 }
 
 template<dma_stream Stream, dma_channel Channel>
@@ -182,11 +66,11 @@ void dma_wrap<Stream, Channel>::mem_to_periph(const uint8_t *src,
                                               size_t size,
                                               volatile uint16_t *periph)
 {
-    constexpr auto stream    = get_stream();
+    constexpr auto stream    = priv::get_stream();
     constexpr auto channel   = static_cast<uint32_t>(Channel);
     constexpr auto mode      = static_cast<uint32_t>(Mode);
     constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = get_size_div(data_size);
+    constexpr auto data_div  = priv::get_size_div(data_size);
 
     DMA_InitTypeDef dma_init;
 
@@ -218,11 +102,11 @@ void dma_wrap<Stream, Channel>::mem_to_periph(uint16_t filler,
                                               size_t cnt,
                                               volatile uint16_t *periph)
 {
-    constexpr auto stream    = get_stream();
+    constexpr auto stream    = priv::get_stream();
     constexpr auto channel   = static_cast<uint32_t>(Channel);
     constexpr auto mode      = static_cast<uint32_t>(Mode);
     constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = get_size_div(data_size);
+    constexpr auto data_div  = priv::get_size_div(data_size);
     static auto local_filler = filler;
 
     DMA_InitTypeDef dma_init;
@@ -255,11 +139,11 @@ void dma_wrap<Stream, Channel>::periph_to_mem(volatile uint16_t *periph,
                                               uint8_t *dst,
                                               size_t size)
 {
-    constexpr auto stream    = get_stream();
+    constexpr auto stream    = priv::get_stream();
     constexpr auto channel   = static_cast<uint32_t>(Channel);
     constexpr auto mode      = static_cast<uint32_t>(Mode);
     constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = get_size_div(data_size);
+    constexpr auto data_div  = priv::get_size_div(data_size);
 
     DMA_InitTypeDef dma_init;
 
@@ -290,7 +174,7 @@ template<dma_stream Stream, dma_channel Channel>
 template<bool EnableTC, bool EnableHT, bool EnableErr>
 void dma_wrap<Stream, Channel>::enable_events()
 {
-    constexpr auto stream = get_stream();
+    constexpr auto stream = priv::get_stream();
     constexpr auto flags = (EnableTC    ? DMA_IT_TC  : 0)
                            | (EnableHT  ? DMA_IT_HT  : 0)
                            | (EnableErr ? DMA_IT_TE  : 0);
@@ -302,7 +186,7 @@ template<dma_stream Stream, dma_channel Channel>
 template<bool DisableTC, bool DisableHT, bool DisableErr>
 void dma_wrap<Stream, Channel>::disable_events()
 {
-    constexpr auto stream = get_stream();
+    constexpr auto stream = priv::get_stream();
     constexpr auto flags = (DisableTC    ? DMA_IT_TC  : 0)
                            | (DisableHT  ? DMA_IT_HT  : 0)
                            | (DisableErr ? DMA_IT_TE  : 0);
@@ -313,47 +197,47 @@ void dma_wrap<Stream, Channel>::disable_events()
 template<dma_stream Stream, dma_channel Channel>
 void dma_wrap<Stream, Channel>::enable()
 {
-    constexpr auto stream = get_stream();
+    constexpr auto stream = priv::get_stream();
     DMA_Cmd(stream, ENABLE);
 }
 
 template<dma_stream Stream, dma_channel Channel>
 void dma_wrap<Stream, Channel>::disable()
 {
-    constexpr auto stream = get_stream();
+    constexpr auto stream = priv::get_stream();
     DMA_Cmd(stream, DISABLE);
 }
 
 template<dma_stream Stream, dma_channel Channel>
 bool dma_wrap<Stream, Channel>::tc()
 {
-    constexpr auto stream = get_stream();
-    constexpr auto flag = get_tc_flag();
+    constexpr auto stream = priv::get_stream();
+    constexpr auto flag = priv::get_tc_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
 template<dma_stream Stream, dma_channel Channel>
 bool dma_wrap<Stream, Channel>::ht()
 {
-    constexpr auto stream = get_stream();
-    constexpr auto flag = get_ht_flag();
+    constexpr auto stream = priv::get_stream();
+    constexpr auto flag = priv::get_ht_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
 template<dma_stream Stream, dma_channel Channel>
 bool dma_wrap<Stream, Channel>::err()
 {
-    constexpr auto stream = get_stream();
-    constexpr auto flag = get_err_flag();
+    constexpr auto stream = priv::get_stream();
+    constexpr auto flag = priv::get_err_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
 template<dma_stream Stream, dma_channel Channel>
 void dma_wrap<Stream, Channel>::clear_tc()
 {
-    constexpr auto stream = get_stream();
-    constexpr auto flag = get_tc_flag();
-    constexpr auto iflag = get_tc_if();
+    constexpr auto stream = priv::get_stream();
+    constexpr auto flag = priv::get_tc_flag();
+    constexpr auto iflag = priv::get_tc_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
@@ -362,9 +246,9 @@ void dma_wrap<Stream, Channel>::clear_tc()
 template<dma_stream Stream, dma_channel Channel>
 void dma_wrap<Stream, Channel>::clear_ht()
 {
-    constexpr auto stream = get_stream();
-    constexpr auto flag = get_ht_flag();
-    constexpr auto iflag = get_ht_if();
+    constexpr auto stream = priv::get_stream();
+    constexpr auto flag = priv::get_ht_flag();
+    constexpr auto iflag = priv::get_ht_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
@@ -373,9 +257,9 @@ void dma_wrap<Stream, Channel>::clear_ht()
 template<dma_stream Stream, dma_channel Channel>
 void dma_wrap<Stream, Channel>::clear_err()
 {
-    constexpr auto stream = get_stream();
-    constexpr auto flag = get_err_flag();
-    constexpr auto iflag = get_err_if();
+    constexpr auto stream = priv::get_stream();
+    constexpr auto flag = priv::get_err_flag();
+    constexpr auto iflag = priv::get_err_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
@@ -384,10 +268,10 @@ void dma_wrap<Stream, Channel>::clear_err()
 template<dma_stream Stream, dma_channel Channel>
 auto dma_wrap<Stream, Channel>::bytes_left()
 {
-    constexpr auto stream = get_stream();
+    constexpr auto stream = priv::get_stream();
     auto items_left = DMA_GetCurrDataCounter(stream);
     auto reg = stream->CR & 0x6000; // Fetch data size
-    auto div = get_size_div(reg);
+    auto div = priv::get_size_div(reg);
 
     return reg * div;
 }
@@ -395,7 +279,25 @@ auto dma_wrap<Stream, Channel>::bytes_left()
 //------------------------------------------------------------------------------
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_stream()
+struct dma_wrap_priv
+{
+    constexpr static auto get_stream();
+    constexpr static auto get_stream_number();
+    constexpr static auto get_size_div(uint32_t data_size);
+
+    constexpr static auto get_rcc();
+
+    constexpr static auto get_err_flag();
+    constexpr static auto get_ht_flag();
+    constexpr static auto get_tc_flag();
+
+    constexpr static auto get_err_if();
+    constexpr static auto get_ht_if();
+    constexpr static auto get_tc_if();
+};
+
+template<dma_stream Stream, dma_channel Channel>
+constexpr auto dma_wrap_priv<Stream, Channel>::get_stream()
 {
     switch (Stream) {
         case dma_stream::dma1_0:
@@ -434,13 +336,13 @@ constexpr auto dma_wrap<Stream, Channel>::get_stream()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_stream_number()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_stream_number()
 {
     return 0xff & static_cast<std::underlying_type_t<dma_stream>>(Stream);
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_size_div(uint32_t data_size)
+constexpr auto dma_wrap_priv<Stream, Channel>::get_size_div(uint32_t data_size)
 {
     // DMA_MemoryDataSize encodes data size in a specific way, so shift can be
     // applied and divider can be obtained.
@@ -449,7 +351,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_size_div(uint32_t data_size)
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_rcc()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_rcc()
 {
     if ((static_cast<std::underlying_type_t<dma_stream>>(Stream) & 0xf00) ==
         0x100) {
@@ -461,7 +363,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_rcc()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_err_flag()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_err_flag()
 {
     constexpr auto stream_no = get_stream_number();
 
@@ -486,7 +388,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_err_flag()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_ht_flag()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_ht_flag()
 {
     constexpr auto stream_no = get_stream_number();
 
@@ -511,7 +413,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_ht_flag()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_tc_flag()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_tc_flag()
 {
     constexpr auto stream_no = get_stream_number();
 
@@ -536,7 +438,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_tc_flag()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_ht_if()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_ht_if()
 {
     constexpr auto stream_no = get_stream_number();
 
@@ -561,7 +463,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_ht_if()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_tc_if()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_tc_if()
 {
     constexpr auto stream_no = get_stream_number();
 
@@ -586,7 +488,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_tc_if()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_err_if()
+constexpr auto dma_wrap_priv<Stream, Channel>::get_err_if()
 {
     constexpr auto stream_no = get_stream_number();
 

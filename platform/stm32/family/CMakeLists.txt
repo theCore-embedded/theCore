@@ -22,6 +22,6 @@ target_compile_definitions(stm32_family PUBLIC
         -DCONFIG_IRQ_COUNT=${TARGET_MCU_IRQ_COUNT}
         )
 
-target_include_directories(stm32_family PUBLIC ${STM32_FAMILY}/export)
+target_include_directories(stm32_family PUBLIC ${STM32_FAMILY}/export export)
 target_link_libraries(stm32_family PUBLIC cmsis)
 target_link_libraries(stm32_family PUBLIC stm32_spl)
