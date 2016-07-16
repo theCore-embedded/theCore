@@ -49,6 +49,7 @@ add_subdirectory(platform)
 # Required layer only when cross-compiling
 if(CMAKE_CROSSCOMPILING)
     add_subdirectory(sys)
+    set(CORE_PROVIDES_LIBC 1) # LibC routines provided by theCore.
 endif()
 
 # Rest of modules
