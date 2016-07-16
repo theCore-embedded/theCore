@@ -12,4 +12,6 @@
 #include <stm32l1xx_gpio.h>
 #include <stm32l1xx_i2c.h>
 
+#include "stm32l1xx_dma_wrap.hpp"
+
 #endif // STM32L1_DEVICE_HPP_
