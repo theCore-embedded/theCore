@@ -1,5 +1,4 @@
 add_library(fat STATIC
-fat.cpp
 dir.cpp
 file.cpp
 dir_inode.cpp

@@ -20,7 +20,7 @@ ssize_t file::read(uint8_t *buf, size_t size)
     ecl_assert(size); // TODO: for now
 
     if (m_opened) {
-        size_t read;
+        unsigned read;
 
         FRESULT res = pf_read(m_fs, reinterpret_cast< void* >(buf), size, &read);
 
