@@ -136,12 +136,18 @@ constexpr auto gpio< Port, Pin >::pick_port()
             return GPIOG;
         case gpio_port::h:
             return GPIOH;
+#ifdef GPIOI
         case gpio_port::i:
             return GPIOI;
+#endif
+#ifdef GPIOJ
         case gpio_port::j:
             return GPIOJ;
+#endif
+#ifdef GPIOK
         case gpio_port::k:
             return GPIOK;
+#endif
     }
 }
 
