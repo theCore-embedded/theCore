@@ -659,15 +659,18 @@ constexpr auto spi_i2s_bus<dev>::pick_spi()
             return SPI2;
         case spi_device::bus3:
             return SPI3;
+#ifdef SPI4
         case spi_device::bus4:
             return SPI4;
+#endif
+#ifdef SPI5
         case spi_device::bus5:
             return SPI5;
+#endif
+#ifdef SPI6
         case spi_device::bus6:
             return SPI6;
-        default:
-            // TODO: clarify
-            return static_cast< decltype(SPI1) >(nullptr);
+#endif
     }
 }
 
@@ -682,15 +685,18 @@ constexpr auto spi_i2s_bus<dev>::pick_rcc()
             return RCC_APB1Periph_SPI2;
         case spi_device::bus3:
             return RCC_APB1Periph_SPI3;
+#ifdef SPI4
         case spi_device::bus4:
             return RCC_APB2Periph_SPI4;
+#endif
+#ifdef SPI5
         case spi_device::bus5:
             return RCC_APB2Periph_SPI5;
+#endif
+#ifdef SPI6
         case spi_device::bus6:
             return RCC_APB2Periph_SPI6;
-        default:
-            // TODO: clarify
-            return static_cast< decltype(RCC_APB2Periph_SPI6) >(-1);
+#endif
     }
 }
 
@@ -805,7 +811,9 @@ template<class Iface_cfg>
 std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, void>
 spi_i2s_bus<dev>::init_interface()
 {
+#if defined(stm32f4xx)
     RCC_PLLI2SCmd(ENABLE);
+#endif
 
     constexpr auto i2s = pick_spi();
     constexpr auto cinit_obj = spi_i2s_cfg<dev>::init_obj;
