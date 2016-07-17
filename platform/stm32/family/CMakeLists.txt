@@ -17,7 +17,8 @@ include(${STM32_FAMILY}/mcu_cfg.cmake)
 add_library(stm32_family ${STM32_FAMILY}/system_stm32${STM32_FAMILY}.c)
 
 target_compile_definitions(stm32_family PUBLIC
-        -D${ST_DEVICE}
+        -Dstm32_${STM32_FAMILY} # Used by theCore
+        -D${ST_DEVICE} # Used by SPL
         -DHSE_VALUE=${CONFIG_PLATFORM_HSE_VAL}
         -DCONFIG_IRQ_COUNT=${TARGET_MCU_IRQ_COUNT}
         )
