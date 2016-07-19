@@ -9,18 +9,18 @@ else()
     message(FATAL_ERROR "Unknown device family: ${CONFIG_PLATOFORM_DEVICE}")
 endif()
 
-# Depreceated configuration value
+# Deprecated configuration value
 if(CONFIG_PLATFORM_DEVICE STREQUAL STM32L1XX_XL)
-    message(WARNING "Depreceated device config: STM32L1XX_XL"
-            ", defauluting to STM32L152RE")
+    message(WARNING "Deprecated device config: STM32L1XX_XL"
+            ", defaulting to STM32L152RE")
     set(CONFIG_PLATFORM_DEVICE STM32L152RE)
 endif()
 
-# Depreceated configuration value
+# Deprecated configuration value
 if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F40_41xxx)
-    message(WARNING "Depreceated device config: STM32F40_41xxx"
-            ", defauluting to SMT32F407VG")
-    set(CONFIG_PLATFORM_DEVICE SMT32F407VG)
+    message(WARNING "Deprecated device config: STM32F40_41xxx"
+            ", defaulting to STM32F407VG")
+    set(CONFIG_PLATFORM_DEVICE STM32F407VG)
 endif()
 
 # Expose per-device definitions
@@ -43,11 +43,11 @@ if(CONFIG_PLATFORM_DEVICE STREQUAL STM32L152RE)
     # Count of user-overridable interrupts.
     # For this particular platform it doesn't include system exceptions,
     # but only peripheral interrupts. Yet.
-    set(TARGET_MCU_IRQ_COUNT 57 CACHE STRING "Avaliable interrupts")
+    set(TARGET_MCU_IRQ_COUNT 57 CACHE STRING "Available interrupts")
     return()
 endif()
 
-if(CONFIG_PLATFORM_DEVICE STREQUAL SMT32F407VG)
+if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F407VG)
     # STM32 device identifier
     set(ST_DEVICE STM32F40_41xxx)
 
