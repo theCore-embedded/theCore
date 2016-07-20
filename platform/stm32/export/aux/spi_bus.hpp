@@ -817,8 +817,8 @@ spi_i2s_bus<dev>::init_interface()
 
     constexpr auto i2s = pick_spi();
     constexpr auto cinit_obj = spi_i2s_cfg<dev>::init_obj;
-    auto init_obj = init_obj;
-    I2S_Init(i2s, &init_obj);
+    auto init_obj = cinit_obj;
+    I2S_Init(i2s, &cinit_obj);
 
     // TODO: disable I2S when there in no XFER
     I2S_Cmd(i2s, ENABLE);

@@ -3,16 +3,16 @@ set(TARGET_MCU_ARCH "arm_cm4" CACHE STRING "Processor arch")
 
 message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
 
-# Depreceated configuration value
+# Deprecated configuration value
 if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F40_41xxx)
-    message(WARNING "Depreceated device config: STM32F40_41xxx"
-            ", defauluting to SMT32F407VG")
-    set(CONFIG_PLATFORM_DEVICE SMT32F407VG)
+    message(WARNING "Deprecated device config: STM32F40_41xxx"
+            ", defaulting to STM32F407VG")
+    set(CONFIG_PLATFORM_DEVICE STM32F407VG)
 endif()
 
 # Expose per-device definitions
 
-if(CONFIG_PLATFORM_DEVICE STREQUAL SMT32F407VG)
+if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F407VG)
     # STM32 device identifier
     set(ST_DEVICE STM32F40_41xxx)
 
@@ -30,7 +30,7 @@ if(CONFIG_PLATFORM_DEVICE STREQUAL SMT32F407VG)
     # Count of user-overridable interrupts.
     # For this particular platform it doesn't include system exceptions,
     # but only peripheral interrupts. Yet.
-    set(TARGET_MCU_IRQ_COUNT 82 CACHE STRING "Avaliable interrupts")
+    set(TARGET_MCU_IRQ_COUNT 82 CACHE STRING "Available interrupts")
     return()
 endif()
 

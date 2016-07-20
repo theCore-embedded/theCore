@@ -1,4 +1,4 @@
-# Library provides platform headers, definitiions and code
+# Library provides platform headers, definitions and code
 add_library(stm32f4xx STATIC
         platform.cpp
         exti_manager.cpp
