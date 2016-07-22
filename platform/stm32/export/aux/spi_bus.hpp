@@ -277,6 +277,7 @@ public:
 
 private:
     static constexpr auto pick_spi();
+    static constexpr auto pick_spi_irqn();
     static constexpr auto pick_rcc();
     static constexpr auto pick_rcc_fn();
 
@@ -333,6 +334,8 @@ private:
     static constexpr uint8_t tx_hidden      = 0x10;
     //! RX is finished if this flag is set.
     static constexpr uint8_t rx_complete    = 0x20;
+    //! User will not be notified about RX events if this flag is set.
+    static constexpr uint8_t rx_hidden      = 0x40;
 
     handler_fn m_event_handler; //! Handler passed via set_handler().
     union
@@ -372,10 +375,19 @@ ecl::err spi_i2s_bus<dev>::init()
         return ecl::err::ok;
     }
 
+    constexpr auto spi_irq = pick_spi_irqn();
+    constexpr auto spi = pick_spi();
+
     init_rcc();
     init_irq();
 
     init_interface();
+
+    // Provide basic error handling
+    // TODO #121 - implement proper error handling
+
+    ecl::irq::subscribe(spi_irq, []{ ecl_assert_msg(0, "SPI bus failure occur"); });
+    SPI_I2S_ITConfig(spi, SPI_I2S_IT_ERR, ENABLE);
 
     m_status |= inited;
 
@@ -392,11 +404,15 @@ void spi_i2s_bus<dev>::set_rx(uint8_t *rx, size_t size)
     // Threat nullptr buffers as indication that xfer of this type
     // is not required
     if (!rx) {
+        // TX channel must be enabled in bidir SPI even if user don't
+        // want it. SPI IRQ handler must not propagate RX events in this case.
+        m_status |= rx_hidden;
         return;
     }
 
     m_rx = rx;
     m_rx_size = size;
+    m_status &= ~(rx_hidden);
 }
 
 template<spi_device dev>
@@ -526,26 +542,29 @@ void spi_i2s_bus<dev>::prepare_tx()
         }
     }
 
-    config::dma_tx::template enable_events<true, true>();
+    config::dma_tx::template enable_events<true, true, true>();
 }
 
 template<spi_device dev>
 void spi_i2s_bus<dev>::prepare_rx()
 {
-    if (!m_rx_size) {
-        // Preventing event routine from waiting RX complete event.
-        m_status |= rx_complete;
-        return;
-    }
-
+    constexpr auto spi = pick_spi();
     m_status &= ~(rx_complete);
 
-    constexpr auto spi = pick_spi();
+
+
     constexpr auto data_sz = config::bus_type == spi_bus_type::i2s ?
                              dma_data_sz::hword : dma_data_sz::byte;
 
-    config::dma_rx::template periph_to_mem<data_sz>(&spi->DR, m_rx, m_rx_size);
-    config::dma_rx::template enable_events<true, true>();
+    if (m_status & rx_hidden) {
+        m_rx_size = m_tx_size; // Informs start_xfer() that RX DMA must be enabled
+        config::dma_rx::template periph_to_mem<dma_data_sz::byte>(&spi->DR, m_rx_size);
+    } else {
+        config::dma_rx::template periph_to_mem<data_sz>(&spi->DR, m_rx,
+                                                        m_rx_size);
+    }
+
+    config::dma_rx::template enable_events<true, true, true>();
 }
 
 template<spi_device dev>
@@ -573,6 +592,12 @@ void spi_i2s_bus<dev>::irq_handler()
     constexpr auto tx_irqn = config::dma_tx::get_irqn();
 
     constexpr auto spi = pick_spi();
+
+    // Basic DMA error handling
+    // TODO #121 - implement proper error handling
+
+    ecl_assert(!config::dma_rx::err());
+    ecl_assert(!config::dma_tx::err());
 
     if (!(m_status & tx_complete)) {
         if (config::dma_tx::tc()) {
@@ -607,8 +632,10 @@ void spi_i2s_bus<dev>::irq_handler()
 
     if (!(m_status & rx_complete)) {
         if (config::dma_rx::tc()) {
-            // Complete TX transaction
-            m_event_handler(channel::rx, event::tc, m_rx_size);
+            // Complete RX transaction
+            if (!(m_status & rx_hidden)) {
+                m_event_handler(channel::rx, event::tc, m_rx_size);
+            }
 
             config::dma_rx::clear_tc();
             
@@ -622,7 +649,10 @@ void spi_i2s_bus<dev>::irq_handler()
         } else if (config::dma_rx::ht()) {
             uint32_t rx_left = config::dma_rx::bytes_left();
 
-            m_event_handler(channel::rx, event::ht, m_rx_size - rx_left);
+            if (!(m_status & rx_hidden)) {
+                m_event_handler(channel::rx, event::ht, m_rx_size - rx_left);
+            }
+
             config::dma_rx::clear_ht();
 
             irq::clear(rx_irqn);
@@ -659,17 +689,42 @@ constexpr auto spi_i2s_bus<dev>::pick_spi()
             return SPI2;
         case spi_device::bus3:
             return SPI3;
-#ifdef SPI4
+#if CONFIG_SPI_COUNT > 3
         case spi_device::bus4:
             return SPI4;
 #endif
-#ifdef SPI5
+#if CONFIG_SPI_COUNT > 4
         case spi_device::bus5:
             return SPI5;
 #endif
-#ifdef SPI6
+#if CONFIG_SPI_COUNT > 5
         case spi_device::bus6:
             return SPI6;
+#endif
+    }
+}
+
+template<spi_device dev>
+constexpr auto spi_i2s_bus<dev>::pick_spi_irqn()
+{
+    switch (dev) {
+        case spi_device::bus1:
+            return SPI1_IRQn;
+        case spi_device::bus2:
+            return SPI2_IRQn;
+        case spi_device::bus3:
+            return SPI3_IRQn;
+#if CONFIG_SPI_COUNT > 3
+        case spi_device::bus4:
+            return SPI4_IRQn;
+#endif
+#if CONFIG_SPI_COUNT > 4
+        case spi_device::bus5:
+            return SPI5_IRQn;
+#endif
+#if CONFIG_SPI_COUNT > 5
+        case spi_device::bus6:
+            return SPI6_IRQn;
 #endif
     }
 }
@@ -685,15 +740,15 @@ constexpr auto spi_i2s_bus<dev>::pick_rcc()
             return RCC_APB1Periph_SPI2;
         case spi_device::bus3:
             return RCC_APB1Periph_SPI3;
-#ifdef SPI4
+#if CONFIG_SPI_COUNT > 3
         case spi_device::bus4:
             return RCC_APB2Periph_SPI4;
 #endif
-#ifdef SPI5
+#if CONFIG_SPI_COUNT > 4
         case spi_device::bus5:
             return RCC_APB2Periph_SPI5;
 #endif
-#ifdef SPI6
+#if CONFIG_SPI_COUNT > 5
         case spi_device::bus6:
             return RCC_APB2Periph_SPI6;
 #endif
