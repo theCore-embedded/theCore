@@ -31,6 +31,10 @@ if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F407VG)
     # For this particular platform it doesn't include system exceptions,
     # but only peripheral interrupts. Yet.
     set(TARGET_MCU_IRQ_COUNT 82 CACHE STRING "Available interrupts")
+
+    # SPI buses count. Essential only for stm32 platform code.
+    set(TARGET_SPI_COUNT 3 CACHE STRING "SPI buses avaliable on the F4 MCU")
+
     return()
 endif()
 

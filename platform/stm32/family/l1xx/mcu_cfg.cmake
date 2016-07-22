@@ -31,11 +31,13 @@ if(CONFIG_PLATFORM_DEVICE STREQUAL STM32L152RE)
     # For this particular platform it doesn't include system exceptions,
     # but only peripheral interrupts. Yet.
     set(TARGET_MCU_IRQ_COUNT 57 CACHE STRING "Avaliable interrupts")
+
+    # SPI buses count. Essential only for stm32 platform code.
+    set(TARGET_SPI_COUNT 3 CACHE STRING "SPI buses avaliable on the F4 MCU")
+
     return()
 endif()
 
 # Additional implementation will be required to cover unsupported
 # devices from stm32f4xx line.
 message(FATAL_ERROR "Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")
-
-
