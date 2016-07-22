@@ -42,6 +42,10 @@ public:
     static void
     periph_to_mem(volatile uint16_t *periph, uint8_t *dst, size_t size);
 
+    template<dma_data_sz Size = dma_data_sz::byte, dma_mode Mode = dma_mode::normal>
+    static void
+    periph_to_mem(volatile uint16_t *periph, size_t size);
+
     // TODO: consider merging all routines below into `start()` and `stop()` methods
     template<bool EnableTC = true, bool EnableHT = false, bool EnableErr = false>
     static void enable_events();

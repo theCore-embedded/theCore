@@ -109,24 +109,24 @@ void dma_wrap_base<Derived>::mem_to_periph(const uint8_t *src,
 
     DMA_InitTypeDef dma_init;
 
-    dma_init.DMA_Channel            = channel;
-    dma_init.DMA_Mode               = mode;
-    dma_init.DMA_BufferSize         = size / data_div;
+    dma_init.DMA_Channel    = channel;
+    dma_init.DMA_Mode       = mode;
+    dma_init.DMA_BufferSize = size / data_div;
 
-    dma_init.DMA_DIR                = DMA_DIR_MemoryToPeripheral;
-    dma_init.DMA_Priority           = DMA_Priority_Low;
-    dma_init.DMA_FIFOMode           = DMA_FIFOMode_Disable;
-    dma_init.DMA_FIFOThreshold      = DMA_FIFOThreshold_1QuarterFull;
-    dma_init.DMA_MemoryBurst        = DMA_MemoryBurst_Single;
-    dma_init.DMA_PeripheralBurst    = DMA_PeripheralBurst_Single;
+    dma_init.DMA_DIR             = DMA_DIR_MemoryToPeripheral;
+    dma_init.DMA_Priority        = DMA_Priority_Low;
+    dma_init.DMA_FIFOMode        = DMA_FIFOMode_Disable;
+    dma_init.DMA_FIFOThreshold   = DMA_FIFOThreshold_1QuarterFull;
+    dma_init.DMA_MemoryBurst     = DMA_MemoryBurst_Single;
+    dma_init.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
     dma_init.DMA_PeripheralDataSize = data_size;
 
-    dma_init.DMA_Memory0BaseAddr    = reinterpret_cast<uint32_t>(src);
-    dma_init.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    dma_init.DMA_MemoryDataSize     = data_size;
+    dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(src);
+    dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
+    dma_init.DMA_MemoryDataSize  = data_size;
 
     DMA_Init(stream, &dma_init);
 }
@@ -137,33 +137,33 @@ void dma_wrap_base<Derived>::mem_to_periph(uint16_t filler,
                                            size_t cnt,
                                            volatile uint16_t *periph)
 {
-    constexpr auto stream    = Derived::get_stream_ptr();
-    constexpr auto channel   = static_cast<uint32_t>(Derived::channel);
-    constexpr auto mode      = static_cast<uint32_t>(Mode);
-    constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = Derived::get_size_div(data_size);
-    static auto local_filler = filler;
+    constexpr auto stream       = Derived::get_stream_ptr();
+    constexpr auto channel      = static_cast<uint32_t>(Derived::channel);
+    constexpr auto mode         = static_cast<uint32_t>(Mode);
+    constexpr auto data_size    = static_cast<uint32_t>(Size);
+    constexpr auto data_div     = Derived::get_size_div(data_size);
+    static auto    local_filler = filler;
 
     DMA_InitTypeDef dma_init;
 
-    dma_init.DMA_Channel            = channel;
-    dma_init.DMA_Mode               = mode;
-    dma_init.DMA_BufferSize         = cnt / data_div;
+    dma_init.DMA_Channel    = channel;
+    dma_init.DMA_Mode       = mode;
+    dma_init.DMA_BufferSize = cnt / data_div;
 
-    dma_init.DMA_DIR                = DMA_DIR_MemoryToPeripheral;
-    dma_init.DMA_Priority           = DMA_Priority_Low;
-    dma_init.DMA_FIFOMode           = DMA_FIFOMode_Disable;
-    dma_init.DMA_FIFOThreshold      = DMA_FIFOThreshold_1QuarterFull;
-    dma_init.DMA_MemoryBurst        = DMA_MemoryBurst_Single;
-    dma_init.DMA_PeripheralBurst    = DMA_PeripheralBurst_Single;
+    dma_init.DMA_DIR             = DMA_DIR_MemoryToPeripheral;
+    dma_init.DMA_Priority        = DMA_Priority_Low;
+    dma_init.DMA_FIFOMode        = DMA_FIFOMode_Disable;
+    dma_init.DMA_FIFOThreshold   = DMA_FIFOThreshold_1QuarterFull;
+    dma_init.DMA_MemoryBurst     = DMA_MemoryBurst_Single;
+    dma_init.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
     dma_init.DMA_PeripheralDataSize = data_size;
 
-    dma_init.DMA_Memory0BaseAddr    = reinterpret_cast<uint32_t>(&local_filler);
-    dma_init.DMA_MemoryInc          = DMA_MemoryInc_Disable;
-    dma_init.DMA_MemoryDataSize     = data_size;
+    dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(&local_filler);
+    dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
+    dma_init.DMA_MemoryDataSize  = data_size;
 
     DMA_Init(stream, &dma_init);
 }
@@ -182,24 +182,60 @@ void dma_wrap_base<Derived>::periph_to_mem(volatile uint16_t *periph,
 
     DMA_InitTypeDef dma_init;
 
-    dma_init.DMA_Channel            = channel;
-    dma_init.DMA_Mode               = mode;
-    dma_init.DMA_BufferSize         = size / data_div;
+    dma_init.DMA_Channel    = channel;
+    dma_init.DMA_Mode       = mode;
+    dma_init.DMA_BufferSize = size / data_div;
 
-    dma_init.DMA_DIR                = DMA_DIR_PeripheralToMemory;
-    dma_init.DMA_Priority           = DMA_Priority_Low;
-    dma_init.DMA_FIFOMode           = DMA_FIFOMode_Disable;
-    dma_init.DMA_FIFOThreshold      = DMA_FIFOThreshold_1QuarterFull;
-    dma_init.DMA_MemoryBurst        = DMA_MemoryBurst_Single;
-    dma_init.DMA_PeripheralBurst    = DMA_PeripheralBurst_Single;
+    dma_init.DMA_DIR             = DMA_DIR_PeripheralToMemory;
+    dma_init.DMA_Priority        = DMA_Priority_Low;
+    dma_init.DMA_FIFOMode        = DMA_FIFOMode_Disable;
+    dma_init.DMA_FIFOThreshold   = DMA_FIFOThreshold_1QuarterFull;
+    dma_init.DMA_MemoryBurst     = DMA_MemoryBurst_Single;
+    dma_init.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
     dma_init.DMA_PeripheralDataSize = data_size;
 
-    dma_init.DMA_Memory0BaseAddr    = reinterpret_cast<uint32_t>(dst);
-    dma_init.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    dma_init.DMA_MemoryDataSize     = data_size;
+    dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(dst);
+    dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
+    dma_init.DMA_MemoryDataSize  = data_size;
+
+    DMA_Init(stream, &dma_init);
+}
+
+template<class Derived>
+template<dma_data_sz Size, dma_mode Mode>
+void
+dma_wrap_base<Derived>::periph_to_mem(volatile uint16_t *periph, size_t size)
+{
+    constexpr auto  stream     = Derived::get_stream_ptr();
+    constexpr auto  channel    = static_cast<uint32_t>(Derived::channel);
+    constexpr auto  mode       = static_cast<uint32_t>(Mode);
+    constexpr auto  data_size  = static_cast<uint32_t>(Size);
+    constexpr auto  data_div   = Derived::get_size_div(data_size);
+    static uint32_t local_sink = 0;
+
+    DMA_InitTypeDef dma_init;
+
+    dma_init.DMA_Channel    = channel;
+    dma_init.DMA_Mode       = mode;
+    dma_init.DMA_BufferSize = size / data_div;
+
+    dma_init.DMA_DIR             = DMA_DIR_PeripheralToMemory;
+    dma_init.DMA_Priority        = DMA_Priority_Low;
+    dma_init.DMA_FIFOMode        = DMA_FIFOMode_Disable;
+    dma_init.DMA_FIFOThreshold   = DMA_FIFOThreshold_1QuarterFull;
+    dma_init.DMA_MemoryBurst     = DMA_MemoryBurst_Single;
+    dma_init.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+
+    dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
+    dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
+    dma_init.DMA_PeripheralDataSize = data_size;
+
+    dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(&local_sink);
+    dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
+    dma_init.DMA_MemoryDataSize  = data_size;
 
     DMA_Init(stream, &dma_init);
 }
@@ -210,9 +246,9 @@ template<bool EnableTC, bool EnableHT, bool EnableErr>
 void dma_wrap_base<Derived>::enable_events()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flags = (EnableTC    ? DMA_IT_TC  : 0)
-                           | (EnableHT  ? DMA_IT_HT  : 0)
-                           | (EnableErr ? DMA_IT_TE  : 0);
+    constexpr auto flags  = (EnableTC ? DMA_IT_TC : 0)
+                            | (EnableHT ? DMA_IT_HT : 0)
+                            | (EnableErr ? DMA_IT_TE : 0);
 
     DMA_ITConfig(stream, flags, ENABLE);
 }
@@ -222,9 +258,9 @@ template<bool DisableTC, bool DisableHT, bool DisableErr>
 void dma_wrap_base<Derived>::disable_events()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flags = (DisableTC    ? DMA_IT_TC  : 0)
-                           | (DisableHT  ? DMA_IT_HT  : 0)
-                           | (DisableErr ? DMA_IT_TE  : 0);
+    constexpr auto flags  = (DisableTC ? DMA_IT_TC : 0)
+                            | (DisableHT ? DMA_IT_HT : 0)
+                            | (DisableErr ? DMA_IT_TE : 0);
 
     DMA_ITConfig(stream, flags, DISABLE);
 }
@@ -247,7 +283,7 @@ template<class Derived>
 bool dma_wrap_base<Derived>::tc()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag = Derived::get_tc_flag();
+    constexpr auto flag   = Derived::get_tc_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
@@ -255,7 +291,7 @@ template<class Derived>
 bool dma_wrap_base<Derived>::ht()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag = Derived::get_ht_flag();
+    constexpr auto flag   = Derived::get_ht_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
@@ -263,7 +299,7 @@ template<class Derived>
 bool dma_wrap_base<Derived>::err()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag = Derived::get_err_flag();
+    constexpr auto flag   = Derived::get_err_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
@@ -271,8 +307,8 @@ template<class Derived>
 void dma_wrap_base<Derived>::clear_tc()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag = Derived::get_tc_flag();
-    constexpr auto iflag = Derived::get_tc_if();
+    constexpr auto flag   = Derived::get_tc_flag();
+    constexpr auto iflag  = Derived::get_tc_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
@@ -282,8 +318,8 @@ template<class Derived>
 void dma_wrap_base<Derived>::clear_ht()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag = Derived::get_ht_flag();
-    constexpr auto iflag = Derived::get_ht_if();
+    constexpr auto flag   = Derived::get_ht_flag();
+    constexpr auto iflag  = Derived::get_ht_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
@@ -293,8 +329,8 @@ template<class Derived>
 void dma_wrap_base<Derived>::clear_err()
 {
     constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag = Derived::get_err_flag();
-    constexpr auto iflag = Derived::get_err_if();
+    constexpr auto flag   = Derived::get_err_flag();
+    constexpr auto iflag  = Derived::get_err_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
@@ -303,10 +339,10 @@ void dma_wrap_base<Derived>::clear_err()
 template<class Derived>
 auto dma_wrap_base<Derived>::bytes_left()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
-    auto items_left = DMA_GetCurrDataCounter(stream);
-    auto reg = stream->CR & 0x6000; // Fetch data size
-    auto div = Derived::get_size_div(reg);
+    constexpr auto stream     = Derived::get_stream_ptr();
+    auto           items_left = DMA_GetCurrDataCounter(stream);
+    auto           reg        = stream->CR & 0x6000; // Fetch data size
+    auto           div        = Derived::get_size_div(reg);
 
     return reg * div;
 }
@@ -376,7 +412,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_stream_ptr()
 template<dma_stream Stream, dma_channel Channel>
 constexpr auto dma_wrap<Stream, Channel>::get_stream_number()
 {
-    return 0xff & static_cast<std::underlying_type_t<dma_stream>>(Stream);
+    return 0xff & static_cast<std::underlying_type_t <dma_stream>>(Stream);
 }
 
 template<dma_stream Stream, dma_channel Channel>
@@ -391,7 +427,7 @@ constexpr auto dma_wrap<Stream, Channel>::get_size_div(uint32_t data_size)
 template<dma_stream Stream, dma_channel Channel>
 constexpr auto dma_wrap<Stream, Channel>::get_rcc()
 {
-    if ((static_cast<std::underlying_type_t<dma_stream>>(Stream) & 0xf00) ==
+    if ((static_cast<std::underlying_type_t <dma_stream>>(Stream) & 0xf00) ==
         0x100) {
         return RCC_AHB1Periph_DMA1;
     } else {
