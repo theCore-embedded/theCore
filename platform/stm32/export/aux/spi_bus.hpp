@@ -28,7 +28,7 @@ enum class spi_bus_type
 
 //! Base template class for the SPI/I2S configuration
 //! \details In order to advertise configuration parameters user must create
-//! template specialization for required SPI/I2S device. Since STM32F4XX devices
+//! template specialization for required SPI/I2S device. Since STM32 devices
 //! support either the SPI protocol or the I2S audio protocol there are two sets
 //! of parameters:
 //!     - common parameters for I2S and SPI modes
@@ -39,20 +39,10 @@ enum class spi_bus_type
 //! Common parameters:
 //! - ecl::spi_bus_type **bus_type** - Defines which bus mode is required,
 //!   SPI or I2S. \sa ecl::spi_bus_type
-//! - struct **dma** - Specifies DMA streams and channels. It must contain
-//!   following static members:
-//!     - ecl::dma::streams **tx_stream** - TX DMA stream number. Make sure right
-//!       DMA stream is used for given SPI/I2S device. See "Table 42. DMA1 request
-//!       mapping" and "Table 43. DMA2 request mapping" in the RM.
-//!       \sa ecl::dma::streams
-//!     - ecl::dma::streams **rx_stream** - RX DMA stream number. Make sure right
-//!       DMA stream is used for given SPI/I2S device. See "Table 42. DMA1 request
-//!       mapping" and "Table 43. DMA2 request mapping" in the RM.
-//!       \sa ecl::dma::streams
-//!     - uint32_t **tx_channel** - TX DMA channel. See "Table 42. DMA1 request
-//!       mapping" and "Table 43. DMA2 request mapping" in the RM"
-//!     - uint32_t **rx_channel** - RX RMA channel. See "Table 42. DMA1 request
-//!       mapping" and "Table 43. DMA2 request mapping" in the RM.
+//! - **dma_tx** alias - Specifies DMA TX wrapper. Refer to the implementation
+//!     for the particular STM32 family to get insight how to properly define it.
+//! - **dma_rx** alias - Specifies DMA RX wrapper. Refer to the implementation
+//!     for the particular STM32 family to get insight how to properly define it.
 //!
 //! I2S-specific parameters:
 //! - I2S_InitTypeDef **init_obj** - Configuraion structure required for I2S mode.
@@ -64,7 +54,7 @@ enum class spi_bus_type
 //!   Refer to STM32 SPL documentation or check examples below to find
 //!   I2S_InitTypeDef's fields.
 //!
-//! \par SPI configuration example.
+//! \par SPI configuration example for STM32F4XX.
 //! In order to use this configuration class one must create configuration class
 //! in the `ecl` namespace before any acccess to \ref spi_i2s_bus instance.
 //! \code{.cpp}
@@ -76,13 +66,8 @@ enum class spi_bus_type
 //! {
 //!     static constexpr auto bus_type = spi_bus_type::spi;
 //!
-//!     struct dma
-//!     {
-//!         static constexpr auto tx_stream  = ecl::dma::streams::dma1_4;
-//!         static constexpr auto tx_channel = 0;
-//!         static constexpr auto rx_stream  = ecl::dma::streams::dma1_3;
-//!         static constexpr auto rx_channel = 0;
-//!     };
+//!     using dma_tx = ecl::dma_wrap<ecl::dma_stream::dma1_4, ecl::dma_channel::ch0>;
+//!     using dma_rx = ecl::dma_wrap<ecl::dma_stream::dma1_3, ecl::dma_channel::ch0>;
 //!
 //!     static constexpr SPI_InitTypeDef init_obj = {
 //!             .SPI_Direction          = SPI_Direction_2Lines_FullDuplex,
@@ -112,13 +97,8 @@ enum class spi_bus_type
 //! {
 //!     static constexpr auto bus_type = spi_bus_type::i2s;
 //!
-//!     struct dma
-//!     {
-//!         static constexpr auto tx_stream  = ecl::dma::streams::dma1_4;
-//!         static constexpr auto tx_channel = 0;
-//!         static constexpr auto rx_stream  = ecl::dma::streams::dma1_3;
-//!         static constexpr auto rx_channel = 0;
-//!     };
+//!     using dma_tx = ecl::dma_wrap<ecl::dma_stream::dma1_4, ecl::dma_channel::ch0>;
+//!     using dma_rx = ecl::dma_wrap<ecl::dma_stream::dma1_3, ecl::dma_channel::ch0>;
 //!
 //!     static constexpr I2S_InitTypeDef init_obj = {
 //!             .I2S_Mode          = I2S_Mode_MasterTx,
@@ -136,8 +116,8 @@ enum class spi_bus_type
 //! \warning To avoid potential problems with multiple configurations for single
 //! SPI/I2S bus, **make sure that full specialization is placed in the
 //! header included (directly or indirectly) by all dependent modules.**.
-//! Thus, redefinition of the config class for given USART will result in
-//! compilation errors. *Good practice is to place all USART configuration
+//! Thus, redefinition of the config class for given SPI will result in
+//! compilation errors. *Good practice is to place all SPI configuration
 //! class in the single target-related header.*
 template<spi_device dev>
 struct spi_i2s_cfg
@@ -281,8 +261,10 @@ private:
     static constexpr auto pick_rcc();
     static constexpr auto pick_rcc_fn();
 
-    static constexpr uint32_t pick_i2s_audio_frequency(ecl::i2s::audio_frequency value);
-    static constexpr uint32_t pick_i2s_data_format(ecl::i2s::data_format value);
+    static constexpr uint32_t
+    pick_i2s_audio_frequency(ecl::i2s::audio_frequency value);
+    static constexpr uint32_t
+    pick_i2s_data_format(ecl::i2s::data_format value);
 
     ecl::err i2s_set_audio_frequency_private(uint32_t value);
     ecl::err i2s_set_data_format_private(uint32_t value);
@@ -323,31 +305,31 @@ private:
     void irq_handler();
 
     //! Bus is inited if this flag is set.
-    static constexpr uint8_t inited         = 0x1;
+    static constexpr uint8_t inited        = 0x1;
     //! Bus is in fill mode if this flag is set.
-    static constexpr uint8_t mode_fill      = 0x2;
+    static constexpr uint8_t mode_fill     = 0x2;
     //! Bus DMA is in circular mode if this flag is set.
-    static constexpr uint8_t mode_circular  = 0x4;
+    static constexpr uint8_t mode_circular = 0x4;
     //! TX is finished if this flag is set.
-    static constexpr uint8_t tx_complete    = 0x8;
+    static constexpr uint8_t tx_complete   = 0x8;
     //! User will not be notified about TX events if this flag is set.
-    static constexpr uint8_t tx_hidden      = 0x10;
+    static constexpr uint8_t tx_hidden     = 0x10;
     //! RX is finished if this flag is set.
-    static constexpr uint8_t rx_complete    = 0x20;
+    static constexpr uint8_t rx_complete   = 0x20;
     //! User will not be notified about RX events if this flag is set.
-    static constexpr uint8_t rx_hidden      = 0x40;
+    static constexpr uint8_t rx_hidden     = 0x40;
 
     handler_fn m_event_handler; //! Handler passed via set_handler().
     union
     {
-        const uint8_t  *buf;        //! Transmit buffer.
-        uint16_t       byte;        //! Byte to transmit (16 bits of 16-bit SPI mode)
+        const uint8_t *buf;        //! Transmit buffer.
+        uint16_t      byte;        //! Byte to transmit (16 bits of 16-bit SPI mode)
     } m_tx;
 
-    size_t          m_tx_size;       //! TX buffer size.
-    uint8_t         *m_rx;           //! Receive buffer.
-    size_t          m_rx_size;       //! RX buffer size.
-    uint8_t         m_status;        //! Represents bus status.
+    size_t  m_tx_size;       //! TX buffer size.
+    uint8_t *m_rx;           //! Receive buffer.
+    size_t  m_rx_size;       //! RX buffer size.
+    uint8_t m_status;        //! Represents bus status.
 };
 
 template<spi_device dev>
@@ -376,7 +358,7 @@ ecl::err spi_i2s_bus<dev>::init()
     }
 
     constexpr auto spi_irq = pick_spi_irqn();
-    constexpr auto spi = pick_spi();
+    constexpr auto spi     = pick_spi();
 
     init_rcc();
     init_irq();
@@ -386,7 +368,8 @@ ecl::err spi_i2s_bus<dev>::init()
     // Provide basic error handling
     // TODO #121 - implement proper error handling
 
-    ecl::irq::subscribe(spi_irq, []{ ecl_assert_msg(0, "SPI bus failure occur"); });
+    ecl::irq::subscribe(spi_irq,
+                        [] { ecl_assert_msg(0, "SPI bus failure occur"); });
     SPI_I2S_ITConfig(spi, SPI_I2S_IT_ERR, ENABLE);
 
     m_status |= inited;
@@ -410,7 +393,7 @@ void spi_i2s_bus<dev>::set_rx(uint8_t *rx, size_t size)
         return;
     }
 
-    m_rx = rx;
+    m_rx      = rx;
     m_rx_size = size;
     m_status &= ~(rx_hidden);
 }
@@ -435,6 +418,8 @@ void spi_i2s_bus<dev>::set_tx(const uint8_t *tx, size_t size)
         return;
     }
 
+    m_status &= ~(mode_fill);
+
     // Threat nullptr buffers as indication that xfer of this type
     // is not required
     if (!tx) {
@@ -444,7 +429,6 @@ void spi_i2s_bus<dev>::set_tx(const uint8_t *tx, size_t size)
         return;
     }
 
-    m_status &= ~(mode_fill);
     m_status &= ~(tx_hidden);
     m_tx.buf = tx;
     m_tx_size = size;
@@ -461,11 +445,11 @@ void spi_i2s_bus<dev>::set_handler(const handler_fn &handler)
 template<spi_device dev>
 void spi_i2s_bus<dev>::reset_buffers()
 {
-    m_status    &= ~(mode_fill);
-    m_tx.buf    = nullptr;
-    m_tx_size   = 0;
-    m_rx        = nullptr;
-    m_rx_size   = 0;
+    m_status &= ~(mode_fill);
+    m_tx.buf = nullptr;
+    m_tx_size = 0;
+    m_rx      = nullptr;
+    m_rx_size = 0;
 }
 
 template<spi_device dev>
@@ -521,24 +505,27 @@ void spi_i2s_bus<dev>::prepare_tx()
             for (;;);
         }
 
-        m_status    |= mode_fill;
-        m_tx_size   = m_rx_size;
-        m_tx.byte   = 0xff;
+        m_status |= mode_fill;
+        m_tx_size = m_rx_size;
+        m_tx.byte = 0xff;
     }
 
     m_status &= ~(tx_complete);
 
-    constexpr auto spi = pick_spi();
+    constexpr auto spi     = pick_spi();
     constexpr auto data_sz = config::bus_type == spi_bus_type::i2s ?
                              dma_data_sz::hword : dma_data_sz::byte;
 
     if (m_status & mode_fill) {
-        config::dma_tx::template mem_to_periph<data_sz>(m_tx.byte, m_tx_size, &spi->DR);
+        config::dma_tx::template mem_to_periph<data_sz>(m_tx.byte, m_tx_size,
+                                                        &spi->DR);
     } else {
-	if (m_status & mode_circular) {
-            config::dma_tx::template mem_to_periph<data_sz, dma_mode::circular>(m_tx.buf, m_tx_size, &spi->DR);
-	} else {      
-            config::dma_tx::template mem_to_periph<data_sz>(m_tx.buf, m_tx_size, &spi->DR);
+        if (m_status & mode_circular) {
+            config::dma_tx::template mem_to_periph<data_sz, dma_mode::circular>(
+                    m_tx.buf, m_tx_size, &spi->DR);
+        } else {
+            config::dma_tx::template mem_to_periph<data_sz>(m_tx.buf, m_tx_size,
+                                                            &spi->DR);
         }
     }
 
@@ -551,14 +538,13 @@ void spi_i2s_bus<dev>::prepare_rx()
     constexpr auto spi = pick_spi();
     m_status &= ~(rx_complete);
 
-
-
     constexpr auto data_sz = config::bus_type == spi_bus_type::i2s ?
                              dma_data_sz::hword : dma_data_sz::byte;
 
     if (m_status & rx_hidden) {
         m_rx_size = m_tx_size; // Informs start_xfer() that RX DMA must be enabled
-        config::dma_rx::template periph_to_mem<dma_data_sz::byte>(&spi->DR, m_rx_size);
+        config::dma_rx::template periph_to_mem<dma_data_sz::byte>(&spi->DR,
+                                                                  m_rx_size);
     } else {
         config::dma_rx::template periph_to_mem<data_sz>(&spi->DR, m_rx,
                                                         m_rx_size);
@@ -600,6 +586,19 @@ void spi_i2s_bus<dev>::irq_handler()
     ecl_assert(!config::dma_tx::err());
 
     if (!(m_status & tx_complete)) {
+        bool tx_irq_served = false;
+
+        if (config::dma_tx::ht()) {
+            uint32_t tx_left = config::dma_tx::bytes_left();
+
+            if (!(m_status & tx_hidden)) {
+                m_event_handler(channel::tx, event::ht, m_tx_size - tx_left);
+            }
+
+            config::dma_tx::clear_ht();
+            tx_irq_served = true;
+        }
+
         if (config::dma_tx::tc()) {
             // Complete TX transaction
 
@@ -609,44 +608,24 @@ void spi_i2s_bus<dev>::irq_handler()
 
             config::dma_tx::clear_tc();
 
-            if (m_status & mode_circular) {
-                irq::clear(tx_irqn);
-                irq::unmask(tx_irqn);
-            } else {
+            if (!is_circular_mode()) {
                 config::dma_tx::template disable_events<true, true>();
                 m_status |= tx_complete;
             }
-        } else if (config::dma_tx::ht()) {
-            uint32_t tx_left = config::dma_tx::bytes_left();
 
-            if (!(m_status & tx_hidden)) {
-                m_event_handler(channel::tx, event::ht, m_tx_size - tx_left);
-            }
+            tx_irq_served = true;
+        }
 
-            config::dma_tx::clear_ht();
-
+        if (tx_irq_served) {
             irq::clear(tx_irqn);
             irq::unmask(tx_irqn);
         }
     }
 
     if (!(m_status & rx_complete)) {
-        if (config::dma_rx::tc()) {
-            // Complete RX transaction
-            if (!(m_status & rx_hidden)) {
-                m_event_handler(channel::rx, event::tc, m_rx_size);
-            }
+        bool rx_irq_served = false;
 
-            config::dma_rx::clear_tc();
-            
-            if (is_circular_mode()) {
-                irq::clear(rx_irqn);
-                irq::unmask(rx_irqn);
-            } else {
-                config::dma_rx::template disable_events<true, true>();
-                m_status |= rx_complete;
-            }
-        } else if (config::dma_rx::ht()) {
+        if (config::dma_rx::ht()) {
             uint32_t rx_left = config::dma_rx::bytes_left();
 
             if (!(m_status & rx_hidden)) {
@@ -654,13 +633,33 @@ void spi_i2s_bus<dev>::irq_handler()
             }
 
             config::dma_rx::clear_ht();
+            rx_irq_served = true;
+        }
 
+        if (config::dma_rx::tc()) {
+            // Complete RX transaction
+            if (!(m_status & rx_hidden)) {
+                m_event_handler(channel::rx, event::tc, m_rx_size);
+            }
+
+            config::dma_rx::clear_tc();
+
+            if (!is_circular_mode()) {
+                config::dma_rx::template disable_events<true, true>();
+                m_status |= rx_complete;
+            }
+
+            rx_irq_served = true;
+        }
+
+        if (rx_irq_served) {
             irq::clear(rx_irqn);
             irq::unmask(rx_irqn);
         }
     }
 
-    if ((m_status & (rx_complete | tx_complete)) == (rx_complete | tx_complete)) {
+    if ((m_status & (rx_complete | tx_complete)) ==
+        (rx_complete | tx_complete)) {
         // All transfers completed
         m_event_handler(channel::meta, event::tc, m_tx_size);
 
@@ -769,9 +768,6 @@ constexpr auto spi_i2s_bus<dev>::pick_rcc_fn()
         case spi_device::bus2:
         case spi_device::bus3:
             return RCC_APB1PeriphClockCmd;
-        default:
-            // TODO: clarify
-            return static_cast< decltype(&RCC_APB2PeriphClockCmd) >(nullptr);
     }
 }
 
@@ -866,18 +862,17 @@ template<class Iface_cfg>
 std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, void>
 spi_i2s_bus<dev>::init_interface()
 {
-#if defined(stm32f4xx)
+#ifdef stm32f4xx
     RCC_PLLI2SCmd(ENABLE);
 #endif
 
-    constexpr auto i2s = pick_spi();
+    constexpr auto i2s       = pick_spi();
     constexpr auto cinit_obj = spi_i2s_cfg<dev>::init_obj;
-    auto init_obj = cinit_obj;
+    auto           init_obj  = cinit_obj;
     I2S_Init(i2s, &cinit_obj);
 
     // TODO: disable I2S when there in no XFER
     I2S_Cmd(i2s, ENABLE);
-
 }
 
 template<spi_device dev>
@@ -885,9 +880,9 @@ template<class Iface_cfg>
 std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::spi, void>
 spi_i2s_bus<dev>::init_interface()
 {
-    constexpr auto spi = pick_spi();
+    constexpr auto spi       = pick_spi();
     constexpr auto cinit_obj = spi_i2s_cfg<dev>::init_obj;
-    auto init_obj = cinit_obj;
+    auto           init_obj  = cinit_obj;
     SPI_Init(spi, &init_obj);
 
     // TODO: disable SPI when there in no XFER
@@ -930,7 +925,7 @@ ecl::err spi_i2s_bus<dev>::i2s_set_audio_frequency_private(uint32_t value)
     // Data format can be changed by i2s_set_data_format()
     i2s_init.I2S_DataFormat = spi->I2SCFGR & SPI_I2SCFGR_DATLEN;
     // Change audio frequency
-    i2s_init.I2S_AudioFreq = value;
+    i2s_init.I2S_AudioFreq  = value;
 
     // Re-init I2S with new audio frequency
     I2S_Init(spi, &i2s_init);
