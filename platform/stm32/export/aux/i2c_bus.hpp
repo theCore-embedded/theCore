@@ -8,9 +8,11 @@
 
 #include <sys/types.h>
 
-namespace ecl {
+namespace ecl
+{
 
-enum class i2c_mode {
+enum class i2c_mode
+{
     POLL,
     IRQ
 };
@@ -38,7 +40,7 @@ struct i2c_config
     static constexpr i2c_mode m_mode = mode;
 };
 
-template <class i2c_config>
+template<class i2c_config>
 class i2c_bus
 {
 public:
@@ -54,7 +56,7 @@ public:
 
     //!
     //! \brief Destructs a bus.
-    ~i2c_bus();
+    ~i2c_bus() = default;
 
     //!
     //! \brief Lazy initialization.
@@ -70,7 +72,7 @@ public:
     void set_rx(uint8_t *rx, size_t size);
 
     //!
-    //! \brief Sets rx buffer made-up from sequence of similar bytes.
+    //! \brief Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
     //!
@@ -126,7 +128,8 @@ private:
 
     //! Communication direction
     // TODO Add slave support
-    enum direction {
+    enum direction
+    {
         MASTER_TX,
         MASTER_RX,
     } m_direction;
@@ -171,8 +174,8 @@ private:
     uint16_t        m_slave_addr;   //! address of slave to communicate
 };
 
-template< class i2c_config >
-i2c_bus< i2c_config >::i2c_bus()
+template<class i2c_config>
+i2c_bus<i2c_config>::i2c_bus()
 	:m_event_handler{}
 	,m_tx{nullptr}
 	,m_tx_size{0}
@@ -186,14 +189,8 @@ i2c_bus< i2c_config >::i2c_bus()
 
 }
 
-template< class i2c_config >
-i2c_bus< i2c_config >::~i2c_bus()
-{
-
-}
-
-template < class i2c_config >
-ecl::err i2c_bus <i2c_config>::init()
+template <class i2c_config>
+ecl::err i2c_bus<i2c_config>::init()
 {
     if (inited()) {
         return ecl::err::ok;
@@ -232,8 +229,8 @@ ecl::err i2c_bus <i2c_config>::init()
     return ecl::err::ok;
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::set_rx(uint8_t *rx, size_t size)
+template<class i2c_config>
+void i2c_bus<i2c_config>::set_rx(uint8_t *rx, size_t size)
 {
     if (!inited()) {
         return;
@@ -244,8 +241,8 @@ void i2c_bus< i2c_config >::set_rx(uint8_t *rx, size_t size)
     m_rx_left = m_rx_size;
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::set_tx(const uint8_t *tx, size_t size)
+template<class i2c_config>
+void i2c_bus<i2c_config>::set_tx(const uint8_t *tx, size_t size)
 {
     if (!inited()) {
         return;
@@ -256,8 +253,8 @@ void i2c_bus< i2c_config >::set_tx(const uint8_t *tx, size_t size)
     m_tx_left = m_tx_size;
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::set_tx(size_t size, uint8_t fill_byte)
+template<class i2c_config>
+void i2c_bus<i2c_config>::set_tx(size_t size, uint8_t fill_byte)
 {
     if (!inited()) {
         return;
@@ -268,8 +265,8 @@ void i2c_bus< i2c_config >::set_tx(size_t size, uint8_t fill_byte)
     (void) fill_byte;
 }
 
-template< class i2c_config >
-ecl::err i2c_bus< i2c_config >::do_xfer()
+template<class i2c_config>
+ecl::err i2c_bus<i2c_config>::do_xfer()
 {
     if (!inited()) {
         return ecl::err::generic;
@@ -306,8 +303,8 @@ ecl::err i2c_bus< i2c_config >::do_xfer()
     return ecl::err::ok;
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::reset_buffers()
+template<class i2c_config>
+void i2c_bus<i2c_config>::reset_buffers()
 {
     m_tx = nullptr;
     m_rx = nullptr;
@@ -315,14 +312,14 @@ void i2c_bus< i2c_config >::reset_buffers()
     m_rx_left = m_rx_size = 0;
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::set_handler(const handler_fn &handler)
+template<class i2c_config>
+void i2c_bus<i2c_config>::set_handler(const handler_fn &handler)
 {
     m_event_handler = handler;
 }
 
-template< class i2c_config >
-ecl::err i2c_bus <i2c_config>::i2c_setup_xfer_irq()
+template<class i2c_config>
+ecl::err i2c_bus<i2c_config>::i2c_setup_xfer_irq()
 {
     constexpr auto i2c = pick_i2c();
 
@@ -336,8 +333,8 @@ ecl::err i2c_bus <i2c_config>::i2c_setup_xfer_irq()
     return ecl::err::ok;
 }
 
-template< class i2c_config >
-ecl::err i2c_bus <i2c_config>::i2c_transmit_poll()
+template<class i2c_config>
+ecl::err i2c_bus<i2c_config>::i2c_transmit_poll()
 {
     constexpr auto i2c = pick_i2c();
 
@@ -363,8 +360,8 @@ ecl::err i2c_bus <i2c_config>::i2c_transmit_poll()
     return ecl::err::ok;
 }
 
-template< class i2c_config >
-ecl::err i2c_bus <i2c_config>::i2c_receive_poll()
+template<class i2c_config>
+ecl::err i2c_bus<i2c_config>::i2c_receive_poll()
 {
     constexpr auto i2c = pick_i2c();
 
@@ -432,8 +429,8 @@ ecl::err i2c_bus <i2c_config>::i2c_receive_poll()
     return ecl::err::ok;
 }
 
-template< class i2c_config >
-constexpr auto i2c_bus< i2c_config >::pick_ev_irqn()
+template<class i2c_config>
+constexpr auto i2c_bus<i2c_config>::pick_ev_irqn()
 {
     constexpr auto i2c = pick_i2c();
 
@@ -448,8 +445,8 @@ constexpr auto i2c_bus< i2c_config >::pick_ev_irqn()
     }
 }
 
-template< class i2c_config >
-constexpr auto i2c_bus< i2c_config >::pick_er_irqn()
+template<class i2c_config>
+constexpr auto i2c_bus<i2c_config>::pick_er_irqn()
 {
     constexpr auto i2c = pick_i2c();
 
@@ -464,8 +461,8 @@ constexpr auto i2c_bus< i2c_config >::pick_er_irqn()
     }
 }
 
-template< class i2c_config >
-constexpr auto i2c_bus< i2c_config >::pick_i2c()
+template<class i2c_config>
+constexpr auto i2c_bus<i2c_config>::pick_i2c()
 {
     switch (i2c_config::m_dev) {
     case i2c_device::bus1:
@@ -481,8 +478,8 @@ constexpr auto i2c_bus< i2c_config >::pick_i2c()
     }
 }
 
-template< class i2c_config >
-constexpr auto i2c_bus< i2c_config >::pick_rcc()
+template<class i2c_config>
+constexpr auto i2c_bus<i2c_config>::pick_rcc()
 {
     switch (i2c_config::m_dev) {
     case i2c_device::bus1:
@@ -498,8 +495,8 @@ constexpr auto i2c_bus< i2c_config >::pick_rcc()
     }
 }
 
-template< class i2c_config >
-constexpr auto i2c_bus< i2c_config >::pick_rcc_fn()
+template<class i2c_config>
+constexpr auto i2c_bus<i2c_config>::pick_rcc_fn()
 {
     switch (i2c_config::m_dev) {
     case i2c_device::bus1:
@@ -511,8 +508,8 @@ constexpr auto i2c_bus< i2c_config >::pick_rcc_fn()
     }
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::receive_bytes(size_t count)
+template<class i2c_config>
+void i2c_bus<i2c_config>::receive_bytes(size_t count)
 {
     constexpr auto i2c = pick_i2c();
 
@@ -526,8 +523,8 @@ void i2c_bus< i2c_config >::receive_bytes(size_t count)
     }
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::send_bytes(size_t count)
+template<class i2c_config>
+void i2c_bus<i2c_config>::send_bytes(size_t count)
 {
     constexpr auto i2c = pick_i2c();
 
@@ -541,8 +538,8 @@ void i2c_bus< i2c_config >::send_bytes(size_t count)
     }
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::irq_ev_handler()
+template<class i2c_config>
+void i2c_bus<i2c_config>::irq_ev_handler()
 {
     constexpr auto irqn  = pick_ev_irqn();
     constexpr auto i2c = pick_i2c();
@@ -665,14 +662,14 @@ void i2c_bus< i2c_config >::irq_ev_handler()
     irq::unmask(irqn);
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::irq_er_handler()
+template<class i2c_config>
+void i2c_bus<i2c_config>::irq_er_handler()
 {
     // TODO add error handling
 }
 
-template< class i2c_config >
-void i2c_bus< i2c_config >::set_slave_addr(uint16_t addr)
+template<class i2c_config>
+void i2c_bus<i2c_config>::set_slave_addr(uint16_t addr)
 {
     m_slave_addr = addr;
 }

@@ -143,116 +143,87 @@ public:
     using handler_fn    = bus_handler;
     using config        = spi_i2s_cfg<dev>;
 
-    //!
-    //! \brief Constructs a bus.
-    //!
+    //! Constructs a bus.
     spi_i2s_bus();
 
-    //!
-    //! \brief Destructs a bus.
-    ~spi_i2s_bus();
+    //! Destructs a bus.
+    ~spi_i2s_bus() = default;
 
-    //!
-    //! \brief Lazy initialization.
+    //! Lazy initialization.
     //! \return Status of operation.
-    //!
     ecl::err init();
 
-    //!
-    //! \brief Sets rx buffer with given size.
+    //! Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
-    //!
     void set_rx(uint8_t *rx, size_t size);
 
-    //!
-    //! \brief Sets rx buffer made-up from sequence of similar bytes.
+    //! Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
-    //!
     void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
-    //!
-    //! \brief Sets tx buffer with given size.
+    //! Sets tx buffer with given size.
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
-    //!
     void set_tx(const uint8_t *tx, size_t size);
 
-    //!
-    //! \brief Sets event handler.
-    //! Handler will be used by the bus, until reset_handler() will be called.
+    //! Sets event handler.
+    //! \details Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
-    //!
     void set_handler(const handler_fn &handler);
 
-    //!
-    //! \brief Reset xfer buffers.
-    //! Buffers that were set by \sa set_tx() and \sa set_rx()
+    //! Reset xfer buffers.
+    //! \details Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
-    //!
     void reset_buffers();
 
-    //!
-    //! \brief Resets previously set handler.
-    //!
+    //! Resets previously set handler.
     void reset_handler();
 
-    //!
-    //! \brief Executes xfer, using buffers previously set.
-    //! When it will be done, handler will be invoked.
+    //! Executes xfer, using buffers previously set.
+    //! \details When it will be done, handler will be invoked.
     //! \return Status of operation.
-    //!
     ecl::err do_xfer();
 
-    //!
-    //! \brief Sets audio frequency for I2S mode.
+    //! Sets audio frequency for I2S mode.
     //! \details Is not used in SPI mode.
     //! \tparam frequency Can be a type of ecl::i2s::audio_frequency
     //! \tparam Iface_cfg Used for correct enable_if mechanism. Must not be passed by user.
     //! \return Status of operation.
-    //!
     template<ecl::i2s::audio_frequency frequency, class Iface_cfg = config>
     std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err>
     i2s_set_audio_frequency();
 
-    //!
-    //! \brief Sets data format for I2S mode.
+    //! Sets data format for I2S mode.
     //! \details Is not used in SPI mode.
     //! \tparam format Can be a type of ecl::i2s::data_format
     //! \tparam Iface_cfg Used for correct enable_if mechanism. Must not be passed by user.
     //! \return Status of operation.
-    //!
     template<ecl::i2s::data_format format, class Iface_cfg = config>
     std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err>
     i2s_set_data_format();
 
-    //!
-    //!  Enables circular mode for the bus.
+    //! Enables circular mode for the bus.
     //! \details In circular mode when xfer is finished, the new xfer is started
-    //!  automatically without interruption. The same buffer is used.
-    //!  The process continues until circular mode is disabled.
-    //!  This method must not be called during xfer().
-    //!
+    //! automatically without interruption. The same buffer is used.
+    //! The process continues until circular mode is disabled.
+    //! This method must not be called during xfer().
     void enable_circular_mode();
 
-    //!
-    //!  Disables circular mode for the bus.
+    //! Disables circular mode for the bus.
     //! \details This method allows to stop xfer() that was started with circular mode.
-    //!  It is recommended to call this method in event handler during processing of the HT or TC event.
-    //!  The xfer is always stopped after TC.
-    //!  If circular mode is disabled during processing of the TC (or between HT and TC),
-    //!  the xfer will be stopped immediately after current TC will be processed.
-    //!  If circular mode is disabled during processing of the HT (or between TC and HT),
-    //!  the xfer will be finished after next TC will be processed.
-    //!  This method also can be called when xfer() is not active.
-    //!
+    //! It is recommended to call this method in event handler during processing of the HT or TC event.
+    //! The xfer is always stopped after TC.
+    //! If circular mode is disabled during processing of the TC (or between HT and TC),
+    //! the xfer will be stopped immediately after current TC will be processed.
+    //! If circular mode is disabled during processing of the HT (or between TC and HT),
+    //! the xfer will be finished after next TC will be processed.
+    //! This method also can be called when xfer() is not active.
     void disable_circular_mode();
 
-    //!
-    //!  Returns the circular mode state.
+    //! Returns the circular mode state.
     //! \return true if circular mode is enabled, false otherwise
-    //!
     bool is_circular_mode();
 
 private:
@@ -345,12 +316,6 @@ spi_i2s_bus<dev>::spi_i2s_bus()
 }
 
 template<spi_device dev>
-spi_i2s_bus<dev>::~spi_i2s_bus()
-{
-
-}
-
-template<spi_device dev>
 ecl::err spi_i2s_bus<dev>::init()
 {
     if (m_status & inited) {
@@ -384,7 +349,7 @@ void spi_i2s_bus<dev>::set_rx(uint8_t *rx, size_t size)
         return;
     }
 
-    // Threat nullptr buffers as indication that xfer of this type
+    // Treat nullptr buffers as indication that xfer of this type
     // is not required
     if (!rx) {
         // TX channel must be enabled in bidir SPI even if user don't
@@ -420,7 +385,7 @@ void spi_i2s_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 
     m_status &= ~(mode_fill);
 
-    // Threat nullptr buffers as indication that xfer of this type
+    // Treat nullptr buffers as indication that xfer of this type
     // is not required
     if (!tx) {
         // TX channel must be enabled in bidir SPI even if user don't
@@ -500,10 +465,8 @@ void spi_i2s_bus<dev>::prepare_tx()
         // Trick is to use fill mode in TX channel without notifying
         // user about it.
 
-        if (!m_rx_size) {
-            // TODO: is this correct that both buffers with 0 size???
-            for (;;);
-        }
+        // TODO: is this correct that both buffers have 0 size???
+        ecl_assert(m_rx_size);
 
         m_status |= mode_fill;
         m_tx_size = m_rx_size;
@@ -529,7 +492,7 @@ void spi_i2s_bus<dev>::prepare_tx()
         }
     }
 
-    config::dma_tx::template enable_events<true, true, true>();
+    config::dma_tx::template enable_events_irq();
 }
 
 template<spi_device dev>
@@ -550,7 +513,7 @@ void spi_i2s_bus<dev>::prepare_rx()
                                                         m_rx_size);
     }
 
-    config::dma_rx::template enable_events<true, true, true>();
+    config::dma_rx::template enable_events_irq();
 }
 
 template<spi_device dev>
@@ -609,7 +572,7 @@ void spi_i2s_bus<dev>::irq_handler()
             config::dma_tx::clear_tc();
 
             if (!is_circular_mode()) {
-                config::dma_tx::template disable_events<true, true>();
+                config::dma_tx::template disable_events();
                 m_status |= tx_complete;
             }
 
@@ -645,7 +608,7 @@ void spi_i2s_bus<dev>::irq_handler()
             config::dma_rx::clear_tc();
 
             if (!is_circular_mode()) {
-                config::dma_rx::template disable_events<true, true>();
+                config::dma_rx::template disable_events();
                 m_status |= rx_complete;
             }
 

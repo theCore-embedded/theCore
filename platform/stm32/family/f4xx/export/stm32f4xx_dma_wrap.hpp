@@ -50,10 +50,10 @@ enum class dma_channel
     ch7 = DMA_Channel_7,
 };
 
-template<class Derived>
-constexpr auto dma_wrap_base<Derived>::get_irqn()
+template<class Impl>
+constexpr auto dma_wrap_base<Impl>::get_irqn()
 {
-    switch (Derived::stream) {
+    switch (Impl::stream) {
         case dma_stream::dma1_0:
             return DMA1_Stream0_IRQn;
         case dma_stream::dma1_1:
@@ -89,23 +89,23 @@ constexpr auto dma_wrap_base<Derived>::get_irqn()
     }
 }
 
-template<class Derived>
-void dma_wrap_base<Derived>::init()
+template<class Impl>
+void dma_wrap_base<Impl>::init()
 {
-    RCC_AHB1PeriphClockCmd(Derived::get_rcc(), ENABLE);
+    RCC_AHB1PeriphClockCmd(Impl::get_rcc(), ENABLE);
 }
 
-template<class Derived>
+template<class Impl>
 template<dma_data_sz Size, dma_mode Mode>
-void dma_wrap_base<Derived>::mem_to_periph(const uint8_t *src,
-                                           size_t size,
-                                           volatile uint16_t *periph)
+void dma_wrap_base<Impl>::mem_to_periph(const uint8_t *src,
+                                        size_t size,
+                                        volatile uint16_t *periph)
 {
-    constexpr auto stream    = Derived::get_stream_ptr();
-    constexpr auto channel   = static_cast<uint32_t>(Derived::channel);
+    constexpr auto stream    = Impl::get_stream_ptr();
+    constexpr auto channel   = static_cast<uint32_t>(Impl::channel);
     constexpr auto mode      = static_cast<uint32_t>(Mode);
     constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = Derived::get_size_div(data_size);
+    constexpr auto data_div  = Impl::get_size_div(data_size);
 
     DMA_InitTypeDef dma_init;
 
@@ -131,17 +131,17 @@ void dma_wrap_base<Derived>::mem_to_periph(const uint8_t *src,
     DMA_Init(stream, &dma_init);
 }
 
-template<class Derived>
+template<class Impl>
 template<dma_data_sz Size, dma_mode Mode>
-void dma_wrap_base<Derived>::mem_to_periph(uint16_t filler,
-                                           size_t cnt,
-                                           volatile uint16_t *periph)
+void dma_wrap_base<Impl>::mem_to_periph(uint16_t filler,
+                                        size_t cnt,
+                                        volatile uint16_t *periph)
 {
-    constexpr auto stream       = Derived::get_stream_ptr();
-    constexpr auto channel      = static_cast<uint32_t>(Derived::channel);
+    constexpr auto stream       = Impl::get_stream_ptr();
+    constexpr auto channel      = static_cast<uint32_t>(Impl::channel);
     constexpr auto mode         = static_cast<uint32_t>(Mode);
     constexpr auto data_size    = static_cast<uint32_t>(Size);
-    constexpr auto data_div     = Derived::get_size_div(data_size);
+    constexpr auto data_div     = Impl::get_size_div(data_size);
     static auto    local_filler = filler;
 
     DMA_InitTypeDef dma_init;
@@ -168,17 +168,17 @@ void dma_wrap_base<Derived>::mem_to_periph(uint16_t filler,
     DMA_Init(stream, &dma_init);
 }
 
-template<class Derived>
+template<class Impl>
 template<dma_data_sz Size, dma_mode Mode>
-void dma_wrap_base<Derived>::periph_to_mem(volatile uint16_t *periph,
-                                           uint8_t *dst,
-                                           size_t size)
+void dma_wrap_base<Impl>::periph_to_mem(volatile uint16_t *periph,
+                                        uint8_t *dst,
+                                        size_t size)
 {
-    constexpr auto stream    = Derived::get_stream_ptr();
-    constexpr auto channel   = static_cast<uint32_t>(Derived::channel);
+    constexpr auto stream    = Impl::get_stream_ptr();
+    constexpr auto channel   = static_cast<uint32_t>(Impl::channel);
     constexpr auto mode      = static_cast<uint32_t>(Mode);
     constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = Derived::get_size_div(data_size);
+    constexpr auto data_div  = Impl::get_size_div(data_size);
 
     DMA_InitTypeDef dma_init;
 
@@ -204,16 +204,16 @@ void dma_wrap_base<Derived>::periph_to_mem(volatile uint16_t *periph,
     DMA_Init(stream, &dma_init);
 }
 
-template<class Derived>
+template<class Impl>
 template<dma_data_sz Size, dma_mode Mode>
 void
-dma_wrap_base<Derived>::periph_to_mem(volatile uint16_t *periph, size_t size)
+dma_wrap_base<Impl>::periph_to_mem(volatile uint16_t *periph, size_t size)
 {
-    constexpr auto  stream     = Derived::get_stream_ptr();
-    constexpr auto  channel    = static_cast<uint32_t>(Derived::channel);
+    constexpr auto  stream     = Impl::get_stream_ptr();
+    constexpr auto  channel    = static_cast<uint32_t>(Impl::channel);
     constexpr auto  mode       = static_cast<uint32_t>(Mode);
     constexpr auto  data_size  = static_cast<uint32_t>(Size);
-    constexpr auto  data_div   = Derived::get_size_div(data_size);
+    constexpr auto  data_div   = Impl::get_size_div(data_size);
     static uint32_t local_sink = 0;
 
     DMA_InitTypeDef dma_init;
@@ -241,11 +241,11 @@ dma_wrap_base<Derived>::periph_to_mem(volatile uint16_t *periph, size_t size)
 }
 
 // TODO: consider merging all routines below into `start()` and `stop()` methods
-template<class Derived>
+template<class Impl>
 template<bool EnableTC, bool EnableHT, bool EnableErr>
-void dma_wrap_base<Derived>::enable_events()
+void dma_wrap_base<Impl>::enable_events_irq()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
+    constexpr auto stream = Impl::get_stream_ptr();
     constexpr auto flags  = (EnableTC ? DMA_IT_TC : 0)
                             | (EnableHT ? DMA_IT_HT : 0)
                             | (EnableErr ? DMA_IT_TE : 0);
@@ -253,11 +253,11 @@ void dma_wrap_base<Derived>::enable_events()
     DMA_ITConfig(stream, flags, ENABLE);
 }
 
-template<class Derived>
+template<class Impl>
 template<bool DisableTC, bool DisableHT, bool DisableErr>
-void dma_wrap_base<Derived>::disable_events()
+void dma_wrap_base<Impl>::disable_events()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
+    constexpr auto stream = Impl::get_stream_ptr();
     constexpr auto flags  = (DisableTC ? DMA_IT_TC : 0)
                             | (DisableHT ? DMA_IT_HT : 0)
                             | (DisableErr ? DMA_IT_TE : 0);
@@ -265,84 +265,84 @@ void dma_wrap_base<Derived>::disable_events()
     DMA_ITConfig(stream, flags, DISABLE);
 }
 
-template<class Derived>
-void dma_wrap_base<Derived>::enable()
+template<class Impl>
+void dma_wrap_base<Impl>::enable()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
+    constexpr auto stream = Impl::get_stream_ptr();
     DMA_Cmd(stream, ENABLE);
 }
 
-template<class Derived>
-void dma_wrap_base<Derived>::disable()
+template<class Impl>
+void dma_wrap_base<Impl>::disable()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
+    constexpr auto stream = Impl::get_stream_ptr();
     DMA_Cmd(stream, DISABLE);
 }
 
-template<class Derived>
-bool dma_wrap_base<Derived>::tc()
+template<class Impl>
+bool dma_wrap_base<Impl>::tc()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag   = Derived::get_tc_flag();
+    constexpr auto stream = Impl::get_stream_ptr();
+    constexpr auto flag   = Impl::get_tc_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
-template<class Derived>
-bool dma_wrap_base<Derived>::ht()
+template<class Impl>
+bool dma_wrap_base<Impl>::ht()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag   = Derived::get_ht_flag();
+    constexpr auto stream = Impl::get_stream_ptr();
+    constexpr auto flag   = Impl::get_ht_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
-template<class Derived>
-bool dma_wrap_base<Derived>::err()
+template<class Impl>
+bool dma_wrap_base<Impl>::err()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag   = Derived::get_err_flag();
+    constexpr auto stream = Impl::get_stream_ptr();
+    constexpr auto flag   = Impl::get_err_flag();
     return DMA_GetFlagStatus(stream, flag) == SET;
 }
 
-template<class Derived>
-void dma_wrap_base<Derived>::clear_tc()
+template<class Impl>
+void dma_wrap_base<Impl>::clear_tc()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag   = Derived::get_tc_flag();
-    constexpr auto iflag  = Derived::get_tc_if();
+    constexpr auto stream = Impl::get_stream_ptr();
+    constexpr auto flag   = Impl::get_tc_flag();
+    constexpr auto iflag  = Impl::get_tc_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
 }
 
-template<class Derived>
-void dma_wrap_base<Derived>::clear_ht()
+template<class Impl>
+void dma_wrap_base<Impl>::clear_ht()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag   = Derived::get_ht_flag();
-    constexpr auto iflag  = Derived::get_ht_if();
+    constexpr auto stream = Impl::get_stream_ptr();
+    constexpr auto flag   = Impl::get_ht_flag();
+    constexpr auto iflag  = Impl::get_ht_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
 }
 
-template<class Derived>
-void dma_wrap_base<Derived>::clear_err()
+template<class Impl>
+void dma_wrap_base<Impl>::clear_err()
 {
-    constexpr auto stream = Derived::get_stream_ptr();
-    constexpr auto flag   = Derived::get_err_flag();
-    constexpr auto iflag  = Derived::get_err_if();
+    constexpr auto stream = Impl::get_stream_ptr();
+    constexpr auto flag   = Impl::get_err_flag();
+    constexpr auto iflag  = Impl::get_err_if();
 
     DMA_ClearFlag(stream, flag);
     DMA_ClearITPendingBit(stream, iflag);
 }
 
-template<class Derived>
-auto dma_wrap_base<Derived>::bytes_left()
+template<class Impl>
+auto dma_wrap_base<Impl>::bytes_left()
 {
-    constexpr auto stream     = Derived::get_stream_ptr();
+    constexpr auto stream     = Impl::get_stream_ptr();
     auto           items_left = DMA_GetCurrDataCounter(stream);
     auto           reg        = stream->CR & 0x6000; // Fetch data size
-    auto           div        = Derived::get_size_div(reg);
+    auto           div        = Impl::get_size_div(reg);
 
     return reg * div;
 }

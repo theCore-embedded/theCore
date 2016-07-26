@@ -1,6 +1,6 @@
 //!
 //! \file
-//! \brief STM32F4xx USART driver
+//! \brief STM32 USART driver
 //!
 
 #ifndef PLATFORM_USART_BUS_HPP_
@@ -63,7 +63,7 @@ namespace ecl
 //! Thus, redefinition of the config class for given USART will result in
 //! compilation errors. *Good practice is to place all USART configuration
 //! class in the single target-related header.*
-template< usart_device dev >
+template<usart_device dev>
 struct usart_cfg
 {
     // Always assert
@@ -75,9 +75,9 @@ struct usart_cfg
 
 struct bypass_console;
 
-//! \brief STM32F4 USART bus
+//! \brief STM32 USART bus
 //!
-template< usart_device dev >
+template<usart_device dev>
 class usart_bus
 {
     // Reuses usart_bus in order to initialize bypass console driver
@@ -95,7 +95,7 @@ public:
 
     //!
     //! \brief Destructs a bus.
-    ~usart_bus();
+    ~usart_bus() = default;
 
     //!
     //! \brief Lazy initialization.
@@ -111,7 +111,7 @@ public:
     void set_rx(uint8_t *rx, size_t size);
 
     //!
-    //! \brief Sets rx buffer made-up from sequence of similar bytes.
+    //! \brief Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
     //!
@@ -197,8 +197,8 @@ private:
     uint8_t         m_status;        //! Tracks device status.
 };
 
-template< usart_device dev >
-usart_bus< dev >::usart_bus()
+template<usart_device dev>
+usart_bus<dev>::usart_bus()
     :m_event_handler{}
     ,m_tx{nullptr}
     ,m_tx_size{0}
@@ -211,14 +211,8 @@ usart_bus< dev >::usart_bus()
 
 }
 
-template< usart_device dev >
-usart_bus< dev >::~usart_bus()
-{
-
-}
-
-template< usart_device dev >
-ecl::err usart_bus< dev >::init()
+template<usart_device dev>
+ecl::err usart_bus<dev>::init()
 {
     USART_InitTypeDef init_struct;
 
@@ -229,15 +223,15 @@ ecl::err usart_bus< dev >::init()
 
     // SPL-like checks, but in compile time.
 
-    static_assert(IS_USART_WORD_LENGTH(usart_cfg< dev >::word_len),
+    static_assert(IS_USART_WORD_LENGTH(usart_cfg<dev>::word_len),
                   "Word length configuration is invalid");
-    static_assert(IS_USART_STOPBITS(usart_cfg< dev >::stop_bit),
+    static_assert(IS_USART_STOPBITS(usart_cfg<dev>::stop_bit),
                   "Stop bits configuration is invalid");
-    static_assert(IS_USART_PARITY(usart_cfg< dev >::parity),
+    static_assert(IS_USART_PARITY(usart_cfg<dev>::parity),
                   "Parity configuration is invalid");
-    static_assert(IS_USART_MODE(usart_cfg< dev >::mode),
+    static_assert(IS_USART_MODE(usart_cfg<dev>::mode),
                   "USART mode is invalid");
-    static_assert(IS_USART_HARDWARE_FLOW_CONTROL(usart_cfg< dev >::hw_flow),
+    static_assert(IS_USART_HARDWARE_FLOW_CONTROL(usart_cfg<dev>::hw_flow),
                   "Flow control configuration is invalid");
 
     // Must be optimized at compile time
@@ -250,12 +244,12 @@ ecl::err usart_bus< dev >::init()
     rcc_fn(rcc_periph, ENABLE);
 
     // Configure UART
-    init_struct.USART_BaudRate             = usart_cfg< dev >::baudrate;
-    init_struct.USART_WordLength           = usart_cfg< dev >::word_len;
-    init_struct.USART_StopBits             = usart_cfg< dev >::stop_bit;
-    init_struct.USART_Parity               = usart_cfg< dev >::parity;
-    init_struct.USART_Mode                 = usart_cfg< dev >::mode;
-    init_struct.USART_HardwareFlowControl  = usart_cfg< dev >::hw_flow;
+    init_struct.USART_BaudRate             = usart_cfg<dev>::baudrate;
+    init_struct.USART_WordLength           = usart_cfg<dev>::word_len;
+    init_struct.USART_StopBits             = usart_cfg<dev>::stop_bit;
+    init_struct.USART_Parity               = usart_cfg<dev>::parity;
+    init_struct.USART_Mode                 = usart_cfg<dev>::mode;
+    init_struct.USART_HardwareFlowControl  = usart_cfg<dev>::hw_flow;
 
     // Init UART
     USART_Init(usart, &init_struct);
@@ -275,8 +269,8 @@ ecl::err usart_bus< dev >::init()
     return ecl::err::ok;
 }
 
-template< usart_device dev >
-void usart_bus< dev >::set_rx(uint8_t *rx, size_t size)
+template<usart_device dev>
+void usart_bus<dev>::set_rx(uint8_t *rx, size_t size)
 {
     // TODO: assert if not initialized
     if (!inited()) {
@@ -287,8 +281,8 @@ void usart_bus< dev >::set_rx(uint8_t *rx, size_t size)
     m_rx_size = size;
 }
 
-template< usart_device dev >
-void usart_bus< dev >::set_tx(size_t size, uint8_t fill_byte)
+template<usart_device dev>
+void usart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 {
     if (!inited()) {
         return;
@@ -299,8 +293,8 @@ void usart_bus< dev >::set_tx(size_t size, uint8_t fill_byte)
     (void) fill_byte;
 }
 
-template< usart_device dev >
-void usart_bus< dev >::set_tx(const uint8_t *tx, size_t size)
+template<usart_device dev>
+void usart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 {
     if (!inited()) {
         return;
@@ -312,15 +306,15 @@ void usart_bus< dev >::set_tx(const uint8_t *tx, size_t size)
 }
 
 
-template< usart_device dev >
-void usart_bus< dev >::set_handler(const handler_fn &handler)
+template<usart_device dev>
+void usart_bus<dev>::set_handler(const handler_fn &handler)
 {
     // It is possible (and recommended) to set handler before bus init.
     m_event_handler = handler;
 }
 
-template< usart_device dev >
-void usart_bus< dev >::reset_buffers()
+template<usart_device dev>
+void usart_bus<dev>::reset_buffers()
 {
     // TODO: assert if not initialized
     if (!inited()) {
@@ -336,14 +330,14 @@ void usart_bus< dev >::reset_buffers()
     clear_tx_done();
 }
 
-template< usart_device dev >
-void usart_bus< dev >::reset_handler()
+template<usart_device dev>
+void usart_bus<dev>::reset_handler()
 {
     m_event_handler = handler_fn{};
 }
 
-template< usart_device dev >
-ecl::err usart_bus< dev >::do_xfer()
+template<usart_device dev>
+ecl::err usart_bus<dev>::do_xfer()
 {
     // TODO: assert if not initialized
     if (!inited()) {
@@ -382,8 +376,8 @@ ecl::err usart_bus< dev >::do_xfer()
 // -----------------------------------------------------------------------------
 // Private members
 
-template< usart_device dev >
-constexpr auto usart_bus< dev >::pick_rcc()
+template<usart_device dev>
+constexpr auto usart_bus<dev>::pick_rcc()
 {
     // USART1 and USART6 are on APB2
     // USART2, USART3, UART4, UART5 are on APB1
@@ -407,8 +401,8 @@ constexpr auto usart_bus< dev >::pick_rcc()
     return static_cast< uint32_t >(-1);
 }
 
-template< usart_device dev >
-constexpr auto usart_bus< dev >::pick_rcc_fn()
+template<usart_device dev>
+constexpr auto usart_bus<dev>::pick_rcc_fn()
 {
     // USART1 and USART6 are on APB2
     // USART2, USART3, UART4, UART5 are on APB1
@@ -430,8 +424,8 @@ constexpr auto usart_bus< dev >::pick_rcc_fn()
     }
 }
 
-template< usart_device dev >
-constexpr auto usart_bus< dev >::pick_irqn()
+template<usart_device dev>
+constexpr auto usart_bus<dev>::pick_irqn()
 {
     constexpr auto usart = pick_usart();
 
@@ -452,8 +446,8 @@ constexpr auto usart_bus< dev >::pick_irqn()
     }
 }
 
-template< usart_device dev >
-constexpr auto usart_bus< dev >::pick_usart()
+template<usart_device dev>
+constexpr auto usart_bus<dev>::pick_usart()
 {
     switch (dev) {
     case usart_device::dev1:
@@ -476,8 +470,8 @@ constexpr auto usart_bus< dev >::pick_usart()
     };
 }
 
-template< usart_device dev >
-void usart_bus< dev >::irq_handler()
+template<usart_device dev>
+void usart_bus<dev>::irq_handler()
 {
     constexpr auto usart = pick_usart();
     constexpr auto irqn  = pick_irqn();

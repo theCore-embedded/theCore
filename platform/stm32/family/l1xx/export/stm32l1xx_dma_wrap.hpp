@@ -203,7 +203,7 @@ dma_wrap_base<Derived>::periph_to_mem(volatile uint16_t *periph, size_t size)
 // TODO: consider merging all routines below into `start()` and `stop()` methods
 template<class Derived>
 template<bool EnableTC, bool EnableHT, bool EnableErr>
-void dma_wrap_base<Derived>::enable_events()
+void dma_wrap_base<Derived>::enable_events_irq()
 {
     constexpr auto channel = Derived::get_spl_channel();
     constexpr auto flags   = (EnableTC ? DMA_IT_TC : 0)
