@@ -120,7 +120,7 @@ public:
     periph_to_mem(volatile uint16_t *periph, size_t size);
 
     // TODO: consider merging enable_events_irq()/enable() routines into `start()` method
-    // and disable_events()/disable() into `stop()` method
+    // and disable_events_irq()/disable() into `stop()` method
 
     //! Enables IRQ for the events from DMA entity.
     //! \pre  DMA was initialized by calling init() method.

@@ -255,7 +255,7 @@ void dma_wrap_base<Impl>::enable_events_irq()
 
 template<class Impl>
 template<bool DisableTC, bool DisableHT, bool DisableErr>
-void dma_wrap_base<Impl>::disable_events()
+void dma_wrap_base<Impl>::disable_events_irq()
 {
     constexpr auto stream = Impl::get_stream_ptr();
     constexpr auto flags  = (DisableTC ? DMA_IT_TC : 0)
@@ -349,24 +349,36 @@ auto dma_wrap_base<Impl>::bytes_left()
 
 //------------------------------------------------------------------------------
 
+//! DMA wrapper for STM32F4XX.
+//! \tparam DMA stream, acoording to RM.
+//! \tparam DMA channel, according to RM.
 template<dma_stream Stream, dma_channel Channel>
 struct dma_wrap : dma_wrap_base<dma_wrap<Stream, Channel>>
 {
     constexpr static auto stream  = Stream;
     constexpr static auto channel = Channel;
 
+    //! Gets a pointer to a stream DMA object, suitable for use with SPL.
     constexpr static auto get_stream_ptr();
+    //! Gets stream DMA number, according to RM.
     constexpr static auto get_stream_number();
+    //! Gets size divider for given data size bits from DMA control register.
     constexpr static auto get_size_div(uint32_t data_size);
-
+    //! Gets RCC peripheral, associated with DMA.
     constexpr static auto get_rcc();
 
+    //! Gets error flag of the DMA.
     constexpr static auto get_err_flag();
+    //! Gets half-transfer flag of the DMA.
     constexpr static auto get_ht_flag();
+    //! Gets transfer-complete flag of the DMA.
     constexpr static auto get_tc_flag();
 
+    //! Gets error interrupt flag of the DMA.
     constexpr static auto get_err_if();
+    //! Gets half-transfer interrupt flag of the DMA.
     constexpr static auto get_ht_if();
+    //! Gets transfer-complete interrupt flag of the DMA.
     constexpr static auto get_tc_if();
 };
 

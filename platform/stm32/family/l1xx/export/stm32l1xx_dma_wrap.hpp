@@ -215,7 +215,7 @@ void dma_wrap_base<Derived>::enable_events_irq()
 
 template<class Derived>
 template<bool DisableTC, bool DisableHT, bool DisableErr>
-void dma_wrap_base<Derived>::disable_events()
+void dma_wrap_base<Derived>::disable_events_irq()
 {
     constexpr auto channel = Derived::get_spl_channel();
     constexpr auto flags   = (DisableTC ? DMA_IT_TC : 0)
@@ -272,8 +272,6 @@ void dma_wrap_base<Derived>::clear_tc()
     DMA_ClearITPendingBit(iflag);
     DMA_ClearFlag(gflag);
     DMA_ClearITPendingBit(giflag);
-
-    Derived::handle_global_interrupt();
 }
 
 template<class Derived>
@@ -284,8 +282,6 @@ void dma_wrap_base<Derived>::clear_ht()
 
     DMA_ClearFlag(flag);
     DMA_ClearITPendingBit(iflag);
-
-    Derived::handle_global_interrupt();
 }
 
 template<class Derived>
@@ -296,8 +292,6 @@ void dma_wrap_base<Derived>::clear_err()
 
     DMA_ClearFlag(flag);
     DMA_ClearITPendingBit(iflag);
-
-    Derived::handle_global_interrupt();
 }
 
 template<class Derived>
@@ -313,27 +307,38 @@ auto dma_wrap_base<Derived>::bytes_left()
 
 //------------------------------------------------------------------------------
 
+//! DMA wrapper for STM32L1XX.
+//! \tparam Channel DMA channel, according to RM.
 template<dma_channel Channel>
 struct dma_wrap : dma_wrap_base<dma_wrap<Channel>>
 {
     static constexpr auto channel = Channel;
 
+    //! Gets a pointer to a channel object, compatible with SPL functions.
     constexpr static auto get_spl_channel();
+    //! Gets size divider for given data size bits from DMA control register.
     constexpr static auto get_size_div(uint32_t data_size);
-
+    //! Gets RCC peripheral, associated with DMA.
     constexpr static auto get_rcc();
 
+    //! Gets error flag of the DMA.
     constexpr static auto get_err_flag();
+    //! Gets half-transfer flag of the DMA.
     constexpr static auto get_ht_flag();
+    //! Gets transfer-complete flag of the DMA.
     constexpr static auto get_tc_flag();
+    //! Gets global flag of the DMA.
     constexpr static auto get_global_flag();
 
-    constexpr static auto get_err_if();
-    constexpr static auto get_ht_if();
-    constexpr static auto get_tc_if();
-    constexpr static auto get_global_if();
 
-    constexpr static void handle_global_interrupt();
+    //! Gets error interrupt flag of the DMA.
+    constexpr static auto get_err_if();
+    //! Gets half-transfer interrupt flag of the DMA.
+    constexpr static auto get_ht_if();
+    //! Gets transfer-complete interrupt flag of the DMA.
+    constexpr static auto get_tc_if();
+    //! Gets global interrupt flag of the DMA.
+    constexpr static auto get_global_if();
 };
 
 template<dma_channel Channel>
@@ -634,19 +639,6 @@ constexpr auto dma_wrap<Channel>::get_global_if()
         case dma_channel::dma2_5:
             return DMA2_IT_GL5;
     }
-}
-
-template<dma_channel Channel>
-constexpr void dma_wrap<Channel>::handle_global_interrupt()
-{
-#if 0
-    constexpr auto err_flag   = get_err_flag();
-    constexpr auto err_iflag  = get_err_if();
-    constexpr auto tc_flag    = get_tc_flag();
-    constexpr auto tc_iflag   = get_tc_if();
-    constexpr auto ht_flag    = get_ht_flag();
-    constexpr auto ht_iflag   = get_ht_if();
-#endif
 }
 
 } // namespace ecl

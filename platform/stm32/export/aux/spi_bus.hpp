@@ -572,7 +572,7 @@ void spi_i2s_bus<dev>::irq_handler()
             config::dma_tx::clear_tc();
 
             if (!is_circular_mode()) {
-                config::dma_tx::template disable_events();
+                config::dma_tx::template disable_events_irq();
                 m_status |= tx_complete;
             }
 
@@ -608,7 +608,7 @@ void spi_i2s_bus<dev>::irq_handler()
             config::dma_rx::clear_tc();
 
             if (!is_circular_mode()) {
-                config::dma_rx::template disable_events();
+                config::dma_rx::template disable_events_irq();
                 m_status |= rx_complete;
             }
 
