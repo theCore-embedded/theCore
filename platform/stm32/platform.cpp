@@ -1,9 +1,6 @@
 #include "platform/execution.h"
 #include "common/irq.hpp"
 
-#include <stm32l1xx_rcc.h>
-#include <stm32l1xx_usart.h>
-
 #if CONFIG_BYPASS_CONSOLE_ENABLED
 extern void bypass_console_init();
 #endif // CONFIG_BYPASS_CONSOLE_ENABLED

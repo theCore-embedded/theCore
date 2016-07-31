@@ -431,10 +431,9 @@ int sd_spi< spi_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const argumen
     crc |= 0x1; // EOT flag
 
     // Init a transaction
-    const uint8_t dummy = 0xff;
-    sd_ret = spi_send(&dummy, 1);
+    spi_send_dummy(1);
 
-    // Comand body
+    // Command body
     const uint8_t to_send[] =
     { CMD_idx, arg[0], arg[1], arg[2], arg[3], crc };
 
@@ -444,7 +443,7 @@ int sd_spi< spi_dev, GPIO_CS >::send_CMD(R &resp, uint8_t CMD_idx, const argumen
         return sd_ret;
     }
 
-    // Rerieve a result
+    // Retrieve a result
     sd_ret = receive_response(resp);
     if (sd_ret < 0) {
         return sd_ret;

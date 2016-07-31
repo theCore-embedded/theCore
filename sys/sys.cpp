@@ -97,7 +97,7 @@ extern "C" void core_main()
 extern "C" void early_main()
 {
     // Platform console subsystem is ready at this stage
-    for (auto c : "Welcome to theCore\r\n") { ecl::bypass_putc(c); }
+    for (auto c : "\r\nWelcome to theCore\r\n") { ecl::bypass_putc(c); }
 
     extern uint32_t __init_array_start;
     extern uint32_t __init_array_end;

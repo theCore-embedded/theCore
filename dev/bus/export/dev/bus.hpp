@@ -366,6 +366,7 @@ ecl::err generic_bus< PBus >::set_buffers(size_t size, uint8_t fill_byte)
 
     platform_handle().reset_buffers();
     platform_handle().set_tx(size, fill_byte);
+    platform_handle().set_rx(nullptr, 0);
     return err::ok;
 }
 
@@ -438,7 +439,7 @@ ecl::err generic_bus< PBus >::xfer(const bus_handler &handler, async_type type)
     cb() = handler;
 
     if (type == async_type::deferred) {
-        // Xfer will be executed when upon user's will.
+        // Xfer will be executed upon user's will.
         return err::ok;
     }
 
@@ -488,8 +489,6 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
 
     if (last_event) {
         // Spurious events are not allowed
-        // TODO #27: platform assert here is required since this routine
-        // is likely will be executed in IRQ context
         ecl_assert(!(m_state & xfer_served));
 
         m_state |= xfer_served;

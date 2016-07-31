@@ -1,9 +1,7 @@
-add_library(stm32l1xx
-        platform.cpp
-        system_stm32l1xx.c)
+add_library(stm32 platform.cpp)
 
 # Get proper MCU definitions
-include(mcu_cfg.cmake)
+add_subdirectory(family)
 
 message(STATUS "Checking [CONFIG_MAX_ISR_PRIORITY]...")
 if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
@@ -12,24 +10,18 @@ if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
             " using default value: ${CONFIG_MAX_ISR_PRIORITY}")
 endif()
 
-target_include_directories(stm32l1xx PUBLIC export)
-target_link_libraries(stm32l1xx PUBLIC cmsis)
-target_link_libraries(stm32l1xx PUBLIC types)
-target_link_libraries(stm32l1xx PUBLIC stm32l1xx_spl)
-target_link_libraries(stm32l1xx PUBLIC platform_common)
-target_link_libraries(stm32l1xx PUBLIC arch)
+target_include_directories(stm32 PUBLIC export)
 
-target_compile_definitions(stm32l1xx PUBLIC
+target_link_libraries(stm32 PUBLIC stm32_family)
+target_link_libraries(stm32 PUBLIC types)
+target_link_libraries(stm32 PUBLIC platform_common)
+target_link_libraries(stm32 PUBLIC arch)
+
+target_compile_definitions(stm32 PUBLIC
         -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
 
-# TODO: check that configuration values are defined
-target_compile_definitions(stm32l1xx PUBLIC
-        -D${ST_DEVICE}
-        -DHSE_VALUE=${CONFIG_PLATFORM_HSE_VAL}
-        -DCONFIG_IRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
-
 # Pick console driver
-message(STATUS "STM32L1XX: Checking [CONFIG_USE_CONSOLE]...")
+message(STATUS "STM32: Checking [CONFIG_USE_CONSOLE]...")
 if(${CONFIG_USE_CONSOLE})
     # TODO: #83 - config name must be reviewed
     if(NOT DEFINED CONFIG_CONSOLE_DEVICE_NUM)
@@ -45,15 +37,15 @@ if(${CONFIG_USE_CONSOLE})
 
     configure_file(templates/console.hpp.in
             ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
-    target_include_directories(stm32l1xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated//)
+    target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 
     # Helps to determine if bypass driver must be enabled and inited
-    target_compile_definitions(stm32l1xx PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
+    target_compile_definitions(stm32 PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
     # Bypass console implementation
-    target_sources(stm32l1xx PRIVATE console.cpp)
+    target_sources(stm32 PRIVATE console.cpp)
     message(STATUS "Bypass console is supported and enabled by the platform")
 else()
     configure_file(templates/console_stub.hpp.in
             ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
-    target_include_directories(stm32l1xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated//)
+    target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 endif()

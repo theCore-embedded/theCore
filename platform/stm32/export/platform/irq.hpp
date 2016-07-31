@@ -1,10 +1,10 @@
 //! \file
-//! \brief stm32l1xx IRQ interface.
+//! \brief STM32 IRQ interface.
 //!
 #ifndef PLATFORM_IRQ_HPP_
 #define PLATFORM_IRQ_HPP_
 
-#include <stm32l1xx.h>
+#include <stm32_device.hpp>
 #include <ecl/err.hpp>
 
 #include <functional>

@@ -20,7 +20,7 @@ ssize_t file::read(uint8_t *buf, size_t size)
     ecl_assert(size); // TODO: for now
 
     if (m_opened) {
-        size_t read;
+        unsigned read;
 
         FRESULT res = pf_read(m_fs, reinterpret_cast< void* >(buf), size, &read);
 
@@ -52,7 +52,7 @@ ssize_t file::write(const uint8_t *buf, size_t size)
 #endif
 }
 
-int file::seek(off_t offt, seekdir way)
+int file::seek(off_t offt, fs::seekdir way)
 {
 #if _USE_LSEEK
     if (m_opened) {

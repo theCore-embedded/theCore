@@ -53,7 +53,7 @@ public:
     {
         mock("platform_bus")
                 .actualCall("set_tx")
-                .withParameter("rx_size", size)
+                .withParameter("tx_size", size)
                 .withParameter("fill_byte", fill_byte);
     }
 

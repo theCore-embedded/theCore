@@ -1,9 +1,7 @@
 //! \file
 //! \brief Platform console implementation
 
-#include <stm32l1xx_rcc.h>
-#include <stm32l1xx_usart.h>
-
+#include <stm32_device.hpp>
 #include "platform/console.hpp"
 
 namespace ecl

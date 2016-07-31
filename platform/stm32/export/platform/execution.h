@@ -6,8 +6,7 @@
 
 #include <cstdint>
 
-#include <stm32l1xx.h>
-#include <core_cm3.h>
+#include <stm32_device.hpp>
 
 
 //! \brief Waits in loop for a given amount of milliseconds.

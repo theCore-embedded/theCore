@@ -267,12 +267,17 @@ TEST(bus_is_ready, fill_tx)
 {
     constexpr size_t fill_size = 32;
     constexpr uint8_t fill_byte = 0xae;
+    uint8_t *rx_expected = nullptr;
 
     mock("platform_bus").expectOneCall("reset_buffers");
     mock("platform_bus")
             .expectOneCall("set_tx")
-            .withParameter("rx_size", fill_size)
+            .withParameter("tx_size", fill_size)
             .withParameter("fill_byte", fill_byte);
+    mock("platform_bus")
+            .expectOneCall("set_rx")
+            .withParameter("rx_buf", rx_expected)
+            .withParameter("size", 0);
 
     auto rc = bus_t::set_buffers(fill_size, fill_byte);
     CHECK_EQUAL(ecl::err::ok, rc);

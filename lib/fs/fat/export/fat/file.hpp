@@ -18,7 +18,7 @@ public:
 
     virtual ssize_t read(uint8_t *buf, size_t size);
     virtual ssize_t write(const uint8_t *buf, size_t size);
-    virtual int seek(off_t offt, seekdir way = seekdir::beg);
+    virtual int seek(off_t offt, fs::seekdir way = fs::seekdir::beg);
     virtual off_t tell();
     virtual int close();
 
