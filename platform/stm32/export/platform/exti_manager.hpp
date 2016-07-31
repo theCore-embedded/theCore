@@ -1,16 +1,14 @@
 //! \file
-//! \brief External interrupt manager for stm32f4xx platform.
-//! \todo Detailed description.
-#ifndef PLATFORM_EXTI_MANAGER_HPP_
-#define PLATFORM_EXTI_MANAGER_HPP_
+//! \brief External interrupt manager for STM32 platform.
+
+#ifndef STM32_EXTI_MANAGER_HPP_
+#define STM32_EXTI_MANAGER_HPP_
 
 #include <ecl/list.hpp>
-#include <aux/pin_descriptor.hpp>
 #include <common/irq.hpp>
+#include <stm32_device.hpp>
 
-#include "stm32f4xx_exti.h"
-#include "stm32f4xx_syscfg.h"
-#include "misc.h"
+#include "gpio_device.hpp"
 
 namespace ecl
 {
@@ -22,7 +20,7 @@ class exti_manager
 {
 public:
     //! Useful alias.
-    using callback = void(*)(void*);
+    using callback = void (*)(void *);
 
     //! External interrupt handler.
     //! \details An object of this class is linked into the intrusive list of
@@ -31,8 +29,9 @@ public:
     class handler
     {
         friend class exti_manager;
+
     public:
-        ecl::list_node  m_node;       //!< List node of the EXTI handlers list.
+        ecl::list_node m_node;       //!< List node of the EXTI handlers list.
 
         //! Constructs empty handler
         handler();
@@ -48,11 +47,11 @@ public:
 
     private:
         //! Calls this handler.
-        void operator ()();
+        void operator()();
 
-        void            *m_ctx;       //!< User-defined context.
-        callback        m_cb;         //!< User-defined callback.
-        uint32_t        m_exti_line;  //!< EXTI line that handled by this handler.
+        void     *m_ctx;       //!< User-defined context.
+        callback m_cb;         //!< User-defined callback.
+        uint32_t m_exti_line;  //!< EXTI line that handled by this handler.
     };
 
 public:
@@ -65,7 +64,7 @@ public:
     };
 
     //! Construction isn't allowed
-    exti_manager()  = delete;
+    exti_manager() = delete;
     //! Destruction isn't allowed
     ~exti_manager() = delete;
 
@@ -85,7 +84,7 @@ public:
     //! \sa unsubscribe()
     //! \param[out] h Unsubscribed handler of a GPIO event.
     //! \param[in]  t Trigger which will produce event.
-    template< typename Gpio >
+    template<typename Gpio>
     static void subscribe(handler &h, trigger t);
 
     //! Unsubscribes handler from any event.
@@ -103,7 +102,7 @@ public:
 
 private:
     //! Type of a grouped EXTI handlers container.
-    using handlers = list< handler, &handler::m_node >;
+    using handlers = list<handler, &handler::m_node>;
 
     //! Maps interrupts to EXTI lines.
     struct mapping
@@ -111,22 +110,22 @@ private:
         //! Direct event handlers count.
         //! \details Direct are from EXTI0 to EXTI4 - one to one relationship
         //! between EXTI and IRQ
-        static constexpr auto direct_cnt   = 5;
+        static constexpr auto direct_cnt = 5;
 
         //! Grouped event handlers.
         //! \details Two groups of EXTI:
         //! EXTI5  - EXTI9  resides on EXTI9_5_IRQn,
         //! EXTI10 - EXTI15 resides on EXTI15_10_IRQn,
-        static constexpr auto grouped_cnt  = 2;
+        static constexpr auto grouped_cnt = 2;
 
         //! Direct EXTI lines.
-        handler  *direct[direct_cnt]       = {};
+        handler  *direct[direct_cnt]  = {};
         //! Grouped IRQ lines.
-        handlers grouped[grouped_cnt]      = {};
+        handlers grouped[grouped_cnt] = {};
     };
 
     //! Gets EXTI line associated with GPIO.
-    template< class Gpio >
+    template<class Gpio>
     static constexpr auto gpio_to_exti();
 
     //! Gets direct array index associated with GPIO.
@@ -145,41 +144,42 @@ private:
     //! Checks if direct EXTI line is already used or not.
     //! \tparam Gpio   GPIO for which EXTI line will be configured.
     //! \return true if line is already used, false otherwise.
-    template< typename Gpio >
-    static std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() < EXTI_Line5, bool >
+    template<typename Gpio>
+    static std::enable_if_t<exti_manager::gpio_to_exti<Gpio>() < EXTI_Line5, bool>
     exti_used();
 
     //! Checks if EXTI line is already used or not.
     //! \tparam Gpio GPIO that feeds required EXTI line.
     //! \return true if line is already used, false otherwise.
-    template< typename Gpio >
-    static std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() >= EXTI_Line5, bool >
+    template<typename Gpio>
+    static std::enable_if_t<exti_manager::gpio_to_exti<Gpio>() >= EXTI_Line5, bool>
     exti_used();
 
     //! Platform-level EXTI configuration routine.
     //! \tparam     Gpio   GPIO for which EXTI line will be configured.
     //! \param[in]  t      Event/IRQ trigger.
-    template< typename Gpio >
+    template<typename Gpio>
     static void configure_line(trigger t);
 
     // TODO: rename it to 'tie_handler' to reflect state changes inside handler
     //! Saves direct EXTI handler object.
     //! \tparam     Gpio   GPIO for which EXTI object will be saved.
     //! \param[in]  h      EXTI handler.
-    template< typename Gpio >
-    static std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() < EXTI_Line5, bool >
+    template<typename Gpio>
+    static std::enable_if_t<exti_manager::gpio_to_exti<Gpio>() < EXTI_Line5, bool>
     save_handler(handler &h);
 
     //! Saves grouped EXTI handler object.
     //! \tparam     Gpio   GPIO for which EXTI object will be saved.
     //! \param[in]  h      EXTI handler.
-    template< typename Gpio >
-    static std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() >= EXTI_Line5, bool >
+    template<typename Gpio>
+    static std::enable_if_t<
+            exti_manager::gpio_to_exti<Gpio>() >= EXTI_Line5, bool>
     save_handler(handler &h);
 
     //! Type of POD storage that holds mapping structure.
     using mapping_storage =
-    std::aligned_storage< sizeof(mapping), alignof(mapping) >::type;
+    std::aligned_storage<sizeof(mapping), alignof(mapping)>::type;
 
     //! Storage holding IRQ to EXTI mapping.
     static mapping_storage m_storage;
@@ -190,34 +190,32 @@ private:
 
 //------------------------------------------------------------------------------
 
-template< class Gpio >
+template<class Gpio>
 void exti_manager::subscribe(handler &h, trigger t)
 {
     __disable_irq();
 
-    if (exti_used< Gpio >()) {
-        for(;;); // TODO: abort
+    if (exti_used<Gpio>()) {
+        for (;;) {} // TODO: abort
     }
 
-    save_handler< Gpio >(h);
+    save_handler<Gpio>(h);
 
     // Do not let EXTI fire unless user explicitely ask for it.
     mask(h);
-    configure_line< Gpio >(t);
+    configure_line<Gpio>(t);
 
     __enable_irq();
 }
 
 //------------------------------------------------------------------------------
 
-template< class Gpio >
+template<class Gpio>
 constexpr auto exti_manager::gpio_to_exti()
 {
     // Hackish, but fast.
     // TODO: rich comment about it.
-    constexpr auto shift =
-            static_cast< typename std::underlying_type< gpio_num >::type >
-            (Gpio::pin);
+    constexpr auto shift = static_cast<typename std::underlying_type<gpio_num>::type>(Gpio::pin);
 
     return 1 << shift;
 }
@@ -226,61 +224,61 @@ constexpr auto exti_manager::exti_to_idx(uint32_t exti)
 {
     // TODO: avoid potential lookup table. Use clz for first 4 lines.
     switch (exti) {
-    // Direct EXTI index.
-    case EXTI_Line0:
-        return 0;
-    case EXTI_Line1:
-        return 1;
-    case EXTI_Line2:
-        return 2;
-    case EXTI_Line3:
-        return 3;
-    case EXTI_Line4:
-        return 4;
+        // Direct EXTI index.
+        case EXTI_Line0:
+            return 0;
+        case EXTI_Line1:
+            return 1;
+        case EXTI_Line2:
+            return 2;
+        case EXTI_Line3:
+            return 3;
+        case EXTI_Line4:
+            return 4;
 
-    // Grouped EXTI index
-    case EXTI_Line5:
-    case EXTI_Line6:
-    case EXTI_Line7:
-    case EXTI_Line8:
-    case EXTI_Line9:
-       return 0;
-    case EXTI_Line10:
-    case EXTI_Line11:
-    case EXTI_Line12:
-    case EXTI_Line13:
-    case EXTI_Line14:
-    case EXTI_Line15:
-       return 1;
+            // Grouped EXTI index
+        case EXTI_Line5:
+        case EXTI_Line6:
+        case EXTI_Line7:
+        case EXTI_Line8:
+        case EXTI_Line9:
+            return 0;
+        case EXTI_Line10:
+        case EXTI_Line11:
+        case EXTI_Line12:
+        case EXTI_Line13:
+        case EXTI_Line14:
+        case EXTI_Line15:
+            return 1;
 
-    default:
-        // TODO: Out of domain
-        return 0;
+        default:
+            // TODO: Out of domain
+            return 0;
     }
 }
 
-template< typename Gpio >
-std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() < EXTI_Line5, bool >
+template<typename Gpio>
+std::enable_if_t<exti_manager::gpio_to_exti<Gpio>() < EXTI_Line5, bool>
 exti_manager::exti_used()
 {
     // In direct EXTI, presence of a handler under the corresponding index
     // means that this line is already used.
 
-    constexpr auto exti = gpio_to_exti< Gpio >();
-    constexpr auto idx = exti_to_idx(exti);
+    constexpr auto exti = gpio_to_exti<Gpio>();
+    constexpr auto idx  = exti_to_idx(exti);
 
     return map()->direct[idx] != nullptr;
 }
 
-template< typename Gpio >
-std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() >= EXTI_Line5, bool >
+template<typename Gpio>
+std::enable_if_t<exti_manager::gpio_to_exti<Gpio>() >= EXTI_Line5, bool>
 exti_manager::exti_used()
 {
     // In grouped EXTIs a handler with the same exti line reside somewhere
     // in the list.
 
-    constexpr auto exti = gpio_to_exti< Gpio >();
-    constexpr auto idx = exti_to_idx(exti);
+    constexpr auto exti = gpio_to_exti<Gpio>();
+    constexpr auto idx  = exti_to_idx(exti);
 
     for (auto &h : map()->grouped[idx]) {
         if (h.m_exti_line == exti) {
@@ -291,59 +289,57 @@ exti_manager::exti_used()
     return false;
 }
 
-template< typename Gpio >
+template<typename Gpio>
 void exti_manager::configure_line(trigger t)
 {
-    constexpr auto pinsource
-        = static_cast< std::underlying_type< gpio_num >::type >(Gpio::pin);
-    constexpr auto portsource
-        = static_cast< std::underlying_type< gpio_port >::type >(Gpio::port);
-    constexpr auto exti = gpio_to_exti< Gpio >();
+    constexpr auto pinsource  = static_cast< std::underlying_type<gpio_num>::type>(Gpio::pin);
+    constexpr auto portsource = static_cast< std::underlying_type<gpio_port>::type>(Gpio::port);
+    constexpr auto exti       = gpio_to_exti<Gpio>();
 
     EXTI_InitTypeDef    exti_init;
     EXTITrigger_TypeDef exti_trigger;
 
-    // Only signle GPIO can act as a source for EXTI line. See RM.
+    // Only single GPIO can act as a source for EXTI line. See RM.
 
     SYSCFG_EXTILineConfig(portsource, pinsource);
 
     switch (t) {
         case trigger::falling:
-            exti_trigger =  EXTI_Trigger_Falling;
+            exti_trigger = EXTI_Trigger_Falling;
             break;
         case trigger::rising:
-            exti_trigger =  EXTI_Trigger_Rising;
+            exti_trigger = EXTI_Trigger_Rising;
             break;
         case trigger::both:
-            exti_trigger =  EXTI_Trigger_Rising_Falling;
+            exti_trigger = EXTI_Trigger_Rising_Falling;
             break;
     }
 
-    exti_init.EXTI_Line     = exti;
-    exti_init.EXTI_Mode     = EXTI_Mode_Interrupt;
-    exti_init.EXTI_Trigger  = exti_trigger;
-    exti_init.EXTI_LineCmd  = ENABLE;
+    exti_init.EXTI_Line    = exti;
+    exti_init.EXTI_Mode    = EXTI_Mode_Interrupt;
+    exti_init.EXTI_Trigger = exti_trigger;
+    exti_init.EXTI_LineCmd = ENABLE;
 
     EXTI_Init(&exti_init);
 }
 
-template< typename Gpio >
-std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() < EXTI_Line5, bool >
+template<typename Gpio>
+std::enable_if_t<exti_manager::gpio_to_exti<Gpio>() < EXTI_Line5, bool>
 exti_manager::save_handler(handler &h)
 {
-    constexpr auto exti = gpio_to_exti< Gpio >();
-    constexpr auto idx = exti_to_idx(exti);
+    constexpr auto exti = gpio_to_exti<Gpio>();
+    constexpr auto idx  = exti_to_idx(exti);
 
     h.m_exti_line = exti;
     map()->direct[idx] = &h;
 }
 
-template< typename Gpio >
-std::enable_if_t< exti_manager::gpio_to_exti< Gpio >() >= EXTI_Line5, bool >
+template<typename Gpio>
+std::enable_if_t<exti_manager::gpio_to_exti<Gpio>() >= EXTI_Line5, bool>
 exti_manager::save_handler(handler &h)
 {
-    constexpr auto exti = gpio_to_exti< Gpio >();
-    constexpr auto idx = exti_to_idx(exti);
+    constexpr auto exti = gpio_to_exti<Gpio>();
+    constexpr auto idx  = exti_to_idx(exti);
 
     h.m_exti_line = exti;
     map()->grouped[idx].push_back(h);
@@ -351,9 +347,9 @@ exti_manager::save_handler(handler &h)
 
 constexpr auto exti_manager::map()
 {
-    return reinterpret_cast< mapping* >(&m_storage);
+    return reinterpret_cast<mapping *>(&m_storage);
 }
 
 } // namespace ecl
 
-#endif // PLATFORM_EXTI_MANAGER_HPP_
+#endif // STM32_EXTI_MANAGER_HPP_

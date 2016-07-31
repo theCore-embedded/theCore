@@ -1,11 +1,8 @@
+//! \file
+//! \brief EXTI manager implementation for STM32 platform
+
 #include <platform/exti_manager.hpp>
 #include <common/irq.hpp>
-
-#include "stm32f4xx_exti.h"
-#include "stm32f4xx_rcc.h"
-#include "stm32f4xx_syscfg.h"
-#include "misc.h"
-
 #include <utility>
 
 namespace ecl
