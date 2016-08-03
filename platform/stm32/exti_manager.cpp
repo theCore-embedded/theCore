@@ -12,30 +12,21 @@ exti_manager::mapping_storage exti_manager::m_storage;
 
 void exti_manager::init()
 {
-    // Maps IRQ into appropriate handler call
-    static constexpr std::pair< size_t, irq_num > irq_mapping[] =
-    {
-        // Direct IRQs
-        { 0, EXTI0_IRQn     },
-        { 1, EXTI1_IRQn     },
-        { 2, EXTI2_IRQn     },
-        { 3, EXTI3_IRQn     },
-        { 4, EXTI4_IRQn     },
+    // Mapping is defined in EXTI wrapper module for corresponding family.
 
-        // Grouped EXTI IRQs
-        { 0, EXTI9_5_IRQn   },
-        { 1, EXTI15_10_IRQn },
-    };
-
-    for (auto &p : irq_mapping)
-    {
-        irq::subscribe(p.second, [&p]{
-            p.second > EXTI4_IRQn
-                    ? group_isr(p.first, p.second)
-                    : direct_isr(p.first, p.second);
+    for (auto &p : exti_irq_idx_direct_mapping) {
+        irq::subscribe(p.second, [&p] {
+            direct_isr(p.first, p.second);
         });
 
-        // Interrupts will be always on, at least at this stage of development
+        irq::unmask(p.second);
+    }
+
+    for (auto &p : exti_irq_idx_grouped_mapping) {
+        irq::subscribe(p.second, [&p] {
+            group_isr(p.first, p.second);
+        });
+
         irq::unmask(p.second);
     }
 
@@ -161,4 +152,4 @@ void exti_manager::handler::operator ()()
     }
 }
 
-}
+} // namespace ecl

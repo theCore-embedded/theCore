@@ -33,7 +33,13 @@ if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F407VG)
     set(TARGET_MCU_IRQ_COUNT 82 CACHE STRING "Available interrupts")
 
     # SPI buses count. Essential only for stm32 platform code.
-    set(TARGET_SPI_COUNT 3 CACHE STRING "SPI buses avaliable on the F4 MCU")
+    set(TARGET_MCU_SPI_COUNT 3 CACHE STRING "SPI buses avaliable on the F4 MCU")
+
+    # Direct EXTIs
+    set(TARGET_MCU_EXTI_DIRECT_COUNT 5 CACHE STRING "EXTI direct lines")
+
+    # Grouped EXTIs
+    set(TARGET_MCU_EXTI_GROUPED_COUNT 2 CACHE STRING "EXTI grouped lines")
 
     return()
 endif()

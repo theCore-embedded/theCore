@@ -69,10 +69,12 @@ public:
     static bool get();
 
 private:
-    //! \brief Returns STM32 representation of the port
+    //! \brief Returns STM32 representation of the port.
+    //! \todo extract it to the stm32 gpio wrap header.
     static constexpr auto pick_port();
 
-    //! \brief Returns STM32 representation of the pin
+    //! \brief Returns STM32 representation of the pin.
+    //! \todo extract it to the stm32 gpio wrap header.
     static constexpr auto pick_pin();
 };
 
