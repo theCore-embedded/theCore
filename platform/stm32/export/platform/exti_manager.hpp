@@ -272,8 +272,8 @@ exti_manager::is_grouped_exti<Gpio> exti_manager::exti_used()
 template<typename Gpio>
 void exti_manager::configure_line(trigger t)
 {
-    constexpr auto pinsource  = static_cast< std::underlying_type<gpio_num>::type>(Gpio::pin);
-    constexpr auto portsource = static_cast< std::underlying_type<gpio_port>::type>(Gpio::port);
+    constexpr auto pinsource  = static_cast<std::underlying_type<gpio_num>::type>(Gpio::pin);
+    constexpr auto portsource = static_cast<std::underlying_type<gpio_port>::type>(Gpio::port);
     constexpr auto exti       = extract_exti<Gpio>();
 
     EXTI_InitTypeDef    exti_init;

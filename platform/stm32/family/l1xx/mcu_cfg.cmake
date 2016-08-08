@@ -39,11 +39,11 @@ if(CONFIG_PLATFORM_DEVICE STREQUAL STM32L152RE)
     set(TARGET_MCU_EXTI_DIRECT_COUNT 5 CACHE STRING "EXTI direct lines")
 
     # Grouped EXTIs
-    set(TARGET_MCU_EXTI_GROUPED_COUNT 5 CACHE STRING "EXTI grouped lines")
+    set(TARGET_MCU_EXTI_GROUPED_COUNT 2 CACHE STRING "EXTI grouped lines")
 
     return()
 endif()
 
 # Additional implementation will be required to cover unsupported
-# devices from stm32f4xx line.
+# devices from stm32l1xx line.
 message(FATAL_ERROR "Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")
