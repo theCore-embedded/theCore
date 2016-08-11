@@ -7,6 +7,7 @@
 
 #include <ecl/iostream.hpp>
 #include <ecl/endian.hpp>
+#include <ecl/types.h>
 
 namespace ecl
 {

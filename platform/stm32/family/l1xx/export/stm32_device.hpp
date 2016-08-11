@@ -11,7 +11,10 @@
 #include <stm32l1xx_gpio.h>
 #include <stm32l1xx_i2c.h>
 #include <stm32l1xx_spi.h>
+#include <stm32l1xx_exti.h>
+#include <stm32l1xx_syscfg.h>
 
 #include "stm32l1xx_dma_wrap.hpp"
+#include "stm32l1xx_exti_wrap.hpp"
 
 #endif // STM32L1_DEVICE_HPP_

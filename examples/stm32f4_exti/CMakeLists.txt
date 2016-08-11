@@ -23,9 +23,9 @@ target_link_libraries(exti libcpp)
 # Configuraion parameters
 
 # Target processor platform and its configuration
-set(CONFIG_PLATFORM stm32f4xx)
-# STM32 discovery is running with SMT32F407VG processor
-set(CONFIG_PLATFORM_DEVICE STM32F40_41xxx)
+set(CONFIG_PLATFORM stm32)
+# STM32 discovery is running with STM32F407VG processor
+set(CONFIG_PLATFORM_DEVICE STM32F407VG)
 # External oscillator has a 8 MHz out clock
 set(CONFIG_PLATFORM_HSE_VAL 8000000)
 

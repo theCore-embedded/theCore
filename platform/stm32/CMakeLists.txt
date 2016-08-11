@@ -1,4 +1,4 @@
-add_library(stm32 platform.cpp)
+add_library(stm32 platform.cpp exti_manager.cpp)
 
 # Get proper MCU definitions
 add_subdirectory(family)
@@ -16,6 +16,7 @@ target_link_libraries(stm32 PUBLIC stm32_family)
 target_link_libraries(stm32 PUBLIC types)
 target_link_libraries(stm32 PUBLIC platform_common)
 target_link_libraries(stm32 PUBLIC arch)
+target_link_libraries(stm32 PUBLIC containers)
 
 target_compile_definitions(stm32 PUBLIC
         -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
