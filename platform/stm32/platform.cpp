@@ -1,6 +1,10 @@
 #include "platform/execution.h"
 #include "common/irq.hpp"
 
+// Header from stm32 miscellaneous firmware library functions
+// (add-on to CMSIS functions). See SPL.
+#include <misc.h>
+
 #if CONFIG_BYPASS_CONSOLE_ENABLED
 extern void bypass_console_init();
 #endif // CONFIG_BYPASS_CONSOLE_ENABLED
@@ -21,6 +25,16 @@ void assert_param(int exp)
 
 extern "C" void platform_init()
 {
+    // Required for FreeRTOS
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+
+    // Magic here.
+    // Logical priority of *any* user interrupt that use FreeRTOS API
+    // must not be greater than configMAX_SYSCALL_INTERRUPT_PRIORITY
+    for (int irqn = WWDG_IRQn; irqn < IRQ_COUNT; ++irqn) {
+        NVIC_SetPriority(static_cast<IRQn_Type>(irqn), CONFIG_MAX_ISR_PRIORITY);
+    }
+
     // IRQ must be ready before anything else will start work
     ecl::irq::init_storage();
 
