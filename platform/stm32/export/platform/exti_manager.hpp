@@ -34,7 +34,10 @@ public:
         ecl::list_node m_node;       //!< List node of the EXTI handlers list.
 
         //! Constructs empty handler
-        handler();
+        handler() = default;
+
+        //! Constructs handler with user data.
+        handler(callback cb, void *ctx);
 
         //! Destroys handler and unsubscribe it from EXTI events.
         ~handler();

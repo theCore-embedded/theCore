@@ -114,12 +114,13 @@ void exti_manager::group_isr(size_t idx, irq_num irqn)
     irq::unmask(irqn);
 }
 
+
 //------------------------------------------------------------------------------
 
-exti_manager::handler::handler()
+exti_manager::handler::handler(exti_manager::callback cb, void *ctx)
     :m_node{}
-    ,m_ctx{nullptr}
-    ,m_cb{nullptr}
+    ,m_ctx{ctx}
+    ,m_cb{cb}
     ,m_exti_line{0}
 {
 
