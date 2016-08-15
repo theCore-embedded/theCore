@@ -18,8 +18,10 @@ target_link_libraries(stm32 PUBLIC platform_common)
 target_link_libraries(stm32 PUBLIC arch)
 target_link_libraries(stm32 PUBLIC containers)
 
-target_compile_definitions(stm32 PUBLIC
-        -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
+target_compile_definitions(stm32
+        PRIVATE
+        -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY}
+        -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 
 # Pick console driver
 message(STATUS "STM32: Checking [CONFIG_USE_CONSOLE]...")

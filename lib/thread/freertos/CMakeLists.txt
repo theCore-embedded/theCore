@@ -5,7 +5,9 @@ target_link_libraries(thread_os PUBLIC thread_common)
 target_link_libraries(thread_os PRIVATE dbg)
 target_link_libraries(thread_os PRIVATE ${PLATFORM_NAME})
 
-# If kernel is provided by us then built it
+# If kernel is provided by theCore then use it
 if (${CONFIG_OS_INTERNAL})
 	target_link_libraries(thread_os PUBLIC freertos)
 endif()
+
+# TODO: provide checks for extistence of external FreeRTOS library.

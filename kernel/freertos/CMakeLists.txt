@@ -35,6 +35,8 @@ endif()
 # by FreeRTOS but not by this build system then add another option here.
 if (${TARGET_MCU_ARCH} MATCHES arm_cm4)
 	set(PORT_DIR ${PORT_DIR}ARM_CM4F/)
+elseif(${TARGET_MCU_ARCH} MATCHES arm_cm3)
+	set(PORT_DIR ${PORT_DIR}ARM_CM3/)
 else()
 	message(FATAL_ERROR "Processor arch is not supported by FreeRTOS build: "
 		"${TARGET_MCU_ARCH}")
