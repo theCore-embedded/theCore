@@ -10,7 +10,7 @@ The main idea of The Core is to make as much as possible in the compile time.
 This affects the way how the device drivers and peripherals are represented.
 In fact, each driver is the template class that is instantiated with all the dependencies in a distinct type by user of The Core in the compile time.
 
-You can check out more directly in the code of [the SPI driver](platform/stm32f4xx/export/platform/spi_bus.hpp) or  [the USART bus](platform/stm32f4xx/export/platform/usart_bus.hpp).
+You can check out more directly in the code of [the SPI driver](platform/stm32/export/aux/spi_bus.hpp) or  [the USART bus](platform/stm32/export/aux/usart_bus.hpp).
 
 The project is at the initial stage. But something is already in there:
 - CMake-based build-system
