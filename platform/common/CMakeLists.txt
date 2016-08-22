@@ -14,4 +14,9 @@ else()
     target_compile_definitions(platform_common PRIVATE -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 endif()
 
+add_unit_host_test(NAME mmio
+        SOURCES tests/mmio_unit.cpp
+        INC_DIRS export)
+
+
 
