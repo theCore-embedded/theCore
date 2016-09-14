@@ -2,8 +2,8 @@
 //! \file
 //! \brief STM32 F4 discovery board without any additional attachments.
 //!
-#ifndef TEST_STM32F4DISCOVERY_SIMPLE_HPP_
-#define TEST_STM32F4DISCOVERY_SIMPLE_HPP_
+#ifndef TEST_STM32F4DISCOVERY_SIMPLE_TARGET_DEFS_HPP_
+#define TEST_STM32F4DISCOVERY_SIMPLE_TARGET_DEFS_HPP_
 
 #include <stm32f4xx_defs.hpp>
 
@@ -21,4 +21,4 @@ using usr_btn = gpio_pa0;
 } // namespace ecl
 
 
-#endif // TEST_STM32F4DISCOVERY_SIMPLE_HPP_
+#endif // TEST_STM32F4DISCOVERY_SIMPLE_TARGET_DEFS_HPP_

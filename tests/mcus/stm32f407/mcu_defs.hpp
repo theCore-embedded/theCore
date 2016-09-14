@@ -1,8 +1,8 @@
 //! \file
-//! \brief stm32f4xx exported definitions and peripherals, required by tests
+//! \brief stm32f407 exported definitions and peripherals, required by tests
 
-#ifndef TEST_STM32F4XX_DEFS_HPP
-#define TEST_STM32F4XX_DEFS_HPP
+#ifndef TEST_STM32F407_MCU_DEFS_HPP_
+#define TEST_STM32F407_MCU_DEFS_HPP_
 
 #include <aux/spi_bus.hpp>
 #include <aux/i2c_bus.hpp>
@@ -30,4 +30,4 @@ using gpio_pa0 = gpio<gpio_port::a, gpio_num::pin0>;
 } // namespace ecl
 
 
-#endif // TEST_STM32F4XX_DEFS_HPP
+#endif // TEST_STM32F407_MCU_DEFS_HPP_
