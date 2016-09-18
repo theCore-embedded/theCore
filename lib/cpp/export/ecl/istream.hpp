@@ -204,7 +204,7 @@ istream<IO_device> &istream< IO_device >::get(char &character)
 template< class IO_device >
 int istream< IO_device >::skip_leading_spaces(char &next)
 {
-    char c;
+    char c = 0;
 
     do {
         if (m_device->read((uint8_t *) &c, 1) <= 0) {
