@@ -1,6 +1,6 @@
 #include <ecl/thread/mutex.hpp>
 
-constexpr ecl::mutex::mutex()
+ecl::mutex::mutex()
     :m_mutex{}
 {
 }

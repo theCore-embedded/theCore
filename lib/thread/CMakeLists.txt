@@ -1,11 +1,11 @@
 # Add thread support for valid kernel
 message(STATUS "Checking [CONFIG_OS]...")
-if (DEFINED CONFIG_OS)
+if(DEFINED CONFIG_OS)
 	message(STATUS "OS selected: ${CONFIG_OS}")
-	if (${CONFIG_OS} STREQUAL "freertos")
+	if(${CONFIG_OS} STREQUAL "freertos")
 		add_subdirectory(freertos)
-	else (${CONFIG_OS} STREQUAL "host")
-		if (${UNIX})
+	else(${CONFIG_OS} STREQUAL "host")
+		if(${UNIX})
 			add_subdirectory(posix)
 		else(${WIN32})
 			# Currently missing

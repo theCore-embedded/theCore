@@ -19,3 +19,12 @@ mkdir -p build_examples
 cd build_examples
 cmake ../examples
 make
+cd ..
+
+# Test cases
+
+mkdir -p build_test_cases
+cd build_test_cases
+cmake ../tests
+make
+cd ..
