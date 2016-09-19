@@ -1,4 +1,4 @@
-include(${MCUS_DIR}/stm32f407/mcu_defs.cmake)
+include(${MCU_DIR}/mcu_defs.cmake)
 
 # External oscillator has a 8 MHz out clock
 set(CONFIG_PLATFORM_HSE_VAL 8000000)
