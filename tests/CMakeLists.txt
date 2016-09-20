@@ -64,7 +64,6 @@ function(add_functional_test test_name)
     message("   Target:        ${TEST_TARGET_NAME}")
     message("   Config:        ${TEST_CONFIG_NAME}")
     message("-----------------------------------------------")
-    message("${CMAKE_ARGS}")
 
     externalproject_add(${COMPLETE_TEST_NAME}
             SOURCE_DIR ${TEST_SOURCE_DIR}
@@ -85,6 +84,11 @@ add_functional_test(empty_main
         TOOLCHAIN_NAME      arm-cm3-gnu.cmake
         TARGET_NAME         stm32f4discovery_simple
         MCU_NAME            stm32f407)
+
+add_functional_test(empty_main
+        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
+        TARGET_NAME         tivac_tm4
+        MCU_NAME            tm4c123gh6pm)
 
 #------------------------------------------------------------------------------
 # Hello World test group. Prints 'Hello, World' and exits.
