@@ -1,7 +1,7 @@
 #ifndef TM4C_EXECUTION_H_
 #define TM4C_EXECUTION_H_
 
-void ecl_abort()
+static void ecl_abort()
 {
     for(;;);
 }
