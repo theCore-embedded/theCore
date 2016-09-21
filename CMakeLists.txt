@@ -1,6 +1,6 @@
 # ASM is crucial
 enable_language(ASM-ATT)
-# All subproject may use tests
+# Subproject may use tests
 enable_testing()
 
 # Obvious requirement

@@ -4,9 +4,10 @@ target_include_directories(common_io INTERFACE export)
 
 add_library(sys STATIC sys.cpp)
 
-# IRQ manager is required that residing in platform.
-# Call to the platform_init() in also required.
+# Call to the platform_init() from platform module is required.
 target_link_libraries(sys ${PLATFORM_NAME})
+# IRQ manager is required.
+target_link_libraries(sys platform_common)
 
 # A special initialization is required if kernel is present
 if(DEFINED CONFIG_OS)
