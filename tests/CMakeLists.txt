@@ -103,3 +103,17 @@ add_functional_test(hello_world
         TARGET_NAME         stm32f4discovery_simple
         CONFIG_NAME         stm32f4disc_nonos
         )
+
+#------------------------------------------------------------------------------
+# Unity test framework demo.
+
+add_functional_test(unity_demo
+        TARGET_NAME         host
+        CONFIG_NAME         host)
+
+add_functional_test(unity_demo
+        TOOLCHAIN_NAME      arm-cm3-gnu.cmake
+        MCU_NAME            stm32f407
+        TARGET_NAME         stm32f4discovery_simple
+        CONFIG_NAME         stm32f4disc_nonos
+        )

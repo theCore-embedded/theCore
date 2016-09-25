@@ -1,8 +1,6 @@
 add_library(bus INTERFACE)
 target_include_directories(bus INTERFACE export)
-target_link_libraries(bus INTERFACE dbg)
-target_link_libraries(bus INTERFACE platform_common)
-target_link_libraries(bus INTERFACE thread)
+target_link_libraries(bus INTERFACE dbg platform_common thread)
 
 add_unit_host_test(NAME bus
 				   SOURCES tests/bus_unit.cpp
