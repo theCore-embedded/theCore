@@ -9,4 +9,6 @@
 	url = https://github.com/forGGe/spl-hub.git
 [submodule "lib/unity/Unity"]
 	path = lib/unity/Unity
-	url = https://github.com/ThrowTheSwitch/Unity.git
+	url = https://github.com/forGGe/Unity.git	
+	# Base repo
+	# url = https://github.com/ThrowTheSwitch/Unity.git
