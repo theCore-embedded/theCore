@@ -14,8 +14,7 @@ else()
 endif()
 
 add_cppcheck(libcpp UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
-target_link_libraries(libcpp PUBLIC types)
-target_link_libraries(libcpp PUBLIC bus)
+target_link_libraries(libcpp PUBLIC types bus)
 
 add_unit_host_test(NAME istream_test SOURCES tests/istream_unit.cpp
                                      INC_DIRS export)
