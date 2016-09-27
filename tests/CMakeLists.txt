@@ -3,19 +3,17 @@ cmake_minimum_required(VERSION 3.4)
 include(ExternalProject)
 include(CMakeParseArguments)
 
-# Adds theCore functional test and sets test parameters.
+# Adds theCore test suite and sets suite parameters.
 #
 # Syntax:
 # add_unit_host_test(test_name
 #					 [TOOLCHAIN_NAME toolchain_name]
-#					 [MCU_NAME mcu_name]
 #					 [TARGET_NAME target_name]
-#					 [CONFIG_NAME test_configuration_name...])
 function(add_suite suite_name)
 
     cmake_parse_arguments(TEST
             ""
-            "TOOLCHAIN_NAME;TARGET_NAME;"
+            "TOOLCHAIN_NAME;TARGET_NAME"
             ""
             ${ARGN})
 
@@ -69,3 +67,7 @@ add_suite(unity_demo
 add_suite(unity_demo
         TOOLCHAIN_NAME      arm-cm3-gnu.cmake
         TARGET_NAME         stm32f4discovery_simple)
+
+add_suite(unity_demo
+        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
+        TARGET_NAME         tivac_tm4)
