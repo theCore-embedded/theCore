@@ -1,1 +1,1 @@
-include(${MCU_DIR}/mcu_defs.cmake)
+include(${MCUS_DIR}/tm4c123gh6pm/mcu_defs.cmake)
