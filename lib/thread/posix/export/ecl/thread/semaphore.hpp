@@ -17,7 +17,7 @@ public:
 
     void signal();
     void wait();
-    ecl::err try_wait();
+    bool try_wait();
 
     semaphore(const semaphore&)             = delete;
     semaphore& operator=(const semaphore&)  = delete;
@@ -37,7 +37,7 @@ public:
 
     void signal();
     void wait();
-    ecl::err try_wait();
+    bool try_wait();
 
     binary_semaphore(const binary_semaphore&)             = delete;
     binary_semaphore& operator=(const binary_semaphore&)  = delete;

@@ -28,16 +28,16 @@ void ecl::semaphore::wait()
     }
 }
 
-ecl::err ecl::semaphore::try_wait()
+bool ecl::semaphore::try_wait()
 {
     if (m_cnt.fetch_sub(1) > 0) {
-        return err::ok; // Got semaphore.
+        return true; // Got semaphore.
     }
 
     // Bring counter back
     ++m_cnt;
 
-    return err::again;
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -74,8 +74,8 @@ void ecl::binary_semaphore::wait()
     ecl_assert(rc == pdTRUE);
 }
 
-ecl::err ecl::binary_semaphore::try_wait()
+bool ecl::binary_semaphore::try_wait()
 {
     auto rc = xSemaphoreTake(m_semaphore, 0);
-    return rc == pdTRUE ? ecl::err::ok : ecl::err::again;
+    return rc == pdTRUE ? true : false;
 }
