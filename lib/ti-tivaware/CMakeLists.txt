@@ -38,4 +38,8 @@ add_library(tivaware STATIC
 
 target_include_directories(tivaware SYSTEM PUBLIC
         ti-tivaware/
-        tivaware/driverlib)
+        ti-tivaware/driverlib)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    target_compile_definitions(tivaware PRIVATE -Dgcc)
+endif()
