@@ -15,16 +15,16 @@ void ecl::semaphore::signal()
     m_cond.notify_one();
 }
 
-ecl::err ecl::semaphore::try_wait()
+bool ecl::semaphore::try_wait()
 {
     std::unique_lock <std::mutex> lock(m_mutex);
 
     if (m_cnt) {
         m_cnt--;
-        return ecl::err::ok;
+        return true;
     }
 
-    return ecl::err::again;
+    return false;
 }
 
 void ecl::semaphore::wait()
@@ -51,11 +51,11 @@ void ecl::binary_semaphore::signal()
     m_cond.notify_one();
 }
 
-ecl::err ecl::binary_semaphore::try_wait()
+bool ecl::binary_semaphore::try_wait()
 {
     std::unique_lock <std::mutex> lock(m_mutex);
 
-    auto rc = m_flag ? ecl::err::ok : ecl::err::again;
+    auto rc = m_flag ? true : false;
     m_flag = false;
     return rc;
 }

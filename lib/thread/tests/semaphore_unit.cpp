@@ -12,14 +12,6 @@
 
 // TODO: remove ugly sleep-programming
 
-// Error code helper
-// TODO: move it to 'utils' headers and protect with check of
-// current test state (enabled or disabled)
-static SimpleString StringFrom(ecl::err err)
-{
-    return SimpleString{ecl::err_to_str(err)};
-}
-
 // Helpers
 template< class Container, class Func >
 static void test_for_each(Container &cont, Func fn)
@@ -61,23 +53,23 @@ TEST(semaphore, try_wait)
     sem.signal();
 
     auto rc = sem.try_wait();
-    CHECK_EQUAL(ecl::err::ok, rc);
+    CHECK_EQUAL(true, rc);
 
     rc = sem.try_wait();
-    CHECK_EQUAL(ecl::err::again, rc);
+    CHECK_EQUAL(false, rc);
 
     rc = sem.try_wait();
-    CHECK_EQUAL(ecl::err::again, rc);
+    CHECK_EQUAL(false, rc);
 
     // Signal same semaphore again
     // to make sure counter is in valid state
     sem.signal();
 
     rc = sem.try_wait();
-    CHECK_EQUAL(ecl::err::ok, rc);
+    CHECK_EQUAL(true, rc);
 
     rc = sem.try_wait();
-    CHECK_EQUAL(ecl::err::again, rc);
+    CHECK_EQUAL(false, rc);
 }
 
 TEST(semaphore, one_semaphore_few_threads)
@@ -96,8 +88,8 @@ TEST(semaphore, one_semaphore_few_threads)
     auto single_thread = [&counter, &entry_semaphore, &exit_semaphore]() {
         std::cout << "entry wait!" << std::endl;
 
-        ecl::err ret;
-        while ((ret = entry_semaphore.try_wait()) == ecl::err::again) {
+        bool ret;
+        while ((ret = entry_semaphore.try_wait()) == false) {
             std::this_thread::yield();
         }
 
@@ -125,8 +117,8 @@ TEST(semaphore, one_semaphore_few_threads)
         entry_semaphore.signal();
         signalled++;
 
-        ecl::err ret;
-        while ((ret = exit_semaphore.try_wait()) == ecl::err::again) {
+        bool ret;
+        while ((ret = exit_semaphore.try_wait()) == false) {
             std::this_thread::yield();
         }
 
