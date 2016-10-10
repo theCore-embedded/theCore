@@ -13,7 +13,7 @@
 namespace ecl
 {
 
-namespace gpio
+namespace gpio_hw
 {
 
 //! GPIO ports.
@@ -151,7 +151,7 @@ static inline void apply_cfg(dir d      = dir::out,
                      static_cast<std::underlying_type_t<pad_type>>(t));
 }
 
-} // namespace gpio
+} // namespace gpio_hw
 
 } // namespace ecl
 
