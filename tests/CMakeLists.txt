@@ -58,6 +58,16 @@ function(add_suite suite_name)
 
 endfunction()
 
+
+#-------------------------------------------------------------------------------
+# Platform BAT suite
+
+add_suite(platform_bat
+        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
+        TARGET_NAME         tivac_tm4)
+
+
+
 #-------------------------------------------------------------------------------
 # Unity demo test suite
 
