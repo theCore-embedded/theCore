@@ -1,3 +1,7 @@
+if(NOT CONFIG_PLATFORM MATCHES "tm4c")
+    return()
+endif()
+
 # override warnings, since library contains few of them
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
 
