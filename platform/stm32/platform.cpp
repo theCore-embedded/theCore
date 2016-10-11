@@ -1,4 +1,5 @@
 #include "platform/execution.h"
+#include "platform/exti_manager.hpp"
 #include "common/irq.hpp"
 
 // Header from stm32 miscellaneous firmware library functions
@@ -37,6 +38,9 @@ extern "C" void platform_init()
 
     // IRQ must be ready before anything else will start work
     ecl::irq::init_storage();
+
+    // EXTI manager depends on IRQ and must be initialized after.
+    ecl::exti_manager::init();
 
     // Update clocks so it is visible to the rest of the system
     SystemCoreClockUpdate();
