@@ -44,8 +44,7 @@ enum class gpio_port
     k
 };
 
-// Encapsulates pin usage
-//! GPIO class incapsulates pin usage.
+//! Encapsulates pin usage.
 //! \tparam Port GPIO port on STM32 device.
 //! \tparam Pin  Pin within given port.
 template< gpio_port Port, gpio_num Pin >

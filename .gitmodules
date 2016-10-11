@@ -12,3 +12,6 @@
 	url = https://github.com/forGGe/Unity.git	
 	# Base repo
 	# url = https://github.com/ThrowTheSwitch/Unity.git
+[submodule "lib/ti-tivaware/ti-tivaware"]
+	path = lib/ti-tivaware/ti-tivaware
+	url = https://github.com/forGGe/ti-tivaware
