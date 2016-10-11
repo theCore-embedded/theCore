@@ -6,9 +6,9 @@ include(CMakeParseArguments)
 # Adds theCore test suite and sets suite parameters.
 #
 # Syntax:
-# add_unit_host_test(test_name
-#					 [TOOLCHAIN_NAME toolchain_name]
-#					 [TARGET_NAME target_name]
+# add_suite(test_name
+#          [TOOLCHAIN_NAME toolchain_name]
+#          [TARGET_NAME target_name])
 function(add_suite suite_name)
 
     cmake_parse_arguments(TEST
@@ -66,6 +66,9 @@ add_suite(platform_bat
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
 
+add_suite(platform_bat
+        TOOLCHAIN_NAME      arm-cm3-gnu.cmake
+        TARGET_NAME         stm32f4discovery_simple)
 
 
 #-------------------------------------------------------------------------------
