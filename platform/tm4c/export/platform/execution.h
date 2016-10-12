@@ -17,7 +17,7 @@ static inline void ecl_spin_wait(uint32_t ms)
 }
 
 
-static void ecl_abort()
+static inline void ecl_abort()
 {
     for(;;);
 }
