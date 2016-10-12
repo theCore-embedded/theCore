@@ -36,6 +36,7 @@ void board_init()
     init_struct.GPIO_Mode = GPIO_Mode_AF;
 
     // Init Port D UART
+
     GPIO_Init(GPIOD, &init_struct);
 
     GPIO_PinAFConfig(GPIOD, GPIO_PinSource8, GPIO_AF_USART3);
@@ -56,7 +57,10 @@ static void suite_runner()
 
 int main()
 {
+    UNITY_BEGIN();
     suite_runner();
+    UNITY_END();
+
     // Suite completed...
     for (;;);
 }
