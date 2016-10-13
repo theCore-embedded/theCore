@@ -43,7 +43,7 @@ if(${CONFIG_USE_CONSOLE})
     target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 
     # Helps to determine if bypass driver must be enabled and inited
-    target_compile_definitions(stm32 PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
+    target_compile_definitions(stm32 PUBLIC -DCONFIG_BYPASS_CONSOLE_ENABLED)
     # Bypass console implementation
     target_sources(stm32 PRIVATE console.cpp)
     message(STATUS "Bypass console is supported and enabled by the platform")

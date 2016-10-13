@@ -5,5 +5,9 @@
 
 extern "C" void unity_putc(char c)
 {
+    if (c == '\n') {
+        ecl::bypass_putc('\r');
+    }
+
     ecl::bypass_putc(c);
 }
