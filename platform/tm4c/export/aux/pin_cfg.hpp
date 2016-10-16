@@ -4,6 +4,9 @@
 #ifndef PLATFORM_AUX_TM4C_PIN_CFG_HPP_
 #define PLATFORM_AUX_TM4C_PIN_CFG_HPP_
 
+// Missing in TiwaWare headers
+#include <cstdint>
+
 #include <gpio.h>
 #include <sysctl.h>
 #include <inc/hw_memmap.h>

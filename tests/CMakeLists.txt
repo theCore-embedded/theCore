@@ -80,7 +80,6 @@ function(add_suite suite_name)
     message("-----------------------------------------------")
     message("   Suite added:   ${COMPLETE_TEST_NAME}")
     message("   Suite dir:     ${SUITE_SOURCE_DIR}")
-    message("   MCU:           ${TEST_MCU_NAME}")
     message("   Target:        ${TEST_TARGET_NAME}")
     message("-----------------------------------------------")
 
@@ -97,9 +96,9 @@ endfunction()
 #-------------------------------------------------------------------------------
 # Platform BAT suite
 
-#add_suite(platform_bat
-#        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
-#        TARGET_NAME         tivac_tm4)
+add_suite(platform_bat
+        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
+        TARGET_NAME         tivac_tm4)
 
 add_suite(platform_bat
         CASES               gpio_bat
