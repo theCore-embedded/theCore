@@ -105,19 +105,19 @@ add_suite(platform_bat
         TOOLCHAIN_NAME      arm-cm3-gnu.cmake
         TARGET_NAME         stm32f4discovery_simple)
 
-
 #-------------------------------------------------------------------------------
 # Unity demo test suite
 
-#add_suite(unity_demo
-#        TARGET_NAME         host)
-#
+add_suite(unity_demo
+        CASES               unity_demo
+        TARGET_NAME         host)
 
 add_suite(unity_demo
         CASES               unity_demo
         TOOLCHAIN_NAME      arm-cm3-gnu.cmake
         TARGET_NAME         stm32f4discovery_simple)
-#
-#add_suite(unity_demo
-#        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
-#        TARGET_NAME         tivac_tm4)
+
+add_suite(unity_demo
+        CASES               unity_demo
+        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
+        TARGET_NAME         tivac_tm4)
