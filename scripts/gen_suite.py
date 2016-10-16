@@ -45,7 +45,8 @@ for group, tests in grouped_tests.items():
 
 includes = '\n\n#include <unity.h>\n#include <unity_fixture.h>\n\n'
 
-board_init = 'extern "C" void board_init()\n' \
+board_init = 'extern void suite_board_init();\n\n' \
+             'extern "C" void board_init()\n' \
              '{\n' \
              '    suite_board_init();\n' \
              '}\n\n'
@@ -73,9 +74,9 @@ suite_main = 'int main()\n' \
 
 # CMake test list
 
-cmake_test_template = '\nadd_subdirectory(${{TESTCASES_DIR}}/{test_name}/ ' \
-                      '${{CMAKE_CURRENT_BINARY_DIR}}/{test_name}_case/)\n' \
-                      'target_link_libraries({suite_name}, {test_name}_case)\n'
+cmake_test_template = '\nset(CASE_SOURCES)\n' \
+                      'include(${{TESTCASES_DIR}}/{test_name}/case_defs.cmake)\n' \
+                      'target_sources({suite_name} PUBLIC ${{CASE_SOURCES}})\n'
 
 # Print generated file
 

@@ -1,3 +1,5 @@
+# Unity demo on STM32F4 Discovery target.
+
 cmake_minimum_required(VERSION 3.4)
 
 project(unity_demo)

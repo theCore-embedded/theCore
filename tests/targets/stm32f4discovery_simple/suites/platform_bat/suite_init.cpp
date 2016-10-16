@@ -1,18 +1,7 @@
-//! \file
-//! \brief
-//! \todo Autogenerate this file
-
-#include <platform/console.hpp>
-
-#include <unity.h>
-#include <unity_fixture.h>
-
 #include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
 
-
-extern "C"
-void board_init()
+void suite_board_init()
 {
     // Init Port D clocks
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
@@ -41,26 +30,4 @@ void board_init()
 
     GPIO_PinAFConfig(GPIOD, GPIO_PinSource8, GPIO_AF_USART3);
     GPIO_PinAFConfig(GPIOD, GPIO_PinSource9, GPIO_AF_USART3);
-}
-
-
-TEST_GROUP_RUNNER(gpio_bat)
-{
-    RUN_TEST_CASE(gpio_bat, set_reset);
-    RUN_TEST_CASE(gpio_bat, toggle);
-}
-
-static void suite_runner()
-{
-    RUN_TEST_GROUP(gpio_bat);
-}
-
-int main()
-{
-    UNITY_BEGIN();
-    suite_runner();
-    UNITY_END();
-
-    // Suite completed...
-    for (;;);
 }
