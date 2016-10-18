@@ -97,13 +97,18 @@ endfunction()
 # Platform BAT suite
 
 add_suite(platform_bat
+        CASES               bypass_console_bat
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
 
 add_suite(platform_bat
-        CASES               gpio_bat
+        CASES               gpio_bat bypass_console_bat
         TOOLCHAIN_NAME      arm-cm3-gnu.cmake
         TARGET_NAME         stm32f4discovery_simple)
+
+add_suite(platform_bat
+        CASES               bypass_console_bat
+        TARGET_NAME         host)
 
 #-------------------------------------------------------------------------------
 # Unity demo test suite
