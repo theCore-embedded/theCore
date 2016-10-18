@@ -9,6 +9,7 @@
 //!
 
 #include <ecl/err.hpp>
+#include <unistd.h>
 
 namespace ecl
 {
