@@ -3,6 +3,7 @@
 #ifndef TM4C_EXECUTION_H_
 #define TM4C_EXECUTION_H_
 
+#include <stdint.h>
 #include <sysctl.h>
 
 //! \brief Waits in loop for a given amount of milliseconds.

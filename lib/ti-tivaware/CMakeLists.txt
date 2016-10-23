@@ -3,7 +3,7 @@ if(NOT CONFIG_PLATFORM MATCHES "tm4c")
 endif()
 
 # override warnings, since library contains few of them
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -Wno-error=sign-compare -Wno-error=type-limits")
 
 add_library(tivaware STATIC
         ti-tivaware/driverlib/adc.c
@@ -40,9 +40,21 @@ add_library(tivaware STATIC
         ti-tivaware/driverlib/watchdog.c
         )
 
+if(CONFIG_PLATFORM_DEVICE MATCHES TM4C123GH6PM)
+    target_compile_definitions(tivaware PUBLIC -DPART_TM4C123GH6PM)
+else()
+    message(FATAL_ERROR "Unknown device: ${CONFIG_PLATFORM_DEVICE}")
+endif()
+
 target_include_directories(tivaware SYSTEM PUBLIC
         ti-tivaware/
         ti-tivaware/driverlib)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    target_compile_definitions(tivaware PUBLIC -DDEBUG)
+    target_sources(tivaware PRIVATE debug_stubs.cpp)
+    target_link_libraries(tivaware PRIVATE dbg)
+endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     target_compile_definitions(tivaware PRIVATE -Dgcc)
