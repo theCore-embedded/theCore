@@ -48,7 +48,7 @@ enum class dir
 {
     in  = GPIO_DIR_MODE_IN,
     out = GPIO_DIR_MODE_OUT,
-    hw  = GPIO_DIR_MODE_HW,
+    hw  = GPIO_DIR_MODE_HW,     //!< Alternate function.
 };
 
 //! GPIO types.
@@ -106,7 +106,7 @@ static constexpr auto get_periph()
 {
     switch (Pt) {
         case port::a:
-            return SYSCTL_PERIPH_GPIOF;
+            return SYSCTL_PERIPH_GPIOA;
         case port::b:
             return SYSCTL_PERIPH_GPIOB;
         case port::c:
@@ -130,7 +130,7 @@ static inline void enable_periph()
     SysCtlPeripheralEnable(periph);
 
     // Wait few cycles before peripheral is ready
-    while (SysCtlPeripheralReady(periph) == false) { }
+    while (!SysCtlPeripheralReady(periph)) { }
 }
 
 //! Applies given configuration for given GPIOs.

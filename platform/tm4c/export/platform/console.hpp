@@ -6,7 +6,7 @@
 namespace ecl
 {
 
-#ifndef CONFIG_USE_CONSOLE
+#ifndef CONFIG_BYPASS_CONSOLE_ENABLED
 
 //! Does nothing if, console disabled.
 static inline void bypass_putc(char c)
@@ -14,14 +14,14 @@ static inline void bypass_putc(char c)
     (void) c;
 }
 
-#else // CONFIG_USE_CONSOLE
+#else // CONFIG_BYPASS_CONSOLE_ENABLED
 
 //! Bypasses console drivers and puts data directly to the UART.
 //! \details Required to print debug of the failed asserts including one that
 //! executed during ISR.
 void bypass_putc(char c);
 
-#endif // CONFIG_USE_CONSOLE
+#endif // CONFIG_BYPASS_CONSOLE_ENABLED
 
 } // namespace ecl
 
