@@ -1,0 +1,9 @@
+{
+  "stm32f4discovery_simple": {
+    "debugger": {
+      "name": "openocd",
+      "flash_params": "init; reset halt; wait_halt; flash write_image erase {elf_path}; reset run; shutdown",
+      "conf_file" : "stm32f4discovery.cfg"
+    }
+  }
+}
