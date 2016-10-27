@@ -16,3 +16,6 @@ target_link_libraries(unity_demo the_core unity)
 include(${AUTOGEN_DIR}/suite_tests.cmake)
 
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
+
+# Produce complete binary, suitable for flashing to the target
+strip_executable(unity_demo)

@@ -19,3 +19,6 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/export)
 include(${AUTOGEN_DIR}/suite_tests.cmake)
 
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
+
+# Produce complete binary, suitable for flashing to the target
+strip_executable(platform_bat)

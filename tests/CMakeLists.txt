@@ -3,6 +3,17 @@ cmake_minimum_required(VERSION 3.4)
 include(ExternalProject)
 include(CMakeParseArguments)
 
+# Stores suite records for use in external tooling.
+# Format:
+#   suite_name,target_name,bin_path,elf_path
+#
+# Each new suite starts with new line.
+set(SUITE_LIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/suite_list.txt)
+
+# Variable holding suites for suite files
+set(SUITE_LIST "")
+
+
 # Adds theCore test suite and sets suite parameters.
 #
 # Syntax:
@@ -84,8 +95,18 @@ function(add_suite suite_name)
     message("   Target:        ${TEST_TARGET_NAME}")
     message("-----------------------------------------------")
 
+    # Records suite for external tooling.
+
+    if(NOT TEST_TARGET_NAME STREQUAL host)
+        set(SUITE_LIST "${SUITE_LIST}${COMPLETE_TEST_NAME},")
+        set(SUITE_LIST "${SUITE_LIST}${TEST_TARGET_NAME},")
+        set(SUITE_LIST "${SUITE_LIST}${AUTOGEN_DIR}/build/${suite_name},")
+        set(SUITE_LIST "${SUITE_LIST}${AUTOGEN_DIR}/build/${suite_name}.bin\n" PARENT_SCOPE)
+    endif()
+
     externalproject_add(${COMPLETE_TEST_NAME}
             SOURCE_DIR ${SUITE_SOURCE_DIR}
+            BINARY_DIR ${AUTOGEN_DIR}/build/
             BUILD_ALWAYS 1
             INSTALL_COMMAND echo 'Install not needed, step skipped'
             CMAKE_ARGS ${CMAKE_ARGS}
@@ -127,3 +148,8 @@ add_suite(unity_demo
         CASES               unity_demo
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
+
+#-------------------------------------------------------------------------------
+# Generate suite list file
+file(GENERATE OUTPUT ${SUITE_LIST_FILE}
+        CONTENT "${SUITE_LIST}")
