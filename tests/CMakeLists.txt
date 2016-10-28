@@ -98,7 +98,7 @@ function(add_suite suite_name)
     # Records suite for external tooling.
 
     if(NOT TEST_TARGET_NAME STREQUAL host)
-        set(SUITE_LIST "${SUITE_LIST}${COMPLETE_TEST_NAME},")
+        set(SUITE_LIST "${SUITE_LIST}${suite_name},")
         set(SUITE_LIST "${SUITE_LIST}${TEST_TARGET_NAME},")
         set(SUITE_LIST "${SUITE_LIST}${AUTOGEN_DIR}/build/${suite_name},")
         set(SUITE_LIST "${SUITE_LIST}${AUTOGEN_DIR}/build/${suite_name}.bin\n" PARENT_SCOPE)
