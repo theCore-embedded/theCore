@@ -7,7 +7,6 @@
 #define PLATFORM_USART_BUS_HPP_
 
 #include <common/bus.hpp>
-#include <common/usart.hpp>
 #include <ecl/err.hpp>
 
 #include <stm32_device.hpp>
