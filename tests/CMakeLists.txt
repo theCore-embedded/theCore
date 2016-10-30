@@ -53,18 +53,6 @@ function(add_suite suite_name)
         list(APPEND TEST_SOURCES ${CASE_SOURCES})
     endforeach()
 
-    # Generate test runners
-
-    string(REPLACE ";" " " TEST_SOURCES "${TEST_SOURCES}")
-
-    execute_process(COMMAND bash "-c"
-            "${CORE_DIR}/scripts/gen_suite.py \
-            -s ${suite_name} -i ${TEST_SOURCES} \
-            -o ${AUTOGEN_DIR}/main.cpp \
-            -m ${AUTOGEN_DIR}/suite_tests.cmake"
-            RESULT_VARIABLE GENSUITE_RESULT
-            OUTPUT_VARIABLE GENSUITE_OUTPUT)
-
     # Be verbose
     message("${GENSUITE_OUTPUT}")
 
@@ -111,6 +99,20 @@ function(add_suite suite_name)
             INSTALL_COMMAND echo 'Install not needed, step skipped'
             CMAKE_ARGS ${CMAKE_ARGS}
             )
+
+    # Generate test runners
+
+    # When invoking script, source file names must be separated with space.
+    string(REPLACE ";" " " TEST_SOURCES_SPACED "${TEST_SOURCES}")
+
+    externalproject_add_step(${COMPLETE_TEST_NAME} gen_test_runner
+            COMMAND bash "-c"
+                        "${CORE_DIR}/scripts/gen_suite.py \
+                        -s ${suite_name} -i ${TEST_SOURCES_SPACED} \
+                        -o ${AUTOGEN_DIR}/main.cpp \
+                        -m ${AUTOGEN_DIR}/suite_tests.cmake"
+            DEPENDS ${TEST_SOURCES}
+            COMMENT "Generating test runners...")
 
 endfunction()
 
