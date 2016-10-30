@@ -7,6 +7,7 @@
 #include <common/bus.hpp>
 
 #include <uart.h>
+#include <sysctl.h>
 #include <hw_memmap.h>
 
 namespace ecl
@@ -31,6 +32,7 @@ template<uart_device dev>
 class uart_bus
 {
 public:
+
     //! \brief Lazy initialization.
     //! \return Status of operation.
     static ecl::err init();
@@ -74,13 +76,51 @@ public:
     //! \return Status of operation.
     static ecl::err do_xfer()
     { return ecl::err::nosys; }
+
+private:
+    static constexpr auto pick_sysctl();
 };
+
+// -----------------------------------------------------------------------------
+// Private members
+
+template<uart_device dev>
+constexpr auto uart_bus<dev>::pick_sysctl()
+{
+    switch (dev) {
+        case uart_device::dev0:
+            return SYSCTL_PERIPH_UART0;
+        case uart_device::dev1:
+            return SYSCTL_PERIPH_UART1;
+        case uart_device::dev2:
+            return SYSCTL_PERIPH_UART2;
+        case uart_device::dev3:
+            return SYSCTL_PERIPH_UART3;
+        case uart_device::dev4:
+            return SYSCTL_PERIPH_UART4;
+        case uart_device::dev5:
+            return SYSCTL_PERIPH_UART5;
+        case uart_device::dev6:
+            return SYSCTL_PERIPH_UART6;
+        case uart_device::dev7:
+            return SYSCTL_PERIPH_UART7;
+    }
+}
 
 //------------------------------------------------------------------------------
 
 template<uart_device dev>
 ecl::err uart_bus<dev>::init()
 {
+    constexpr auto periph = static_cast<std::underlying_type_t<uart_device>>(dev);
+    constexpr auto periph_sysctl = pick_sysctl();
+
+    SysCtlPeripheralEnable(periph_sysctl);
+
+    UARTConfigSetExpClk(periph, SysCtlClockGet(), 115200,
+                        UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
+                        UART_CONFIG_PAR_NONE);
+
     return err::ok;
 }
 
