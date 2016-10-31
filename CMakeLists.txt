@@ -26,10 +26,6 @@ else()
     set(PLATFORM_NAME ${CONFIG_PLATFORM}) # For convinience
 endif()
 
-# Set general flags for C\C++ compiler and linker
-set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
-set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
-
 set(CMAKE_C_FLAGS
         "${CMAKE_C_FLAGS} ${CC_WARN_FLAGS} ${CC_EXTRA_FLAGS}")
 set(CMAKE_CXX_FLAGS

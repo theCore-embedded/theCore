@@ -162,6 +162,10 @@ public:
     //!
     ecl::err do_xfer();
 
+    // Should not be copied.
+    usart_bus &operator=(usart_bus&) = delete;
+    usart_bus(usart_bus&) = delete;
+
 private:
     //! Picks proper RCC at compile time.
     static constexpr auto pick_rcc();

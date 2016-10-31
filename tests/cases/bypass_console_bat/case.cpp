@@ -22,7 +22,7 @@ TEST(bypass_console_bat, print_ascii)
 
     for (char c = 0x20; c < 0x7f; ++c) {
         ecl::bypass_putc(c);
-        if ((c - 0x20 & 0xf) == 0xf) {
+        if (((c - 0x20) & 0xf) == 0xf) {
             ecl::bypass_putc('\r');
             ecl::bypass_putc('\n');
         }

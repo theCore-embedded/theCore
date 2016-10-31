@@ -48,6 +48,9 @@ public:
         //! Sets user-defined callback.
         void set_cb(callback cb);
 
+        handler &operator=(handler&) = default;
+        handler(const handler&) = default;
+
     private:
         //! Calls this handler.
         void operator()();
@@ -139,7 +142,7 @@ private:
 // Not all platforms have grouped EXTI lines.
 #if CONFIG_ECL_EXTI_GROUPED_COUNT > 0
         //! Grouped IRQ lines.
-        handlers grouped[grouped_cnt] = {};
+        handlers grouped[grouped_cnt];
 #endif
     };
 

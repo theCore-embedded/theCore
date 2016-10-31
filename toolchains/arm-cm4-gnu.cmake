@@ -43,13 +43,17 @@ set(C_CXX_EXTRA_FLAGS "-gdwarf-2 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp")
 set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS}")
 set(CXX_EXTRA_FLAGS "-std=c++14 ${C_CXX_EXTRA_FLAGS}")
 
+# Set general flags for C\C++ compiler and linker
+set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
+
 # Supported modes are normal, release, debug and minimum size
 # Normal mode
 set(CMAKE_C_FLAGS
 	"${CMAKE_C_FLAGS} ${CC_PLATFORM_FLAGS} ${CC_WARN_FLAGS} ${CC_EXTRA_FLAGS}"
 	CACHE STRING "C flags")
 set(CMAKE_CXX_FLAGS
-	"${CMAKE_CXX_FLAGS} ${CXX_PLATFORM_FLAGS} ${CC_WARN_FLAGS} ${CXX_EXTRA_FLAGS}"
+	"${CMAKE_CXX_FLAGS} ${CXX_PLATFORM_FLAGS} ${CXX_WARN_FLAGS} ${CXX_EXTRA_FLAGS}"
 	CACHE STRING "C++ flags")
 
 # Release flags, optimization is on,

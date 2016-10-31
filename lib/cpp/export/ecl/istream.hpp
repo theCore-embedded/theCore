@@ -32,6 +32,10 @@ public:
     int get();
     istream &get(char &c);
 
+    // Disabled for now.
+    istream &operator=(istream &) = delete;
+    istream(const istream &) = delete;
+
 private:
     // Simply, a device driver object
     IO_device *m_device;
