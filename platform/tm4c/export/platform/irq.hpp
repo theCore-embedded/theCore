@@ -12,10 +12,13 @@
 #define __Vendor_SysTickConfig    0
 
 #include <core_cm4.h>
+
 #include <ecl/err.hpp>
 
 #include <functional>
 #include <type_traits>
+
+#include <interrupt.h>
 
 namespace ecl
 {
@@ -30,7 +33,8 @@ namespace irq
 //!
 static inline void mask(irq_num irqn)
 {
-    NVIC_DisableIRQ(irqn);
+//    NVIC_DisableIRQ(irqn);
+    IntDisable(irqn);
 }
 
 //! Unmasks or enables the given IRQ.
@@ -38,7 +42,7 @@ static inline void mask(irq_num irqn)
 //!
 static inline void unmask(irq_num irqn)
 {
-    NVIC_EnableIRQ(irqn);
+    IntEnable(irqn);
 }
 
 //! Gets current IRQ number.
@@ -51,11 +55,9 @@ static inline irq_num get_current_irqn()
     "mrs %0, ipsr" : "=r" (irqn)
     );
 
-    // IPSR holds exception numbers starting from 0
-    // Valid IRQ number starts from -15
-    // See Cortex-M3 processors documentation
-    // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/BABBGBEC.html
-    return static_cast<irq_num>(irqn - 16);
+    // To be compatible with TivaWare library, IRQ number must be the same as exception number.
+    // TODO: add reference links
+    return irqn;
 }
 
 //! Checks if a processor is in handler mode of execution at this time.
@@ -69,13 +71,13 @@ static inline bool in_isr()
 //! Disables interrupts globally.
 static inline void disable()
 {
-    __disable_irq();
+    IntMasterDisable();
 }
 
 //! Enables interrupts globally.
 static inline void enable()
 {
-    __enable_irq();
+    IntMasterEnable();
 }
 
 //! Clears pending interrupt of the given IRQ.
@@ -83,7 +85,7 @@ static inline void enable()
 //!
 static inline void clear(irq_num irqn)
 {
-    NVIC_ClearPendingIRQ(irqn);
+    IntPendClear(irqn);
 }
 
 } // namespace irq
