@@ -135,7 +135,9 @@ private:
         } tx;
 
         size_t          tx_sz;      //! TX buffer size.
-        size_t          tx_idx;     //! TX buffer current index.
+        //! TX buffer current index.
+        //! In fill mode it counts bytes written.
+        size_t          tx_idx;
         uint8_t         *rx;        //! RX buffer.
         size_t          rx_sz;      //! RX buffer size.
         size_t          rx_idx;     //! RX buffer current index.
@@ -228,7 +230,14 @@ void uart_bus<dev>::irq_bus_handler()
             // the TXRIS bit is set.
             // It is *cleared by performing a single write to the transmit FIFO*,
             // or by clearing the interrupt by writing a 1 to the TXIC bit.
-            UARTCharPutNonBlocking(periph, bus_ctx.tx.buf[bus_ctx.tx_idx++]);
+
+            if (bus_ctx.status & ctx::fill) {
+                UARTCharPutNonBlocking(periph, bus_ctx.tx.fill_byte);
+            } else {
+                UARTCharPutNonBlocking(periph, bus_ctx.tx.buf[bus_ctx.tx_idx]);
+            }
+
+            ++bus_ctx.tx_idx;
 
             // Unblock next interrupt.
 
@@ -315,7 +324,6 @@ template<uart_device dev>
 void uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 {
     // TODO: implement
-#if 0
     auto &bus_ctx = get_ctx();
 
     ecl_assert((bus_ctx.status & (ctx::inited | ctx::tx_done))
@@ -325,10 +333,6 @@ void uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
     bus_ctx.tx_sz = size;
 
     bus_ctx.status |= ctx::fill;
-#else
-    (void) size; (void) fill_byte;
-    ecl_assert(0);
-#endif
 }
 
 template<uart_device dev>
@@ -382,13 +386,18 @@ ecl::err uart_bus<dev>::do_xfer()
 
     uint32_t int_flags = 0;
 
-    if (bus_ctx.tx.buf) {
+    if ((bus_ctx.status & ctx::fill) || bus_ctx.tx.buf) {
         int_flags |= UART_INT_TX;
 
         // Bus operates in half-duplex mode. TX interrupt must be provoked if TX is
         // required. Otherwise (RX required), interrupts will be triggered
         // during byte reception, no need to provoke it.
-        UARTCharPut(periph, bus_ctx.tx.buf[0]);
+        if (bus_ctx.status & ctx::fill) {
+            UARTCharPut(periph, bus_ctx.tx.fill_byte);
+        } else {
+            UARTCharPut(periph, bus_ctx.tx.buf[0]);
+        }
+
         bus_ctx.tx_idx = 1;
         bus_ctx.status &= ~ctx::tx_done;
     }
