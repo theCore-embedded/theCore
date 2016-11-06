@@ -40,6 +40,10 @@ public:
     // Puts a single character
     ostream &put(char c);
 
+    // Disabled for now.
+    ostream &operator=(ostream &) = delete;
+    ostream(const ostream &) = delete;
+
 private:
     // Simply, a device driver object
     IO_device *m_device;

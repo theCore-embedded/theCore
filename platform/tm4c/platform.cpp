@@ -1,6 +1,8 @@
 #include <cstdint>
 #include <sysctl.h>
 
+#include <common/irq.hpp>
+
 #ifdef CONFIG_BYPASS_CONSOLE_ENABLED
 namespace ecl
 {
@@ -22,6 +24,9 @@ extern "C" void SystemInit()
 extern "C" void platform_init()
 {
     // TODO: implement
+
+    // IRQ must be ready before anything else will start work
+    ecl::irq::init_storage();
 
 #ifdef CONFIG_BYPASS_CONSOLE_ENABLED
     ecl::bypass_console_init();

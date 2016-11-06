@@ -1,4 +1,4 @@
-if("${PLATFORM_NAME}" STREQUAL "host")
+if(PLATFORM_NAME STREQUAL host)
     add_library(platform_common INTERFACE)
     target_include_directories(platform_common INTERFACE export)
 else()

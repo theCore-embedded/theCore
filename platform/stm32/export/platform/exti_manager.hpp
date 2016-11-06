@@ -31,7 +31,7 @@ public:
         friend class exti_manager;
 
     public:
-        ecl::list_node m_node;       //!< List node of the EXTI handlers list.
+        ecl::list_node m_node = {};       //!< List node of the EXTI handlers list.
 
         //! Constructs empty handler
         handler() = default;
@@ -48,13 +48,16 @@ public:
         //! Sets user-defined callback.
         void set_cb(callback cb);
 
+        handler &operator=(handler&) = default;
+        handler(const handler&) = default;
+
     private:
         //! Calls this handler.
         void operator()();
 
-        void     *m_ctx;       //!< User-defined context.
-        callback m_cb;         //!< User-defined callback.
-        uint32_t m_exti_line;  //!< EXTI line that handled by this handler.
+        void     *m_ctx         = nullptr;       //!< User-defined context.
+        callback m_cb           = {};            //!< User-defined callback.
+        uint32_t m_exti_line    = 0;             //!< EXTI line that handled by this handler.
     };
 
 public:
@@ -139,7 +142,7 @@ private:
 // Not all platforms have grouped EXTI lines.
 #if CONFIG_ECL_EXTI_GROUPED_COUNT > 0
         //! Grouped IRQ lines.
-        handlers grouped[grouped_cnt] = {};
+        handlers grouped[grouped_cnt];
 #endif
     };
 
@@ -314,6 +317,9 @@ exti_manager::is_direct_exti<Gpio> exti_manager::save_handler(handler &h)
 
     h.m_exti_line = exti;
     map()->direct[idx] = &h;
+
+    // Dummy return value. See is_direct_exti for explanation.
+    return true;
 }
 
 template<typename Gpio>
@@ -324,6 +330,9 @@ exti_manager::is_grouped_exti<Gpio> exti_manager::save_handler(handler &h)
 
     h.m_exti_line = exti;
     map()->grouped[idx].push_back(h);
+
+    // Dummy return value. See is_direct_exti for explanation.
+    return true;
 }
 
 constexpr auto exti_manager::map()

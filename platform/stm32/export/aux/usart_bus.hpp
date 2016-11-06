@@ -7,7 +7,6 @@
 #define PLATFORM_USART_BUS_HPP_
 
 #include <common/bus.hpp>
-#include <common/usart.hpp>
 #include <ecl/err.hpp>
 
 #include <stm32_device.hpp>
@@ -22,6 +21,19 @@
 
 namespace ecl
 {
+
+//! Represents distinct peripheral devices
+enum class usart_device
+{
+    dev1,
+    dev2,
+    dev3,
+    dev4,
+    dev5,
+    dev6,
+    dev7,
+    dev8
+};
 
 //! Base template class for the usart configuration
 //! \details User must create template specialization for required USART device.
@@ -149,6 +161,10 @@ public:
     //! \return Status of operation.
     //!
     ecl::err do_xfer();
+
+    // Should not be copied.
+    usart_bus &operator=(usart_bus&) = delete;
+    usart_bus(usart_bus&) = delete;
 
 private:
     //! Picks proper RCC at compile time.

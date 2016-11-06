@@ -48,6 +48,7 @@ endif()
 
 target_include_directories(tivaware SYSTEM PUBLIC
         ti-tivaware/
+        ti-tivaware/inc
         ti-tivaware/driverlib)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)

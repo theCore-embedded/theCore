@@ -34,6 +34,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m3 -mthumb -fdata-sections \
 	-ffunction-sections -fno-common -msoft-float -mfloat-abi=soft")
 
+
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
 # why????
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
@@ -43,13 +44,17 @@ set(C_CXX_EXTRA_FLAGS "-gdwarf-2 ")
 set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS}")
 set(CXX_EXTRA_FLAGS "-std=c++14 ${C_CXX_EXTRA_FLAGS}")
 
+# Set general flags for C\C++ compiler and linker
+set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
+
 # Supported modes are normal, release, debug and minimum size
 # Normal mode
 set(CMAKE_C_FLAGS
 	"${CMAKE_C_FLAGS} ${CC_PLATFORM_FLAGS} ${CC_WARN_FLAGS} ${CC_EXTRA_FLAGS}"
 	CACHE STRING "C flags")
 set(CMAKE_CXX_FLAGS
-	"${CMAKE_CXX_FLAGS} ${CXX_PLATFORM_FLAGS} ${CC_WARN_FLAGS} ${CXX_EXTRA_FLAGS}"
+	"${CMAKE_CXX_FLAGS} ${CXX_PLATFORM_FLAGS} ${CXX_WARN_FLAGS} ${CXX_EXTRA_FLAGS}"
 	CACHE STRING "C++ flags")
 
 # Release flags, optimization is on,

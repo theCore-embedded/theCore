@@ -63,6 +63,7 @@ void init_storage()
 void subscribe(irq_num irqn, const handler_type &handler)
 {
     ecl_assert(static_cast<int>(irqn) >= 0);
+    ecl_assert(static_cast<int>(irqn) < IRQ_COUNT);
 
     auto handlers = extract_handlers();
 
@@ -74,6 +75,7 @@ void subscribe(irq_num irqn, const handler_type &handler)
 void unsubscribe(irq_num irqn)
 {
     ecl_assert(static_cast<int>(irqn) >= 0);
+    ecl_assert(static_cast<int>(irqn) < IRQ_COUNT);
 
     auto handlers = extract_handlers();
     irq::disable();

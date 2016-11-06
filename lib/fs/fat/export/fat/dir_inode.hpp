@@ -32,6 +32,9 @@ public:
     virtual ssize_t size() const override;
     virtual ssize_t get_name(char *buf, size_t buf_sz) const override;
 
+    dir_inode &operator=(dir_inode&) = delete;
+    dir_inode(const dir_inode&) = delete;
+
 private:
     // Holds a reference to a path string and manages its deallocation
     allocator  m_alloc; // The allocator to create various objects

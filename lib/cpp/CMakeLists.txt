@@ -16,6 +16,8 @@ endif()
 add_cppcheck(libcpp UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
 target_link_libraries(libcpp PUBLIC types bus)
 
+#target_compile_options(libcpp PUBLIC -Wno-non-virtual-dtor)
+
 add_unit_host_test(NAME istream_test SOURCES tests/istream_unit.cpp
                                      INC_DIRS export)
 

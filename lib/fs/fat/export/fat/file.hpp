@@ -22,6 +22,9 @@ public:
     virtual off_t tell();
     virtual int close();
 
+    file &operator=(file&) = delete;
+    file(const file&) = delete;
+
 private:
     FATFS *m_fs;
     bool  m_opened; // TODO: remove it and use FATFS::flag instead
