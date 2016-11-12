@@ -244,25 +244,38 @@ void uart_bus<dev>::irq_bus_handler()
             UARTIntEnable(periph, UART_INT_TX);
         }
 
-        irq::clear(uart_it);
-        irq::unmask(uart_it);
-
         // Leave TX termination to the next interrupt.
 
     } else if (!(bus_ctx.status & ctx::rx_done)) {
         // Half-duplex. Start RX only after TX.
-        // TODO
-        ecl_assert(0);
-    } else {
+
+        bus_ctx.rx[bus_ctx.rx_idx++] = UARTCharGetNonBlocking(periph);
+
+        // RX interrupts won't occur anymore. Handle RX termination right now.
+        if (bus_ctx.rx_idx == bus_ctx.rx_sz) {
+            bus_ctx.h(bus_channel::rx, bus_event::tc, bus_ctx.rx_sz);
+            bus_ctx.status |= ctx::rx_done;
+        } else {
+            UARTIntEnable(periph, UART_INT_RX);
+        }
+    }
+
+    if ((bus_ctx.status & (ctx::tx_done | ctx::rx_done))
+                         == (ctx::tx_done | ctx::rx_done)) {
         // Everything is finished.
 
-        UARTIntClear(periph, UART_INT_TX);
+        UARTIntClear(periph, UART_INT_TX | UART_INT_RX);
         UARTIntDisable(periph, UART_INT_TX | UART_INT_RX);
         bus_ctx.h(bus_channel::meta, bus_event::tc, 0);
 
-        irq::clear(uart_it);
         irq::mask(uart_it);
+    } else {
+
+        // Continue with next interrupts
+        irq::unmask(uart_it);
     }
+
+    irq::clear(uart_it);
 }
 
 //------------------------------------------------------------------------------
@@ -358,6 +371,7 @@ void uart_bus<dev>::reset_buffers()
     // ambiguity.
     bus_ctx.status &= ~ctx::fill;
     bus_ctx.tx.buf = nullptr;
+    bus_ctx.rx = nullptr;
 }
 
 template<uart_device dev>
