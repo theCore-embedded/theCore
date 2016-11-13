@@ -135,7 +135,9 @@ private:
         } tx;
 
         size_t          tx_sz;      //! TX buffer size.
-        size_t          tx_idx;     //! TX buffer current index.
+        //! TX buffer current index.
+        //! In fill mode it counts bytes written.
+        size_t          tx_idx;
         uint8_t         *rx;        //! RX buffer.
         size_t          rx_sz;      //! RX buffer size.
         size_t          rx_idx;     //! RX buffer current index.
@@ -228,32 +230,52 @@ void uart_bus<dev>::irq_bus_handler()
             // the TXRIS bit is set.
             // It is *cleared by performing a single write to the transmit FIFO*,
             // or by clearing the interrupt by writing a 1 to the TXIC bit.
-            UARTCharPutNonBlocking(periph, bus_ctx.tx.buf[bus_ctx.tx_idx++]);
+
+            if (bus_ctx.status & ctx::fill) {
+                UARTCharPutNonBlocking(periph, bus_ctx.tx.fill_byte);
+            } else {
+                UARTCharPutNonBlocking(periph, bus_ctx.tx.buf[bus_ctx.tx_idx]);
+            }
+
+            ++bus_ctx.tx_idx;
 
             // Unblock next interrupt.
 
             UARTIntEnable(periph, UART_INT_TX);
         }
 
-        irq::clear(uart_it);
-        irq::unmask(uart_it);
-
         // Leave TX termination to the next interrupt.
 
     } else if (!(bus_ctx.status & ctx::rx_done)) {
         // Half-duplex. Start RX only after TX.
-        // TODO
-        ecl_assert(0);
-    } else {
+
+        bus_ctx.rx[bus_ctx.rx_idx++] = UARTCharGetNonBlocking(periph);
+
+        // RX interrupts won't occur anymore. Handle RX termination right now.
+        if (bus_ctx.rx_idx == bus_ctx.rx_sz) {
+            bus_ctx.h(bus_channel::rx, bus_event::tc, bus_ctx.rx_sz);
+            bus_ctx.status |= ctx::rx_done;
+        } else {
+            UARTIntEnable(periph, UART_INT_RX);
+        }
+    }
+
+    if ((bus_ctx.status & (ctx::tx_done | ctx::rx_done))
+                         == (ctx::tx_done | ctx::rx_done)) {
         // Everything is finished.
 
-        UARTIntClear(periph, UART_INT_TX);
+        UARTIntClear(periph, UART_INT_TX | UART_INT_RX);
         UARTIntDisable(periph, UART_INT_TX | UART_INT_RX);
         bus_ctx.h(bus_channel::meta, bus_event::tc, 0);
 
-        irq::clear(uart_it);
         irq::mask(uart_it);
+    } else {
+
+        // Continue with next interrupts
+        irq::unmask(uart_it);
     }
+
+    irq::clear(uart_it);
 }
 
 //------------------------------------------------------------------------------
@@ -315,7 +337,6 @@ template<uart_device dev>
 void uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 {
     // TODO: implement
-#if 0
     auto &bus_ctx = get_ctx();
 
     ecl_assert((bus_ctx.status & (ctx::inited | ctx::tx_done))
@@ -325,10 +346,6 @@ void uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
     bus_ctx.tx_sz = size;
 
     bus_ctx.status |= ctx::fill;
-#else
-    (void) size; (void) fill_byte;
-    ecl_assert(0);
-#endif
 }
 
 template<uart_device dev>
@@ -354,6 +371,7 @@ void uart_bus<dev>::reset_buffers()
     // ambiguity.
     bus_ctx.status &= ~ctx::fill;
     bus_ctx.tx.buf = nullptr;
+    bus_ctx.rx = nullptr;
 }
 
 template<uart_device dev>
@@ -382,13 +400,18 @@ ecl::err uart_bus<dev>::do_xfer()
 
     uint32_t int_flags = 0;
 
-    if (bus_ctx.tx.buf) {
+    if ((bus_ctx.status & ctx::fill) || bus_ctx.tx.buf) {
         int_flags |= UART_INT_TX;
 
         // Bus operates in half-duplex mode. TX interrupt must be provoked if TX is
         // required. Otherwise (RX required), interrupts will be triggered
         // during byte reception, no need to provoke it.
-        UARTCharPut(periph, bus_ctx.tx.buf[0]);
+        if (bus_ctx.status & ctx::fill) {
+            UARTCharPut(periph, bus_ctx.tx.fill_byte);
+        } else {
+            UARTCharPut(periph, bus_ctx.tx.buf[0]);
+        }
+
         bus_ctx.tx_idx = 1;
         bus_ctx.status &= ~ctx::tx_done;
     }
