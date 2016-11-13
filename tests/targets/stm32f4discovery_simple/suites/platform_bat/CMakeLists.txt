@@ -10,6 +10,12 @@ add_executable(platform_bat ${AUTOGEN_DIR}/main.cpp suite_init.cpp)
 
 target_link_libraries(platform_bat the_core unity)
 
+# Avoid particular test. Required mode(s) is not implemented in UART driver yet
+# or implemented with some details.
+target_compile_definitions(platform_bat PUBLIC
+        -DUART_TEST_NO_FILL_MODE
+        -DUART_TEST_NO_RX_MODE)
+
 # Expose suite headers to the test cases
 include_directories(${CMAKE_CURRENT_LIST_DIR}/export)
 

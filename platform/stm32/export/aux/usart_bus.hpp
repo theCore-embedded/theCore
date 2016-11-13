@@ -545,7 +545,7 @@ void usart_bus<dev>::irq_handler()
         if (status == SET) {
             // Do not receive more than one byte. This is actually a small
             // adaptation to console purposes. Every symbol must be immediately
-            // transfered to the client of the console driver (code that owns
+            // transferred to the client of the console driver (code that owns
             // this bus).
             // If throughput is the case, additional buffering may be applied,
             // so this usart bus will accumulate some data (in other words,
