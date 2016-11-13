@@ -1,9 +1,7 @@
 # override warnings, since library contains a lot of them
 set(CC_NO_EXTRA_WARNINGS "-Wno-pedantic -Wno-all -Wno-extra")
-set(CXX_NO_EXTRA_WARNINGS "-Wno-effc++")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CC_NO_EXTRA_WARNINGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CXX_NO_EXTRA_WARNINGS}")
 
 set(SPL_DIR ${CMAKE_CURRENT_LIST_DIR}/SPL/STM32F4xx_StdPeriph_Driver/)
 
