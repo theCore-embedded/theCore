@@ -32,6 +32,10 @@ endif()
 #					 [DEPENDS list_of_dependencies...]
 #					 [INC_DIRS list_of_include_directories...])
 function(add_unit_host_test)
+    # Set general flags for C\C++ compiler and linker
+    set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+    set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
+
     # All test can use most recent standart
     set(CMAKE_CXX_STANDARD 14)
 

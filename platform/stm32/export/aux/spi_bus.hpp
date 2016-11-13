@@ -143,48 +143,46 @@ public:
     using handler_fn    = bus_handler;
     using config        = spi_i2s_cfg<dev>;
 
-    //! Constructs a bus.
-    spi_i2s_bus();
-
-    //! Destructs a bus.
-    ~spi_i2s_bus() = default;
+    // Static use only
+    spi_i2s_bus() = delete;
+    ~spi_i2s_bus() = delete;
 
     //! Lazy initialization.
     //! \return Status of operation.
-    ecl::err init();
+    static ecl::err init();
 
     //! Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
-    void set_rx(uint8_t *rx, size_t size);
+    static void set_rx(uint8_t *rx, size_t size);
 
     //! Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
-    void set_tx(size_t size, uint8_t fill_byte = 0xff);
+    static void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
     //! Sets tx buffer with given size.
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
-    void set_tx(const uint8_t *tx, size_t size);
+    static void set_tx(const uint8_t *tx, size_t size);
 
     //! Sets event handler.
     //! \details Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
-    void set_handler(const handler_fn &handler);
+    static void set_handler(const handler_fn &handler);
 
     //! Reset xfer buffers.
     //! \details Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
-    void reset_buffers();
+    static void reset_buffers();
 
     //! Resets previously set handler.
-    void reset_handler();
+    static void reset_handler();
 
     //! Executes xfer, using buffers previously set.
     //! \details When it will be done, handler will be invoked.
     //! \return Status of operation.
-    ecl::err do_xfer();
+    static ecl::err do_xfer();
 
     //! Sets audio frequency for I2S mode.
     //! \details Is not used in SPI mode.
@@ -192,7 +190,7 @@ public:
     //! \tparam Iface_cfg Used for correct enable_if mechanism. Must not be passed by user.
     //! \return Status of operation.
     template<ecl::i2s::audio_frequency frequency, class Iface_cfg = config>
-    std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err>
+    static std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err>
     i2s_set_audio_frequency();
 
     //! Sets data format for I2S mode.
@@ -201,7 +199,7 @@ public:
     //! \tparam Iface_cfg Used for correct enable_if mechanism. Must not be passed by user.
     //! \return Status of operation.
     template<ecl::i2s::data_format format, class Iface_cfg = config>
-    std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err>
+    static std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, ecl::err>
     i2s_set_data_format();
 
     //! Enables circular mode for the bus.
@@ -209,7 +207,7 @@ public:
     //! automatically without interruption. The same buffer is used.
     //! The process continues until circular mode is disabled.
     //! This method must not be called during xfer().
-    void enable_circular_mode();
+    static void enable_circular_mode();
 
     //! Disables circular mode for the bus.
     //! \details This method allows to stop xfer() that was started with circular mode.
@@ -220,11 +218,11 @@ public:
     //! If circular mode is disabled during processing of the HT (or between TC and HT),
     //! the xfer will be finished after next TC will be processed.
     //! This method also can be called when xfer() is not active.
-    void disable_circular_mode();
+    static void disable_circular_mode();
 
     //! Returns the circular mode state.
     //! \return true if circular mode is enabled, false otherwise
-    bool is_circular_mode();
+    static bool is_circular_mode();
 
 private:
     static constexpr auto pick_spi();
@@ -237,43 +235,43 @@ private:
     static constexpr uint32_t
     pick_i2s_data_format(ecl::i2s::data_format value);
 
-    ecl::err i2s_set_audio_frequency_private(uint32_t value);
-    ecl::err i2s_set_data_format_private(uint32_t value);
+    static ecl::err i2s_set_audio_frequency_private(uint32_t value);
+    static ecl::err i2s_set_data_format_private(uint32_t value);
 
     //! Initiliazes I2S interface, if bus was configured is such way
     template<class Iface_cfg = config>
-    std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, void>
+    static std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::i2s, void>
     init_interface();
 
     //! Initiliazes SPI interface, if bus was configured is such way
     template<class Iface_cfg = config>
-    std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::spi, void>
+    static std::enable_if_t<Iface_cfg::bus_type == spi_bus_type::spi, void>
     init_interface();
 
     // DMA init helper
-    void init_dma();
+    static void init_dma();
 
     // Checks if buffer sizes are valid
-    bool valid_sizes();
+    static bool valid_sizes();
 
     // Prepares TX transaction, if needed
-    void prepare_tx();
+    static void prepare_tx();
 
     // Prepares RX transaction, if needed
-    void prepare_rx();
+    static void prepare_rx();
 
     // Starts transaction, if needed
-    void start_xfer();
+    static void start_xfer();
 
     // RCC init helper
-    void init_rcc();
+    static void init_rcc();
 
     // IRQ init helper
-    void init_irq();
+    static void init_irq();
 
     // Handles DMA events
     // TODO Implement IRQ mode #102
-    void irq_handler();
+    static void irq_handler();
 
     //! Bus is inited if this flag is set.
     static constexpr uint8_t inited        = 0x1;
@@ -290,30 +288,44 @@ private:
     //! User will not be notified about RX events if this flag is set.
     static constexpr uint8_t rx_hidden     = 0x40;
 
-    handler_fn m_event_handler; //! Handler passed via set_handler().
-    union
+    static union tx_data
     {
-        const uint8_t *buf;        //! Transmit buffer.
-        uint16_t      byte;        //! Byte to transmit (16 bits of 16-bit SPI mode)
+        const uint8_t *buf;         //! Transmit buffer.
+        uint16_t      byte;         //! Byte to transmit (16 bits of 16-bit SPI mode)
     } m_tx;
 
-    size_t  m_tx_size;       //! TX buffer size.
-    uint8_t *m_rx;           //! Receive buffer.
-    size_t  m_rx_size;       //! RX buffer size.
-    uint8_t m_status;        //! Represents bus status.
+    static size_t  m_tx_size;       //! TX buffer size.
+    static uint8_t *m_rx;           //! Receive buffer.
+    static size_t  m_rx_size;       //! RX buffer size.
+    static uint8_t m_status;        //! Represents bus status.
+
+    //! Storage type for the event handler.
+    using handler_storage = std::aligned_storage_t<sizeof(handler_fn), alignof(handler_fn)>;
+
+    //! Storage for the event handler.
+    handler_storage m_handler_storage;
+
+    //! Gets event handler
+    constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
 };
 
 template<spi_device dev>
-spi_i2s_bus<dev>::spi_i2s_bus()
-    :m_event_handler{}
-    ,m_tx{nullptr}
-    ,m_tx_size{0}
-    ,m_rx{nullptr}
-    ,m_rx_size{0}
-    ,m_status{rx_complete | tx_complete}
-{
+size_t spi_i2s_bus<dev>::m_tx_size;
 
-}
+template<spi_device dev>
+size_t spi_i2s_bus<dev>::m_rx_size;
+
+template<spi_device dev>
+spi_i2s_bus<dev>::tx_data spi_i2s_bus<dev>::m_tx;
+
+template<spi_device dev>
+uint8_t *spi_i2s_bus<dev>::m_rx;
+
+template<spi_device dev>
+uint8_t spi_i2s_bus<dev>::m_status = spi_i2s_bus<dev>::tx_complete | spi_i2s_bus<dev>::rx_complete;
+
+template<spi_device dev>
+spi_i2s_bus<dev>::handler_storage spi_i2s_bus<dev>::m_handler_storage;
 
 template<spi_device dev>
 ecl::err spi_i2s_bus<dev>::init()
@@ -321,6 +333,8 @@ ecl::err spi_i2s_bus<dev>::init()
     if (m_status & inited) {
         return ecl::err::ok;
     }
+
+    new (&m_handler_storage) handler_fn;
 
     constexpr auto spi_irq = pick_spi_irqn();
     constexpr auto spi     = pick_spi();
@@ -403,7 +417,7 @@ void spi_i2s_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 template<spi_device dev>
 void spi_i2s_bus<dev>::set_handler(const handler_fn &handler)
 {
-    m_event_handler = handler;
+    get_handler() = handler;
 }
 
 
@@ -420,7 +434,7 @@ void spi_i2s_bus<dev>::reset_buffers()
 template<spi_device dev>
 void spi_i2s_bus<dev>::reset_handler()
 {
-    m_event_handler = handler_fn{};
+    get_handler() = handler_fn{};
 }
 
 template<spi_device dev>
@@ -555,7 +569,7 @@ void spi_i2s_bus<dev>::irq_handler()
             uint32_t tx_left = config::dma_tx::bytes_left();
 
             if (!(m_status & tx_hidden)) {
-                m_event_handler(channel::tx, event::ht, m_tx_size - tx_left);
+                get_handler()(channel::tx, event::ht, m_tx_size - tx_left);
             }
 
             config::dma_tx::clear_ht();
@@ -566,7 +580,7 @@ void spi_i2s_bus<dev>::irq_handler()
             // Complete TX transaction
 
             if (!(m_status & tx_hidden)) {
-                m_event_handler(channel::tx, event::tc, m_tx_size);
+                get_handler()(channel::tx, event::tc, m_tx_size);
             }
 
             config::dma_tx::clear_tc();
@@ -592,7 +606,7 @@ void spi_i2s_bus<dev>::irq_handler()
             uint32_t rx_left = config::dma_rx::bytes_left();
 
             if (!(m_status & rx_hidden)) {
-                m_event_handler(channel::rx, event::ht, m_rx_size - rx_left);
+                get_handler()(channel::rx, event::ht, m_rx_size - rx_left);
             }
 
             config::dma_rx::clear_ht();
@@ -602,7 +616,7 @@ void spi_i2s_bus<dev>::irq_handler()
         if (config::dma_rx::tc()) {
             // Complete RX transaction
             if (!(m_status & rx_hidden)) {
-                m_event_handler(channel::rx, event::tc, m_rx_size);
+                get_handler()(channel::rx, event::tc, m_rx_size);
             }
 
             config::dma_rx::clear_tc();
@@ -624,7 +638,7 @@ void spi_i2s_bus<dev>::irq_handler()
     if ((m_status & (rx_complete | tx_complete)) ==
         (rx_complete | tx_complete)) {
         // All transfers completed
-        m_event_handler(channel::meta, event::tc, m_tx_size);
+        get_handler()(channel::meta, event::tc, m_tx_size);
 
         if (!(m_status & mode_circular)) {
             config::dma_rx::disable();

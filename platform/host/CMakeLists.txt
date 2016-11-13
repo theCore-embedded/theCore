@@ -1,7 +1,7 @@
-add_library(host INTERFACE)
+add_library(host console.cpp)
 add_library(startup INTERFACE)
 
-target_include_directories(host INTERFACE export)
-target_include_directories(host INTERFACE export/platform)
-target_link_libraries(host INTERFACE types)
-target_link_libraries(host INTERFACE platform_common)
+target_include_directories(host PUBLIC export)
+target_include_directories(host PUBLIC export/platform)
+target_link_libraries(host PUBLIC types)
+target_link_libraries(host PUBLIC platform_common)

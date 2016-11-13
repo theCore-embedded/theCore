@@ -33,6 +33,39 @@ inline constexpr size_t offset_of(T1 T2::*member) {
     return reinterpret_cast<uint8_t *>(&(ptr->*member)) - reinterpret_cast<uint8_t *>(ptr);
 }
 
+//! Safe storage wrapper to avoid static initialization fiasco
+//! \tparam T non-POD type to protect against implicit constructor call during static initialization
+template<class T>
+class safe_storage
+{
+public:
+    //! Initializes storage.
+    //! \tparam Args Types of the constructor args.
+    //! \param  args T's ctor arguments.
+    //! \pre  Storage not yet initialized, i.e. ctor wasn't called yet.
+    //! \post Storage initialized and object is ready to work.
+    //! \note Violating pre-conditions leads to undefined behaviour.
+    template<class ...Args>
+    static void init(Args ...args)
+    {
+        new (&m_stor) T{args...};
+    }
+
+    //! Gets object reference.
+    //! \pre Storage initialized, i.e. init() was called once.
+    static constexpr T& get()
+    {
+        return reinterpret_cast<T&>(m_stor);
+    }
+
+private:
+    //! Storage for the T object.
+    static std::aligned_storage_t<sizeof(T), alignof(T)> m_stor;
+};
+
+template<class T>
+std::aligned_storage_t<sizeof(T), alignof(T)> safe_storage<T>::m_stor;
+
 } // namespace ecl
 
-#endif
+#endif // ECL_UTILS_HPP_

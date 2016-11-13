@@ -49,67 +49,62 @@ public:
     using event         = bus_event;
     using handler_fn    = bus_handler;
 
-    //!
-    //! \brief Constructs a bus.
-    //!
-    i2c_bus();
-
-    //!
-    //! \brief Destructs a bus.
-    ~i2c_bus() = default;
+    // Static use only
+    i2c_bus() = delete;
+    ~i2c_bus() = delete;
 
     //!
     //! \brief Lazy initialization.
     //! \return Status of operation.
     //!
-    ecl::err init();
+    static ecl::err init();
 
     //!
     //! \brief Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
     //!
-    void set_rx(uint8_t *rx, size_t size);
+    static void set_rx(uint8_t *rx, size_t size);
 
     //!
     //! \brief Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
     //!
-    void set_tx(size_t size, uint8_t fill_byte = 0xff);
+    static void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
     //!
     //! \brief Sets tx buffer with given size.
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
     //!
-    void set_tx(const uint8_t *tx, size_t size);
+    static void set_tx(const uint8_t *tx, size_t size);
 
     //!
     //! \brief Sets event handler.
     //! Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
     //!
-    void set_handler(const handler_fn &handler);
+    static void set_handler(const handler_fn &handler);
 
     //!
     //! \brief Reset xfer buffers.
     //! Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
     //!
-    void reset_buffers();
+    static void reset_buffers();
 
     //!
     //! \brief Resets previously set handler.
     //!
-    void reset_handler();
+    static void reset_handler();
 
     //!
     //! \brief Executes xfer, using buffers previously set.
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
     //!
-    ecl::err do_xfer();
+    static ecl::err do_xfer();
 
     //!
     //! \brief Sets slave address.
@@ -117,7 +112,7 @@ public:
     //! In case there is only one device on the bus,
     //! this function may be called only once,
     //! before first xfer().
-    void set_slave_addr(uint16_t addr);
+    static void set_slave_addr(uint16_t addr);
 
 private:
     static constexpr auto pick_rcc();
@@ -128,7 +123,7 @@ private:
 
     //! Communication direction
     // TODO Add slave support
-    enum direction
+    static enum direction
     {
         MASTER_TX,
         MASTER_RX,
@@ -140,54 +135,74 @@ private:
     static constexpr uint8_t m_inited     = 0x1;
 
     // Device status methods
-    inline bool inited() const     { return (m_status & m_inited)  != 0; }
+    static inline bool inited() const     { return (m_status & m_inited)  != 0; }
 
-    inline void set_inited()       { m_status |= m_inited; }
-    inline void clear_inited()     { m_status &= ~(m_inited); }
+    static inline void set_inited()       { m_status |= m_inited; }
+    static inline void clear_inited()     { m_status &= ~(m_inited); }
 
     //! Setup xfer in IRQ mode
-    ecl::err i2c_setup_xfer_irq();
+    static ecl::err i2c_setup_xfer_irq();
 
     //! Operations for POLL mode
-    ecl::err i2c_transmit_poll();
-    ecl::err i2c_receive_poll();
+    static ecl::err i2c_transmit_poll();
+    static ecl::err i2c_receive_poll();
 
     //! Handles IRQ events from a bus.
-    void irq_ev_handler();
+    static void irq_ev_handler();
     //! Handles IRQ events (error) from a bus.
-    void irq_er_handler();
+    static void irq_er_handler();
 
     //! Helper functions for bytes receive/transmit
-    void receive_bytes(size_t count);
-    void send_bytes(size_t count);
+    static void receive_bytes(size_t count);
+    static void send_bytes(size_t count);
 
-    handler_fn      m_event_handler; //! Handler passed via set_handler().
-    const uint8_t   *m_tx;           //! Transmit buffer.
-    size_t          m_tx_size;       //! TX buffer size.
-    size_t          m_tx_left;       //! Left to send in TX buffer.
-    uint8_t         *m_rx;           //! Receive buffer.
-    size_t          m_rx_size;       //! RX buffer size.
-    size_t          m_rx_left;       //! Left to receive in RX buffer.
-    uint8_t         m_status;        //! Tracks device status.
+    static const uint8_t   *m_tx;           //! Transmit buffer.
+    static size_t          m_tx_size;       //! TX buffer size.
+    static size_t          m_tx_left;       //! Left to send in TX buffer.
+    static uint8_t         *m_rx;           //! Receive buffer.
+    static size_t          m_rx_size;       //! RX buffer size.
+    static size_t          m_rx_left;       //! Left to receive in RX buffer.
+    static uint8_t         m_status;        //! Tracks device status.
 
-    uint16_t        m_own_addr;     //! device address in slave mode
-    uint16_t        m_slave_addr;   //! address of slave to communicate
+    static uint16_t        m_own_addr;      //! device address in slave mode
+    static uint16_t        m_slave_addr;    //! address of slave to communicate
+
+    //! Private handler storage.
+    static safe_storage<handler_fn> m_handler_storage;
+
+    //! Gets event handler
+    constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
 };
 
 template<class i2c_config>
-i2c_bus<i2c_config>::i2c_bus()
-	:m_event_handler{}
-	,m_tx{nullptr}
-	,m_tx_size{0}
-	,m_tx_left{0}
-	,m_rx{nullptr}
-	,m_rx_size{0}
-	,m_rx_left{0}
-	,m_status{0}
-	,m_slave_addr{0}
-{
+const uint8_t *i2c_bus<i2c_config>::m_tx;
 
-}
+template<class i2c_config>
+uint8_t *i2c_bus<i2c_config>::m_rx;
+
+template<class i2c_config>
+size_t i2c_bus<i2c_config>::m_tx_size;
+
+template<class i2c_config>
+size_t i2c_bus<i2c_config>::m_tx_left;
+
+template<class i2c_config>
+size_t i2c_bus<i2c_config>::m_rx_size;
+
+template<class i2c_config>
+size_t i2c_bus<i2c_config>::m_rx_left;
+
+template<class i2c_config>
+uint8_t i2c_bus<i2c_config>::m_status;
+
+template<class i2c_config>
+uint8_t i2c_bus<i2c_config>::m_own_addr;
+
+template<class i2c_config>
+uint8_t i2c_bus<i2c_config>::m_slave_addr;
+
+template<class i2c_config>
+safe_storage<typename i2c_bus<i2c_config>::handler_fn> i2c_bus<i2c_config>::m_handler_storage;
 
 template <class i2c_config>
 ecl::err i2c_bus<i2c_config>::init()
@@ -275,15 +290,15 @@ ecl::err i2c_bus<i2c_config>::do_xfer()
     if (i2c_config::m_mode == i2c_mode::POLL) {
         if (m_tx) {
             i2c_transmit_poll();
-            m_event_handler(channel::tx, event::tc, m_tx_size);
+            get_handler()(channel::tx, event::tc, m_tx_size);
         }
 
         if (m_rx) {
             i2c_receive_poll();
-            m_event_handler(channel::rx, event::tc, m_rx_size);
+            get_handler()(channel::rx, event::tc, m_rx_size);
         }
 
-        m_event_handler(channel::meta, event::tc, m_rx_size | m_tx_size);
+        get_handler()(channel::meta, event::tc, m_rx_size | m_tx_size);
     } else if (i2c_config::m_mode == i2c_mode::IRQ) {
         // There are common interrupts for tx and rx.
         // If no tx is required then rx will be done,
@@ -315,7 +330,7 @@ void i2c_bus<i2c_config>::reset_buffers()
 template<class i2c_config>
 void i2c_bus<i2c_config>::set_handler(const handler_fn &handler)
 {
-    m_event_handler = handler;
+    get_handler() = handler;
 }
 
 template<class i2c_config>
@@ -589,16 +604,16 @@ void i2c_bus<i2c_config>::irq_ev_handler()
         } else {
             // all bytes were transmitted
             I2C_GenerateSTOP(i2c, ENABLE);
-            m_event_handler(channel::tx, event::tc, 0);
+            get_handler()(channel::tx, event::tc, 0);
 
             // tx is done here, set up rx
             if (m_rx) {
                 m_direction = MASTER_RX;
                 i2c_setup_xfer_irq();
             } else {
-                m_event_handler(channel::tx, event::tc, m_tx_size);
+                get_handler()(channel::tx, event::tc, m_tx_size);
                 // transfer is complete
-                m_event_handler(channel::meta, event::tc, m_tx_size);
+                get_handler()(channel::meta, event::tc, m_tx_size);
                 I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
                 return;
             }
@@ -649,10 +664,10 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 
         // rx is done (as well as tx)
         if (m_rx_left == 0) {
-            m_event_handler(channel::rx, event::tc, m_rx_size);
+            get_handler()(channel::rx, event::tc, m_rx_size);
 
             // rx always last, so transfer is complete
-            m_event_handler(channel::meta, event::tc, m_rx_size);
+            get_handler((channel::meta, event::tc, m_rx_size);
             I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
 
             return;

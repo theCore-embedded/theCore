@@ -9,6 +9,7 @@
 #include <common/bus.hpp>
 #include <common/irq.hpp>
 #include <ecl/assert.h>
+#include <ecl/utils.hpp>
 
 #include <uart.h>
 #include <sysctl.h>
@@ -147,12 +148,11 @@ private:
     //! Private context storage.
     //! \details Default-initialized during static objects zero-initialization.
     //! Afterwards, init() is responsible of calling non-trival ctor of ctx.
-    static std::aligned_storage_t<sizeof(ctx), alignof(ctx)> m_ctx_storage;
+    static safe_storage<ctx> m_ctx_storage;
 };
 
 template<uart_device dev>
-std::aligned_storage_t<sizeof(typename uart_bus<dev>::ctx),
-    alignof(typename uart_bus<dev>::ctx)> uart_bus<dev>::m_ctx_storage;
+safe_storage<typename uart_bus<dev>::ctx> uart_bus<dev>::m_ctx_storage;
 
 //------------------------------------------------------------------------------
 // Private members
@@ -206,7 +206,7 @@ constexpr auto uart_bus<dev>::pick_it()
 template<uart_device dev>
 constexpr auto &uart_bus<dev>::get_ctx()
 {
-    return reinterpret_cast<ctx&>(m_ctx_storage);
+    return m_ctx_storage.get();
 }
 
 template<uart_device dev>

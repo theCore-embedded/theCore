@@ -47,7 +47,7 @@ enum class async_type
 //!                  during current xfer.
 //! \sa generic_bus::xfer()
 //!
-using bus_handler = std::function< void(bus_channel ch, bus_event type, size_t total) >;
+using bus_handler = std::function<void(bus_channel ch, bus_event type, size_t total)>;
 
 //!
 //! \brief The dummy bus class.
@@ -60,7 +60,7 @@ public:
     //! \brief Lazy initialization.
     //! \return Status of operation.
     //!
-    ecl::err init()
+    static ecl::err init()
     { return ecl::err::nosys; }
 
     //!
@@ -68,7 +68,7 @@ public:
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
     //!
-    void set_rx(uint8_t *rx, size_t size)
+    static void set_rx(uint8_t *rx, size_t size)
     { (void) rx; (void) size; }
 
     //!
@@ -76,7 +76,7 @@ public:
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
     //!
-    void set_tx(size_t size, uint8_t fill_byte = 0xff)
+    static void set_tx(size_t size, uint8_t fill_byte = 0xff)
     { (void) size; (void) fill_byte; }
 
     //!
@@ -84,7 +84,7 @@ public:
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
     //!
-    void set_tx(const uint8_t *tx, size_t size)
+    static void set_tx(const uint8_t *tx, size_t size)
     { (void) tx; (void) size; }
 
     //!
@@ -92,7 +92,7 @@ public:
     //! Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
     //!
-    void set_handler(const bus_handler &handler)
+    static void set_handler(const bus_handler &handler)
     { (void) handler; }
 
     //!
@@ -100,13 +100,13 @@ public:
     //! Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
     //!
-    void reset_buffers()
+    static void reset_buffers()
     { return; }
 
     //!
     //! \brief Resets previously set handler.
     //!
-    void reset_handler()
+    static void reset_handler()
     { return; }
 
     //!
@@ -114,7 +114,7 @@ public:
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
     //!
-    ecl::err do_xfer()
+    static ecl::err do_xfer()
     { return ecl::err::nosys; }
 };
 
