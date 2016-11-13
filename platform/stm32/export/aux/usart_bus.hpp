@@ -100,67 +100,62 @@ public:
     using event         = ecl::bus_event;
     using handler_fn    = ecl::bus_handler;
 
-    //!
-    //! \brief Constructs a bus.
-    //!
-    usart_bus();
-
-    //!
-    //! \brief Destructs a bus.
-    ~usart_bus() = default;
+    // Static interface only
+    usart_bus() = delete;
+    ~usart_bus() = delete;
 
     //!
     //! \brief Lazy initialization.
     //! \return Status of operation.
     //!
-    ecl::err init();
+    static ecl::err init();
 
     //!
     //! \brief Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
     //!
-    void set_rx(uint8_t *rx, size_t size);
+    static void set_rx(uint8_t *rx, size_t size);
 
     //!
     //! \brief Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
     //!
-    void set_tx(size_t size, uint8_t fill_byte = 0xff);
+    static void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
     //!
     //! \brief Sets tx buffer with given size.
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
     //!
-    void set_tx(const uint8_t *tx, size_t size);
+    static void set_tx(const uint8_t *tx, size_t size);
 
     //!
     //! \brief Sets event handler.
     //! Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
     //!
-    void set_handler(const handler_fn &handler);
+    static void set_handler(const handler_fn &handler);
 
     //!
     //! \brief Reset xfer buffers.
     //! Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
     //!
-    void reset_buffers();
+    static void reset_buffers();
 
     //!
     //! \brief Resets previously set handler.
     //!
-    void reset_handler();
+    static void reset_handler();
 
     //!
     //! \brief Executes xfer, using buffers previously set.
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
     //!
-    ecl::err do_xfer();
+    static ecl::err do_xfer();
 
     // Should not be copied.
     usart_bus &operator=(usart_bus&) = delete;
@@ -187,45 +182,66 @@ private:
 
     // Device status methods
 
-    inline bool inited() const     { return (m_status & m_inited)  != 0; }
-    inline bool tx_done() const    { return (m_status & m_tx_done) != 0; }
-    inline bool rx_done() const    { return (m_status & m_rx_done) != 0; }
+    static inline bool inited()           { return (m_status & m_inited)  != 0; }
+    static inline bool tx_done()          { return (m_status & m_tx_done) != 0; }
+    static inline bool rx_done()          { return (m_status & m_rx_done) != 0; }
 
-    inline void set_inited()       { m_status |= m_inited; }
-    inline void set_tx_done()      { m_status |= m_tx_done; }
-    inline void set_rx_done()      { m_status |= m_rx_done; }
+    static inline void set_inited()       { m_status |= m_inited; }
+    static inline void set_tx_done()      { m_status |= m_tx_done; }
+    static inline void set_rx_done()      { m_status |= m_rx_done; }
 
-    inline void clear_inited()     { m_status &= ~(m_inited); }
-    inline void clear_tx_done()    { m_status &= ~(m_tx_done); }
-    inline void clear_rx_done()    { m_status &= ~(m_rx_done); }
+    static inline void clear_inited()     { m_status &= ~(m_inited); }
+    static inline void clear_tx_done()    { m_status &= ~(m_tx_done); }
+    static inline void clear_rx_done()    { m_status &= ~(m_rx_done); }
 
 
     //! Handles IRQ events from a bus.
-    void irq_handler();
+    static void irq_handler();
 
-    handler_fn      m_event_handler; //! Handler passed via set_handler().
-    const uint8_t   *m_tx;           //! Transmit buffer.
-    size_t          m_tx_size;       //! TX buffer size.
-    size_t          m_tx_left;       //! Left to send in TX buffer.
-    uint8_t         *m_rx;           //! Receive buffer.
-    size_t          m_rx_size;       //! RX buffer size.
-    size_t          m_rx_left;       //! Left to receive in RX buffer.
-    uint8_t         m_status;        //! Tracks device status.
+    //! Stores Handler passed via set_handler()
+    static std::aligned_storage_t<sizeof(handler_fn), alignof(handler_fn)> m_handler_storage;
+
+    //! Gets event handler
+    static constexpr auto &event_handler();
+
+    static const uint8_t   *m_tx;           //! Transmit buffer.
+    static size_t          m_tx_size;       //! TX buffer size.
+    static size_t          m_tx_left;       //! Left to send in TX buffer.
+    static uint8_t         *m_rx;           //! Receive buffer.
+    static size_t          m_rx_size;       //! RX buffer size.
+    static size_t          m_rx_left;       //! Left to receive in RX buffer.
+    static uint8_t         m_status;        //! Tracks device status.
+
 };
 
-template<usart_device dev>
-usart_bus<dev>::usart_bus()
-    :m_event_handler{}
-    ,m_tx{nullptr}
-    ,m_tx_size{0}
-    ,m_tx_left{0}
-    ,m_rx{nullptr}
-    ,m_rx_size{0}
-    ,m_rx_left{0}
-    ,m_status{0}
-{
 
-}
+// Static members declarations
+
+template<usart_device dev>
+std::aligned_storage_t<sizeof(typename usart_bus<dev>::handler_fn), alignof(typename usart_bus<dev>::handler_fn)>
+usart_bus<dev>::m_handler_storage;
+
+template<usart_device dev>
+const uint8_t *usart_bus<dev>::m_tx;
+
+template<usart_device dev>
+uint8_t *usart_bus<dev>::m_rx;
+
+template<usart_device dev>
+size_t usart_bus<dev>::m_tx_size;
+
+template<usart_device dev>
+size_t usart_bus<dev>::m_tx_left;
+
+template<usart_device dev>
+size_t usart_bus<dev>::m_rx_size;
+
+template<usart_device dev>
+size_t usart_bus<dev>::m_rx_left;
+
+template<usart_device dev>
+uint8_t usart_bus<dev>::m_status;
+
 
 template<usart_device dev>
 ecl::err usart_bus<dev>::init()
@@ -236,6 +252,10 @@ ecl::err usart_bus<dev>::init()
     if (inited()) {
         return ecl::err::ok;
     }
+
+    // Init static storage
+
+    new (&m_handler_storage) handler_fn;
 
     // SPL-like checks, but in compile time.
 
@@ -272,8 +292,8 @@ ecl::err usart_bus<dev>::init()
 
     // TODO: enable irq before each transaction and disable after
     // rather than keep it enabled all time
-    auto lambda = [this]() {
-        this->irq_handler();
+    auto lambda = []() {
+        irq_handler();
     };
 
     irq::subscribe(irqn, lambda);
@@ -326,7 +346,7 @@ template<usart_device dev>
 void usart_bus<dev>::set_handler(const handler_fn &handler)
 {
     // It is possible (and recommended) to set handler before bus init.
-    m_event_handler = handler;
+    event_handler() = handler;
 }
 
 template<usart_device dev>
@@ -349,7 +369,7 @@ void usart_bus<dev>::reset_buffers()
 template<usart_device dev>
 void usart_bus<dev>::reset_handler()
 {
-    m_event_handler = handler_fn{};
+    event_handler() = handler_fn{};
 }
 
 template<usart_device dev>
@@ -391,6 +411,12 @@ ecl::err usart_bus<dev>::do_xfer()
 
 // -----------------------------------------------------------------------------
 // Private members
+
+template<usart_device dev>
+constexpr auto &usart_bus<dev>::event_handler()
+{
+    return reinterpret_cast<handler_fn&>(m_handler_storage);
+}
 
 template<usart_device dev>
 constexpr auto usart_bus<dev>::pick_rcc()
@@ -506,7 +532,7 @@ void usart_bus<dev>::irq_handler()
                 irq::unmask(irqn);
             } else {
                 // Last interrupt occurred, need to notify.
-                m_event_handler(channel::tx, event::tc, m_tx_size);
+                event_handler()(channel::tx, event::tc, m_tx_size);
 
                 // Transaction complete.
                 set_tx_done();
@@ -528,7 +554,7 @@ void usart_bus<dev>::irq_handler()
             *m_rx = static_cast< uint8_t >(data);
 
             // Notify about that 1 byte is received.
-            m_event_handler(channel::rx, event::tc, 1);
+            event_handler()(channel::rx, event::tc, 1);
 
             // Transaction complete.
             set_rx_done();
@@ -540,7 +566,7 @@ void usart_bus<dev>::irq_handler()
 
     if (tx_done() && rx_done()) {
         // Both TX and RX are finished. Notifying.
-        m_event_handler(channel::meta, event::tc, 0);
+        event_handler()(channel::meta, event::tc, 0);
     }
 }
 
