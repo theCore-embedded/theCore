@@ -7,6 +7,7 @@
 #include <common/i2c.hpp>
 
 #include <sys/types.h>
+#include <ecl/utils.hpp>
 
 namespace ecl
 {
@@ -28,12 +29,12 @@ template< i2c_device        dev,
 struct i2c_config
 {
     static constexpr I2C_InitTypeDef m_init_obj = {
-            .I2C_ClockSpeed = clock_speed,
-            .I2C_Mode = operation_mode,
-            .I2C_DutyCycle = duty_cycle,
-            .I2C_OwnAddress1 = own_address,
-            .I2C_Ack = ack,
-            .I2C_AcknowledgedAddress = acknowledged_address
+        clock_speed,
+        operation_mode,
+        duty_cycle,
+        own_address,
+        ack,
+        acknowledged_address
     };
 
     static constexpr i2c_device m_dev = dev;
@@ -135,7 +136,7 @@ private:
     static constexpr uint8_t m_inited     = 0x1;
 
     // Device status methods
-    static inline bool inited() const     { return (m_status & m_inited)  != 0; }
+    static inline bool inited()           { return (m_status & m_inited)  != 0; }
 
     static inline void set_inited()       { m_status |= m_inited; }
     static inline void clear_inited()     { m_status &= ~(m_inited); }
@@ -196,10 +197,10 @@ template<class i2c_config>
 uint8_t i2c_bus<i2c_config>::m_status;
 
 template<class i2c_config>
-uint8_t i2c_bus<i2c_config>::m_own_addr;
+uint16_t i2c_bus<i2c_config>::m_own_addr;
 
 template<class i2c_config>
-uint8_t i2c_bus<i2c_config>::m_slave_addr;
+uint16_t i2c_bus<i2c_config>::m_slave_addr;
 
 template<class i2c_config>
 safe_storage<typename i2c_bus<i2c_config>::handler_fn> i2c_bus<i2c_config>::m_handler_storage;
@@ -227,12 +228,12 @@ ecl::err i2c_bus<i2c_config>::init()
         constexpr auto irqn_ev = pick_ev_irqn();
         constexpr auto irqn_er = pick_er_irqn();
 
-        auto lambda_ev = [this]() {
-            this->irq_ev_handler();
+        auto lambda_ev = []() {
+            irq_ev_handler();
         };
 
-        auto lambda_er = [this]() {
-            this->irq_er_handler();
+        auto lambda_er = []() {
+            irq_er_handler();
         };
 
         irq::subscribe(irqn_ev, lambda_ev);
@@ -667,7 +668,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
             get_handler()(channel::rx, event::tc, m_rx_size);
 
             // rx always last, so transfer is complete
-            get_handler((channel::meta, event::tc, m_rx_size);
+            get_handler()(channel::meta, event::tc, m_rx_size);
             I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
 
             return;

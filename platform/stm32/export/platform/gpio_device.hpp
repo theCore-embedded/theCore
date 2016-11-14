@@ -4,6 +4,8 @@
 #ifndef PLATFORM_GPIO_DEVICE_HPP
 #define PLATFORM_GPIO_DEVICE_HPP
 
+#include <stm32_device.hpp>
+
 namespace ecl
 {
 

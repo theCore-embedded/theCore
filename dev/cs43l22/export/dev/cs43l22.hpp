@@ -827,6 +827,6 @@ err cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency()
     return I2s::platform_handle().template i2s_set_audio_frequency<frequency>();
 }
 
-};
+} // namespace ecl
 
 #endif // DEV_CS43L22_HPP

@@ -5,10 +5,11 @@
 //! See [wiki article about that](https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Nifty_Counter)
 //!
 
+
 #include <ecl/iostream.hpp>
 
-#include <new>         // placement new
 #include <type_traits> // aligned_storage
+#include <new>         // placement new
 
 namespace ecl {
 
@@ -44,6 +45,9 @@ typename istream< console_driver >::device_type &console_device
 cin_type  &cin  = reinterpret_cast< cin_type& >(cin_obj_buf);
 cout_type &cout = reinterpret_cast< cout_type& >(cout_obj_buf);
 cerr_type &cerr = reinterpret_cast< cerr_type& >(cerr_obj_buf);
+
+// Re-defined by CppUTest library. Should not be used here.
+#undef new
 
 iostream_initializer::iostream_initializer()
 {
