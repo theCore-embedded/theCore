@@ -1,4 +1,4 @@
-//! \file
+﻿//! \file
 //! \brief Common IRQ implementation
 
 #include "common/irq.hpp"
@@ -26,7 +26,7 @@ static void default_handler()
 }
 
 //! Effectively casts IRQ storage
-static constexpr auto extract_handlers()
+static auto extract_handlers()
 {
     return reinterpret_cast<irq::handler_type *>(&storage);
 }

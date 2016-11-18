@@ -1,4 +1,4 @@
-//!
+﻿//!
 //! \file
 //! \brief Contains implementation for CS43L22 driver.
 //! \details The CS43L22 is a highly integrated,
@@ -46,67 +46,67 @@ public:
     //!
     enum class beep_frequency
     {
-        hz260  = 0x0, // 260.78 Hz
-        hz521  = 0x10, // 521.74 Hz
-        hz585  = 0x20, // 585.37 Hz
-        hz666  = 0x30, // 666.67 Hz
-        hz705  = 0x40, // 705.88 Hz
-        hz774  = 0x50, // 774.19 Hz
-        hz888  = 0x60, // 888.89 Hz
-        hz1000 = 0x70, // 1000.00 Hz
-        hz1043 = 0x80, // 1043.48 Hz
-        hz1200 = 0x90, // 1200.00 Hz
-        hz1333 = 0xA0, // 1333.33 Hz
-        hz1411 = 0xB0, // 1411.76 Hz
-        hz1600 = 0xC0, // 1600.00 Hz
-        hz1714 = 0xD0, // 1714.29 Hz
-        hz2000 = 0xE0, // 2000.00 Hz
-        hz2181 = 0xF0, // 2181.82 Hz
+        hz260  = 0x0,  //! 260.78 Hz
+        hz521  = 0x10, //! 521.74 Hz
+        hz585  = 0x20, //! 585.37 Hz
+        hz666  = 0x30, //! 666.67 Hz
+        hz705  = 0x40, //! 705.88 Hz
+        hz774  = 0x50, //! 774.19 Hz
+        hz888  = 0x60, //! 888.89 Hz
+        hz1000 = 0x70, //! 1000.00 Hz
+        hz1043 = 0x80, //! 1043.48 Hz
+        hz1200 = 0x90, //! 1200.00 Hz
+        hz1333 = 0xA0, //! 1333.33 Hz
+        hz1411 = 0xB0, //! 1411.76 Hz
+        hz1600 = 0xC0, //! 1600.00 Hz
+        hz1714 = 0xD0, //! 1714.29 Hz
+        hz2000 = 0xE0, //! 2000.00 Hz
+        hz2181 = 0xF0, //! 2181.82 Hz
     };
 
     //! Register masks for possible values for on duration of the beep signal.
     //!
     enum class beep_on_time
     {
-        ms86   = 0x0, // 86 ms
-        ms430  = 0x1, // 430 ms
-        ms780  = 0x2, // 780 ms
-        ms1200 = 0x3, // 1.20 s
-        ms1500 = 0x4, // 1.50 s
-        ms1800 = 0x5, // 1.80 s
-        ms2200 = 0x6, // 2.20 s
-        ms2500 = 0x7, // 2.50 s
-        ms2800 = 0x8, // 2.80 s
-        ms3200 = 0x9, // 3.20 s
-        ms3500 = 0xA, // 3.50 s
-        ms3800 = 0xB, // 3.80 s
-        ms4200 = 0xC, // 4.20 s
-        ms4500 = 0xD, // 4.50 s
-        ms4800 = 0xE, // 4.80 s
-        ms5200 = 0xF, // 5.20 s
+        ms86   = 0x0, //! 86 ms
+        ms430  = 0x1, //! 430 ms
+        ms780  = 0x2, //! 780 ms
+        ms1200 = 0x3, //! 1.20 s
+        ms1500 = 0x4, //! 1.50 s
+        ms1800 = 0x5, //! 1.80 s
+        ms2200 = 0x6, //! 2.20 s
+        ms2500 = 0x7, //! 2.50 s
+        ms2800 = 0x8, //! 2.80 s
+        ms3200 = 0x9, //! 3.20 s
+        ms3500 = 0xA, //! 3.50 s
+        ms3800 = 0xB, //! 3.80 s
+        ms4200 = 0xC, //! 4.20 s
+        ms4500 = 0xD, //! 4.50 s
+        ms4800 = 0xE, //! 4.80 s
+        ms5200 = 0xF, //! 5.20 s
     };
 
     //! Register masks for possible values for off duration of the beep signal.
     //!
     enum class beep_off_time
     {
-        ms1230  = 0x0,  // 1.23 s
-        ms2580  = 0x20, // 2.58 s
-        ms3900  = 0x40, // 3.90 s
-        ms5200  = 0x60, // 5.20 s
-        ms6600  = 0x80, // 6.60 s
-        ms8050  = 0xA0, // 8.05 s
-        ms9350  = 0xC0, // 9.35 s
-        ms10800 = 0xE0, // 10.80 s
+        ms1230  = 0x0,  //! 1.23 s
+        ms2580  = 0x20, //! 2.58 s
+        ms3900  = 0x40, //! 3.90 s
+        ms5200  = 0x60, //! 5.20 s
+        ms6600  = 0x80, //! 6.60 s
+        ms8050  = 0xA0, //! 8.05 s
+        ms9350  = 0xC0, //! 9.35 s
+        ms10800 = 0xE0, //! 10.80 s
     };
 
     //! Register masks for operation modes of the beep generator.
     //!
     enum class beep_mode
     {
-        single    = 0x40, // Play one beep
-        multiple  = 0x80, // Play beep for on_time, mute for off_time
-        continuous = 0xC0, // Play continuously
+        single    = 0x40,	//! Play one beep
+        multiple  = 0x80,	//! Play beep for on_time, mute for off_time
+        continuous = 0xC0,	//! Play continuously
     };
 
     //!  Maximum value of the master volume.
@@ -373,6 +373,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::power_up()
     Rst_gpio::set();
 
     uint8_t value {0};
+    I2c::platform_handle::set_slave_addr(i2c_address);
 
     // power up sequence according to RM
     err rc = register_write(pwr_ctrl1, 0x01);
@@ -458,7 +459,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_start(const uint16_t *buffer, size
 
     I2s::lock();
 
-    I2s::platform_handle().enable_circular_mode();
+    I2s::platform_handle::enable_circular_mode();
     I2s::set_buffers(reinterpret_cast< const uint8_t *>(buffer), nullptr, count * sizeof(*buffer));
     err rc = I2s::xfer(internal_tx_cplt_cb);
 
@@ -475,7 +476,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_stop()
 
 
     // disable circular mode for I2S bus
-    I2s::platform_handle().disable_circular_mode();
+    I2s::platform_handle::disable_circular_mode();
 
     m_state |= stream_stopped;
 
@@ -491,7 +492,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::register_write(codec_register reg, uint8_t va
 
     I2c::lock();
 
-    I2c::platform_handle().set_slave_addr(i2c_address);
+	I2c::platform_handle::set_slave_addr(i2c_address);
     I2c::set_buffers(buffer, 0, sizeof(buffer));
     err rc = I2c::xfer();
 
@@ -507,7 +508,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::register_read(codec_register reg, uint8_t &va
 
     I2c::lock();
 
-    I2c::platform_handle().set_slave_addr(i2c_address);
+	I2c::platform_handle::set_slave_addr(i2c_address);
     I2c::set_buffers(reinterpret_cast< uint8_t *>(&reg), &value, sizeof(uint8_t));
     err rc = I2c::xfer();
 
@@ -824,7 +825,7 @@ err cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency()
 {
     ecl_assert(m_state & inited);
 
-    return I2s::platform_handle().template i2s_set_audio_frequency<frequency>();
+    return I2s::platform_handle::template i2s_set_audio_frequency<frequency>();
 }
 
 } // namespace ecl

@@ -1,4 +1,4 @@
-#ifndef PLATFORM_I2C_BUS_HPP_
+﻿#ifndef PLATFORM_I2C_BUS_HPP_
 #define PLATFORM_I2C_BUS_HPP_
 
 #include <stm32_device.hpp>
@@ -172,8 +172,11 @@ private:
     static safe_storage<handler_fn> m_handler_storage;
 
     //! Gets event handler
-    constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
+    static constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
 };
+
+template<class i2c_config>
+typename i2c_bus<i2c_config>::direction i2c_bus<i2c_config>::m_direction;
 
 template<class i2c_config>
 const uint8_t *i2c_bus<i2c_config>::m_tx;

@@ -1,4 +1,4 @@
-//!
+﻿//!
 //! \file
 //! \brief STM32 USART driver
 //!
@@ -211,9 +211,7 @@ private:
     static size_t          m_rx_size;       //! RX buffer size.
     static size_t          m_rx_left;       //! Left to receive in RX buffer.
     static uint8_t         m_status;        //! Tracks device status.
-
 };
-
 
 // Static members declarations
 
