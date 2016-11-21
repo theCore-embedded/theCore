@@ -303,10 +303,10 @@ private:
     using handler_storage = std::aligned_storage_t<sizeof(handler_fn), alignof(handler_fn)>;
 
     //! Storage for the event handler.
-    handler_storage m_handler_storage;
+    static handler_storage m_handler_storage;
 
     //! Gets event handler
-    constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
+    static constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
 };
 
 template<spi_device dev>
@@ -316,7 +316,7 @@ template<spi_device dev>
 size_t spi_i2s_bus<dev>::m_rx_size;
 
 template<spi_device dev>
-spi_i2s_bus<dev>::tx_data spi_i2s_bus<dev>::m_tx;
+typename spi_i2s_bus<dev>::tx_data spi_i2s_bus<dev>::m_tx;
 
 template<spi_device dev>
 uint8_t *spi_i2s_bus<dev>::m_rx;
@@ -325,7 +325,7 @@ template<spi_device dev>
 uint8_t spi_i2s_bus<dev>::m_status = spi_i2s_bus<dev>::tx_complete | spi_i2s_bus<dev>::rx_complete;
 
 template<spi_device dev>
-spi_i2s_bus<dev>::handler_storage spi_i2s_bus<dev>::m_handler_storage;
+typename spi_i2s_bus<dev>::handler_storage spi_i2s_bus<dev>::m_handler_storage;
 
 template<spi_device dev>
 ecl::err spi_i2s_bus<dev>::init()
@@ -807,8 +807,8 @@ void spi_i2s_bus<dev>::init_rcc()
 template<spi_device dev>
 void spi_i2s_bus<dev>::init_irq()
 {
-    auto handler = [this]() {
-        this->irq_handler();
+    auto handler = []() {
+        irq_handler();
     };
 
     // TODO: FIXME: CODE DUPLICATION!!!!!!
@@ -846,7 +846,7 @@ spi_i2s_bus<dev>::init_interface()
     constexpr auto i2s       = pick_spi();
     constexpr auto cinit_obj = spi_i2s_cfg<dev>::init_obj;
     auto           init_obj  = cinit_obj;
-    I2S_Init(i2s, &cinit_obj);
+    I2S_Init(i2s, &init_obj);
 
     // TODO: disable I2S when there in no XFER
     I2S_Cmd(i2s, ENABLE);

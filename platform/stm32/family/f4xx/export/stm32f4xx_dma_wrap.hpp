@@ -1,4 +1,4 @@
-//! \file
+﻿//! \file
 //! \brief STM32F4XX DMA wrappers implementation
 //!
 #ifndef PLATFORM_STM32F4XX_DMA_WRAP_
@@ -104,8 +104,7 @@ void dma_wrap_base<Impl>::mem_to_periph(const uint8_t *src,
     constexpr auto stream    = Impl::get_stream_ptr();
     constexpr auto channel   = static_cast<uint32_t>(Impl::channel);
     constexpr auto mode      = static_cast<uint32_t>(Mode);
-    constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = Impl::get_size_div(data_size);
+    constexpr auto data_div  = Impl::get_size_div(Size);
 
     DMA_InitTypeDef dma_init;
 
@@ -122,11 +121,11 @@ void dma_wrap_base<Impl>::mem_to_periph(const uint8_t *src,
 
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
-    dma_init.DMA_PeripheralDataSize = data_size;
+    dma_init.DMA_PeripheralDataSize = data_size_to_spl_periph(Size);
 
     dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(src);
     dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
-    dma_init.DMA_MemoryDataSize  = data_size;
+    dma_init.DMA_MemoryDataSize  = data_size_to_spl_memory(Size);
 
     DMA_Init(stream, &dma_init);
 }
@@ -140,8 +139,7 @@ void dma_wrap_base<Impl>::mem_to_periph(uint16_t filler,
     constexpr auto stream       = Impl::get_stream_ptr();
     constexpr auto channel      = static_cast<uint32_t>(Impl::channel);
     constexpr auto mode         = static_cast<uint32_t>(Mode);
-    constexpr auto data_size    = static_cast<uint32_t>(Size);
-    constexpr auto data_div     = Impl::get_size_div(data_size);
+    constexpr auto data_div     = Impl::get_size_div(Size);
     static auto    local_filler = filler;
 
     DMA_InitTypeDef dma_init;
@@ -159,11 +157,11 @@ void dma_wrap_base<Impl>::mem_to_periph(uint16_t filler,
 
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
-    dma_init.DMA_PeripheralDataSize = data_size;
+    dma_init.DMA_PeripheralDataSize = data_size_to_spl_periph(Size);
 
     dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(&local_filler);
     dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
-    dma_init.DMA_MemoryDataSize  = data_size;
+    dma_init.DMA_MemoryDataSize  = data_size_to_spl_memory(Size);
 
     DMA_Init(stream, &dma_init);
 }
@@ -177,8 +175,7 @@ void dma_wrap_base<Impl>::periph_to_mem(volatile uint16_t *periph,
     constexpr auto stream    = Impl::get_stream_ptr();
     constexpr auto channel   = static_cast<uint32_t>(Impl::channel);
     constexpr auto mode      = static_cast<uint32_t>(Mode);
-    constexpr auto data_size = static_cast<uint32_t>(Size);
-    constexpr auto data_div  = Impl::get_size_div(data_size);
+    constexpr auto data_div  = Impl::get_size_div(Size);
 
     DMA_InitTypeDef dma_init;
 
@@ -195,11 +192,11 @@ void dma_wrap_base<Impl>::periph_to_mem(volatile uint16_t *periph,
 
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
-    dma_init.DMA_PeripheralDataSize = data_size;
+    dma_init.DMA_PeripheralDataSize = data_size_to_spl_periph(Size);
 
     dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(dst);
     dma_init.DMA_MemoryInc       = DMA_MemoryInc_Enable;
-    dma_init.DMA_MemoryDataSize  = data_size;
+    dma_init.DMA_MemoryDataSize  = data_size_to_spl_memory(Size);
 
     DMA_Init(stream, &dma_init);
 }
@@ -212,8 +209,7 @@ dma_wrap_base<Impl>::periph_to_mem(volatile uint16_t *periph, size_t size)
     constexpr auto  stream     = Impl::get_stream_ptr();
     constexpr auto  channel    = static_cast<uint32_t>(Impl::channel);
     constexpr auto  mode       = static_cast<uint32_t>(Mode);
-    constexpr auto  data_size  = static_cast<uint32_t>(Size);
-    constexpr auto  data_div   = Impl::get_size_div(data_size);
+    constexpr auto  data_div   = Impl::get_size_div(Size);
     static uint32_t local_sink = 0;
 
     DMA_InitTypeDef dma_init;
@@ -231,11 +227,11 @@ dma_wrap_base<Impl>::periph_to_mem(volatile uint16_t *periph, size_t size)
 
     dma_init.DMA_PeripheralBaseAddr = reinterpret_cast<uint32_t>(periph);
     dma_init.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
-    dma_init.DMA_PeripheralDataSize = data_size;
+    dma_init.DMA_PeripheralDataSize = data_size_to_spl_periph(Size);
 
     dma_init.DMA_Memory0BaseAddr = reinterpret_cast<uint32_t>(&local_sink);
     dma_init.DMA_MemoryInc       = DMA_MemoryInc_Disable;
-    dma_init.DMA_MemoryDataSize  = data_size;
+    dma_init.DMA_MemoryDataSize  = data_size_to_spl_memory(Size);
 
     DMA_Init(stream, &dma_init);
 }
@@ -340,9 +336,12 @@ template<class Impl>
 auto dma_wrap_base<Impl>::bytes_left()
 {
     constexpr auto stream     = Impl::get_stream_ptr();
-    auto           items_left = DMA_GetCurrDataCounter(stream);
     auto           reg        = stream->CR & 0x6000; // Fetch data size
-    auto           div        = Impl::get_size_div(reg);
+
+    // DMA_MemoryDataSize encodes data size in a specific way, so shift can be
+    // applied and divider can be obtained.
+    // However, this can be possibly changed in SPL.
+    auto div = reg == DMA_MemoryDataSize_Byte ? 1 : reg >> 12;
 
     return reg * div;
 }
@@ -363,7 +362,7 @@ struct dma_wrap : dma_wrap_base<dma_wrap<Stream, Channel>>
     //! Gets stream DMA number, according to RM.
     constexpr static auto get_stream_number();
     //! Gets size divider for given data size bits from DMA control register.
-    constexpr static auto get_size_div(uint32_t data_size);
+	constexpr static auto get_size_div(dma_data_sz data_size);
     //! Gets RCC peripheral, associated with DMA.
     constexpr static auto get_rcc();
 
@@ -428,12 +427,16 @@ constexpr auto dma_wrap<Stream, Channel>::get_stream_number()
 }
 
 template<dma_stream Stream, dma_channel Channel>
-constexpr auto dma_wrap<Stream, Channel>::get_size_div(uint32_t data_size)
+constexpr auto dma_wrap<Stream, Channel>::get_size_div(dma_data_sz data_size)
 {
-    // DMA_MemoryDataSize encodes data size in a specific way, so shift can be
-    // applied and divider can be obtained.
-    // However, this can be possibly changed in SPL.
-    return data_size == DMA_MemoryDataSize_Byte ? 1 : data_size >> 12;
+    switch (data_size) {
+        case dma_data_sz::byte:
+            return 1;
+        case dma_data_sz::hword:
+            return 2;
+        case dma_data_sz::word:
+            return 4;
+    }
 }
 
 template<dma_stream Stream, dma_channel Channel>

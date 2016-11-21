@@ -14,7 +14,7 @@ namespace ecl
 template<uint32_t SplExti>
 constexpr auto direct_exti();
 
-//! Checks if given EXTI line is grouped..
+//! Checks if given EXTI line is grouped.
 //! \tparam SplExti EXTI line in the SPL representation.
 //! \return true if EXTI is grouped and false if otherwise.
 template<uint32_t SplExti>

@@ -1,4 +1,4 @@
-//! \file
+﻿//! \file
 //! \brief External interrupt manager for STM32 platform.
 
 #ifndef STM32_EXTI_MANAGER_HPP_
@@ -201,7 +201,7 @@ private:
 
     //! Type of POD storage that holds mapping structure.
     using mapping_storage =
-    std::aligned_storage<sizeof(mapping), alignof(mapping)>::type;
+    std::aligned_storage_t<sizeof(mapping), alignof(mapping)>;
 
     //! Storage holding IRQ to EXTI mapping.
     static mapping_storage m_storage;

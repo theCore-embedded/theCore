@@ -1,4 +1,4 @@
-#ifndef DEV_BUS_BUS_HPP_
+﻿#ifndef DEV_BUS_BUS_HPP_
 #define DEV_BUS_BUS_HPP_
 
 //!
@@ -38,6 +38,9 @@ public:
     //! Costruction is not allowed.
     generic_bus() = delete;
     ~generic_bus() = delete;
+
+    //! Exported platform bus type.
+	using platform_handle = PBus;
 
     //! Inits a bus.
     //! \details Lazy initialization. Inits an underlying platform bus.
@@ -243,13 +246,13 @@ err generic_bus<PBus>::init()
         return err::ok;
     }
 
-    PBus::set_handler(platform_handler);
-
     auto rc = PBus::init();
 
     if (is_ok(rc)) {
         m_state |= bus_inited;
     }
+
+    PBus::set_handler(platform_handler);
 
     // Call these methods here to guarantee that
     // all static objects were allocated before first use

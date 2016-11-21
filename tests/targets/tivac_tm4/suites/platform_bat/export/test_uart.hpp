@@ -1,5 +1,5 @@
 //! \file
-//! \brief Test UART for gpio_case test
+//! \brief Test UART for platform BAT test
 #ifndef TIVAC_PLATFORM_BAT_TEST_UART_HPP_
 #define TIVAC_PLATFORM_BAT_TEST_UART_HPP_
 

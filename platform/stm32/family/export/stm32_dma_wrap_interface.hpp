@@ -1,4 +1,4 @@
-//!
+﻿//!
 //! \file
 //! \brief DMA wrapper interface for STM32 platform
 //!
@@ -13,9 +13,9 @@ namespace ecl
 //! Common data sizes of the DMA transaction, defined by STM32 SPL
 enum class dma_data_sz
 {
-    byte  = DMA_MemoryDataSize_Byte,
-    word  = DMA_MemoryDataSize_Word,
-    hword = DMA_MemoryDataSize_HalfWord,
+    byte,
+    word,
+    hword,
 };
 
 //! Common DMA modes, defined by STM32 SPL
@@ -231,6 +231,40 @@ public:
     //! Checks how many bytes left to transmit via DMA entity.
     //! \pre    DMA was initialized by calling init() method.
     static auto bytes_left();
+
+private:
+
+    //! Converts data size enum to the SPL constant usable with SPL functions.
+    //! \details Suitable in context of memory endpoint configuration.
+    static constexpr auto data_size_to_spl_memory(dma_data_sz data_sz)
+    {
+        switch (data_sz) {
+            case dma_data_sz::byte:
+                return DMA_MemoryDataSize_Byte;
+            case dma_data_sz::hword:
+                return DMA_MemoryDataSize_HalfWord;
+            case dma_data_sz::word:
+                return DMA_MemoryDataSize_Word;
+            default:
+                return static_cast<uint32_t>(-1);
+        }
+    }
+
+    //! Converts data size enum to the SPL constant usable with SPL functions.
+    //! \details Suitable in context of peripheral endpoint configuration.
+    static constexpr auto data_size_to_spl_periph(dma_data_sz data_sz)
+    {
+        switch (data_sz) {
+            case dma_data_sz::byte:
+                return DMA_PeripheralDataSize_Byte;
+            case dma_data_sz::hword:
+                return DMA_PeripheralDataSize_HalfWord;
+            case dma_data_sz::word:
+                return DMA_PeripheralDataSize_Word;
+            default:
+                return static_cast<uint32_t>(-1);
+        }
+    }
 };
 
 } // namespace ecl
