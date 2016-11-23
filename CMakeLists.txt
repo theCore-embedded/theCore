@@ -1,4 +1,4 @@
-# ASM is crucial
+﻿# ASM is crucial
 enable_language(ASM-ATT)
 # Subproject may use tests
 enable_testing()
