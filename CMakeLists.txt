@@ -1,4 +1,4 @@
-# ASM is crucial
+﻿# ASM is crucial
 enable_language(ASM-ATT)
 # Subproject may use tests
 enable_testing()
@@ -7,7 +7,7 @@ enable_testing()
 cmake_minimum_required(VERSION 3.4)
 
 # Our project name
-project(the_core)
+project(the_core LANGUAGES C CXX)
 
 # C++14 is required
 set(CMAKE_CXX_STANDARD 14)

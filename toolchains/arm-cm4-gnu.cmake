@@ -1,8 +1,4 @@
-# TODO: review it
-# our linker requires special script
-INCLUDE(CMakeForceCompiler)
-
-# this one is important
+﻿# this one is important
 set(CMAKE_SYSTEM_NAME Generic)
 # this one not so much
 set(CMAKE_SYSTEM_VERSION 1)
@@ -12,8 +8,12 @@ set(CMAKE_C_LINKER arm-none-eabi-gcc)
 set(CMAKE_CXX_LINKER arm-none-eabi-g++)
 
 # specify the cross compiler
-CMAKE_FORCE_C_COMPILER(arm-none-eabi-gcc GNU)
-CMAKE_FORCE_CXX_COMPILER(arm-none-eabi-g++ GNU)
+set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
+
+# Way to avoid specifying linking flags in the toolchain.
+# See https://cmake.org/pipermail/cmake-developers/2016-February/027888.html
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # where is the target environment
 set(CMAKE_FIND_ROOT_PATH /usr/arm-none-eabi)

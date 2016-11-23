@@ -1,9 +1,9 @@
-if(NOT CONFIG_PLATFORM MATCHES "tm4c")
+﻿if(NOT CONFIG_PLATFORM MATCHES "tm4c")
     return()
 endif()
 
 # override warnings, since library contains few of them
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -Wno-error=sign-compare -Wno-error=type-limits")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -Wno-error=sign-compare -Wno-error=type-limits -Wno-error=old-style-declaration")
 
 add_library(tivaware STATIC
         ti-tivaware/driverlib/adc.c
@@ -57,6 +57,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
     target_link_libraries(tivaware PRIVATE dbg)
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+if(CMAKE_C_COMPILER MATCHES "gcc")
     target_compile_definitions(tivaware PRIVATE -Dgcc)
 endif()

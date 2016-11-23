@@ -1,4 +1,4 @@
-# Linker flags.
+﻿# Linker flags.
 # TODO: check redundancy when using -msoft-float and -mfloat-abi=soft together
 # TODO: alternate flags according to choosen family.
 set(CMAKE_C_LINK_FLAGS
