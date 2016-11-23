@@ -18,12 +18,12 @@ include(CppcheckTargets)
 
 # TODO: add same configuration mechanism for choosing right kernel
 
-message(STATUS "Checking [CONFIG_PLATFORM]...")
+message(STATUS "Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")
 
 if(NOT CMAKE_CROSSCOMPILING)
     if(DEFINED CONFIG_PLATFORM)
-        if (NOT CONFIG_PLATFORM STREQUAL "host")
-            message(FATAL_ERROR "CONFIG_PLATFORM must be set to 'host' if not cross-compiling")
+        if(NOT CONFIG_PLATFORM STREQUAL "host")
+            message(FATAL_ERROR "Cross-compiler is required for platform other than 'host'.")
         endif()
     else()
         # It is fine to omit platform name if not cross-compiling
