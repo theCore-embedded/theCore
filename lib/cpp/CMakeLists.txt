@@ -17,5 +17,8 @@ add_cppcheck(libcpp UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
 target_link_libraries(libcpp PUBLIC types)
 target_link_libraries(libcpp PUBLIC bus)
 
-# Unit testing
-add_subdirectory(tests)
+add_unit_host_test(NAME istream_test SOURCES tests/istream_unit.cpp
+                                     INC_DIRS export)
+
+add_unit_host_test(NAME ostream_test SOURCES tests/ostream_unit.cpp
+                                     INC_DIRS export)

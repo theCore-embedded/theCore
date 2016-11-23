@@ -19,9 +19,6 @@ endif()
 
 set(SRC_DIR freertos/FreeRTOS/Source/)
 
-# Obtain some processor info
-set(TARGET_ARCH ${TARGET_PROCESSOR_ARCHITECTURE})
-
 # Compiler-dependent paths.
 # If you hit error here, make sure you check compiler support
 # in FreeRTOS source tree. If compiler is supported by RTOS, but not
@@ -36,11 +33,13 @@ endif()
 # Architecture-dependent paths.
 # Same as for compiler paths works here. If the architecture is supported
 # by FreeRTOS but not by this build system then add another option here.
-if (${TARGET_ARCH} MATCHES arm_cm4)
+if (${TARGET_MCU_ARCH} MATCHES arm_cm4)
 	set(PORT_DIR ${PORT_DIR}ARM_CM4F/)
+elseif(${TARGET_MCU_ARCH} MATCHES arm_cm3)
+	set(PORT_DIR ${PORT_DIR}ARM_CM3/)
 else()
 	message(FATAL_ERROR "Processor arch is not supported by FreeRTOS build: "
-		"${TARGET_ARCH}")
+		"${TARGET_MCU_ARCH}")
 endif()
 
 add_library(freertos

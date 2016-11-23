@@ -1,31 +1,31 @@
+# Library provides platform headers, definitions and code
 add_library(stm32f4xx STATIC
         platform.cpp
-        irq_manager.cpp
         exti_manager.cpp
         utils.c
         )
 
 target_include_directories(stm32f4xx PUBLIC export)
 
+# Find out particular MCU configuration
+include(mcu_cfg.cmake)
+
 # Platform submodules
-add_subdirectory(startup)
 add_subdirectory(f4)
 
 # TODO: clarify essential libraries
-target_link_libraries(stm32f4xx PUBLIC stm32f4xx_spl)
+target_link_libraries(stm32f4xx PUBLIC stm32_spl)
 target_link_libraries(stm32f4xx PUBLIC platform_common)
 target_link_libraries(stm32f4xx PUBLIC types)
 target_link_libraries(stm32f4xx PUBLIC containers)
 target_link_libraries(stm32f4xx PUBLIC emc) # For memset
 target_link_libraries(stm32f4xx PUBLIC system_stm32f4xx)
+target_link_libraries(stm32f4xx PUBLIC arch)
 
 add_cppcheck(stm32f4xx)
 
-# Notify whole system about which processor is used
-set(TARGET_PROCESSOR_ARCHITECTURE "arm_cm4" CACHE STRING "Processor arch")
-
-# Maximum priority of user ISRs can be redefined,
-# but be careful: it heavily depends on RTOS constraits.
+# Maximum priority of user ISRs can be redefined, but be careful:
+# it heavily depends on RTOS constraits.
 # I.e. for FreeRTOS maximum user priorities should be logically
 # less or equal than configMAX_SYSCALL_INTERRUPT_PRIORITY
 # (numerical priority representation of M4 is such that higher numbers
@@ -38,19 +38,8 @@ if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
             " using default value: ${CONFIG_MAX_ISR_PRIORITY}")
 endif()
 
-message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
-if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F40_41xxx)
-    # Count of user-overridable interrupts.
-    # For this particular platform it doesn't include system exceptions,
-    # but only peripheral interrupts. Yet.
-    target_compile_definitions(stm32f4xx PUBLIC -DCONFIG_IRQ_COUNT=82)
-else()
-    # Additional implementation will be required to cover unsupported
-    # devices from stm32f4xx line.
-    message(FATAL_ERROR "Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")
-endif()
-
-target_compile_definitions(stm32f4xx PUBLIC
+target_compile_definitions(stm32f4xx PRIVATE
+        -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT}
         -DCONFIG_MAX_ISR_PRIORITY=${CONFIG_MAX_ISR_PRIORITY})
 
 # Pick console driver
@@ -68,17 +57,17 @@ if(${CONFIG_USE_CONSOLE})
     message(STATUS "Console device:  ${CONFIG_CONSOLE_DEVICE_NUM}")
     message(STATUS "Console baud rate: ${CONFIG_CONSOLE_BAUD}")
 
-    configure_file(templates/platform_console.hpp.in
-            ${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
-    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+    configure_file(templates/console.hpp.in
+            ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
+    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 
     # Helps to determine if bypass driver must be enabled and inited
     target_compile_definitions(stm32f4xx PRIVATE -DCONFIG_BYPASS_CONSOLE_ENABLED)
     # Bypass console implementation
-    target_sources(stm32f4xx PRIVATE bypass_console.cpp)
+    target_sources(stm32f4xx PRIVATE console.cpp)
     message(STATUS "Bypass console is supported and enabled by the platform")
 else()
-    configure_file(templates/platform_console_stub.hpp.in
-            ${CMAKE_CURRENT_BINARY_DIR}/console/platform_console.hpp)
-    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/console/)
+    configure_file(templates/console_stub.hpp.in
+            ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
+    target_include_directories(stm32f4xx PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 endif()

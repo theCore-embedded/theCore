@@ -5,7 +5,7 @@
 #include <CppUTest/CommandLineTestRunner.h>
 #include <algorithm>
 
-// For convinience
+// For convenience
 static auto &our_memset = LIBC_FUNCTION(memset);
 
 static constexpr uint8_t   canary_byte      = 0xab;

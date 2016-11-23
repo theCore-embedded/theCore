@@ -12,7 +12,7 @@ set(SPL_DIR ${CMAKE_CURRENT_LIST_DIR}/SPL/STM32F4xx_StdPeriph_Driver/)
 # list of modules not included:
 # ${SPL_DIR}src/stm32f4xx_fmc.c
 
-add_library(stm32f4xx_spl STATIC
+add_library(stm32_spl STATIC
         ${SPL_DIR}src/stm32f4xx_dbgmcu.c
         ${SPL_DIR}src/stm32f4xx_cryp_tdes.c
         ${SPL_DIR}src/stm32f4xx_usart.c
@@ -56,6 +56,6 @@ add_library(stm32f4xx_spl STATIC
 # Why?
 
 # STM32 peripherial library headers
-target_include_directories(stm32f4xx_spl SYSTEM PUBLIC ${SPL_DIR}/inc)
+target_include_directories(stm32_spl SYSTEM PUBLIC ${SPL_DIR}/inc)
 
-target_link_libraries(stm32f4xx_spl PUBLIC stm32f4xx) # Let it be circular dependency for sake of simplicity
+target_link_libraries(stm32_spl PUBLIC ${PLATFORM_NAME}) # Let it be circular dependency for sake of simplicity

@@ -6,8 +6,7 @@
 
 #include <ecl/list.hpp>
 #include <aux/pin_descriptor.hpp>
-
-#include "irq_manager.hpp"
+#include <common/irq.hpp>
 
 #include "stm32f4xx_exti.h"
 #include "stm32f4xx_syscfg.h"
@@ -25,8 +24,7 @@ public:
     //! Useful alias.
     using callback = void(*)(void*);
 
-    //! External in
-    //! terrupt handler.
+    //! External interrupt handler.
     //! \details An object of this class is linked into the intrusive list of
     //! EXTI handlers. Client must retain the object and make sure that it
     //! will not be destroyed without deregistering.
