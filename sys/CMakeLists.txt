@@ -1,17 +1,14 @@
-# TODO: move it to a separate module
-add_library(common_io INTERFACE)
-target_include_directories(common_io INTERFACE export)
-
-add_library(sys STATIC sys.cpp)
+﻿add_library(sys INTERFACE)
+target_sources(sys INTERFACE ${CMAKE_CURRENT_LIST_DIR}/sys.cpp)
 
 # Call to the platform_init() from platform module is required.
-target_link_libraries(sys ${PLATFORM_NAME})
+target_link_libraries(sys INTERFACE ${PLATFORM_NAME})
 # IRQ manager is required.
-target_link_libraries(sys platform_common)
+target_link_libraries(sys INTERFACE platform_common)
 
 # A special initialization is required if kernel is present
 if(DEFINED CONFIG_OS)
-    target_link_libraries(sys ${CONFIG_OS}_main)
+	target_link_libraries(sys INTERFACE ${CONFIG_OS}_main)
 else()
-    target_sources(sys PRIVATE kernel_stubs.c)
+	target_sources(sys INTERFACE ${CMAKE_CURRENT_LIST_DIR}/kernel_stubs.c)
 endif()

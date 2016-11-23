@@ -1,6 +1,6 @@
-if("${CONFIG_PLATFORM_DEVICE}" MATCHES "STM32F4")
+﻿if(CONFIG_PLATFORM_DEVICE MATCHES "STM32F4")
     set(STM32_FAMILY f4xx)
-elseif("${CONFIG_PLATFORM_DEVICE}" MATCHES "STM32L1")
+elseif(CONFIG_PLATFORM_DEVICE MATCHES "STM32L1")
     set(STM32_FAMILY l1xx)
 else()
     # Likely that additional implementation is required in order to add new stm32
