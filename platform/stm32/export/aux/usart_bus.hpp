@@ -163,13 +163,13 @@ public:
 
 private:
     //! Picks proper RCC at compile time.
-    static constexpr auto pick_rcc();
+    static auto pick_rcc();
     //! Picks proper RCC operation function at compile time.
-    static constexpr auto pick_rcc_fn();
+    static auto pick_rcc_fn();
     //! Picks IRQ number at compile time.
-    static constexpr auto pick_irqn();
+    static auto pick_irqn();
     //! Converts to proper USART type.
-    static constexpr auto pick_usart();
+    static auto pick_usart();
 
     // Device status flags
 
@@ -268,11 +268,11 @@ ecl::err usart_bus<dev>::init()
     static_assert(IS_USART_HARDWARE_FLOW_CONTROL(usart_cfg<dev>::hw_flow),
                   "Flow control configuration is invalid");
 
-    // Must be optimized at compile time
-    constexpr auto rcc_periph = pick_rcc();
-    constexpr auto rcc_fn     = pick_rcc_fn();
-    constexpr auto usart      = pick_usart();
-    constexpr auto irqn       = pick_irqn();
+    // Should be optimized at compile time
+    auto rcc_periph = pick_rcc();
+    auto rcc_fn     = pick_rcc_fn();
+    auto usart      = pick_usart();
+    auto irqn       = pick_irqn();
 
     // Enable peripheral clock
     rcc_fn(rcc_periph, ENABLE);
@@ -378,8 +378,8 @@ ecl::err usart_bus<dev>::do_xfer()
         return ecl::err::generic;
     }
 
-    constexpr auto irqn = pick_irqn();
-    constexpr auto usart = pick_usart();
+    auto irqn = pick_irqn();
+    auto usart = pick_usart();
 
     if (m_tx) {
         m_tx_left = m_tx_size;
@@ -417,13 +417,13 @@ constexpr auto &usart_bus<dev>::event_handler()
 }
 
 template<usart_device dev>
-constexpr auto usart_bus<dev>::pick_rcc()
+auto usart_bus<dev>::pick_rcc()
 {
     // USART1 and USART6 are on APB2
     // USART2, USART3, UART4, UART5 are on APB1
     // See datasheet for detailed explanations
     // TODO: Switch instead of 'if's
-    constexpr auto usart = pick_usart();
+    auto usart = pick_usart();
     if (usart == USART1)
         return RCC_APB2Periph_USART1;
     if (usart == USART2)
@@ -442,12 +442,12 @@ constexpr auto usart_bus<dev>::pick_rcc()
 }
 
 template<usart_device dev>
-constexpr auto usart_bus<dev>::pick_rcc_fn()
+auto usart_bus<dev>::pick_rcc_fn()
 {
     // USART1 and USART6 are on APB2
     // USART2, USART3, UART4, UART5 are on APB1
     // See datasheet for detailed explanations
-    constexpr auto usart = pick_usart();
+    auto usart = pick_usart();
     // TODO: switch instead of 'if's
     if (usart == USART1
 #ifdef USART6
@@ -465,9 +465,9 @@ constexpr auto usart_bus<dev>::pick_rcc_fn()
 }
 
 template<usart_device dev>
-constexpr auto usart_bus<dev>::pick_irqn()
+auto usart_bus<dev>::pick_irqn()
 {
-    constexpr auto usart = pick_usart();
+    auto usart = pick_usart();
 
     if (usart == USART1) {
         return USART1_IRQn;
@@ -483,11 +483,13 @@ constexpr auto usart_bus<dev>::pick_irqn()
     } else if (usart == USART6) {
         return USART6_IRQn;
 #endif
+    } else {
+        return static_cast<IRQn>(-1);
     }
 }
 
 template<usart_device dev>
-constexpr auto usart_bus<dev>::pick_usart()
+auto usart_bus<dev>::pick_usart()
 {
     switch (dev) {
     case usart_device::dev1:
@@ -513,8 +515,8 @@ constexpr auto usart_bus<dev>::pick_usart()
 template<usart_device dev>
 void usart_bus<dev>::irq_handler()
 {
-    constexpr auto usart = pick_usart();
-    constexpr auto irqn  = pick_irqn();
+    auto usart = pick_usart();
+    auto irqn  = pick_irqn();
     ITStatus status;
 
     irq::clear(irqn);

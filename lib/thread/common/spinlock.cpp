@@ -1,8 +1,8 @@
-#include <ecl/thread/common/spinlock.hpp>
+﻿#include <ecl/thread/common/spinlock.hpp>
 
 
 constexpr ecl::common::spinlock::spinlock()
-    :m_flag{ATOMIC_FLAG_INIT}
+    :m_flag ATOMIC_FLAG_INIT // Braces '{}' are included in macro body of ATOMIC_FLAG_INIT
 {
 }
 
