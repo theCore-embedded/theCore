@@ -35,38 +35,31 @@ file(GLOB_RECURSE CXX_LIB_PATHS
     FOLLOW_SYMLINKS
     "${CMAKE_FIND_ROOT_PATH}/*/array")
 
-#file(GLOB_RECURSE C_LIB_PATHS
-#    FOLLOW_SYMLINKS
-#    "${CMAKE_FIND_ROOT_PATH}/*/wchar.h")
-
-#message(FATAL_ERROR "${C_LIB_PATHS}")
+# Multiple paths can be found, pick one.
 
 list(GET CXX_LIB_PATHS 0 CXX_LIB_INCLUDE_PATH)
-#list(GET C_LIB_PATHS 0 C_LIB_INCLUDE_PATH)
-
 get_filename_component(CXX_LIB_INCLUDE_PATH "${CXX_LIB_INCLUDE_PATH}" DIRECTORY)
-#get_filename_component(C_LIB_INCLUDE_PATH "${C_LIB_INCLUDE_PATH}" DIRECTORY)
 
+# Include directories differ based on FPU selected.
 set(CXX_LIB_INCLUDE_PATH
     "-isystem ${CXX_LIB_INCLUDE_PATH} \
      -isystem ${CXX_LIB_INCLUDE_PATH}/arm-none-eabi/armv7e-m/softfp/fpv5-sp-d16/")
 
+# C language lacks some includes, too.
 set(C_LIB_INCLUDE_PATH "-isystem ${CMAKE_FIND_ROOT_PATH}/arm-none-eabi/include/")
 
-################################################################################
-# Flags and definitions used with Clang complilation suite
-
-# avoid using any additional flags when linking with shared libraries
+# Avoid using any additional flags when linking with shared libraries.
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
-# common flags for current platform
+# Common flags for current platform.
+# Short enums required. Otherwise, errors raised by linker.
 set(CC_PLATFORM_FLAGS "-target armv7-none-eabi -mcpu=cortex-m4 -ffreestanding -mthumb -fdata-sections \
     -ffunction-sections -fno-common -fshort-enums")
 
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
 # why????
 # Register definitions present in C header files. Skip the silly warning.
-set(CXX_PLATFORM_FLAGS "-Wno-register -fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
+set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # TODO: move std and gdwarf flags out of toolchain into the core listfile itself
 set(C_CXX_EXTRA_FLAGS "-gdwarf-2 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp --sysroot ${CMAKE_FIND_ROOT_PATH} ${C_LIB_INCLUDE_PATH} ")
@@ -75,7 +68,7 @@ set(CXX_EXTRA_FLAGS "-std=c++1z ${C_CXX_EXTRA_FLAGS} ${CXX_LIB_INCLUDE_PATH} ")
 
 # Set general flags for C\C++ compiler and linker
 set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
-set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++ -Wno-keyword-macro")
+set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++ ")
 
 # Supported modes are normal, release, debug and minimum size
 # Normal mode
