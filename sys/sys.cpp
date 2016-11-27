@@ -1,23 +1,23 @@
-//!
+﻿//!
 //! \file
 //! \brief The Core system initialization module.
 //!
-#include <cstdint>
-#include <cstddef>
+#include <stdint.h>
+#include <stddef.h>
 
 #include <common/irq.hpp>
 #include <platform/console.hpp>
 #include <platform/execution.h>
 
 // TODO: move it somewhere
-void operator delete(void *)
+void operator delete(void *) noexcept
 {
     // TODO: call to abort routine
     for(;;);
 }
 
 // TODO: move it somewhere
-void operator delete(void *, unsigned int)
+void operator delete(void *, unsigned int) noexcept
 {
     // TODO: call to abort routine
     for(;;);
@@ -77,7 +77,7 @@ void __cxa_guard_release(int *gv)
 extern "C" void platform_init();
 extern "C" void board_init();
 extern "C" void kernel_main();
-extern "C" int main();
+int main();
 
 //! Lowest level C-routine inside the Core
 //! \details Performs essential initialization before construction of C++ objects

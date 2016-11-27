@@ -207,7 +207,7 @@ private:
     static mapping_storage m_storage;
 
     //! Obtains map from storage
-    static constexpr auto map();
+    static mapping* map();
 };
 
 //------------------------------------------------------------------------------
@@ -335,10 +335,6 @@ exti_manager::is_grouped_exti<Gpio> exti_manager::save_handler(handler &h)
     return true;
 }
 
-constexpr auto exti_manager::map()
-{
-    return reinterpret_cast<mapping *>(&m_storage);
-}
 
 } // namespace ecl
 

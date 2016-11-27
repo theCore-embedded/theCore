@@ -1,4 +1,4 @@
-//! \file
+﻿//! \file
 //! \brief Platform console implementation
 
 #include <stm32_device.hpp>
@@ -14,9 +14,9 @@ struct bypass_console
         // TODO: Duplicates usart_bus::init(), but it is ok for this moment
 
         USART_InitTypeDef init_struct;
-        constexpr auto rcc_periph = platform_console::pick_rcc();
-        constexpr auto rcc_fn = platform_console::pick_rcc_fn();
-        constexpr auto usart = platform_console::pick_usart();
+        auto rcc_periph = platform_console::pick_rcc();
+        auto rcc_fn = platform_console::pick_rcc_fn();
+        auto usart = platform_console::pick_usart();
 
         // Enable peripheral clock
         rcc_fn(rcc_periph, ENABLE);
@@ -36,7 +36,7 @@ struct bypass_console
 
     static void putc(char c)
     {
-        constexpr auto usart = platform_console::pick_usart();
+        auto usart = platform_console::pick_usart();
 
         while (USART_GetFlagStatus(usart, USART_FLAG_TXE) == RESET);
         USART_SendData(usart, c);

@@ -9,9 +9,6 @@ cmake_minimum_required(VERSION 3.4)
 # Our project name
 project(the_core LANGUAGES C CXX)
 
-# C++14 is required
-set(CMAKE_CXX_STANDARD 14)
-
 include(build_api.cmake)
 include(Findcppcheck)
 include(CppcheckTargets)
@@ -30,6 +27,9 @@ if(NOT CMAKE_CROSSCOMPILING)
         message(STATUS "CONFIG_PLATFORM not set, defauluting to 'host'...")
         set(CONFIG_PLATFORM "host")
     endif()
+
+    # C++14 is required
+    set(CMAKE_CXX_STANDARD 14)
 else()
     # When cross-compiling, platform must be set explicitly.
     if(NOT DEFINED CONFIG_PLATFORM)
