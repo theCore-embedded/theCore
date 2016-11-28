@@ -43,7 +43,6 @@ function(add_suite suite_name)
         endif()
     endif()
 
-
     # Often used paths
 
     set(MCUS_DIR ${CMAKE_CURRENT_LIST_DIR}/mcus)
@@ -136,7 +135,7 @@ endfunction()
 # Platform BAT suite
 
 add_suite(platform_bat
-        CASES               gpio_bat bypass_console_bat uart_bat
+        CASES               gpio_bat bypass_console_bat uart_bat streams_bat
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
 
