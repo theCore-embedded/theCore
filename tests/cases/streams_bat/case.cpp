@@ -1,4 +1,4 @@
-﻿#include <unity.h>
+#include <unity.h>
 #include <unity_fixture.h>
 
 #include <ecl/iostream.hpp>

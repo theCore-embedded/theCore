@@ -1,4 +1,4 @@
-﻿//! \file
+//! \file
 //! \brief UART implementation for TI TM4C MCU
 
 #ifndef PLATFORM_TM4C_UART_BUS_HPP_
