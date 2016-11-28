@@ -1,24 +1,26 @@
-//! \file
+﻿//! \file
 //! \brief TM4C bypass console implementation.
 
-#include "platform/gpio_device.hpp"
-#include <uart.h>
+#include "platform/console.hpp"
 
 namespace ecl
 {
 
 void bypass_console_init()
 {
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+    constexpr auto uart_dev = static_cast<std::underlying_type_t<uart_device>>(ECL_CONSOLE_DEVICE);
 
-    UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 115200,
+    SysCtlPeripheralEnable(platform_console::pick_sysctl());
+
+    UARTConfigSetExpClk(uart_dev, SysCtlClockGet(), 115200,
                         UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                         UART_CONFIG_PAR_NONE);
 }
 
 void bypass_putc(char c)
 {
-    UARTCharPut(UART0_BASE, c);
+    constexpr auto uart_dev = static_cast<std::underlying_type_t<uart_device>>(ECL_CONSOLE_DEVICE);
+    UARTCharPut(uart_dev, c);
 }
 
 } // namespace ecl

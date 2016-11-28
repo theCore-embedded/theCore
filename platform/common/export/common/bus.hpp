@@ -1,4 +1,4 @@
-//!
+﻿//!
 //! \file
 //! \brief \todo
 //! \copyright
@@ -60,8 +60,8 @@ public:
     //! \brief Lazy initialization.
     //! \return Status of operation.
     //!
-    static ecl::err init()
-    { return ecl::err::nosys; }
+    static err init()
+    { return err::nosys; }
 
     //!
     //! \brief Sets rx buffer with given size.
@@ -114,8 +114,8 @@ public:
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
     //!
-    static ecl::err do_xfer()
-    { return ecl::err::nosys; }
+    static err do_xfer()
+    { return err::nosys; }
 };
 
 } // namespace ecl

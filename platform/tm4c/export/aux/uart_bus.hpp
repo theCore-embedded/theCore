@@ -1,4 +1,4 @@
-//! \file
+﻿//! \file
 //! \brief UART implementation for TI TM4C MCU
 
 #ifndef PLATFORM_TM4C_UART_BUS_HPP_
@@ -39,11 +39,14 @@ enum class uart_device
 template<uart_device dev>
 class uart_bus
 {
+    //! Bypass console routines, partially reuse UART driver code.
+    friend void bypass_console_init();
+    friend void bypass_putc();
 public:
 
     //! \brief Lazy initialization.
     //! \return Status of operation.
-    static ecl::err init();
+    static err init();
 
     //! \brief Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
@@ -76,7 +79,7 @@ public:
     //! \brief Executes xfer, using buffers previously set.
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
-    static ecl::err do_xfer();
+    static err do_xfer();
 
     uart_bus(const uart_bus&) = delete;
     uart_bus &operator=(uart_bus&) = delete;
@@ -281,7 +284,7 @@ void uart_bus<dev>::irq_bus_handler()
 //------------------------------------------------------------------------------
 
 template<uart_device dev>
-ecl::err uart_bus<dev>::init()
+err uart_bus<dev>::init()
 {
     auto &bus_ctx = get_ctx();
 
@@ -298,7 +301,7 @@ ecl::err uart_bus<dev>::init()
                         UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                         UART_CONFIG_PAR_NONE);
 
-    ecl::irq::subscribe(pick_it(), irq_bus_handler);
+    irq::subscribe(pick_it(), irq_bus_handler);
     UARTFIFODisable(periph);
 
     bus_ctx.status |= (ctx::inited | ctx::rx_done | ctx::tx_done);
@@ -386,7 +389,7 @@ void uart_bus<dev>::reset_handler()
 }
 
 template<uart_device dev>
-ecl::err uart_bus<dev>::do_xfer()
+err uart_bus<dev>::do_xfer()
 {
     auto &bus_ctx = get_ctx();
 

@@ -1,14 +1,29 @@
-add_library(tm4c platform.cpp)
+﻿add_library(tm4c platform.cpp)
 
 include(mcu_cfg.cmake)
 
-target_link_libraries(tm4c PUBLIC arch cmsis tivaware platform_common dbg)
+target_link_libraries(tm4c PUBLIC arch cmsis tivaware platform_common dbg utils)
 
 target_include_directories(tm4c PUBLIC export)
 
-message(STATUS "TM4C: Checking STUB [CONFIG_USE_BYPASS_CONSOLE]...")
-if(CONFIG_USE_BYPASS_CONSOLE)
-    message(STATUS "TM4C: Bypass console is enabled")
-    target_compile_definitions(tm4c PUBLIC -DCONFIG_BYPASS_CONSOLE_ENABLED)
+# Enable console driver.
+
+message(STATUS "TM4C: Checking [CONFIG_USE_CONSOLE]...")
+if(CONFIG_USE_CONSOLE)
+    # TODO: #83 - config name must be reviewed
+    if(NOT DEFINED CONFIG_CONSOLE_DEVICE_NUM)
+        message(FATAL_ERROR "CONFIG_CONSOLE_DEVICE_NUM must be set in order to use console")
+    endif()
+
+    message(STATUS "Console device used: ${CONFIG_CONSOLE_DEVICE_NUM}")
+
+    # Bypass must be enabled and inited
+    target_compile_definitions(tm4c PUBLIC
+        -DCORE_CONFIG_USE_CONSOLE
+        -DCORE_CONFIG_CONSOLE_DEVICE_NUM=${CONFIG_CONSOLE_DEVICE_NUM})
+
+    # Bypass console implementation
     target_sources(tm4c PRIVATE console.cpp)
+
+    message(STATUS "Bypass console is supported and enabled by the platform")
 endif()
