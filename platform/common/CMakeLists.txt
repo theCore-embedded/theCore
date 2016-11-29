@@ -1,4 +1,4 @@
-if(PLATFORM_NAME STREQUAL host)
+﻿if(PLATFORM_NAME STREQUAL host)
     add_library(platform_common INTERFACE)
     target_include_directories(platform_common INTERFACE export)
 else()
@@ -8,8 +8,7 @@ else()
 
     target_include_directories(platform_common PUBLIC export)
 
-    target_link_libraries(platform_common PUBLIC ${PLATFORM_NAME})
-    target_link_libraries(platform_common PUBLIC types)
+    target_link_libraries(platform_common PUBLIC ${PLATFORM_NAME} types)
     target_link_libraries(platform_common PRIVATE dbg)
 
     target_compile_definitions(platform_common PRIVATE -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})

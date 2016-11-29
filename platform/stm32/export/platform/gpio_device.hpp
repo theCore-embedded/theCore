@@ -1,4 +1,4 @@
-//! \file
+﻿//! \file
 //! \brief GPIO device interface for STM32 platform
 //! \todo Detailed explanation.
 #ifndef PLATFORM_GPIO_DEVICE_HPP
@@ -72,11 +72,11 @@ public:
 private:
     //! \brief Returns STM32 representation of the port.
     //! \todo extract it to the stm32 gpio wrap header.
-    static constexpr auto pick_port();
+    static auto pick_port();
 
     //! \brief Returns STM32 representation of the pin.
     //! \todo extract it to the stm32 gpio wrap header.
-    static constexpr auto pick_pin();
+    static auto pick_pin();
 };
 
 //------------------------------------------------------------------------------
@@ -84,8 +84,8 @@ private:
 template< gpio_port Port, gpio_num Pin >
 void gpio< Port, Pin >::set()
 {
-    constexpr auto hw_port = pick_port();
-    constexpr auto hw_pin  = pick_pin();
+    auto hw_port = pick_port();
+    auto hw_pin  = pick_pin();
 
     GPIO_WriteBit(hw_port, hw_pin, Bit_SET);
 }
@@ -93,8 +93,8 @@ void gpio< Port, Pin >::set()
 template< gpio_port Port, gpio_num Pin >
 void gpio< Port, Pin >::reset()
 {
-    constexpr auto hw_port = pick_port();
-    constexpr auto hw_pin  = pick_pin();
+    auto hw_port = pick_port();
+    auto hw_pin  = pick_pin();
 
     GPIO_WriteBit(hw_port, hw_pin, Bit_RESET);
 }
@@ -102,8 +102,8 @@ void gpio< Port, Pin >::reset()
 template< gpio_port Port, gpio_num Pin >
 void gpio< Port, Pin >::toggle()
 {
-    constexpr auto hw_port = pick_port();
-    constexpr auto hw_pin  = pick_pin();
+    auto hw_port = pick_port();
+    auto hw_pin  = pick_pin();
 
     GPIO_ToggleBits(hw_port, hw_pin);
 }
@@ -111,8 +111,8 @@ void gpio< Port, Pin >::toggle()
 template< gpio_port Port, gpio_num Pin >
 bool gpio< Port, Pin >::get()
 {
-    constexpr auto hw_port = pick_port();
-    constexpr auto hw_pin  = pick_pin();
+    auto hw_port = pick_port();
+    auto hw_pin  = pick_pin();
 
     return GPIO_ReadInputDataBit(hw_port, hw_pin) == Bit_SET;
 }
@@ -120,7 +120,7 @@ bool gpio< Port, Pin >::get()
 //------------------------------------------------------------------------------
 
 template< gpio_port Port, gpio_num Pin >
-constexpr auto gpio< Port, Pin >::pick_port()
+auto gpio< Port, Pin >::pick_port()
 {
     switch (Port) {
         case gpio_port::a:
@@ -151,11 +151,13 @@ constexpr auto gpio< Port, Pin >::pick_port()
         case gpio_port::k:
             return GPIOK;
 #endif
+        default:
+            return reinterpret_cast<GPIO_TypeDef*>(0);
     }
 }
 
 template< gpio_port Port, gpio_num Pin >
-constexpr auto gpio< Port, Pin >::pick_pin()
+auto gpio< Port, Pin >::pick_pin()
 {
     switch (Pin) {
         case gpio_num::pin0:
@@ -190,6 +192,8 @@ constexpr auto gpio< Port, Pin >::pick_pin()
             return GPIO_Pin_14;
         case gpio_num::pin15:
             return GPIO_Pin_15;
+        default:
+            return static_cast<uint16_t>(-1);
     }
 }
 

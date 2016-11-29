@@ -1,4 +1,4 @@
-//! \file
+﻿//! \file
 //! \brief EXTI manager implementation for STM32 platform
 
 #include <platform/exti_manager.hpp>
@@ -114,6 +114,10 @@ void exti_manager::group_isr(size_t idx, irq_num irqn)
     irq::unmask(irqn);
 }
 
+exti_manager::mapping* exti_manager::map()
+{
+    return reinterpret_cast<mapping *>(&m_storage);
+}
 
 //------------------------------------------------------------------------------
 
