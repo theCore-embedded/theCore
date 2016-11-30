@@ -200,6 +200,8 @@ static constexpr inline auto get_pin_intflag(num n)
             return GPIO_INT_PIN_6;
         case num::pin7:
             return GPIO_INT_PIN_7;
+        default:
+            return 0xff;
     }
 }
 

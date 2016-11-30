@@ -1,8 +1,9 @@
-﻿add_library(tm4c platform.cpp)
+add_library(tm4c platform.cpp exti_manager.cpp)
 
 include(mcu_cfg.cmake)
 
-target_link_libraries(tm4c PUBLIC arch cmsis tivaware platform_common dbg utils)
+target_link_libraries(tm4c PUBLIC
+    arch cmsis tivaware platform_common dbg utils containers)
 
 target_include_directories(tm4c PUBLIC export)
 

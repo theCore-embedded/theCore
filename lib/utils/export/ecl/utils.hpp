@@ -59,7 +59,7 @@ public:
 
     //! Gets object reference.
     //! \pre Storage initialized, i.e. init() was called once.
-    static constexpr T& get()
+    static T& get()
     {
         return reinterpret_cast<T&>(m_stor);
     }
