@@ -10,6 +10,7 @@
 #include <gpio.h>
 #include <sysctl.h>
 #include <inc/hw_memmap.h>
+#include <inc/hw_ints.h>
 
 #include <type_traits>
 
@@ -152,6 +153,54 @@ static inline void apply_cfg(dir d      = dir::out,
     GPIOPadConfigSet(pt, pins,
                      static_cast<std::underlying_type_t<strength>>(s),
                      static_cast<std::underlying_type_t<pad_type>>(t));
+}
+
+//------------------------------------------------------------------------------
+
+//! Obtains IRQ number of given port.
+//! \param pt Port for whom IRQn must be obtained.
+static constexpr inline auto get_irqn(port pt)
+{
+    switch (pt) {
+        case port::a:
+            return INT_GPIOA;
+        case port::b:
+            return INT_GPIOB;
+        case port::c:
+            return INT_GPIOC;
+        case port::d:
+            return INT_GPIOD;
+        case port::e:
+            return INT_GPIOE;
+        case port::f:
+            return INT_GPIOF;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+//! Obtains interrupt flag used for corresponding GPIO pin.
+//! \param n Pin for whom interrup flag must be obtained.
+static constexpr inline auto get_pin_intflag(num n)
+{
+    switch (n) {
+        case num::pin0:
+            return GPIO_INT_PIN_0;
+        case num::pin1:
+            return GPIO_INT_PIN_1;
+        case num::pin2:
+            return GPIO_INT_PIN_2;
+        case num::pin3:
+            return GPIO_INT_PIN_3;
+        case num::pin4:
+            return GPIO_INT_PIN_4;
+        case num::pin5:
+            return GPIO_INT_PIN_5;
+        case num::pin6:
+            return GPIO_INT_PIN_6;
+        case num::pin7:
+            return GPIO_INT_PIN_7;
+    }
 }
 
 } // namespace gpio_hw

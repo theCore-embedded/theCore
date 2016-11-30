@@ -39,7 +39,6 @@ namespace irq
 //!
 static inline void mask(irq_num irqn)
 {
-//    NVIC_DisableIRQ(irqn);
     IntDisable(irqn);
 }
 
