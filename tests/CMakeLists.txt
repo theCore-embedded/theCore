@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.4)
 
 include(ExternalProject)
 include(CMakeParseArguments)
@@ -135,7 +135,7 @@ endfunction()
 # Platform BAT suite
 
 add_suite(platform_bat
-        CASES               gpio_bat bypass_console_bat uart_bat streams_bat
+        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat streams_bat
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
 

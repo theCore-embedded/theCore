@@ -81,7 +81,7 @@ std::aligned_storage_t<sizeof(T), alignof(T)> safe_storage<T>::m_stor;
 template<typename Enum>
 constexpr auto extract_value(Enum val)
 {
-    static_assert(std::is_enum_v<Enum>, "Given type is not enumeration.");
+    static_assert(std::is_enum<Enum>::value, "Given type is not enumeration.");
 
     return static_cast<std::underlying_type_t<Enum>>(val);
 }
