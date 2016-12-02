@@ -103,6 +103,9 @@ void exti_manager::irq_port_handler()
     // Get pins that provoked the interrupt.
     auto pins = GPIOIntStatus(port, true);
 
+    // Mask GPIO lines to prevent spurious events
+    GPIOIntDisable(port, pins);
+
     irq_handler(Port, pins);
 
     irq::clear(irqn);

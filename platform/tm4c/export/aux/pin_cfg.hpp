@@ -56,8 +56,8 @@ enum class dir
 enum class pad_type
 {
     push_pull = GPIO_PIN_TYPE_STD,
-    pull      = GPIO_PIN_TYPE_STD_WPU,
-    push      = GPIO_PIN_TYPE_STD_WPD,
+    pull      = GPIO_PIN_TYPE_STD_WPD,  //! Pull down (to ground)
+    push      = GPIO_PIN_TYPE_STD_WPU,  //! Push up (to Vcc)
     od        = GPIO_PIN_TYPE_OD,
     analog    = GPIO_PIN_TYPE_ANALOG,
     wake_high = GPIO_PIN_TYPE_WAKE_HIGH,

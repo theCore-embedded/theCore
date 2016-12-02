@@ -1,6 +1,8 @@
 #include <unity.h>
 #include <unity_fixture.h>
 
+#include <ecl/unity_helpers.hpp>
+
 #include "test_uart.hpp"
 
 #include <atomic>
@@ -123,6 +125,8 @@ TEST(uart_bat, receive_buf)
     expected_rx = body;
     const uint8_t expected_buf[] = "qwertyuiop";
     uint8_t *rx_buf = buf + offt; // To check underflow
+
+    UnityPrintWithEOL("Type \'qwertyuiop\' string to finish the test");
 
     ecl::test_uart::set_rx(rx_buf, expected_rx);
     ecl::test_uart::set_handler(test_handler);

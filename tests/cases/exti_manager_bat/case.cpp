@@ -1,6 +1,8 @@
 #include <unity.h>
 #include <unity_fixture.h>
 
+#include <ecl/unity_helpers.hpp>
+
 #include <test_gpio.hpp>
 
 #include <platform/exti_manager.hpp>
@@ -69,11 +71,13 @@ TEST(exti_basic, handle_presses)
 
     test_handler.set_ctx(expected_ctx);
 
+    UnityPrintWithEOL("Press button 3 times...");
+
     while (calls_occur < calls_expected) {
         ecl::exti_manager::unmask(test_handler);
         while (!call_occur) { } // Wait for a call
 
-        UnityPrint("Button press detected\n");
+        UnityPrintWithEOL("Button press detected");
 
         call_occur = false;
 

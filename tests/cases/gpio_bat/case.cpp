@@ -40,11 +40,9 @@ private:
     {
         Gpio::set();
         ecl_spin_wait(1000);
-        TEST_ASSERT_TRUE(Gpio::get());
 
         Gpio::reset();
         ecl_spin_wait(1000);
-        TEST_ASSERT_FALSE(Gpio::get());
     }
 
     template<typename Gpio>
@@ -56,7 +54,6 @@ private:
 
         Gpio::toggle();
         ecl_spin_wait(1000);
-        TEST_ASSERT_FALSE(Gpio::get());
     }
 
     template<typename Gpio>

@@ -16,7 +16,8 @@ void suite_board_init()
         ecl::gpio_hw::num::pin3>();
 
     // GPIO push button
-    ecl::gpio_hw::apply_cfg<ecl::gpio_hw::port::f, ecl::gpio_hw::num::pin4>(ecl::gpio_hw::dir::in);
+    ecl::gpio_hw::apply_cfg<ecl::gpio_hw::port::f,
+        ecl::gpio_hw::num::pin4>(ecl::gpio_hw::dir::in, ecl::gpio_hw::pad_type::push);
 
     // Console
     ecl::gpio_hw::enable_periph<ecl::gpio_hw::port::a>();
