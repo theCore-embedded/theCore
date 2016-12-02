@@ -17,6 +17,12 @@ template<gpio_hw::port Port, gpio_hw::num Pin>
 class gpio
 {
 public:
+    //! Advertised platform port.
+    static constexpr auto port = Port;
+
+    //! Advertised platform pin.
+    static constexpr auto pin = Pin;
+
     //! Sets output pin level to high.
     static void set();
 

@@ -3,7 +3,7 @@ add_library(unity
         Unity/src/unity.c
         Unity/extras/fixture/src/unity_fixture.c)
 
-target_include_directories(unity PUBLIC Unity/src/ Unity/extras/fixture/src)
+target_include_directories(unity PUBLIC export/ Unity/src/ Unity/extras/fixture/src)
 
 target_compile_definitions(unity PUBLIC
         -DUNITY_EXCLUDE_STDLIB_MALLOC      # Prevent Unity from using standart library calls.

@@ -3,12 +3,14 @@
 
 #include <common/irq.hpp>
 
-#ifdef CONFIG_BYPASS_CONSOLE_ENABLED
+#include "platform/exti_manager.hpp"
+
+#ifdef CORE_CONFIG_USE_BYPASS_CONSOLE
 namespace ecl
 {
 extern void bypass_console_init();
 } // namespace ecl
-#endif // CONFIG_USE_CONSOLE
+#endif // CORE_CONFIG_USE_BYPASS_CONSOLE
 
 // Required by ARM ARCH startup code
 extern "C" void SystemInit()
@@ -28,7 +30,10 @@ extern "C" void platform_init()
     // IRQ must be ready before anything else will start work
     ecl::irq::init_storage();
 
-#ifdef CONFIG_BYPASS_CONSOLE_ENABLED
+    // EXTI manager must be ready after IRQ, but before user code start working with it
+    ecl::exti_manager::init();
+
+#ifdef CORE_CONFIG_USE_BYPASS_CONSOLE
     ecl::bypass_console_init();
 #endif
 }

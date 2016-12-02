@@ -1,6 +1,8 @@
 #include <unity.h>
 #include <unity_fixture.h>
 
+#include <ecl/unity_helpers.hpp>
+
 #include "test_uart.hpp"
 
 #include <atomic>
@@ -12,7 +14,8 @@ static volatile std::atomic_bool rx_complete;
 static size_t expected_rx;
 static size_t expected_tx;
 
-static void test_handler(ecl::bus_channel ch, ecl::bus_event type, size_t total) {
+static void test_handler(ecl::bus_channel ch, ecl::bus_event type, size_t total)
+{
     if (!tx_complete) {
         TEST_ASSERT_TRUE(ch == ecl::bus_channel::tx);
         TEST_ASSERT_TRUE(type == ecl::bus_event::tc); // TODO: handle ht as well
@@ -122,6 +125,8 @@ TEST(uart_bat, receive_buf)
     expected_rx = body;
     const uint8_t expected_buf[] = "qwertyuiop";
     uint8_t *rx_buf = buf + offt; // To check underflow
+
+    UnityPrintWithEOL("Type \'qwertyuiop\' string to finish the test");
 
     ecl::test_uart::set_rx(rx_buf, expected_rx);
     ecl::test_uart::set_handler(test_handler);

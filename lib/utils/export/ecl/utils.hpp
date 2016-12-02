@@ -9,6 +9,8 @@
 namespace ecl
 {
 
+//------------------------------------------------------------------------------
+
 // Proudly taken from stackoverflow :)
 // http://stackoverflow.com/questions/1198260/iterate-over-tuple
 
@@ -25,6 +27,8 @@ for_each(std::tuple<Tp...>& t, FuncT f)
     for_each<I + 1, FuncT, Tp...>(t, f);
 }
 
+//------------------------------------------------------------------------------
+
 //! Obtains offset of the given member within given type.
 template<typename T1, typename T2>
 inline constexpr size_t offset_of(T1 T2::*member) {
@@ -32,6 +36,8 @@ inline constexpr size_t offset_of(T1 T2::*member) {
     T2 *ptr = reinterpret_cast<T2 *>(&object);
     return reinterpret_cast<uint8_t *>(&(ptr->*member)) - reinterpret_cast<uint8_t *>(ptr);
 }
+
+//------------------------------------------------------------------------------
 
 //! Safe storage wrapper to avoid static initialization fiasco
 //! \tparam T non-POD type to protect against implicit constructor call during static initialization
@@ -53,7 +59,7 @@ public:
 
     //! Gets object reference.
     //! \pre Storage initialized, i.e. init() was called once.
-    static constexpr T& get()
+    static T& get()
     {
         return reinterpret_cast<T&>(m_stor);
     }
@@ -65,6 +71,21 @@ private:
 
 template<class T>
 std::aligned_storage_t<sizeof(T), alignof(T)> safe_storage<T>::m_stor;
+
+//------------------------------------------------------------------------------
+
+//! Extracts value from enumerator element of given type.
+//! \tparam Enum Enumerator type.
+//! \param[in] val Value of the enumerator type.
+//! \return Integer representation of the enum value.
+template<typename Enum>
+constexpr auto extract_value(Enum val)
+{
+    static_assert(std::is_enum<Enum>::value, "Given type is not enumeration.");
+
+    return static_cast<std::underlying_type_t<Enum>>(val);
+}
+
 
 } // namespace ecl
 
