@@ -1,4 +1,4 @@
-﻿//! \file
+//! \file
 //! \brief EXTI manager implementation for STM32 platform
 
 #include <platform/exti_manager.hpp>
@@ -42,8 +42,15 @@ void exti_manager::unsubscribe(handler &h)
 {
     __disable_irq();
 
-    // Will not appear in the exti list anymore
+    // Will not appear in the exti list anymore (if was present)
     h.m_node.unlink();
+
+    // A bit slow method to remove handler from the array of direct handler.
+    for (auto &saved : map()->direct) {
+        if (saved == &h) {
+            saved = nullptr;
+        }
+    }
 
     // De-configure line
 

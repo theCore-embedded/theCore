@@ -30,4 +30,18 @@ void suite_board_init()
 
     GPIO_PinAFConfig(GPIOD, GPIO_PinSource8, GPIO_AF_USART3);
     GPIO_PinAFConfig(GPIOD, GPIO_PinSource9, GPIO_AF_USART3);
+
+    // Init Port A clocks
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+    GPIO_StructInit(&init_struct);
+
+    // Push button GPIO configuration
+
+    init_struct.GPIO_Mode   = GPIO_Mode_IN;
+    init_struct.GPIO_OType  = GPIO_OType_PP;
+    init_struct.GPIO_PuPd   = GPIO_PuPd_NOPULL;
+    init_struct.GPIO_Pin    = GPIO_Pin_0;
+
+    GPIO_StructInit(&init_struct);
 }

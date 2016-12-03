@@ -135,19 +135,19 @@ endfunction()
 # Platform BAT suite
 
 add_suite(platform_bat
-        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat streams_bat
+        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
 
 # GNU suite
 add_suite(platform_bat
-        CASES               gpio_bat bypass_console_bat uart_bat
+        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         stm32f4discovery_simple)
 
 # Clang suite
 add_suite(platform_bat
-        CASES               gpio_bat bypass_console_bat uart_bat
+        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat
         TOOLCHAIN_NAME      arm-cm4-clang.cmake
         TARGET_NAME         stm32f4discovery_simple)
 
