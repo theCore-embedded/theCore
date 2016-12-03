@@ -6,9 +6,9 @@
 // (add-on to CMSIS functions). See SPL.
 #include <misc.h>
 
-#if CONFIG_BYPASS_CONSOLE_ENABLED
+#if CONFIG_USE_BYPASS_CONSOLE
 extern void bypass_console_init();
-#endif // CONFIG_BYPASS_CONSOLE_ENABLED
+#endif // CONFIG_USE_BYPASS_CONSOLE
 
 
 /* Required for STM32 Peripherial library */
@@ -51,8 +51,8 @@ extern "C" void platform_init()
     DWT->CYCCNT = 0;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-#if CONFIG_BYPASS_CONSOLE_ENABLED
+#if CONFIG_USE_BYPASS_CONSOLE
     bypass_console_init();
-#endif // CONFIG_BYPASS_CONSOLE_ENABLED
+#endif // CONFIG_USE_BYPASS_CONSOLE
 }
 

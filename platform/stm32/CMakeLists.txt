@@ -24,8 +24,16 @@ target_compile_definitions(stm32
         -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 
 # Pick console driver
-message(STATUS "STM32: Checking [CONFIG_USE_CONSOLE]...")
-if(${CONFIG_USE_CONSOLE})
+message(STATUS "STM32: Checking [CONFIG_USE_CONSOLE] and [CONFIG_USE_BYPASS_CONSOLE]...")
+if(CONFIG_USE_CONSOLE)
+    message(STATUS "Regular console driver will be used")
+    # Bypass console must be enabled automatically.
+    set(CONFIG_USE_BYPASS_CONSOLE 1)
+
+    target_compile_definitions(stm32 PUBLIC -DCONFIG_USE_CONSOLE)
+endif()
+
+if(CONFIG_USE_BYPASS_CONSOLE)
     # TODO: #83 - config name must be reviewed
     if(NOT DEFINED CONFIG_CONSOLE_DEVICE_NUM)
         message(FATAL_ERROR "CONFIG_CONSOLE_DEVICE_NUM must be set in order to use console")
@@ -43,7 +51,7 @@ if(${CONFIG_USE_CONSOLE})
     target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 
     # Helps to determine if bypass driver must be enabled and inited
-    target_compile_definitions(stm32 PUBLIC -DCONFIG_BYPASS_CONSOLE_ENABLED)
+    target_compile_definitions(stm32 PUBLIC -DCONFIG_USE_BYPASS_CONSOLE)
     # Bypass console implementation
     target_sources(stm32 PRIVATE console.cpp)
     message(STATUS "Bypass console is supported and enabled by the platform")
