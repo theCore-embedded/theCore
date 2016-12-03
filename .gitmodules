@@ -15,3 +15,6 @@
 [submodule "lib/ti-tivaware/ti-tivaware"]
 	path = lib/ti-tivaware/ti-tivaware
 	url = https://github.com/forGGe/ti-tivaware
+[submodule "lib/fs/fat/pff"]
+	path = lib/fs/fat/pff
+	url = https://github.com/forGGe/petite-fat
