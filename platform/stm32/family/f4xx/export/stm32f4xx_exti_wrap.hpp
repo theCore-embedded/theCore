@@ -43,7 +43,7 @@ constexpr auto get_exti_idx()
         case EXTI_Line4:
             return 4;
 
-            // Grouped EXTI indexes
+        // Grouped EXTI indexes
         case EXTI_Line5:
         case EXTI_Line6:
         case EXTI_Line7:

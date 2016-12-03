@@ -1,4 +1,4 @@
-﻿//!
+//!
 //! \file
 //! \brief The Core system initialization module.
 //!
@@ -87,13 +87,13 @@ extern "C" void core_main()
     platform_init();
     board_init();
 
-#ifdef CONFIG_BYPASS_CONSOLE_ENABLED
+#ifdef CONFIG_USE_BYPASS_CONSOLE
 	// Dirty hack to make sure pin configuration is established before
 	// bypass console will be used.
 	// It should be fixed by configuring console GPIO directly in the platform,
     // not in the user's `board_init()` routine. See issue #151.
     ecl_spin_wait(50);
-#endif
+#endif // CONFIG_USE_BYPASS_CONSOLE
     kernel_main();
 }
 

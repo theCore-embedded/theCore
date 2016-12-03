@@ -25,14 +25,18 @@ static auto constexpr mode      = USART_Mode_Rx | USART_Mode_Tx;
 static auto constexpr hw_flow   = USART_HardwareFlowControl_None;
 };
 
-using platform_console = ecl::usart_bus< ECL_CONSOLE_DEVICE >;
+using bypass_console_bus = ecl::usart_bus< ECL_CONSOLE_DEVICE >;
+
+#ifdef CONFIG_USE_CONSOLE
+using platform_console = bypass_console_bus;
+#endif // CONFIG_USE_CONSOLE
 
 //! Bypasses console drivers and puts data directly to the UART
 //! \details Required to print debug of the failed asserts including one that
 //! executed during ISR.
 void bypass_putc(char c);
 
-}
+} // namespace ecl
 
 
 #endif // STM32L1XX_CONSOLE_DRIVER_HPP_

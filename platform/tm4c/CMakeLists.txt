@@ -30,7 +30,7 @@ if(CONFIG_USE_BYPASS_CONSOLE)
 
     # Bypass must be enabled and inited
     target_compile_definitions(tm4c PUBLIC
-	-DCORE_CONFIG_USE_BYPASS_CONSOLE
+        -DCORE_CONFIG_USE_BYPASS_CONSOLE
         -DCORE_CONFIG_CONSOLE_DEVICE_NUM=${CONFIG_CONSOLE_DEVICE_NUM})
 
     # Bypass console implementation

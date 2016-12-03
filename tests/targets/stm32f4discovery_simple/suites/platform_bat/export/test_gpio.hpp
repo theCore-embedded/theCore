@@ -27,6 +27,9 @@ using orange_leds = gpio<gpio_port::d, gpio_num::pin13>;
 //! Exported list of GPIOs.
 using test_gpios = gpio_list<red_led, blue_led, green_led, orange_leds>;
 
+//! Push button
+using push_button = gpio<gpio_port::a, gpio_num::pin0>;
+
 } // namespace ecl
 
 #endif // STM32DISC_PLATFORM_BAT_TEST_GPIO_HPP_
