@@ -1,4 +1,4 @@
-﻿//! \file
+//! \file
 //! \brief STM32F4XX DMA wrappers implementation
 //!
 #ifndef PLATFORM_STM32F4XX_DMA_WRAP_
@@ -336,6 +336,7 @@ template<class Impl>
 auto dma_wrap_base<Impl>::bytes_left()
 {
     constexpr auto stream     = Impl::get_stream_ptr();
+    auto           items_left = DMA_GetCurrDataCounter(stream);
     auto           reg        = stream->CR & 0x6000; // Fetch data size
 
     // DMA_MemoryDataSize encodes data size in a specific way, so shift can be
@@ -343,7 +344,7 @@ auto dma_wrap_base<Impl>::bytes_left()
     // However, this can be possibly changed in SPL.
     auto div = reg == DMA_MemoryDataSize_Byte ? 1 : reg >> 12;
 
-    return reg * div;
+    return items_left * div;
 }
 
 //------------------------------------------------------------------------------
