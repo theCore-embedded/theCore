@@ -11,20 +11,18 @@ namespace ecl
 
 //------------------------------------------------------------------------------
 
-// Proudly taken from stackoverflow :)
-// http://stackoverflow.com/questions/1198260/iterate-over-tuple
+// Special credit to RostakaGmfun for providing cool way to iterate tuple.
 
-template<std::size_t I = 0, typename FuncT, typename... Tp>
-inline typename std::enable_if<I == sizeof...(Tp), void>::type
-for_each(std::tuple<Tp...> &, FuncT)
-{ }
-
-template<std::size_t I = 0, typename FuncT, typename... Tp>
-inline typename std::enable_if<I < sizeof...(Tp), void>::type
-for_each(std::tuple<Tp...>& t, FuncT f)
+template <class FuncT, class TupleT, size_t ... Is>
+void for_each_impl(TupleT &tuple, FuncT func, std::index_sequence<Is...>)
 {
-    f(std::get<I>(t));
-    for_each<I + 1, FuncT, Tp...>(t, f);
+    (void)std::initializer_list<int>{(func(std::get<Is>(tuple)), 0)...};
+}
+
+template<class FuncT,  class ... Tp>
+void for_each(std::tuple<Tp...> &tuple, FuncT func)
+{
+    for_each_impl(tuple, func, std::index_sequence_for<Tp...>{});
 }
 
 //------------------------------------------------------------------------------
