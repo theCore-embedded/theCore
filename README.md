@@ -128,6 +128,8 @@ The project is on its very beginning, so any help is more than welcome and highl
 If you'd like to take a part in the project growth and (or) have any questions – feel free to email me at forgge@gmail.com, leave message at [gitter](https://gitter.im/forGGe/theCore) or simply check out [a list of issues](https://github.com/forGGe/theCore/issues).
 If you have any suggestions on theCore improvement or just like it how it is, don’t keep silence! I’ll be happy to read your reviews.
 
+When making pull requests, make sure that code conforms to [theCore code style guide](style.md).
+
 You are welcome to use theCore in your own projects.
 If there is something that it’s not enough for this, please let me know via email or open some issues and we will do our best to handle this ASAP.
 Good luck!
