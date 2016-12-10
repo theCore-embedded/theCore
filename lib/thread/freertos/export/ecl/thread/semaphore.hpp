@@ -37,10 +37,10 @@ public:
 
     //!
     //! \brief Tries to wait on semaphore without lock.
-    //! \retval err::again  Someone already waits a semaphore.
-    //! \retval err::ok     Semaphore counter decremented.
+    //! \retval false  Someone already waits a semaphore.
+    //! \retval true   Semaphore counter decremented.
     //!
-    ecl::err try_wait();
+    bool try_wait();
 
     binary_semaphore(const binary_semaphore&)             = delete;
     binary_semaphore& operator=(const binary_semaphore&)  = delete;
@@ -72,10 +72,10 @@ public:
 
     //!
     //! \brief Tries to wait on semaphore without lock.
-    //! \retval err::again  Wait will result in lock.
-    //! \retval err::ok     Semaphore counter decremented.
+    //! \retval false  Wait will result in lock.
+    //! \retval true   Semaphore counter decremented.
     //!
-    ecl::err try_wait();
+    bool try_wait();
 
     semaphore(const semaphore&)             = delete;
     semaphore& operator=(const semaphore&)  = delete;

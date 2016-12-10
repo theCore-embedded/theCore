@@ -16,6 +16,11 @@
 namespace ecl
 {
 
+// Ctor in aux class left as default intentionally.
+// aux class and its derived will be destroyed by calling `destroy()` method
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+
 //!
 //! \brief Base helper class, used internally by shared_ptr
 //!
@@ -52,6 +57,8 @@ protected:
     size_t m_cnt;       //!< Reference counter.
     size_t m_weak;      //!< Weak reference counter.
 };
+
+#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------------
 
@@ -156,6 +163,12 @@ public:
     const T* operator ->() const;
 
 private:
+
+// Ctor in aux class left as default intentionally.
+// aux class and its derived will be destroyed by calling `destroy()` method
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+
     //! Type-erased helper class
     template< class Alloc, class... Args >
     class aux_alloc : public aux
@@ -188,6 +201,8 @@ private:
     private:
         Alloc    m_alloc;  //! The allocator used to allocated this object.
     };
+
+#pragma GCC diagnostic pop
 
     //! Releases the ownership.
     //! \todo: describe post and pre conditions

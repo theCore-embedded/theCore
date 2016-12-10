@@ -6,7 +6,7 @@ set -v # Be verbose
 
 # Main Core builds
 
-mkdir build
+mkdir -p build
 cd build
 cmake ..
 make
@@ -15,7 +15,16 @@ cd ..
 
 # Examples
 
-mkdir build_examples
+mkdir -p build_examples
 cd build_examples
 cmake ../examples
 make
+cd ..
+
+# Test cases
+
+mkdir -p build_test_cases
+cd build_test_cases
+cmake ../tests
+make
+cd ..

@@ -1,0 +1,1 @@
+set(CONFIG_PLATFORM_NAME host)

@@ -30,6 +30,8 @@ public:
     // Returns path
     virtual const char* get_path() const override;
 
+    path_erased &operator=(path_erased&) = delete;
+    path_erased(const path_erased&) = delete;
 private:
     const char*   m_path;   // Path
     size_t        m_sz;     // Path buffer size

@@ -18,14 +18,19 @@ public:
         const DIR &fat_dir, fat::path_ptr path);
     virtual ~dir();
 
-    // Next entity in a dir
-    // nullptr returned if no more items
+    //! Next entity in a dir
+    //! \details nullptr returned if no more items
     virtual fs::inode_ptr next() override;
-    // Rewinds to the start of the dir
-    // -1 if error, 0 otherwise
+
+    //! Rewinds to the start of the dir
+    //! -1 if error, 0 otherwise
     virtual int rewind() override;
-    // Closes a dir
+
+    //! Closes a dir
     virtual int close() override;
+
+    dir &operator=(dir&) = delete;
+    dir(const dir&) = delete;
 
 private:
     // TBD

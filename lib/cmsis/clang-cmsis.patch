@@ -1,0 +1,22 @@
+diff --git a/CMSIS/Include/cmsis_gcc.h b/CMSIS/Include/cmsis_gcc.h
+index d868f2e..c852ada 100644
+--- a/CMSIS/Include/cmsis_gcc.h
++++ b/CMSIS/Include/cmsis_gcc.h
+@@ -1,4 +1,4 @@
+-/**************************************************************************//**
++﻿/**************************************************************************//**
+  * @file     cmsis_gcc.h
+  * @brief    CMSIS Cortex-M Core Function/Instruction Header File
+  * @version  V4.30
+@@ -337,7 +337,11 @@ __attribute__( ( always_inline ) ) __STATIC_INLINE void __set_FPSCR(uint32_t fps
+ #if (__FPU_PRESENT == 1U) && (__FPU_USED == 1U)
+   /* Empty asm statement works as a scheduling barrier */
+   __ASM volatile ("");
++#ifdef __clang__
++  __builtin_arm_set_fpscr(fpscr);
++#else
+   __ASM volatile ("VMSR fpscr, %0" : : "r" (fpscr) : "vfpcc");
++#endif
+   __ASM volatile ("");
+ #endif
+ }

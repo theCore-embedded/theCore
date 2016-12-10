@@ -43,6 +43,9 @@ public:
     //! Returns a pointer to a previous list node.
     list_node* prev() const;
 
+    list_node(const list_node&) = delete;
+    list_node &operator=(list_node&) = delete;
+
 private:
     list_node *m_next; //!< Next node in a list. Equals to this if the list is empty.
     list_node *m_prev; //!< Previous node in a list. Equals to this if the list is empty.
@@ -113,6 +116,9 @@ template< typename T, list_node T::* Mptr >
 class list
 {
 public:
+    //! Constructs a list
+    list();
+
     //! Returns iterator to first valid element of a list,
     //! provided that this node is a head.
     list_iter< T, Mptr > begin();
@@ -133,6 +139,11 @@ private:
 };
 
 //------------------------------------------------------------------------------
+
+template< typename T, list_node T::* Mptr >
+list< T, Mptr >::list()
+    :head{}
+{}
 
 template< typename T, list_node T::* Mptr >
 list_iter< T, Mptr > list< T, Mptr >::begin()
@@ -194,6 +205,10 @@ public:
     //! \warning Comparing iterators from different lists is illegal.
     //! \return False if iterators point to the same object within the same list.
     bool operator !=(const list_iter< T, Mptr >& other);
+
+    list_iter(const list_iter&) = default;
+    list_iter &operator=(list_iter&) = default;
+    list_iter &operator=(const list_iter&) = default;
 
 private:
     list_node *m_cur; //! Current list node.

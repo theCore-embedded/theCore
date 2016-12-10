@@ -27,18 +27,22 @@ public:
     ostream(IO_device *device);
     ~ostream();
 
-    ostream& operator<<(int value);
-    ostream& operator<<(unsigned int value);
-    ostream& operator<<(char character);
-    ostream& operator<<(const char *string);
+    ostream &operator<<(int value);
+    ostream &operator<<(unsigned int value);
+    ostream &operator<<(char character);
+    ostream &operator<<(const char *string);
 
     // For I\O manipulators
-    ostream& operator<<(ostream& (*func)(ostream< IO_device >&));
+    ostream &operator<<(ostream& (*func)(ostream< IO_device >&));
     // NOTE: this will be used later with different manipulators,
     // such that used for hex or octal output of integers
 
     // Puts a single character
-    ostream& put(char c);
+    ostream &put(char c);
+
+    // Disabled for now.
+    ostream &operator=(ostream &) = delete;
+    ostream(const ostream &) = delete;
 
 private:
     // Simply, a device driver object
@@ -61,32 +65,36 @@ ostream< IO_device >::~ostream()
 }
 
 template< class IO_device >
-ostream<IO_device>& ostream< IO_device >::operator<< (int value)
+ostream<IO_device> &ostream< IO_device >::operator<< (int value)
 {
-    int higher_multiplicand = 1;
-    int out_digit = 0;
+    unsigned int higher_multiplicand = 1;
+    unsigned int out_digit = 0;
     int val2 = value;
     char out_character;
 
-    while(val2 / 10 != 0) {
+    while (val2 / 10 != 0) {
         higher_multiplicand *= 10;
         val2 /= 10;
     }
 
+    int delim = higher_multiplicand;
+
     if (value < 0) {
         m_device->write((uint8_t *) "-", 1);
         value *= -1;
+        delim *= -1;
     }
 
-    for (int i = 1; i <= higher_multiplicand; i *= 10) {
-        out_digit = value * i / higher_multiplicand;
+    for (unsigned int i = 1; i <= higher_multiplicand; i *= 10) {
+        out_digit = value / delim;
         out_character = out_digit + 48;
 
         if (m_device->write(reinterpret_cast< uint8_t* >(&out_character), 1) < 0) {
             break; //FIXME: add error handling
         }
 
-        value = value - out_digit * higher_multiplicand / i;
+        value = value - out_digit * delim;
+        delim /= 10;
     }
 
     return *this;
@@ -94,27 +102,30 @@ ostream<IO_device>& ostream< IO_device >::operator<< (int value)
 
 
 template< class IO_device >
-ostream<IO_device>& ostream< IO_device >::operator<< (unsigned int value)
+ostream<IO_device> &ostream< IO_device >::operator<< (unsigned int value)
 {
-    int higher_multiplicand = 1;
-    int out_digit = 0;
-    int val2 = value;
+    unsigned int higher_multiplicand = 1;
+    unsigned int out_digit = 0;
+    unsigned int val2 = value;
     char out_character;
 
-    while(val2 / 10 != 0) {
+    while (val2 / 10 != 0) {
         higher_multiplicand *= 10;
         val2 /= 10;
     }
 
-    for (int i = 1; i <= higher_multiplicand; i *= 10) {
-        out_digit = value * i / higher_multiplicand;
+    int delim = higher_multiplicand;
+
+    for (unsigned int i = 1; i <= higher_multiplicand; i *= 10) {
+        out_digit = value / delim;
         out_character = out_digit + 48;
 
         if (m_device->write((uint8_t *) &out_character, 1) < 0) {
             break; //FIXME: add error handling
         }
 
-        value = value - out_digit * higher_multiplicand / i;
+        value = value - out_digit * delim;
+        delim /= 10;
     }
 
     return *this;
@@ -122,9 +133,9 @@ ostream<IO_device>& ostream< IO_device >::operator<< (unsigned int value)
 
 
 template< class IO_device >
-ostream<IO_device>& ostream< IO_device >::operator<<(char character)
+ostream<IO_device> &ostream< IO_device >::operator<<(char character)
 {
-    if(m_device->write((uint8_t *) &character,1) < 0) {
+    if (m_device->write((uint8_t *) &character, 1) < 0) {
         return *this; //FIXME: add error handling
     }
 
@@ -133,20 +144,20 @@ ostream<IO_device>& ostream< IO_device >::operator<<(char character)
 
 
 template< class IO_device >
-ostream<IO_device>& ostream< IO_device >::operator<<(const char *string)
+ostream<IO_device> &ostream< IO_device >::operator<<(const char *string)
 {
     // TODO: improve this function in a way it can write a string
     // to a device with chunks that are split by '\n' symbol
     // What about somehow move it to the platform layer?
 
     size_t i = 0;
-    while(string[i] != 0) {
+    while (string[i] != '\0') {
         if (string[i] == '\n') {
             uint8_t carret_ret = '\r';
             m_device->write(&carret_ret, 1);
         }
 
-        if(m_device->write((const uint8_t *) &string[i], 1) < 0) {
+        if (m_device->write((const uint8_t *) &string[i], 1) < 0) {
             break; //FIXME: add error handling
         }
 
@@ -157,14 +168,14 @@ ostream<IO_device>& ostream< IO_device >::operator<<(const char *string)
 
 
 template< class IO_device >
-ostream<IO_device>& ostream< IO_device >::operator<<(
+ostream<IO_device> &ostream< IO_device >::operator<<(
         ostream& (*func)(ostream< IO_device >&))
 {
     return func(*this);
 }
 
 template< class IO_device >
-ostream<IO_device>& ostream< IO_device >::put(char c)
+ostream<IO_device> &ostream< IO_device >::put(char c)
 {
     m_device->write((uint8_t *)&c, 1);
     return *this;

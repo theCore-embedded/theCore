@@ -3,6 +3,7 @@
 
 #if __STDC_HOSTED__
 #include <assert.h>
+#include <stdio.h>
 #endif
 
 #ifdef __cplusplus

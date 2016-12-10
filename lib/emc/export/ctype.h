@@ -7,7 +7,7 @@ extern "C" {
 
 /* To avoid collisions between hosted libc and existing implementation
  * names must be mangled */
-#if __STDC_HOSTED__
+#if EXTERNAL_LIBC
 #define LIBC_FUNCTION(name) ecl_##name
 #else
 #define LIBC_FUNCTION(name) name

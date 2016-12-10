@@ -9,6 +9,7 @@
 //!
 
 #include <ecl/err.hpp>
+#include <unistd.h>
 
 namespace ecl
 {
@@ -98,6 +99,7 @@ private:
 
 template< class GBus >
 bus_pipe< GBus >::bus_pipe()
+    :m_last{err::ok}
 {
 
 }

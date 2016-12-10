@@ -1,4 +1,4 @@
-#ifndef DEV_BUS_BUS_HPP_
+﻿#ifndef DEV_BUS_BUS_HPP_
 #define DEV_BUS_BUS_HPP_
 
 //!
@@ -31,13 +31,16 @@ namespace ecl
 //! fiasco” to handle initialization of the static members.
 //! See https://isocpp.org/wiki/faq/ctors
 //!
-template< class PBus >
+template<class PBus>
 class generic_bus
 {
 public:
     //! Costruction is not allowed.
     generic_bus() = delete;
     ~generic_bus() = delete;
+
+    //! Exported platform bus type.
+	using platform_handle = PBus;
 
     //! Inits a bus.
     //! \details Lazy initialization. Inits an underlying platform bus.
@@ -181,12 +184,6 @@ public:
     //!
     static err trigger_xfer();
 
-    //! Returns a reference to underlying platform bus.
-    //! \details   This allows to perform specific for underlying bus operations.
-    //! \retval    PBus&    Reference to underlying platform bus.
-    //!
-    static PBus& platform_handle();
-
 private:
     //! Convinient alias.
     using atomic_flag   = std::atomic_flag;
@@ -235,27 +232,27 @@ private:
     static uint8_t      m_state;    //!< State flags.
 };
 
-template< class PBus > size_t                   generic_bus< PBus >::m_received{};
-template< class PBus > size_t                   generic_bus< PBus >::m_sent{};
-template< class PBus > std::atomic_flag         generic_bus< PBus >::m_cleaned{};
-template< class PBus > uint8_t                  generic_bus< PBus >::m_state{};
+template<class PBus> size_t                   generic_bus<PBus>::m_received{};
+template<class PBus> size_t                   generic_bus<PBus>::m_sent{};
+template<class PBus> std::atomic_flag         generic_bus<PBus>::m_cleaned{};
+template<class PBus> uint8_t                  generic_bus<PBus>::m_state{};
 
 //------------------------------------------------------------------------------
 
-template< class PBus >
-err generic_bus< PBus >::init()
+template<class PBus>
+err generic_bus<PBus>::init()
 {
     if (m_state & bus_inited) {
         return err::ok;
     }
 
-    platform_handle().set_handler(platform_handler);
-
-    auto rc = platform_handle().init();
+    auto rc = PBus::init();
 
     if (is_ok(rc)) {
         m_state |= bus_inited;
     }
+
+    PBus::set_handler(platform_handler);
 
     // Call these methods here to guarantee that
     // all static objects were allocated before first use
@@ -266,22 +263,22 @@ err generic_bus< PBus >::init()
     return rc;
 }
 
-template< class PBus >
-err generic_bus< PBus >::deinit()
+template<class PBus>
+err generic_bus<PBus>::deinit()
 {
     if (!(m_state & bus_inited)) {
         return err::perm;
     }
 
-    platform_handle().reset_handler();
+    PBus::reset_handler();
     cleanup();
     m_state = 0;
 
     return err::ok;
 }
 
-template< class PBus >
-void generic_bus< PBus >::lock()
+template<class PBus>
+void generic_bus<PBus>::lock()
 {
     // If bus is not initialized then pre-conditions are violated.
     ecl_assert(m_state & bus_inited);
@@ -297,8 +294,8 @@ void generic_bus< PBus >::lock()
     }
 }
 
-template< class PBus >
-void generic_bus< PBus >::unlock()
+template<class PBus>
+void generic_bus<PBus>::unlock()
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -331,8 +328,8 @@ void generic_bus< PBus >::unlock()
     mut().unlock();
 }
 
-template< class PBus >
-ecl::err generic_bus< PBus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
+template<class PBus>
+ecl::err generic_bus<PBus>::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -346,15 +343,15 @@ ecl::err generic_bus< PBus >::set_buffers(const uint8_t *tx, uint8_t *rx, size_t
         return err::busy;
     }
 
-    platform_handle().reset_buffers();
-    platform_handle().set_tx(tx, size);
-    platform_handle().set_rx(rx, size);
+    PBus::reset_buffers();
+    PBus::set_tx(tx, size);
+    PBus::set_rx(rx, size);
 
     return err::ok;
 }
 
-template< class PBus >
-ecl::err generic_bus< PBus >::set_buffers(size_t size, uint8_t fill_byte)
+template<class PBus>
+ecl::err generic_bus<PBus>::set_buffers(size_t size, uint8_t fill_byte)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -364,13 +361,14 @@ ecl::err generic_bus< PBus >::set_buffers(size_t size, uint8_t fill_byte)
         return err::busy;
     }
 
-    platform_handle().reset_buffers();
-    platform_handle().set_tx(size, fill_byte);
+    PBus::reset_buffers();
+    PBus::set_tx(size, fill_byte);
+    PBus::set_rx(nullptr, 0);
     return err::ok;
 }
 
-template< class PBus >
-ecl::err generic_bus< PBus >::xfer(size_t *sent, size_t *received)
+template<class PBus>
+ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -395,7 +393,7 @@ ecl::err generic_bus< PBus >::xfer(size_t *sent, size_t *received)
     // Reset transfer counters
     m_received = m_sent = 0;
 
-    auto rc = platform_handle().do_xfer();
+    auto rc = PBus::do_xfer();
 
     if (is_ok(rc)) {
         sem().wait();
@@ -424,8 +422,8 @@ ecl::err generic_bus< PBus >::xfer(size_t *sent, size_t *received)
     return rc;
 }
 
-template< class PBus >
-ecl::err generic_bus< PBus >::xfer(const bus_handler &handler, async_type type)
+template<class PBus>
+ecl::err generic_bus<PBus>::xfer(const bus_handler &handler, async_type type)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -438,15 +436,15 @@ ecl::err generic_bus< PBus >::xfer(const bus_handler &handler, async_type type)
     cb() = handler;
 
     if (type == async_type::deferred) {
-        // Xfer will be executed when upon user's will.
+        // Xfer will be executed upon user's will.
         return err::ok;
     }
 
     return trigger_xfer();
 }
 
-template< class PBus >
-ecl::err generic_bus< PBus >::trigger_xfer()
+template<class PBus>
+ecl::err generic_bus<PBus>::trigger_xfer()
 {
     ecl_assert(m_state & bus_locked);
     ecl_assert(!bus_is_busy()); // Violating of pre-conditions
@@ -456,7 +454,7 @@ ecl::err generic_bus< PBus >::trigger_xfer()
 
     m_cleaned.clear();
 
-    auto rc = platform_handle().do_xfer();
+    auto rc = PBus::do_xfer();
 
     if (is_error(rc)) {
         // Deem that xfer virtually occurs in blocking mode and thus
@@ -476,8 +474,8 @@ ecl::err generic_bus< PBus >::trigger_xfer()
 
 //------------------------------------------------------------------------------
 
-template< class PBus >
-void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_t total)
+template<class PBus>
+void generic_bus<PBus>::platform_handler(bus_channel ch, bus_event type, size_t total)
 {
     // Transfer complete across all channels
     bool last_event = (ch == bus_channel::meta && type == bus_event::tc);
@@ -488,8 +486,6 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
 
     if (last_event) {
         // Spurious events are not allowed
-        // TODO #27: platform assert here is required since this routine
-        // is likely will be executed in IRQ context
         ecl_assert(!(m_state & xfer_served));
 
         m_state |= xfer_served;
@@ -539,49 +535,43 @@ void generic_bus< PBus >::platform_handler(bus_channel ch, bus_event type, size_
     }
 }
 
-template< class PBus >
-bool generic_bus< PBus >::bus_is_busy()
+template<class PBus>
+bool generic_bus<PBus>::bus_is_busy()
 {
     // Asynchronous operation still in progress.
     return (m_state & async_mode) && !(m_state & xfer_served);
 }
 
-template< class PBus >
-void generic_bus< PBus >::cleanup()
+template<class PBus>
+void generic_bus<PBus>::cleanup()
 {
-    platform_handle().reset_buffers();
+    PBus::reset_buffers();
     cb() = bus_handler{};
     // When bus will be locked again, no need to wait for events.
     m_state &= ~(async_mode);
 }
 
-template< class PBus >
-mutex& generic_bus< PBus >::mut()
+template<class PBus>
+mutex& generic_bus<PBus>::mut()
 {
     static mutex m;
     return m;
 }
 
-template< class PBus >
-binary_semaphore& generic_bus< PBus >::sem()
+template<class PBus>
+binary_semaphore& generic_bus<PBus>::sem()
 {
     static binary_semaphore s;
     return s;
 }
 
-template< class PBus >
-bus_handler& generic_bus< PBus >::cb()
+template<class PBus>
+bus_handler& generic_bus<PBus>::cb()
 {
     static bus_handler bh;
     return bh;
 }
 
-template< class PBus >
-PBus& generic_bus< PBus >::platform_handle()
-{
-    static PBus pb;
-    return pb;
-}
-}
+} // namespace ecl
 
 #endif

@@ -2,7 +2,7 @@
 #include <ecl/thread/utils.hpp>
 #include <ecl/assert.h>
 
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 
 ecl::semaphore::semaphore()
         :m_semaphore{}
@@ -28,16 +28,16 @@ void ecl::semaphore::wait()
     }
 }
 
-ecl::err ecl::semaphore::try_wait()
+bool ecl::semaphore::try_wait()
 {
     if (m_cnt.fetch_sub(1) > 0) {
-        return err::ok; // Got semaphore.
+        return true; // Got semaphore.
     }
 
     // Bring counter back
     ++m_cnt;
 
-    return err::again;
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ void ecl::binary_semaphore::signal()
     // a binary semaphore. If signal called multiple times without waiting
     // for a semaphore it is expected that only one event will be delivered to
     // a task when it will call wait()
-    if (!ecl::irq_manager::in_isr()) {
+    if (!ecl::irq::in_isr()) {
         xSemaphoreGive(m_semaphore);
     } else {
         // Don't care about priority inversion thus skipping second argument
@@ -74,8 +74,8 @@ void ecl::binary_semaphore::wait()
     ecl_assert(rc == pdTRUE);
 }
 
-ecl::err ecl::binary_semaphore::try_wait()
+bool ecl::binary_semaphore::try_wait()
 {
     auto rc = xSemaphoreTake(m_semaphore, 0);
-    return rc == pdTRUE ? ecl::err::ok : ecl::err::again;
+    return rc == pdTRUE ? true : false;
 }

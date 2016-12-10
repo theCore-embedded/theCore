@@ -160,6 +160,9 @@ public:
     // Debug routine
     void print_stats() const;
 #endif
+    // Copying disabled.
+    pool& operator=(pool&) = delete;
+    pool(const pool&) = delete;
 
 private:
     //! Gets size of info array containing bits representing data chunk state.
@@ -414,6 +417,10 @@ public:
     //! \tparam U A new allocator type.
     template< typename U >
     pool_allocator< U > rebind() const;
+
+    // Default copying is OK.
+    pool_allocator& operator=(const pool_allocator&) = default;
+    pool_allocator(const pool_allocator&) = default;
 
 private:
     pool_base *m_pool; //!< Memory pool. \todo use reference instead of pointer.

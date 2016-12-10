@@ -1,5 +1,5 @@
 #include <ecl/thread/utils.hpp>
-#include <platform/irq_manager.hpp>
+#include <common/irq.hpp>
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -25,8 +25,8 @@ ecl::thread_handle ecl::this_thread::get_handle()
 {
     TaskHandle_t handle = NULL;
 
-    if (!ecl::irq_manager::in_isr()) {
-        ecl::irq_manager::disable();
+    if (!ecl::irq::in_isr()) {
+        ecl::irq::disable();
         handle = reinterpret_cast< TaskHandle_t >(pxCurrentTCB);
     }
 

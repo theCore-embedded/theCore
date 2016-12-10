@@ -1,15 +1,12 @@
-# Add thread support for valid kernel
+﻿# Add thread support for valid kernel
 message(STATUS "Checking [CONFIG_OS]...")
-if (DEFINED CONFIG_OS)
+if(DEFINED CONFIG_OS)
 	message(STATUS "OS selected: ${CONFIG_OS}")
-	if (${CONFIG_OS} STREQUAL "freertos")
+	if(CONFIG_OS STREQUAL "freertos")
 		add_subdirectory(freertos)
-	else (${CONFIG_OS} STREQUAL "host")
-		if (${UNIX})
+	else(CONFIG_OS STREQUAL "host")
+		if(UNIX)
 			add_subdirectory(posix)
-		else(${WIN32})
-			# Currently missing
-			add_subdirectory(win32)
 		else()
 			# Please, implement it if you see this message
 			message(FATAL_ERROR "	Your host system has no known thread support")
@@ -26,9 +23,9 @@ endif()
 add_subdirectory(common)
 
 # TODO: comment about lib names
-add_library(thread lock_guard.cpp)
-target_include_directories(thread PUBLIC export)
-target_link_libraries(thread PUBLIC thread_os)
+add_library(thread INTERFACE)
+target_include_directories(thread INTERFACE export)
+target_link_libraries(thread INTERFACE thread_os)
 
 # Tests.
 

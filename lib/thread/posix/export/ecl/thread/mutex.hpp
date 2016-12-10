@@ -9,7 +9,7 @@ namespace ecl
 class mutex
 {
 public:
-    constexpr mutex();
+    mutex();
 
     void lock();
     void unlock();

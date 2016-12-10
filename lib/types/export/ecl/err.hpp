@@ -1,5 +1,5 @@
-#ifndef LIB_UTILS_ERR_HPP_
-#define LIB_UTILS_ERR_HPP_
+﻿#ifndef ECL_LIB_UTILS_ERR_HPP_
+#define ECL_LIB_UTILS_ERR_HPP_
 
 namespace ecl
 {
@@ -103,4 +103,4 @@ const char* err_to_str(err error);
 
 }
 
-#endif // LIB_UTILS_ERR_HPP_
+#endif // ECL_LIB_UTILS_ERR_HPP_

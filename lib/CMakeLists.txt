@@ -11,4 +11,5 @@ add_subdirectory(thread)
 add_subdirectory(containers)
 add_subdirectory(cmsis)
 add_subdirectory(stm32-spl)
-
+add_subdirectory(ti-tivaware)
+add_subdirectory(unity)

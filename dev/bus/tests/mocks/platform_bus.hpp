@@ -21,19 +21,19 @@ public:
     using event      = ecl::bus_event;
     using handler_fn = ecl::bus_handler;
 
-    ecl::err init()
+    static ecl::err init()
     {
         mock("platform_bus").actualCall("init");
         return static_cast< ecl::err >
                 (mock("platform_bus").returnIntValueOrDefault(0));
     }
 
-    void reset_buffers()
+    static void reset_buffers()
     {
         mock("platform_bus").actualCall("reset_buffers");
     }
 
-    void set_tx(const uint8_t *tx, size_t size)
+    static void set_tx(const uint8_t *tx, size_t size)
     {
         mock("platform_bus")
                 .actualCall("set_tx")
@@ -41,7 +41,7 @@ public:
                 .withParameter("size", size);
     }
 
-    void set_rx(uint8_t *rx, size_t size)
+    static void set_rx(uint8_t *rx, size_t size)
     {
         mock("platform_bus")
                 .actualCall("set_rx")
@@ -49,27 +49,27 @@ public:
                 .withParameter("size", size);
     }
 
-    void set_tx(size_t size, uint8_t fill_byte)
+    static void set_tx(size_t size, uint8_t fill_byte)
     {
         mock("platform_bus")
                 .actualCall("set_tx")
-                .withParameter("rx_size", size)
+                .withParameter("tx_size", size)
                 .withParameter("fill_byte", fill_byte);
     }
 
-    void set_handler(const handler_fn &handler)
+    static void set_handler(const handler_fn &handler)
     {
         mock("platform_bus").actualCall("set_handler");
         m_handler = handler;
     }
 
-    void reset_handler()
+    static void reset_handler()
     {
         mock("platform_bus").actualCall("reset_handler");
         m_handler = handler_fn{};
     }
 
-    ecl::err do_xfer()
+    static ecl::err do_xfer()
     {
         mock("platform_bus").actualCall("do_xfer");
         return static_cast< ecl::err >
