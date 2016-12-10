@@ -1,4 +1,4 @@
-﻿//! \file
+//! \file
 //! \brief CS43l22 codec usage example.
 //! \details Example shows how to use CS43L22 codec to stream PCM data.
 //! Incoming data is 16 bps, mono. Before it is scheduled for streaming,
@@ -30,7 +30,7 @@ static constexpr size_t bps = 16;
 
 //! Total amount of samples in the audio.
 //! Note that bytes_per_sample = bps_in / 8
-static constexpr size_t samples_in = sizeof(audio_data) / bps / 8;
+static constexpr size_t samples_in = sizeof(audio_data) / (bps / 8);
 
 //! Amount of channels in the outgoing buffer. Stereo.
 static constexpr size_t channels_out = 2;
@@ -54,7 +54,8 @@ static const uint16_t *data_ptr = audio_data;
 //! Creates stereo channel in the outgoing buffer from the mono channel.
 static void copy_mono_to_stereo(const uint16_t *from, uint16_t *to, size_t count)
 {
-    for (size_t in = 0, out = 0; in < count; in++, out += 2) {
+    for (size_t in = 0; in < count; in++) {
+        size_t out = in * 2;
         to[out + 1] = to[out] = from[in];
     }
 }
@@ -115,7 +116,7 @@ int main()
     ecl::cs43l22_instance::set_sampling_frequency<ecl::i2s::audio_frequency::k8>();
 
     // Start audio streaming. Events from codec will be handled in event_handler() routine.
-    ecl::cs43l22_instance::pcm_stream_start(samples, sizeof(samples) / bps / 8, event_handler);
+    ecl::cs43l22_instance::pcm_stream_start(samples, sizeof(samples) / (bps / 8), event_handler);
 
     for(;;);
     return 0;
