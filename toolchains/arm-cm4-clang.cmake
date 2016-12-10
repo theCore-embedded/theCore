@@ -1,4 +1,4 @@
-﻿# this one is important
+# this one is important
 set(CMAKE_SYSTEM_NAME Generic)
 # this one not so much
 set(CMAKE_SYSTEM_VERSION 1)
@@ -62,7 +62,7 @@ set(CC_PLATFORM_FLAGS "-target armv7-none-eabi -mcpu=cortex-m4 -ffreestanding -m
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # TODO: move std and gdwarf flags out of toolchain into the core listfile itself
-set(C_CXX_EXTRA_FLAGS "-gdwarf-2 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp --sysroot ${CMAKE_FIND_ROOT_PATH} ${C_LIB_INCLUDE_PATH} ")
+set(C_CXX_EXTRA_FLAGS "-mfpu=fpv4-sp-d16 -mfloat-abi=softfp --sysroot ${CMAKE_FIND_ROOT_PATH} ${C_LIB_INCLUDE_PATH} ")
 set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS} ")
 set(CXX_EXTRA_FLAGS "-std=c++1z ${C_CXX_EXTRA_FLAGS} ${CXX_LIB_INCLUDE_PATH} ")
 
@@ -80,19 +80,19 @@ set(CMAKE_CXX_FLAGS
 	CACHE STRING "C++ flags")
 
 # Release flags, optimization is on,
-set(CMAKE_C_FLAGS_RELEASE "-O3 -flto=4 -ffat-lto-objects -DNDEBUG "
+set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG "
 	CACHE STRING "Release C flags")
 set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE}
 	CACHE STRING "Release C++ flags")
 
 # Minimum size release flags, LTO and minimum size
-set(CMAKE_C_FLAGS_MINSIZEREL "-Os -flto=4 -ffat-lto-objects -DNDEBUG "
+set(CMAKE_C_FLAGS_MINSIZEREL "-Os -DNDEBUG "
 	CACHE STRING "Minsize C flags")
 set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL}
 	CACHE STRING "Minsize C++ flags")
 
 # Debug mode, no LTO and maximum debug info
-set(CMAKE_C_FLAGS_DEBUG  "-O0 -g3 "
+set(CMAKE_C_FLAGS_DEBUG  "-O0 -ggdb"
 	CACHE STRING "Debug C flags")
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG}
 	CACHE STRING "Debug C++ flags")
@@ -100,7 +100,7 @@ set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG}
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy CACHE STRING "Objcopy executable")
 
 set(CMAKE_ASM-ATT_COMPILE_OBJECT
-  "<CMAKE_ASM-ATT_COMPILER> -target armv7-none-eabi -mcpu=cortex-m4 -o <OBJECT> <SOURCE>")
+  "<CMAKE_ASM-ATT_COMPILER> -mthumb -target armv7-none-eabi -mcpu=cortex-m4 -o <OBJECT> <SOURCE>")
 set(CMAKE_C_LINK_EXECUTABLE
     "${CMAKE_C_LINKER} <CMAKE_C_LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES> -o <TARGET>")
 set(CMAKE_CXX_LINK_EXECUTABLE

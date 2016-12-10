@@ -1,8 +1,7 @@
-﻿set(PLATFORM_DIR ${CORE_DIR}/platform/${PLATFORM_NAME}/)
+set(PLATFORM_DIR ${CORE_DIR}/platform/${PLATFORM_NAME}/)
 
 if(CMAKE_C_COMPILER MATCHES "clang")
-    # Clang does not provide its own linker (yet), use gnu instead
-    include(${PLATFORM_DIR}linker/gnu/gnu.cmake)
+    include(${PLATFORM_DIR}linker/clang/clang.cmake)
 elseif(CMAKE_C_COMPILER MATCHES "gcc")
     # using GCC
     include(${PLATFORM_DIR}linker/gnu/gnu.cmake)
