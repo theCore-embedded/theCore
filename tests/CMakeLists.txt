@@ -100,7 +100,7 @@ function(add_suite suite_name)
     # Records suite for external tooling.
 
     if(NOT TEST_TARGET_NAME STREQUAL host)
-        set(SUITE_LIST "${SUITE_LIST}${suite_name},")
+        set(SUITE_LIST "${SUITE_LIST}${suite_name}.${SUITE_SUFFIX},")
         set(SUITE_LIST "${SUITE_LIST}${TEST_TARGET_NAME},")
         set(SUITE_LIST "${SUITE_LIST}${AUTOGEN_DIR}/build/${suite_name},")
         set(SUITE_LIST "${SUITE_LIST}${AUTOGEN_DIR}/build/${suite_name}.bin\n" PARENT_SCOPE)
@@ -146,10 +146,11 @@ add_suite(platform_bat
         TARGET_NAME         stm32f4discovery_simple)
 
 # Clang suite
-add_suite(platform_bat
-        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat
-        TOOLCHAIN_NAME      arm-cm4-clang.cmake
-        TARGET_NAME         stm32f4discovery_simple)
+# Disabled due to issues with clang. See issue #191.
+#add_suite(platform_bat
+#        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat
+#        TOOLCHAIN_NAME      arm-cm4-clang.cmake
+#        TARGET_NAME         stm32f4discovery_simple)
 
 add_suite(platform_bat
         CASES               bypass_console_bat
