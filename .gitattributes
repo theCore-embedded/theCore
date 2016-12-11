@@ -1,0 +1,6 @@
+platform/stm32/family/f4xx/export/stm32f4xx.h linguist-vendored
+platform/stm32/family/f4xx/export/system_stm32f4xx.h linguist-vendored
+platform/stm32/family/f4xx/system_stm32f4xx.c linguist-vendored
+platform/stm32/family/l1xx/export/stm32l1xx.h linguist-vendored
+platform/stm32/family/l1xx/export/system_stm32l1xx.h linguist-vendored
+platform/stm32/family/l1xx/system_stm32l1xx.c linguist-vendored
