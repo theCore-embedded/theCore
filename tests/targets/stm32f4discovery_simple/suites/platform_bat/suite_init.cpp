@@ -43,5 +43,16 @@ void suite_board_init()
     init_struct.GPIO_PuPd   = GPIO_PuPd_NOPULL;
     init_struct.GPIO_Pin    = GPIO_Pin_0;
 
+    GPIO_Init(GPIOA, &init_struct);
+
+    // ADC ADC123_IN1 pin - PA1
+
     GPIO_StructInit(&init_struct);
+
+    init_struct.GPIO_Mode   = GPIO_Mode_AN;
+    init_struct.GPIO_OType  = GPIO_OType_PP;
+    init_struct.GPIO_PuPd   = GPIO_PuPd_NOPULL;
+    init_struct.GPIO_Pin    = GPIO_Pin_1;
+
+    GPIO_Init(GPIOA, &init_struct);
 }
