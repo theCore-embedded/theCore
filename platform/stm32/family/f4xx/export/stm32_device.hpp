@@ -13,7 +13,9 @@
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_exti.h>
 #include <stm32f4xx_syscfg.h>
+#include <stm32f4xx_adc.h>
 
+#include "stm32_memmap.hpp"
 #include "stm32f4xx_dma_wrap.hpp"
 #include "stm32f4xx_exti_wrap.hpp"
 
