@@ -1,5 +1,7 @@
 //! \file
 //! \brief STM32 ADC driver.
+//! \details Some app notes can be found at:
+//! http://goo.gl/9rTqUT (AN3116 application note, STM32’s ADC modes and their applications)
 #ifndef PLATFORM_ADC_HPP_
 #define PLATFORM_ADC_HPP_
 
@@ -106,7 +108,7 @@ struct extractor
 
         (void)std::initializer_list<int> {
             (ADC_RegularChannelConfig(spl_adc, extract_value(chs),
-            ++rank, ADC_SampleTime_15Cycles), 0) ...
+            ++rank, ADC_SampleTime_144Cycles), 0) ...
         };
     }
 };
@@ -200,7 +202,6 @@ void adc<dev>::init()
     RCC_APB2PeriphClockCmd(periph, ENABLE);
 
     ADC_TempSensorVrefintCmd(ENABLE);
-    ADC_VBATCmd(ENABLE);
 }
 
 template<adc_dev dev>
@@ -209,7 +210,7 @@ void adc<dev>::enable_channels(sample_array<Group> &out_samples)
 {
     auto spl_adc = pick_spl_adc();
 
-    ADC_InitTypeDef init_struct;
+    ADC_InitTypeDef         init_struct;
 
     // Parameters that are not dependent on channels.
 
@@ -223,7 +224,7 @@ void adc<dev>::enable_channels(sample_array<Group> &out_samples)
 
     // TODO: Use Group::template extractor<extractor>::scan_mode() here
     // if DMA is used.
-    init_struct.ADC_ScanConvMode     = DISABLE;
+    init_struct.ADC_ScanConvMode     = ENABLE;
     init_struct.ADC_NbrOfConversion  = Group::template extractor<extractor>::conv_num();
 
     ADC_Init(spl_adc, &init_struct);
@@ -236,6 +237,7 @@ void adc<dev>::enable_channels(sample_array<Group> &out_samples)
     m_convs     = out_samples.size();
 
     ADC_ContinuousModeCmd(spl_adc, DISABLE);
+    ADC_EOCOnEachRegularChannelCmd(spl_adc, ENABLE);
 }
 
 template<adc_dev dev>
@@ -245,7 +247,8 @@ void adc<dev>::single()
 
     // Restore single mode. TODO: read register instead?
     if (m_mode != current_mode::single) {
-        ADC_ContinuousModeCmd(spl_adc, ENABLE);
+        ADC_ContinuousModeCmd(spl_adc, DISABLE);
+        ADC_EOCOnEachRegularChannelCmd(spl_adc, ENABLE);
         m_mode = current_mode::single;
     }
 
@@ -266,8 +269,24 @@ void adc<dev>::single()
         auto sample = ADC_GetConversionValue(spl_adc);
         m_samples[i] = sample;
 
-        // Clear flag of conversion
-        ADC_ClearFlag(spl_adc, ADC_FLAG_EOC);
+        // Clear overrun flag set as a result of conversion.
+        // According to RM:
+        // If the conversions are slow enough, the conversion sequence can be handled by the
+        // software. In this case the EOCS bit must be set in the ADC_CR2 register for the EOC status
+        // bit to be set at the end of each conversion, and not only at the end of the sequence.
+        //
+        // When EOCS = 1, overrun detection is automatically enabled. Thus, each time a conversion is
+        // complete, EOC is set and the ADC_DR register can be read. The overrun management is
+        // the same as when the DMA is used.
+        //
+        // To recover the ADC from OVR state when the EOCS is set, follow the steps below:
+        //  1. Clear the ADC OVR bit in ADC_SR register
+        //  2. Trigger the ADC to start the conversion.
+        //
+        // Note that in case if overrun is really happen, samples will be invalid.
+        // This is a temporary solution before something more reliable (like DMA mode)
+        // will be implemented.
+        ADC_ClearFlag(spl_adc, ADC_FLAG_OVR);
     }
 
     // Restore external trigger.

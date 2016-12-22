@@ -24,14 +24,20 @@ TEST(adc_bat, single_run)
 
     ecl::test_adc::enable_channels<ecl::test_channel>(arr);
 
-    UnityPrintWithEOL("Performing 10 conversions");
+    UnityPrintWithEOL("Performing 5 channels conversions");
 
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 5; ++i) {
         ecl::test_adc::single();
 
-        UnityPrint("ADC value: ---> ");
-        UnityPrintNumberHex(arr[0], 4);
-        UnityPrintWithEOL(" <---");
+        UnityPrintWithEOL("--------- ADC values ---------");
+
+        for (size_t ch = 0; ch < arr.size(); ++ch) {
+            UnityPrint("channel: ");
+            UnityPrintNumberHex(ch, 2);
+            UnityPrint(" value: ");
+            UnityPrintNumberHex(arr[ch], 4);
+            UNITY_PRINT_EOL();
+        }
 
         ecl_spin_wait(1000);
     }
