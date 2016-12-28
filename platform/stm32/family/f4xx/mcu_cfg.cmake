@@ -41,6 +41,9 @@ if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F407VG)
     # Grouped EXTIs
     set(TARGET_MCU_EXTI_GROUPED_COUNT 2 CACHE STRING "EXTI grouped lines")
 
+    # Present ADC modules
+    set(TARGET_MCU_ADC_COUNT 3 CACHE STRING "ADC modules count")
+
     return()
 endif()
 

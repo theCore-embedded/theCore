@@ -1,4 +1,4 @@
-﻿#ifndef ECL_LIB_UTILS_ERR_HPP_
+#ifndef ECL_LIB_UTILS_ERR_HPP_
 #define ECL_LIB_UTILS_ERR_HPP_
 
 namespace ecl

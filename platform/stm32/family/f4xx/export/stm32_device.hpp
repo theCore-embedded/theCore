@@ -15,8 +15,8 @@
 #include <stm32f4xx_syscfg.h>
 #include <stm32f4xx_adc.h>
 
-#include "stm32_memmap.hpp"
 #include "stm32f4xx_dma_wrap.hpp"
 #include "stm32f4xx_exti_wrap.hpp"
+#include "stm32f4xx_adc_wrap.hpp"
 
 #endif // STM32F4_DEVICE_HPP_
