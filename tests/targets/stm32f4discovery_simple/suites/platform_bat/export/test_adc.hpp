@@ -16,7 +16,9 @@ using test_adc = adc<ecl::adc_dev::dev1>;
 template<>
 struct adc_cfg<adc_dev::dev1>
 {
-    static constexpr adc_mgmt_mode mgtm_mode = adc_mgmt_mode::irq;
+    static constexpr adc_mgmt_mode mgtm_mode = adc_mgmt_mode::dma;
+
+    using dma = dma_wrap<dma_stream::dma2_0, dma_channel::ch0>;
 };
 
 // Test channel - PA1 pin and temperature channel.

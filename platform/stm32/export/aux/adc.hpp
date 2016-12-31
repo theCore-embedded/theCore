@@ -130,6 +130,7 @@ struct channel_group_exti_trigger
 //------------------------------------------------------------------------------
 
 //! ADC configuration prototype.
+//! \todo documentation.
 template<adc_dev dev>
 struct adc_cfg
 {
@@ -405,6 +406,121 @@ void mgmt_configurator<dev, adc_mgmt_mode::irq>::irq_handler(adc_event evt)
 
 //------------------------------------------------------------------------------
 
+//! Configurator for ADC DMA mode.
+template<adc_dev dev>
+class mgmt_configurator<dev, adc_mgmt_mode::dma>
+{
+public:
+    //! Initializes ADC to work in the DMA mode.
+    static void init();
+
+    //! Enables DMA mode for given channels.
+    template<typename Group>
+    static void enable_channels(
+            typename adc<dev>::template sample_array<Group> &out_samples);
+
+    //! Performs DMA configuration for single-mode async conversion.
+    static void single(const adc_evh &evh);
+private:
+    //! Handles DMA IRQ.
+    static void irq_handler();
+
+    //! User handler of ADC events.
+    static safe_storage<adc_evh> m_user_evh;
+};
+
+template<adc_dev dev>
+safe_storage<adc_evh> mgmt_configurator<dev, adc_mgmt_mode::dma>::m_user_evh;
+
+//------------------------------------------------------------------------------
+
+template<adc_dev dev>
+void mgmt_configurator<dev, adc_mgmt_mode::dma>::init()
+{
+    // TODO: assert if not inited.
+
+    m_user_evh.init();
+
+    constexpr auto dma_irqn = adc_cfg<dev>::dma::get_irqn();
+
+    adc_cfg<dev>::dma::init();
+    adc_cfg<dev>::dma::template enable_events_irq<true>();
+
+    // Subscribe for DMA events.
+    irq::subscribe(dma_irqn, irq_handler);
+    irq::unmask(dma_irqn);
+}
+
+template<adc_dev dev>
+template<typename Group>
+void mgmt_configurator<dev, adc_mgmt_mode::dma>::enable_channels(
+        typename adc<dev>::template sample_array<Group> &out_samples)
+{
+    // TODO: assert that already inited.
+
+    // TODO: Use adc::pick_spl_adc() somehow
+    auto spl_adc = reinterpret_cast<ADC_TypeDef*>(dev);
+
+    // Prepare DMA
+    adc_cfg<dev>::dma::template periph_to_mem<dma_data_sz::hword>(
+                reinterpret_cast<volatile uint16_t*>(&spl_adc->DR),
+                reinterpret_cast<uint8_t*>(out_samples.data()),
+                out_samples.size() * sizeof(typename adc<dev>::sample_type));
+}
+
+template<adc_dev dev>
+void mgmt_configurator<dev, adc_mgmt_mode::dma>::single(const adc_evh &evh)
+{
+    // TODO: assert that already inited.
+
+    // TODO: Use adc::pick_spl_adc() somehow
+    auto spl_adc = reinterpret_cast<ADC_TypeDef*>(dev);
+
+    m_user_evh.get() = evh;
+
+    // Good to go. ADC will be enabled/triggered in the ADC class.
+    adc_cfg<dev>::dma::enable();
+
+    // Enable DMA requests from ADC periphery.
+    ADC_DMACmd(spl_adc, ENABLE);
+}
+
+//------------------------------------------------------------------------------
+
+template<adc_dev dev>
+void mgmt_configurator<dev, adc_mgmt_mode::dma>::irq_handler()
+{
+    constexpr auto dma_irqn = adc_cfg<dev>::dma::get_irqn();
+
+    // TODO: Use adc::pick_spl_adc() somehow
+    auto spl_adc = reinterpret_cast<ADC_TypeDef*>(dev);
+
+    if (adc_cfg<dev>::dma::ht()) {
+        // Half of channels are converted
+        m_user_evh.get()(adc_event::hc);
+        adc_cfg<dev>::dma::clear_ht();
+    }
+
+    if (adc_cfg<dev>::dma::tc()) {
+        m_user_evh.get()(adc_event::eoc);
+
+        // Stop ADC
+        ADC_DMACmd(spl_adc, DISABLE);
+        ADC_Cmd(spl_adc, DISABLE);
+
+        // Stop DMA
+        adc_cfg<dev>::dma::clear_tc();
+        adc_cfg<dev>::dma::disable();
+
+    }
+
+    irq::clear(dma_irqn);
+    irq::unmask(dma_irqn);
+}
+
+
+//------------------------------------------------------------------------------
+
 //! ADC peripheral class.
 //! \tparam dev ADC device to work with.
 template<adc_dev dev>
@@ -521,7 +637,7 @@ void adc<dev>::enable_channels(sample_array<Group> &out_samples)
 
     // TODO: Use Group::template extractor<extractor>::scan_mode() here
     // if DMA is used.
-    init_struct.ADC_ScanConvMode     = DISABLE;
+    init_struct.ADC_ScanConvMode     = Group::template extractor<extractor>::scan_mode();
     init_struct.ADC_NbrOfConversion  = Group::template extractor<extractor>::conv_num();
 
     ADC_Init(spl_adc, &init_struct);

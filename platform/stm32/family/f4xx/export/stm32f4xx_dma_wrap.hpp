@@ -1,6 +1,6 @@
 //! \file
 //! \brief STM32F4XX DMA wrappers implementation
-//!
+//! \todo Document how to properly use DMA
 #ifndef PLATFORM_STM32F4XX_DMA_WRAP_
 #define PLATFORM_STM32F4XX_DMA_WRAP_
 
