@@ -23,7 +23,7 @@ struct adc_cfg<adc_dev::dev1>
 
 // Test channel - PA1 pin and temperature channel.
 using test_channel = channel_group_sw_trigger<
-                adc_channel::ch1 /*, ecl::adc_channel::ch16 */>;
+                adc_channel::ch1 , ecl::adc_channel::ch16>;
 
 } // namespace ecl
 

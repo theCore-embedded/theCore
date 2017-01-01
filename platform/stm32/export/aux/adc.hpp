@@ -18,6 +18,8 @@ namespace ecl
 {
 
 //! ADC management mode.
+//! \details Samples readings can occur either by software after end-of-conversion
+//! IRQ is generated or with help of DMA.
 enum class adc_mgmt_mode
 {
     dma,    //! ADC managed using DMA.
@@ -130,7 +132,54 @@ struct channel_group_exti_trigger
 //------------------------------------------------------------------------------
 
 //! ADC configuration prototype.
-//! \todo documentation.
+//! \details Specific ADC device is pre-configured by providing template
+//! specialization of the adc_cfg class. Contents of the adc_cfg specialization
+//! depends on ADC management mode used. Two options possible:
+//!  - DMA management mode.
+//!  - IRQ management mode.
+//!
+//! \par DMA mode
+//! Following fields must be present:
+//!  - Management mode constexpr field `mgtm_mode`, set to `adc_mgmt_mode::dma`
+//!  - DMA descriptor `dma` for particular ADC. Refer to RM to find appropriate
+//!    DMA configuration for given ADC.
+//!
+//! \code{.cpp}
+//! namespace ecl
+//! {
+//!
+//! // Provides configuraion of the adc_dev::dev1 (ADC1).
+//! template<>
+//! struct adc_cfg<adc_dev::dev1>
+//! {
+//!     // Signifies DMA management mode.
+//!     static constexpr adc_mgmt_mode mgtm_mode = adc_mgmt_mode::dma;
+//!
+//!     // DMA2, Stream 0, Channel 0 is dedicated for ADC1
+//!     using dma = dma_wrap<dma_stream::dma2_0, dma_channel::ch0>;
+//! };
+//!
+//! } // namespace ecl
+//! \endcode
+//!
+//! \par IRQ mode
+//! Following fields must be present:
+//!  - Management mode constexpr field `mgtm_mode`, set to `adc_mgmt_mode::irq`
+//!
+//! // Provides configuraion of the adc_dev::dev1 (ADC1).
+//! template<>
+//! struct adc_cfg<adc_dev::dev1>
+//! {
+//!     // Signifies IRQ management mode.
+//!     static constexpr adc_mgmt_mode mgtm_mode = adc_mgmt_mode::irq;
+//! };
+//!
+//! \warning To avoid potential problems with multiple configurations for single
+//! ADC, **make sure that full specialization is placed in the
+//! header included (directly or indirectly) by all dependent modules.**.
+//! Thus, redefinition of the config class for given ADC will result in
+//! compilation errors. *Good practice is to place all ADC configuration
+//! class in the single target-related header.*
 template<adc_dev dev>
 struct adc_cfg
 {
@@ -183,13 +232,13 @@ using adc_evh = std::function<void(adc_event)>;
 //! ADC interrupts helper.
 //! \details Accross all 3 ADC there is only 1 interrupt channel avaliable.
 //! ADC interrupt helper dispatches incoming interrupt and calls appropriate handlers.
-//! \warning Intented to use only by \ref adc class.
+//! \warning Intented to be used only by \ref adc class.
 //! Acts like a singleton.
-class adc_ints
+class adc_irq_dispatcher
 {
 public:
     //! Gets dispatcher instance.
-    static inline adc_ints& get_instance();
+    static inline adc_irq_dispatcher& get_instance();
 
     //! Subscrbies for ADC events and registers given handler handler.
     //! \tparam adc ADC device for which event handler should be registered.
@@ -211,7 +260,7 @@ private:
     inline void irqh();
 
     //! Constructs ADC interrupt dispatcher with default interrupt handlers.
-    inline adc_ints();
+    inline adc_irq_dispatcher();
 
     //! ADC event handlers. One per each ADC.
     adc_evh m_evhs[adcs_count()];
@@ -219,14 +268,14 @@ private:
 
 //------------------------------------------------------------------------------
 
-adc_ints &adc_ints::get_instance()
+adc_irq_dispatcher &adc_irq_dispatcher::get_instance()
 {
-    static adc_ints instance;
+    static adc_irq_dispatcher instance;
     return instance;
 }
 
 template<adc_dev dev>
-void adc_ints::subscribe(const adc_evh &h)
+void adc_irq_dispatcher::subscribe(const adc_evh &h)
 {
     // TODO: Use adc::pick_spl_adc() somehow
     auto spl_adc = reinterpret_cast<ADC_TypeDef*>(dev);
@@ -242,7 +291,7 @@ void adc_ints::subscribe(const adc_evh &h)
 }
 
 template<adc_dev dev>
-void adc_ints::unsubscribe()
+void adc_irq_dispatcher::unsubscribe()
 {
     // TODO: Use adc::pick_spl_adc() somehow
     auto spl_adc = reinterpret_cast<ADC_TypeDef*>(dev);
@@ -259,7 +308,7 @@ void adc_ints::unsubscribe()
 
 //------------------------------------------------------------------------------
 
-adc_ints::adc_ints()
+adc_irq_dispatcher::adc_irq_dispatcher()
     :m_evhs{}
 {
     // Initialize event handlers.
@@ -274,7 +323,7 @@ adc_ints::adc_ints()
     irq::unmask(adc_irqn);
 }
 
-void adc_ints::irqh()
+void adc_irq_dispatcher::irqh()
 {
     for (size_t i = 0; i < adcs_count(); ++i) {
         // TODO: Use adc::pick_spl_adc() somehow
@@ -292,7 +341,7 @@ void adc_ints::irqh()
     irq::unmask(adc_irqn);
 }
 
-void adc_ints::default_evh(adc_event)
+void adc_irq_dispatcher::default_evh(adc_event)
 {
     // Event not handled - abort execution.
     ecl_abort();
@@ -308,6 +357,7 @@ class adc;
 //! Management configurator class.
 //! \details Helps to configure ADC parameters with respect to the management
 //! mode used.
+//! \warning Intented to be used only by \ref adc class.
 template<adc_dev dev, adc_mgmt_mode mode = adc_cfg<dev>::mgtm_mode>
 class mgmt_configurator
 { };
@@ -357,7 +407,7 @@ void mgmt_configurator<dev, adc_mgmt_mode::irq>::init()
     m_user_evh.init();
 
     // Register own ADC IRQ handler.
-    adc_ints::get_instance().subscribe<dev>(irq_handler);
+    adc_irq_dispatcher::get_instance().subscribe<dev>(irq_handler);
 }
 
 template<adc_dev dev>
@@ -407,6 +457,7 @@ void mgmt_configurator<dev, adc_mgmt_mode::irq>::irq_handler(adc_event evt)
 //------------------------------------------------------------------------------
 
 //! Configurator for ADC DMA mode.
+//! \warning Intented to be used only by \ref adc class.
 template<adc_dev dev>
 class mgmt_configurator<dev, adc_mgmt_mode::dma>
 {
@@ -444,7 +495,8 @@ void mgmt_configurator<dev, adc_mgmt_mode::dma>::init()
     constexpr auto dma_irqn = adc_cfg<dev>::dma::get_irqn();
 
     adc_cfg<dev>::dma::init();
-    adc_cfg<dev>::dma::template enable_events_irq<true>();
+    // TODO: add DMA error flags & handling.
+    adc_cfg<dev>::dma::template enable_events_irq<true, false, false>();
 
     // Subscribe for DMA events.
     irq::subscribe(dma_irqn, irq_handler);
@@ -490,6 +542,8 @@ void mgmt_configurator<dev, adc_mgmt_mode::dma>::single(const adc_evh &evh)
 template<adc_dev dev>
 void mgmt_configurator<dev, adc_mgmt_mode::dma>::irq_handler()
 {
+    // TODO: add DMA error flags & handling.
+
     constexpr auto dma_irqn = adc_cfg<dev>::dma::get_irqn();
 
     // TODO: Use adc::pick_spl_adc() somehow
@@ -522,6 +576,7 @@ void mgmt_configurator<dev, adc_mgmt_mode::dma>::irq_handler()
 //------------------------------------------------------------------------------
 
 //! ADC peripheral class.
+//! \details Provides API to work with ADC on stm32 platform.
 //! \tparam dev ADC device to work with.
 template<adc_dev dev>
 class adc
@@ -541,6 +596,12 @@ public:
     static void init();
 
     //! Configures ADC to work with given channels, in IRQ mode.
+    //! \param[in,out] out_samples Samples array that will be populated with
+    //! target samples. Should not be destroyed until conversion of given
+    //! channels will complete.
+    //! \note ADC configured in IRQ mode cannot handle conversion of more than
+    //! 1 channel. Use DMA mode. See \ref ecl::adc_cfg to get hints about how
+    //! to configure ADC in DMA mode.
     template<typename Group>
     static void enable_channels(sample_array<Group> &out_samples);
 
@@ -553,6 +614,7 @@ public:
     //! \pre Channels configured with use_channels() call.
     //! \return Result of operation.
     //! \retval ecl::err::ok Channels are converted and data is stored in the buffer.
+    //! \todo Implement support for external triggers.
     static err single();
 
     //! Performs single conversion of the previously configured channels asynchronously.
@@ -564,6 +626,7 @@ public:
     //! \pre Channels configured with use_channels() call.
     //! \return Result of operation.
     //! \retval ecl::err::ok Channels conversion is pending.
+    //! \todo Implement support for external triggers.
     static err single(const adc_evh &evh);
 
 private:
@@ -609,6 +672,8 @@ auto adc<dev>::pick_spl_adc()
 template<adc_dev dev>
 void adc<dev>::init()
 {
+    // TODO: assert if not inited
+
     constexpr auto periph = pick_periph();
     RCC_APB2PeriphClockCmd(periph, ENABLE);
 
@@ -621,6 +686,8 @@ template<adc_dev dev>
 template<typename Group>
 void adc<dev>::enable_channels(sample_array<Group> &out_samples)
 {
+    // TODO: assert if inited
+
     auto spl_adc = pick_spl_adc();
 
     ADC_InitTypeDef         init_struct;
@@ -654,6 +721,8 @@ void adc<dev>::enable_channels(sample_array<Group> &out_samples)
 template<adc_dev dev>
 err adc<dev>::single()
 {
+    // TODO: assert if inited
+
     // Busy-wait end of conversion.
     volatile int spin = 0;
     auto evh = [&spin](adc_event) { spin = 1; };
@@ -669,7 +738,7 @@ err adc<dev>::single()
 template<adc_dev dev>
 err adc<dev>::single(const adc_evh &evh)
 {
-    // TODO: DMA mode if >1 channel is selected
+    // TODO: assert if inited
 
     auto spl_adc = pick_spl_adc();
 
