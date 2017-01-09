@@ -1,4 +1,4 @@
-﻿//! \file
+//! \file
 //! \brief GPIO device interface for STM32 platform
 //! \todo Detailed explanation.
 #ifndef PLATFORM_GPIO_DEVICE_HPP
@@ -9,7 +9,7 @@
 namespace ecl
 {
 
-// GPIO numbers
+//! GPIO numbers
 enum class gpio_num
 {
     pin0,
@@ -30,7 +30,7 @@ enum class gpio_num
     pin15,
 };
 
-// GPIO ports
+//! GPIO ports
 enum class gpio_port
 {
     a,
@@ -123,36 +123,36 @@ template< gpio_port Port, gpio_num Pin >
 auto gpio< Port, Pin >::pick_port()
 {
     switch (Port) {
-        case gpio_port::a:
-            return GPIOA;
-        case gpio_port::b:
-            return GPIOB;
-        case gpio_port::c:
-            return GPIOC;
-        case gpio_port::d:
-            return GPIOD;
-        case gpio_port::e:
-            return GPIOE;
-        case gpio_port::f:
-            return GPIOF;
-        case gpio_port::g:
-            return GPIOG;
-        case gpio_port::h:
-            return GPIOH;
+    case gpio_port::a:
+        return GPIOA;
+    case gpio_port::b:
+        return GPIOB;
+    case gpio_port::c:
+        return GPIOC;
+    case gpio_port::d:
+        return GPIOD;
+    case gpio_port::e:
+        return GPIOE;
+    case gpio_port::f:
+        return GPIOF;
+    case gpio_port::g:
+        return GPIOG;
+    case gpio_port::h:
+        return GPIOH;
 #ifdef GPIOI
-        case gpio_port::i:
-            return GPIOI;
+    case gpio_port::i:
+        return GPIOI;
 #endif
 #ifdef GPIOJ
-        case gpio_port::j:
-            return GPIOJ;
+    case gpio_port::j:
+        return GPIOJ;
 #endif
 #ifdef GPIOK
-        case gpio_port::k:
-            return GPIOK;
+    case gpio_port::k:
+        return GPIOK;
 #endif
-        default:
-            return reinterpret_cast<GPIO_TypeDef*>(0);
+    default:
+        return reinterpret_cast<GPIO_TypeDef*>(0);
     }
 }
 
@@ -160,40 +160,40 @@ template< gpio_port Port, gpio_num Pin >
 auto gpio< Port, Pin >::pick_pin()
 {
     switch (Pin) {
-        case gpio_num::pin0:
-            return GPIO_Pin_0;
-        case gpio_num::pin1:
-            return GPIO_Pin_1;
-        case gpio_num::pin2:
-            return GPIO_Pin_2;
-        case gpio_num::pin3:
-            return GPIO_Pin_3;
-        case gpio_num::pin4:
-            return GPIO_Pin_4;
-        case gpio_num::pin5:
-            return GPIO_Pin_5;
-        case gpio_num::pin6:
-            return GPIO_Pin_6;
-        case gpio_num::pin7:
-            return GPIO_Pin_7;
-        case gpio_num::pin8:
-            return GPIO_Pin_8;
-        case gpio_num::pin9:
-            return GPIO_Pin_9;
-        case gpio_num::pin10:
-            return GPIO_Pin_10;
-        case gpio_num::pin11:
-            return GPIO_Pin_11;
-        case gpio_num::pin12:
-            return GPIO_Pin_12;
-        case gpio_num::pin13:
-            return GPIO_Pin_13;
-        case gpio_num::pin14:
-            return GPIO_Pin_14;
-        case gpio_num::pin15:
-            return GPIO_Pin_15;
-        default:
-            return static_cast<uint16_t>(-1);
+    case gpio_num::pin0:
+        return GPIO_Pin_0;
+    case gpio_num::pin1:
+        return GPIO_Pin_1;
+    case gpio_num::pin2:
+        return GPIO_Pin_2;
+    case gpio_num::pin3:
+        return GPIO_Pin_3;
+    case gpio_num::pin4:
+        return GPIO_Pin_4;
+    case gpio_num::pin5:
+        return GPIO_Pin_5;
+    case gpio_num::pin6:
+        return GPIO_Pin_6;
+    case gpio_num::pin7:
+        return GPIO_Pin_7;
+    case gpio_num::pin8:
+        return GPIO_Pin_8;
+    case gpio_num::pin9:
+        return GPIO_Pin_9;
+    case gpio_num::pin10:
+        return GPIO_Pin_10;
+    case gpio_num::pin11:
+        return GPIO_Pin_11;
+    case gpio_num::pin12:
+        return GPIO_Pin_12;
+    case gpio_num::pin13:
+        return GPIO_Pin_13;
+    case gpio_num::pin14:
+        return GPIO_Pin_14;
+    case gpio_num::pin15:
+        return GPIO_Pin_15;
+    default:
+        return static_cast<uint16_t>(-1);
     }
 }
 
