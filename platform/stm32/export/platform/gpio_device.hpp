@@ -1,4 +1,4 @@
-﻿//! \file
+//! \file
 //! \brief GPIO device interface for STM32 platform
 //! \todo Detailed explanation.
 #ifndef PLATFORM_GPIO_DEVICE_HPP
@@ -9,7 +9,7 @@
 namespace ecl
 {
 
-// GPIO numbers
+//! GPIO numbers
 enum class gpio_num
 {
     pin0,
@@ -30,7 +30,7 @@ enum class gpio_num
     pin15,
 };
 
-// GPIO ports
+//! GPIO ports
 enum class gpio_port
 {
     a,
