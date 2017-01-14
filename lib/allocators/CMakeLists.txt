@@ -15,4 +15,4 @@ add_unit_host_test(NAME pool_allocator
         tests/pool_main.cpp
         alloc.cpp
         INC_DIRS export
-        DEPENDS libcpp dbg)
+        DEPENDS core_cpp dbg)

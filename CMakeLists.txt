@@ -1,4 +1,4 @@
-﻿# ASM is crucial
+# ASM is crucial
 enable_language(ASM-ATT)
 # Subproject may use tests
 enable_testing()
@@ -55,7 +55,9 @@ add_subdirectory(platform)
 # Required layer only when cross-compiling
 if(CMAKE_CROSSCOMPILING)
     add_subdirectory(sys)
-    set(CORE_PROVIDES_LIBC 1) # LibC routines provided by theCore.
+
+    # Newlib is theCore default C library (with some limitations).
+    target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
 endif()
 
 # Rest of modules

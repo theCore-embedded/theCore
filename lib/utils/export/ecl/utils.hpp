@@ -1,7 +1,7 @@
 //! \file
 //! \brief General the Core utilities library.
-#ifndef ECL_UTILS_HPP_
-#define ECL_UTILS_HPP_
+#ifndef LIB_ECL_UTILS_HPP_
+#define LIB_ECL_UTILS_HPP_
 
 #include <tuple>
 #include <utility>
@@ -84,7 +84,6 @@ constexpr auto extract_value(Enum val)
     return static_cast<std::underlying_type_t<Enum>>(val);
 }
 
-
 } // namespace ecl
 
-#endif // ECL_UTILS_HPP_
+#endif // LIB_ECL_UTILS_HPP_

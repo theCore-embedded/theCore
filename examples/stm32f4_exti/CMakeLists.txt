@@ -18,7 +18,7 @@ add_executable(exti main.cpp target.cpp)
 
 # Some dependencies
 target_link_libraries(exti the_core)
-target_link_libraries(exti libcpp)
+target_link_libraries(exti core_cpp)
 
 # Configuraion parameters
 

@@ -4,10 +4,8 @@
 #ifndef THE_CORE_EXECUTION_H_
 #define THE_CORE_EXECUTION_H_
 
-#include <cstdint>
-
-#include <stm32_device.hpp>
-
+#include <stdint.h>
+#include <stm32_device.h>
 
 //! \brief Waits in loop for a given amount of milliseconds.
 //! \details Uses DWT register.
@@ -25,6 +23,7 @@ static inline void ecl_spin_wait(uint32_t ms)
 // TODO #72: add add suspend() and resume() routines
 
 //! \brief Aborts execution of currently running code. Never return.
+__attribute__((noreturn))
 static inline void ecl_abort()
 {
     for(;;);

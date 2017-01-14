@@ -13,7 +13,7 @@ project(cs43l22_audio)
 add_executable(audio main.cpp target.cpp)
 
 # Some dependencies
-target_link_libraries(audio the_core libcpp cs43l22)
+target_link_libraries(audio the_core core_cpp cs43l22)
 
 # Configuraion parameters
 

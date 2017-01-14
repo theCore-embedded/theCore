@@ -24,7 +24,7 @@ set(CONFIG_RUN_CPPCHECK_DURING_BUILD true)
 
 # Some dependencies
 target_link_libraries(hello the_core)
-target_link_libraries(hello libcpp)
+target_link_libraries(hello core_cpp)
 target_link_libraries(hello host)
 
 # Enable console.
