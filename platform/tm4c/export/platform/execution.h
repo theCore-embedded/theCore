@@ -3,6 +3,7 @@
 #ifndef TM4C_EXECUTION_H_
 #define TM4C_EXECUTION_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <sysctl.h>
 
@@ -17,7 +18,7 @@ static inline void ecl_spin_wait(uint32_t ms)
     SysCtlDelay(wait_cycles);
 }
 
-
+__attribute__((noreturn))
 static inline void ecl_abort()
 {
     for(;;);

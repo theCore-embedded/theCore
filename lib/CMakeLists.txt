@@ -1,7 +1,11 @@
+if(CMAKE_CROSSCOMPILING)
+    # Usable only for bare-metal environment.
+    # TODO: not all platfotms that theCore will support are bare-metals.
+    # Some platforms may not need newlib. This should be checked.
+    add_subdirectory(newlib)
+endif()
+
 add_subdirectory(cpp)
-# Embedded C library. Name was choosed to prevent collisions 
-# with standart C library (libc)
-add_subdirectory(emc)
 add_subdirectory(allocators)
 add_subdirectory(fs)
 add_subdirectory(utils)
