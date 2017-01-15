@@ -48,6 +48,7 @@ int _fork(void)
 
 int _fstat(int file, struct stat *st)
 {
+    (void)st;
     (void)file;
     errno = EBADF;
     return -1;
