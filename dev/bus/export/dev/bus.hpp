@@ -439,7 +439,7 @@ ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received, std::chrono::mi
 
                 // Check if transfer was not completed right after timeout was reached.
                 if (!(m_state & xfer_served)) {
-                    return err::timedout;
+                    rc = err::timedout;
                 } // else {
                     // Transfer completed.
                 // }
