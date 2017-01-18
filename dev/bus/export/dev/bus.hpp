@@ -1,4 +1,4 @@
-﻿#ifndef DEV_BUS_BUS_HPP_
+#ifndef DEV_BUS_BUS_HPP_
 #define DEV_BUS_BUS_HPP_
 
 //!
@@ -82,6 +82,7 @@ public:
     //! Sets RX and TX buffers and their sizes.
     //! \details If only TX or RX transaction required, then only one buffer must
     //! be passed. All effects from calls to set_buffers() will be discarded.
+    //! This API is convinient analog if both buffers are equal in size.
     //! \par Side effects:
     //! \li Bus will remember all buffers, until unlock() or set_buffers()
     //!     will be called.
@@ -95,8 +96,26 @@ public:
     //! \retval    err::ok      Buffers successfully set.
     //! \retval    err::inval   Both buffers are null.
     //! \retval    err::busy    Device is still executing async xfer.
-    //!
     static err set_buffers(const uint8_t *tx, uint8_t *rx, size_t size);
+
+    //! Sets RX and TX buffers and their sizes.
+    //! \details If only TX or RX transaction required, then only one buffer must
+    //! be passed. All effects from calls to set_buffers() will be discarded.
+    //! \par Side effects:
+    //! \li Bus will remember all buffers, until unlock() or set_buffers()
+    //!     will be called.
+    //! \pre       Bus is locked.
+    //! \post      Bus is ready to execute xfer.
+    //! \param[in] tx       Data to transmit.
+    //!                     If this param is null, then rx must be set.
+    //! \param[in] rx       Buffer to receive a data. Optional.
+    //!                     If this param is null, then tx must be set.
+    //! \param[in] tx_size  Size of TX buffer. Zero is valid size.
+    //! \param[in] rx_size  Size of RX buffer. Zero is valid size.
+    //! \retval    err::ok      Buffers successfully set.
+    //! \retval    err::inval   Both buffers are null.
+    //! \retval    err::busy    Device is still executing async xfer.
+    static err set_buffers(const uint8_t *tx, uint8_t *rx, size_t tx_size, size_t rx_size);
 
     //! Sets TX buffer size and fills it with given byte.
     //! \details This will instruct a platform bus to send a byte given number
@@ -331,6 +350,12 @@ void generic_bus<PBus>::unlock()
 template<class PBus>
 ecl::err generic_bus<PBus>::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
 {
+    return set_buffers(tx, rx, size, size);
+}
+
+template<class PBus>
+ecl::err generic_bus<PBus>::set_buffers(const uint8_t *tx, uint8_t *rx, size_t tx_size, size_t rx_size)
+{
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
     ecl_assert(m_state & bus_locked);
@@ -344,8 +369,8 @@ ecl::err generic_bus<PBus>::set_buffers(const uint8_t *tx, uint8_t *rx, size_t s
     }
 
     PBus::reset_buffers();
-    PBus::set_tx(tx, size);
-    PBus::set_rx(rx, size);
+    PBus::set_tx(tx, tx_size);
+    PBus::set_rx(rx, rx_size);
 
     return err::ok;
 }
