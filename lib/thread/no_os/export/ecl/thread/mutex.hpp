@@ -1,10 +1,10 @@
-#ifndef LIB_THREAD_COMMON_MUTEX_
-#define LIB_THREAD_COMMON_MUTEX_
+//! \file
+//! \brief Mutex implementation for projects without OS support.
+
+#ifndef LIB_THREAD_NO_OS_MUTEX_
+#define LIB_THREAD_NO_OS_MUTEX_
 
 namespace ecl
-{
-
-namespace common
 {
 
 class mutex
@@ -20,8 +20,6 @@ public:
     mutex& operator=(const mutex&)  = delete;
 };
 
-}
+} // namespace ecl
 
-}
-
-#endif // LIB_THREAD_COMMON_MUTEX_
+#endif // LIB_THREAD_NO_OS_MUTEX_

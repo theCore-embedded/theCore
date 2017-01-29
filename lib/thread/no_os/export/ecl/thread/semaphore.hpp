@@ -1,14 +1,14 @@
-#ifndef LIB_THREAD_COMMON_SEMAPHORE_
-#define LIB_THREAD_COMMON_SEMAPHORE_
+//! \file
+//! \brief Semaphore implementation for projects without OS support.
+
+#ifndef LIB_THREAD_NO_OS_SEMAPHORE_
+#define LIB_THREAD_NO_OS_SEMAPHORE_
 
 #include <ecl/err.hpp>
 
 #include <atomic>
 
 namespace ecl
-{
-
-namespace common
 {
 
 // Empty semaphore, acting like spinlock of some kind
@@ -48,9 +48,6 @@ private:
     std::atomic_bool m_flag;
 };
 
+} // namespace ecl
 
-}
-
-}
-
-#endif // LIB_THREAD_COMMON_SEMAPHORE_
+#endif // LIB_THREAD_NO_OS_SEMAPHORE_
