@@ -1,7 +1,12 @@
 add_library(core_cpp INTERFACE)
+
+if(CMAKE_CROSSCOMPILING)
+    target_sources(core_cpp INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/arm_eabi.cpp)
+endif()
+
 target_sources(core_cpp INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}/arm_eabi.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/streams.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/streams.cpp)
 
 target_include_directories(core_cpp
         INTERFACE ${CMAKE_CURRENT_LIST_DIR}/export)
