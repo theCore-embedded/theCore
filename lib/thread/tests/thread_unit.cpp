@@ -148,7 +148,7 @@ TEST_GROUP(started_native_thread)
         rc = started_tr.start();
         CHECK_EQUAL(ecl::err::ok, rc);
 
-        // TODO: might be useful to add here some delay
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
         CHECK_EQUAL(true, routine_arg.started);
         // Thread shouldn't complete by itself
