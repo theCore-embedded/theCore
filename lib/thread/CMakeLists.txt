@@ -45,3 +45,13 @@ add_unit_host_test(
     INC_DIRS no_os/export/
     DEPENDS pthread types
 )
+
+# FreeRTOS semaphore test.
+add_unit_host_test(
+    NAME semaphore_freertos
+    SOURCES tests/semaphore_unit.cpp freertos/semaphore.cpp
+    INC_DIRS freertos/export/ tests/mocks/freertos
+    DEPENDS types dbg pthread
+)
+
+# Cover FreeRTOS thread with unit test - #211
