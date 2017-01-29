@@ -1,13 +1,13 @@
 // Empty semaphore
 
-#include <ecl/thread/common/semaphore.hpp>
+#include <ecl/thread/semaphore.hpp>
 
-void ecl::common::semaphore::signal()
+void ecl::semaphore::signal()
 {
     m_counter++;
 }
 
-void ecl::common::semaphore::wait()
+void ecl::semaphore::wait()
 {
     int cnt;
 
@@ -16,7 +16,7 @@ void ecl::common::semaphore::wait()
     }
 }
 
-bool ecl::common::semaphore::try_wait()
+bool ecl::semaphore::try_wait()
 {
     bool rc = true;
 
@@ -30,17 +30,17 @@ bool ecl::common::semaphore::try_wait()
 
 //------------------------------------------------------------------------------
 
-void ecl::common::binary_semaphore::signal()
+void ecl::binary_semaphore::signal()
 {
     m_flag = true;
 }
 
-void ecl::common::binary_semaphore::wait()
+void ecl::binary_semaphore::wait()
 {
     while (!m_flag);
 }
 
-bool ecl::common::binary_semaphore::try_wait()
+bool ecl::binary_semaphore::try_wait()
 {
     if (m_flag.exchange(false)) {
         return true;
