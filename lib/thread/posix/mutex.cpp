@@ -5,6 +5,11 @@ ecl::mutex::mutex()
 {
 }
 
+ecl::mutex::~mutex()
+{
+}
+
+
 void ecl::mutex::lock()
 {
     m_mutex.lock();

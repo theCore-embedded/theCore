@@ -10,6 +10,7 @@ class mutex
 {
 public:
     mutex();
+    ~mutex();
 
     void lock();
     void unlock();
