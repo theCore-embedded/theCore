@@ -1,19 +1,18 @@
-﻿#include <ecl/thread/common/spinlock.hpp>
+#include <ecl/thread/spinlock.hpp>
 
 
-constexpr ecl::common::spinlock::spinlock()
+constexpr ecl::spinlock::spinlock()
     :m_flag ATOMIC_FLAG_INIT // Braces '{}' are included in macro body of ATOMIC_FLAG_INIT
 {
 }
 
-void ecl::common::spinlock::lock()
+void ecl::spinlock::lock()
 {
     while (m_flag.test_and_set(std::memory_order_acquire))
         ;
 }
 
-void ecl::common::spinlock::unlock()
+void ecl::spinlock::unlock()
 {
     m_flag.clear(std::memory_order_release);
 }
-

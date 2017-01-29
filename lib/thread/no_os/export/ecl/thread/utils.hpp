@@ -1,7 +1,8 @@
 //! \file
-//! \brief Default utilities.
-#ifndef LIB_THREAD_DEFAULT_UTILS_HPP_
-#define LIB_THREAD_DEFAULT_UTILS_HPP_
+//! \brief Utilities for projects without OS support.
+//!
+#ifndef LIB_THREAD_NO_OS_UTILS_HPP_
+#define LIB_THREAD_NO_OS_UTILS_HPP_
 
 #include <platform/execution.h>
 
@@ -20,8 +21,8 @@ static inline void sleep_for(uint32_t ms)
     ecl_spin_wait(ms);
 }
 
-}
+} // namespace this_thread
 
-}
+} // namespace ecl
 
-#endif // LIB_THREAD_DEFAULT_UTILS_HPP_
+#endif // LIB_THREAD_NO_OS_UTILS_HPP_
