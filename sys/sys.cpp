@@ -7,7 +7,7 @@
 
 #include <common/irq.hpp>
 #include <platform/console.hpp>
-#include <platform/execution.h>
+#include <common/execution.h>
 
 // TODO: move it somewhere
 void operator delete(void *) noexcept

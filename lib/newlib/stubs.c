@@ -3,7 +3,7 @@
 //! \details Not all newlib functionality is allowed (by default) in theCore.
 //! Examples include forking or using memory allocations.
 
-#include <platform/execution.h>
+#include <common/execution.h>
 
 #include <stdlib.h>
 #include <sys/unistd.h>

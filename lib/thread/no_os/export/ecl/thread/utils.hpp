@@ -4,7 +4,7 @@
 #ifndef LIB_THREAD_NO_OS_UTILS_HPP_
 #define LIB_THREAD_NO_OS_UTILS_HPP_
 
-#include <platform/execution.h>
+#include <common/execution.h>
 
 namespace ecl
 {
