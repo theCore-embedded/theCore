@@ -1,4 +1,4 @@
-﻿# this one is important
+# this one is important
 set(CMAKE_SYSTEM_NAME Generic)
 # this one not so much
 set(CMAKE_SYSTEM_VERSION 1)
@@ -26,6 +26,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 ################################################################################
 # Flags and definitions used with GNU complilation suite
+
+# Essential stuff for using 3rd-party libs
+set(CMAKE_INCLUDE_SYSTEM_FLAG_C "-isystem ")
+set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
 # avoid using any additional flags when linking with shared libraries
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
