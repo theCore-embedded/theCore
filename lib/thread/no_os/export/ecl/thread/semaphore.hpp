@@ -5,6 +5,7 @@
 #define LIB_THREAD_NO_OS_SEMAPHORE_
 
 #include <ecl/err.hpp>
+#include <chrono>
 
 #include <atomic>
 
@@ -39,7 +40,7 @@ public:
 
     void signal();
     void wait();
-    bool try_wait();
+    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds::min());
 
     binary_semaphore(const binary_semaphore&)             = delete;
     binary_semaphore& operator=(const binary_semaphore&)  = delete;

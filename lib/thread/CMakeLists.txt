@@ -21,8 +21,7 @@ add_library(thread INTERFACE)
 # Implementation of particular thread support resides in thread_impl.
 target_link_libraries(thread INTERFACE thread_impl)
 
-# Posix semaphore test. No need to mock anything - platform provides
-# desired implementation.
+# Posix semaphore test.
 add_unit_host_test(
     NAME semaphore_posix
     SOURCES tests/semaphore_unit.cpp posix/semaphore.cpp
@@ -38,11 +37,11 @@ add_unit_host_test(
     DEPENDS utils types dbg pthread
 )
 
-# Semaphore for platforms without OS layer. No mocks needed, only atomic support.
+# Semaphore for platforms without OS layer. Mocking time routines.
 add_unit_host_test(
     NAME semaphore_no_os
     SOURCES tests/semaphore_unit.cpp no_os/semaphore.cpp
-    INC_DIRS no_os/export/
+    INC_DIRS no_os/export/ tests/mocks/
     DEPENDS pthread types
 )
 
@@ -50,7 +49,7 @@ add_unit_host_test(
 add_unit_host_test(
     NAME semaphore_freertos
     SOURCES tests/semaphore_unit.cpp freertos/semaphore.cpp
-    INC_DIRS freertos/export/ tests/mocks/freertos
+    INC_DIRS freertos/export/ tests/mocks/freertos tests/mocks/
     DEPENDS types dbg pthread
 )
 

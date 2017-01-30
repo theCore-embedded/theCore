@@ -6,9 +6,14 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <chrono>
+#include <future>
 
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
+
+// Mocking timed-semaphores
+uint32_t mock_time = 0;
 
 // TODO: remove ugly sleep-programming
 
@@ -34,6 +39,7 @@ TEST_GROUP(semaphore)
 
     void teardown()
     {
+        mock_time = 0;
     }
 };
 
@@ -70,6 +76,69 @@ TEST(semaphore, try_wait)
 
     rc = sem.try_wait();
     CHECK_EQUAL(false, rc);
+}
+
+TEST(semaphore, binary_timed_try_wait_timeout)
+{
+    using namespace std::literals::chrono_literals;
+
+    ecl::binary_semaphore to; // Sends signal to task
+
+    // Async task
+    auto task = [&to](auto to_wait) {
+        // Wait for event
+        return to.try_wait(to_wait);
+    };
+
+    // Initial time value will be '0', wait time - '1000'
+    auto future = std::async(std::launch::async, task, 1000ms);
+
+    // Let operation settle.
+    test_delay(10);
+
+    // Task should keep waiting for events.
+    CHECK_TRUE(std::future_status::timeout == future.wait_for(0ms));
+
+    // Progress time. Timeout should be reached.
+    mock_time = 1001;
+
+    // Get result
+
+    auto actual = future.get();
+    CHECK_EQUAL(false, actual);
+}
+
+TEST(semaphore, binary_timed_try_wait_succed)
+{
+    using namespace std::literals::chrono_literals;
+
+    ecl::binary_semaphore to;  // Sends signal to task
+
+    // Async task
+    auto task = [&to](auto to_wait) {
+        // Wait for event
+        return to.try_wait(to_wait);
+    };
+
+    // Initial time value will be '0', wait time - '1000'
+    auto future = std::async(std::launch::async, task, 1000ms);
+
+    // Let operation settle.
+    test_delay(10);
+
+    // Task should keep waiting for events.
+    CHECK_TRUE(std::future_status::timeout == future.wait_for(0ms));
+
+    // Progress time. Timeout should not be reached.
+    mock_time = 500;
+
+    // Signal semaphore
+    to.signal();
+
+    // Get result
+
+    auto actual = future.get();
+    CHECK_EQUAL(true, actual);
 }
 
 TEST(semaphore, one_semaphore_few_threads)

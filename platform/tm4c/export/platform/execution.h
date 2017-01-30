@@ -9,6 +9,10 @@
 
 #include <hw_memmap.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //------------------------------------------------------------------------------
 // Due to incompatibility of DriverLib with CMSIS (register names redefined)
 // part of CMSIS library is included here.
@@ -508,5 +512,9 @@ static inline void ecl_abort()
 {
     for(;;);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // TM4C_EXECUTION_H_
