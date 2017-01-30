@@ -13,7 +13,7 @@
 #include <CppUTest/CommandLineTestRunner.h>
 
 // Mocking timed-semaphores
-uint32_t mock_time = 0;
+volatile uint32_t mock_time = 0;
 
 // TODO: remove ugly sleep-programming
 
@@ -28,6 +28,48 @@ static void test_delay(unsigned msecs = 1000)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(msecs));
 }
+
+// Time in semaphore timeout methods must be mocked in order to use timeout tests.
+#ifdef SEMAPHORE_TEST_MOCKED_TIME
+template<typename Sem>
+static void test_timed_wait(bool signal)
+{
+    using namespace std::literals::chrono_literals;
+
+    ecl::binary_semaphore to; // Sends signal to task
+
+    // Async task
+    auto task = [&to](auto to_wait) {
+        // Wait for event
+        return to.try_wait(to_wait);
+    };
+
+    // Initial time value will be '0', wait time - '1000'
+    auto future = std::async(std::launch::async, task, 1000ms);
+
+    // Let operation settle.
+    test_delay(10);
+
+    // Task should keep waiting for events.
+    CHECK_TRUE(std::future_status::timeout == future.wait_for(0ms));
+
+    if (signal) {
+        // Progress time. Timeout should not be reached.
+        mock_time = 500;
+
+        // Signal semaphore
+        to.signal();
+    } else {
+        // Progress time. Timeout should be reached.
+        mock_time = 1001;
+    }
+
+    // Get result
+
+    auto actual = future.get();
+    CHECK_EQUAL(signal, actual);
+}
+#endif // SEMAPHORE_TEST_MOCKED_TIME
 
 constexpr auto threads_count = 10;
 
@@ -78,68 +120,28 @@ TEST(semaphore, try_wait)
     CHECK_EQUAL(false, rc);
 }
 
+// Time in semaphore timeout methods must be mocked in order to use timeout tests.
+#ifdef SEMAPHORE_TEST_MOCKED_TIME
 TEST(semaphore, binary_timed_try_wait_timeout)
 {
-    using namespace std::literals::chrono_literals;
-
-    ecl::binary_semaphore to; // Sends signal to task
-
-    // Async task
-    auto task = [&to](auto to_wait) {
-        // Wait for event
-        return to.try_wait(to_wait);
-    };
-
-    // Initial time value will be '0', wait time - '1000'
-    auto future = std::async(std::launch::async, task, 1000ms);
-
-    // Let operation settle.
-    test_delay(10);
-
-    // Task should keep waiting for events.
-    CHECK_TRUE(std::future_status::timeout == future.wait_for(0ms));
-
-    // Progress time. Timeout should be reached.
-    mock_time = 1001;
-
-    // Get result
-
-    auto actual = future.get();
-    CHECK_EQUAL(false, actual);
+    test_timed_wait<ecl::binary_semaphore>(false);
 }
 
 TEST(semaphore, binary_timed_try_wait_succed)
 {
-    using namespace std::literals::chrono_literals;
-
-    ecl::binary_semaphore to;  // Sends signal to task
-
-    // Async task
-    auto task = [&to](auto to_wait) {
-        // Wait for event
-        return to.try_wait(to_wait);
-    };
-
-    // Initial time value will be '0', wait time - '1000'
-    auto future = std::async(std::launch::async, task, 1000ms);
-
-    // Let operation settle.
-    test_delay(10);
-
-    // Task should keep waiting for events.
-    CHECK_TRUE(std::future_status::timeout == future.wait_for(0ms));
-
-    // Progress time. Timeout should not be reached.
-    mock_time = 500;
-
-    // Signal semaphore
-    to.signal();
-
-    // Get result
-
-    auto actual = future.get();
-    CHECK_EQUAL(true, actual);
+    test_timed_wait<ecl::binary_semaphore>(true);
 }
+
+TEST(semaphore, timed_wait_timeout)
+{
+    test_timed_wait<ecl::semaphore>(false);
+}
+
+TEST(semaphore, timed_try_wait_succed)
+{
+    test_timed_wait<ecl::semaphore>(true);
+}
+#endif // SEMAPHORE_TEST_MOCKED_TIME
 
 TEST(semaphore, one_semaphore_few_threads)
 {

@@ -35,6 +35,7 @@ add_unit_host_test(
     SOURCES tests/thread_unit.cpp posix/thread.cpp posix/semaphore.cpp
     INC_DIRS posix/export/
     DEPENDS utils types dbg pthread
+    COMPILE_OPTIONS -Wno-error=strict-aliasing
 )
 
 # Semaphore for platforms without OS layer. Mocking time routines.
@@ -43,6 +44,7 @@ add_unit_host_test(
     SOURCES tests/semaphore_unit.cpp no_os/semaphore.cpp
     INC_DIRS no_os/export/ tests/mocks/
     DEPENDS pthread types
+    COMPILE_OPTIONS -DSEMAPHORE_TEST_MOCKED_TIME=1
 )
 
 # FreeRTOS semaphore test.

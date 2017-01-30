@@ -18,16 +18,26 @@ void ecl::semaphore::wait()
     }
 }
 
-bool ecl::semaphore::try_wait()
+bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
 {
-    bool rc = true;
+    auto till = get_ms_time() + ms;
 
-    if (m_counter.fetch_sub(1) <= 0) {
-        m_counter++;
-        rc = false;
-    }
+    int cnt;
+    bool exch = false;
 
-    return rc;
+    // Will block.
+    while (((cnt = m_counter.load()) <= 0   // Wait till counter goes up enough
+                                            // to avoid block.
+               // After counter uprised, try to set new value.
+               // Magic here is that after counter is checked new thread can
+               // decrement it. Compare-and-exchange makes sure that counter
+               // is not modified by other threads.
+               || !(exch = m_counter.compare_exchange_weak(cnt, cnt - 1)))
+           // Keep track of timeout.
+           && get_ms_time() < till)
+    { }
+
+    return exch;
 }
 
 //------------------------------------------------------------------------------

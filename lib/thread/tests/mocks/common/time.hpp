@@ -10,7 +10,7 @@
 
 #include <chrono>
 
-extern uint32_t mock_time;
+extern volatile uint32_t mock_time;
 
 static inline std::chrono::milliseconds get_ms_time()
 {

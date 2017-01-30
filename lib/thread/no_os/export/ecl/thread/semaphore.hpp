@@ -21,7 +21,7 @@ public:
 
     void signal();
     void wait();
-    bool try_wait();
+    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds::min());
 
     semaphore(const semaphore&)             = delete;
     semaphore& operator=(const semaphore&)  = delete;
