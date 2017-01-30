@@ -1,23 +1,10 @@
-﻿//! \file
+//! \file
 //! \brief TM4C IRQ interface.
 //!
 #ifndef PLATFORM_IRQ_HPP_
 #define PLATFORM_IRQ_HPP_
 
-// TODO: clarify these values
-#define SysTick_IRQn              -1
-#define IRQn_Type                 int
-#define __FPU_PRESENT             1
-#define __NVIC_PRIO_BITS          4
-#define __Vendor_SysTickConfig    0
-
-// hw_memmap.h header can contain some of definitions, that must be
-// undefined to avoid redefinition errors in core_cm4.h
-#undef ITM_BASE
-#undef DWT_BASE
-#undef NVIC_BASE
-
-#include <core_cm4.h>
+#include <platform/execution.h>
 
 #include <ecl/err.hpp>
 
@@ -29,7 +16,7 @@
 namespace ecl
 {
 
-using irq_num = IRQn_Type;
+using irq_num = int;
 
 namespace irq
 {
@@ -92,12 +79,6 @@ static inline void clear(irq_num irqn)
 {
     IntPendClear(irqn);
 }
-
-// hw_memmap.h header can contain some of definitions, that must be
-// undefined to avoid redefinition errors after _this_ header inclusion.
-#undef ITM_BASE
-#undef DWT_BASE
-#undef NVIC_BASE
 
 } // namespace irq
 
