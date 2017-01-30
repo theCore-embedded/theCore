@@ -41,7 +41,8 @@ TEST_GROUP(fc28)
     }
 };
 
-static void test_get_sample_with_delta(auto expected, auto delta, auto sample, auto resolution)
+template<typename Et, typename Dt, typename St, typename Rt>
+static void test_get_sample_with_delta(Et expected, Dt delta, St sample, Rt resolution)
 {
     using namespace ecl::sensor::fc28_defs;
     moisture_type moisture;
@@ -73,8 +74,6 @@ TEST(fc28, get_moisture_min_max)
 {
     using namespace ecl::sensor::fc28_defs;
 
-    moisture_type moisture;
-
     // 10 bits resolution
     test_get_sample_with_delta(min_moisture, 0, 1023, 10);
     test_get_sample_with_delta(max_moisture, 0, 0, 10);
@@ -91,8 +90,6 @@ TEST(fc28, get_moisture_min_max)
 TEST(fc28, get_moisture_in_between_10bits)
 {
     using namespace ecl::sensor::fc28_defs;
-
-    moisture_type moisture;
 
     // Maximum 10-bit ADC value that can be obtained from sensor is 0x3ff,
     // minimum value - 0xff.
