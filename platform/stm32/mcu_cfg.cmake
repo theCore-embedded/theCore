@@ -1,9 +1,9 @@
 message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
 
 # Notify whole system about which processor is used
-if("${CONFIG_PLATOFORM_DEVICE}" MATCHES "STM32L1")
+if(CONFIG_PLATOFORM_DEVICE MATCHES "STM32L1")
     set(TARGET_MCU_ARCH "arm_cm3" CACHE STRING "Processor arch")
-elseif("${CONFIG_PLATOFORM_DEVICE}" MATCHES "STM32F4")
+elseif(CONFIG_PLATOFORM_DEVICE MATCHES "STM32F4")
     set(TARGET_MCU_ARCH "arm_cm4" CACHE STRING "Processor arch")
 else()
     message(FATAL_ERROR "Unknown device family: ${CONFIG_PLATOFORM_DEVICE}")

@@ -7,6 +7,7 @@
 #include <ecl/err.hpp>
 
 #include <atomic>
+#include <chrono>
 
 namespace ecl
 {
@@ -37,10 +38,11 @@ public:
 
     //!
     //! \brief Tries to wait on semaphore without lock.
+    //! \param[in] ms Milliseconds to wait.
     //! \retval false  Someone already waits a semaphore.
     //! \retval true   Semaphore counter decremented.
     //!
-    bool try_wait();
+    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds::min());
 
     binary_semaphore(const binary_semaphore&)             = delete;
     binary_semaphore& operator=(const binary_semaphore&)  = delete;

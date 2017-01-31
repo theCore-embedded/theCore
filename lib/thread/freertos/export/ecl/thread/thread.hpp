@@ -24,6 +24,7 @@ public:
     ~native_thread();
 
     native_thread& operator=(native_thread &) = delete;
+    native_thread(const native_thread&) = delete;
 
     // Sets new stack size
     // Asserts if stack size == 0

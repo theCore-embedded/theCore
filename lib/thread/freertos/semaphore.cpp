@@ -4,6 +4,8 @@
 
 #include <common/irq.hpp>
 
+#include <algorithm>
+
 ecl::semaphore::semaphore()
         :m_semaphore{}
         ,m_cnt{0}
@@ -74,8 +76,12 @@ void ecl::binary_semaphore::wait()
     ecl_assert(rc == pdTRUE);
 }
 
-bool ecl::binary_semaphore::try_wait()
+bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
 {
-    auto rc = xSemaphoreTake(m_semaphore, 0);
-    return rc == pdTRUE ? true : false;
+    // TODO: avoid potential overflow here
+    auto ticks = portTICK_PERIOD_MS * ms.count();
+
+    auto rc = xSemaphoreTake(m_semaphore,
+                             std::min(ticks, static_cast<decltype(ticks)>(portMAX_DELAY)));
+    return rc == pdTRUE;
 }

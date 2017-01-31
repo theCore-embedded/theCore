@@ -1,4 +1,4 @@
-﻿# Linker flags.
+# Linker flags.
 # TODO: check redundancy when using -msoft-float and -mfloat-abi=soft together
 
 if(CONFIG_PLATFORM_DEVICE MATCHES "STM32F4")
@@ -11,8 +11,10 @@ else()
     message(FATAL_ERROR "Device ${CONFIG_PLATFORM_DEVICE} doesn't have any linker flags defined")
 endif()
 
+# TODO: alter FPU flags based on device used
+
 set(CMAKE_C_LINK_FLAGS
-    "-fuse-linker-plugin ${FAMILY_CORE} -msoft-float -mfloat-abi=soft \
+    "-fuse-linker-plugin ${FAMILY_CORE} -mfpu=fpv4-sp-d16 -mfloat-abi=softfp \
     -nostartfiles -nostdlib -mthumb -flto -Wl,--gc-sections"
 	CACHE STRING "Linker C flags")
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_C_LINK_FLAGS} CACHE STRING "Linker C++ flags")
