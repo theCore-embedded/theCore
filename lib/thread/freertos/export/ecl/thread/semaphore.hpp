@@ -58,23 +58,17 @@ public:
     semaphore();
     ~semaphore();
 
-    //!
     //! \brief Signals a semaphore.
     //! Can be called from ISR.
-    //!
     void signal();
 
-    //!
     //! \brief Waits a semaphore
     //! Cannot be called from ISR.
-    //!
     void wait();
 
-    //!
     //! \brief Tries to wait on semaphore without lock.
     //! \retval false  Wait will result in lock.
     //! \retval true   Semaphore counter decremented.
-    //!
     bool try_wait();
 
     semaphore(const semaphore&)             = delete;
