@@ -34,7 +34,7 @@ public:
     //! \param[in] ms Milliseconds to wait.
     //! \retval true Semaphore signal consumed, counter decreased.
     //! \retval false Nothing to consume.
-    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds::min());
+    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds(0));
 
     semaphore(const semaphore&)             = delete;
     semaphore& operator=(const semaphore&)  = delete;
@@ -69,7 +69,7 @@ public:
     //! \param[in] ms Milliseconds to wait.
     //! \retval true Semaphore signal consumed, counter decreased.
     //! \retval false Nothing to consume.
-    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds::min());
+    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds(0));
 
     binary_semaphore(const binary_semaphore&)             = delete;
     binary_semaphore& operator=(const binary_semaphore&)  = delete;

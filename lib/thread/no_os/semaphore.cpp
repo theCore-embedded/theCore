@@ -25,7 +25,6 @@ bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
     int cnt;
     bool exch = false;
 
-    // Will block.
     while (((cnt = m_counter.load()) <= 0   // Wait till counter goes up enough
                                             // to avoid block.
                // After counter uprised, try to set new value.

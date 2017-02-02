@@ -42,7 +42,7 @@ public:
     //! \retval false  Someone already waits a semaphore.
     //! \retval true   Semaphore counter decremented.
     //!
-    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds::min());
+    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds(0));
 
     binary_semaphore(const binary_semaphore&)             = delete;
     binary_semaphore& operator=(const binary_semaphore&)  = delete;
@@ -71,7 +71,7 @@ public:
     //! \brief Tries to wait on semaphore without lock.
     //! \retval false  Wait will result in lock.
     //! \retval true   Semaphore counter decremented.
-    bool try_wait();
+    bool try_wait(std::chrono::milliseconds ms = std::chrono::milliseconds(0));
 
     semaphore(const semaphore&)             = delete;
     semaphore& operator=(const semaphore&)  = delete;

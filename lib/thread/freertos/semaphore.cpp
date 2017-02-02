@@ -4,6 +4,8 @@
 
 #include <common/irq.hpp>
 
+#include <task.h>
+
 #include <algorithm>
 
 ecl::semaphore::semaphore()
@@ -30,15 +32,37 @@ void ecl::semaphore::wait()
     }
 }
 
-bool ecl::semaphore::try_wait()
+bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
 {
-    if (m_cnt.fetch_sub(1) > 0) {
-        return true; // Got semaphore.
-    }
+    using std::chrono::milliseconds;
+    // Keep track of cycles wasted during loop operation
+    auto end = xTaskGetTickCount() + ms.count() / portTICK_PERIOD_MS;
 
-    // Bring counter back
-    ++m_cnt;
+    int cnt;
 
+    do {
+        if ((cnt = m_cnt.load()) > 0) {
+            // Now we almost sure that it is safe to decrement counter - it is
+            // positive. However, other thread(s) can decrement before we will.
+            // CAS will ensure that counter is the same.
+            if (m_cnt.compare_exchange_weak(cnt, cnt - 1)) {
+                // We've got a semaphore. Cool.
+                return true;
+            }
+        }
+
+        // Either counter is <= 0, which means that someone else blocked and waiting
+        // for event, or we failed with decrementing positive counter.
+        // To let implementation be simple, we remain graceful and do not
+        // wait on binary semaphore. It means that every other thread
+        // doing wait() will be able to get semaphore event in the first place.
+        // Tradeoff is that we always at the end of a queue.
+
+        // Make sure MCU is not stall with executing this loop.
+        taskYIELD();
+    } while (xTaskGetTickCount() > end); // Are we wasted all time?
+
+    // We still here, means that counter was not obtained within given time
     return false;
 }
 
@@ -78,8 +102,9 @@ void ecl::binary_semaphore::wait()
 
 bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
 {
+    using std::chrono::milliseconds;
     // TODO: avoid potential overflow here
-    auto ticks = portTICK_PERIOD_MS * ms.count();
+    auto ticks = ms > milliseconds(0) ? ms.count() / portTICK_PERIOD_MS : 0;
 
     auto rc = xSemaphoreTake(m_semaphore,
                              std::min(ticks, static_cast<decltype(ticks)>(portMAX_DELAY)));
