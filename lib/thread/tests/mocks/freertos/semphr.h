@@ -1,5 +1,5 @@
 //! \file
-//! \brief FreeRTOSS semaphore mock header
+//! \brief FreeRTOS semaphore mock header
 
 #ifndef FREERTOS_SEMPHR_MOCK_H_
 #define FREERTOS_SEMPHR_MOCK_H_
