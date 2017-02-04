@@ -5,7 +5,7 @@
 
 #include <ecl/assert.h>
 #include <platform/irq.hpp>
-#include <platform/execution.h>
+#include <common/execution.h>
 
 #include <new>
 

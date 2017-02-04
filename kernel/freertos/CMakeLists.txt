@@ -2,7 +2,7 @@ add_library(freertos_main kernel_main.c)
 target_link_libraries(freertos_main PRIVATE dbg)
 
 set(MAIN_STACK_SIZE)
-if (DEFINED CONFIG_FREERTOS_MAIN_THREAD_STACK)
+if(DEFINED CONFIG_FREERTOS_MAIN_THREAD_STACK)
 	set(MAIN_STACK_SIZE ${CONFIG_FREERTOS_MAIN_THREAD_STACK})
 else()
 	set(MAIN_STACK_SIZE 512)
@@ -12,7 +12,7 @@ message(STATUS "FreeRTOS main thread stack size: ${MAIN_STACK_SIZE} bytes")
 
 target_compile_definitions(freertos_main PRIVATE -DMAIN_STACK_SIZE=${MAIN_STACK_SIZE})
 
-if (NOT ${CONFIG_OS_INTERNAL})
+if(CONFIG_OS_EXTERNAL)
 	message(STATUS "Kernel is selected, but it is provdided externally")
 	return()
 endif()
@@ -23,19 +23,28 @@ set(SRC_DIR freertos/FreeRTOS/Source/)
 # If you hit error here, make sure you check compiler support
 # in FreeRTOS source tree. If compiler is supported by RTOS, but not
 # by build system just add another option here.
-if (${CMAKE_C_COMPILER_ID} MATCHES GNU)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_C_COMPILER MATCHES "gcc")
 	set(PORT_DIR "GCC/")
 else()
 	message(FATAL_ERROR "Compiler is not supported by FreeRTOS build: "
 		"${CMAKE_C_COMPILER_ID}")
 endif()
 
+# Path to FreeRTOS header must be provided
+if(NOT DEFINED CONFIG_FREERTOS_HEADERS_PATH)
+    message(FATAL_ERROR "FreeRTOS header path is not set")
+else()
+    if(NOT EXISTS ${CONFIG_FREERTOS_HEADERS_PATH}/FreeRTOSConfig.h)
+        message(FATAL_ERROR "Path \'${CONFIG_FREERTOS_HEADERS_PATH}\' does not contain FreeRTOSConfig.h")
+    endif()
+endif()
+
 # Architecture-dependent paths.
 # Same as for compiler paths works here. If the architecture is supported
 # by FreeRTOS but not by this build system then add another option here.
-if (${TARGET_MCU_ARCH} MATCHES arm_cm4)
+if(TARGET_MCU_ARCH MATCHES "arm_cm4")
 	set(PORT_DIR ${PORT_DIR}ARM_CM4F/)
-elseif(${TARGET_MCU_ARCH} MATCHES arm_cm3)
+elseif(TARGET_MCU_ARCH MATCHES "arm_cm3")
 	set(PORT_DIR ${PORT_DIR}ARM_CM3/)
 else()
 	message(FATAL_ERROR "Processor arch is not supported by FreeRTOS build: "

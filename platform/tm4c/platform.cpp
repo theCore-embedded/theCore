@@ -21,6 +21,12 @@ extern "C" void SystemInit()
                SYSCTL_SYSDIV_2; // Processor clock is OSC / 2
 
     SysCtlClockSet(cfg);
+
+    // Initialize DWT, used by platform to count ticks.
+    // See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
 extern "C" void platform_init()

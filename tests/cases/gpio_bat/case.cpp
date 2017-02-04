@@ -3,7 +3,7 @@
 
 #include <ecl/utils.hpp>
 
-#include <platform/execution.h>
+#include <common/execution.h>
 
 #include "test_gpio.hpp"
 

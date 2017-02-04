@@ -6,14 +6,11 @@ target_sources(thread_impl INTERFACE
 	${CMAKE_CURRENT_LIST_DIR}/utils.cpp
 	${CMAKE_CURRENT_LIST_DIR}/signal.cpp)
 
-target_include_directories(thread_impl INTERFACE  .)
 target_include_directories(thread_impl INTERFACE export)
-target_link_libraries(thread_impl INTERFACE thread_common)
-target_link_libraries(thread_impl INTERFACE dbg)
-target_link_libraries(thread_impl INTERFACE ${PLATFORM_NAME})
+target_link_libraries(thread_impl INTERFACE dbg INTERFACE ${PLATFORM_NAME})
 
 # If kernel is provided by theCore then use it
-if(CONFIG_OS_INTERNAL)
+if(NOT CONFIG_OS_EXTERNAL)
     target_link_libraries(thread_impl INTERFACE freertos)
 endif()
 

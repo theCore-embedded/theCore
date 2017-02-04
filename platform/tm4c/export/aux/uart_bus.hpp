@@ -15,8 +15,8 @@
 #include <sysctl.h>
 #include <interrupt.h>
 
-#include <hw_memmap.h>
 #include <hw_ints.h>
+#include <hw_memmap.h>
 
 namespace ecl
 {

@@ -174,6 +174,16 @@ add_suite(unity_demo
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
 
+
+#-------------------------------------------------------------------------------
+# Concurrency tests
+
+add_suite(concurrency_suite
+        CASES               semaphore_test
+        TOOLCHAIN_NAME      arm-cm4-gnu.cmake
+        TARGET_NAME         stm32f4discovery_rtos)
+
+
 #-------------------------------------------------------------------------------
 # Generate suite list file
 file(GENERATE OUTPUT ${SUITE_LIST_FILE}

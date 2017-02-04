@@ -1,7 +1,7 @@
 #include "assert.h"
 
 #include <ecl/iostream.hpp>
-#include <platform/execution.h>
+#include <common/execution.h>
 #include <platform/console.hpp>
 
 using ecl::bypass_putc;
