@@ -1,4 +1,4 @@
-﻿#ifndef DEV_BUS_BUS_HPP_
+#ifndef DEV_BUS_BUS_HPP_
 #define DEV_BUS_BUS_HPP_
 
 //!
@@ -46,14 +46,12 @@ public:
     //! \details Lazy initialization. Inits an underlying platform bus.
     //! \todo introduce init counter.
     //! \return Status of operation.
-    //!
     static err init();
 
     //! De-inits a bus.
     //! \pre Bus is initied.
     //! \todo use init counter to measure how many users are inited this bus.
     //! \return Status of operation.
-    //!
     static err deinit();
 
     //! Locks a bus.
@@ -63,7 +61,6 @@ public:
     //! \pre    Bus is inited successfully.
     //! \post   Bus is locked.
     //! \sa     unlock()
-    //!
     static void lock();
 
     //! Unlocks a bus.
@@ -76,7 +73,6 @@ public:
     //! \pre    Bus is locked.
     //! \post   Bus is unlocked.
     //! \sa     set_buffers()
-    //!
     static void unlock();
 
     //! Sets RX and TX buffers and their sizes.
@@ -95,7 +91,6 @@ public:
     //! \retval    err::ok      Buffers successfully set.
     //! \retval    err::inval   Both buffers are null.
     //! \retval    err::busy    Device is still executing async xfer.
-    //!
     static err set_buffers(const uint8_t *tx, uint8_t *rx, size_t size);
 
     //! Sets TX buffer size and fills it with given byte.
@@ -115,7 +110,6 @@ public:
     //! \param[in] fill_byte    Byte which will be sent in TX stream.
     //! \retval    err::ok      Buffer successfully set and filled.
     //! \retval    err::busy    Device is still executing async xfer.
-    //!
     static err set_buffers(size_t size, uint8_t fill_byte = 0xff);
 
     //! Performs xfer in blocking mode using buffers set previously.
@@ -135,7 +129,6 @@ public:
     //! \retval     err::busy   Device is still executing async xfer.
     //! \retval     err::io     Transaction started but failed.
     //! \retval     err         Any other error that can occur in platform bus
-    //!
     static err xfer(size_t *sent = nullptr, size_t *received = nullptr);
 
     //! Performs xfer in async mode using buffers set previously.
@@ -165,7 +158,6 @@ public:
     //! \retval    err::ok   Data is sent successfully.
     //! \retval    err::busy Device is still executing async xfer.
     //! \retval    err       Any other error that can occur in platform bus.
-    //!
     static err xfer(const bus_handler &handler, async_type type = async_type::immediate);
 
     //! Triggers continued or deffered xfer in async mode.
@@ -181,8 +173,16 @@ public:
     //! \pre       Bus is locked, buffers are set and async xfer is either
     //!            defered or executed.
     //! \post      Xfer is ongoing.
-    //!
     static err trigger_xfer();
+
+    //! Cancels xfer.
+    //! \details Capable of cancelling any previously started or scheduled xfer.
+    //! Keeps buffer and callback configured. Callable from ISR context.
+    //! \pre Bus locked, xfer started or scheduled. If bus is unlocked, behaviour
+    //! is undefined.
+    //! \post Xfer canceled, but buffers is not touched. Note that xfer can be
+    //! ongoing or even completed during this call.
+    static err cancel_xfer();
 
 private:
     //! Convinient alias.
@@ -466,7 +466,27 @@ ecl::err generic_bus<PBus>::trigger_xfer()
         m_state &= ~(async_mode);
     } else {
         // Events of this particular xfer is not yet served.
+        // TODO: possible concurrent situatiion when xfer is already executed,
+        // and this line will clear essential flag that otherwise should
+        // not be cleared. It should be investigated.
         m_state &= ~(xfer_served);
+    }
+
+    return rc;
+}
+
+template<class PBus>
+ecl::err generic_bus<PBus>::cancel_xfer()
+{
+    ecl_assert(m_state & bus_locked);  // Violating of pre-conditions
+
+    // No check for scheduled or running xfer here to avoid needless complexety.
+
+    auto rc =  PBus::cancel_xfer();
+
+    if (is_ok(rc)) {
+        // Pretend that xfer is completed.
+        m_state |= xfer_served;
     }
 
     return rc;
