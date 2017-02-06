@@ -16,6 +16,7 @@
 #include <common/bus.hpp>
 
 #include <atomic>
+#include <chrono>
 
 namespace ecl
 {
@@ -129,7 +130,8 @@ public:
     //! \retval     err::busy   Device is still executing async xfer.
     //! \retval     err::io     Transaction started but failed.
     //! \retval     err         Any other error that can occur in platform bus
-    static err xfer(size_t *sent = nullptr, size_t *received = nullptr);
+    static err xfer(size_t *sent = nullptr, size_t *received = nullptr,
+                    std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     //! Performs xfer in async mode using buffers set previously.
     //! \details If underlying bus works in half-duplex mode then first
@@ -255,7 +257,7 @@ err generic_bus<PBus>::init()
     PBus::set_handler(platform_handler);
 
     // Call these methods here to guarantee that
-    // all static objects were allocated before first use
+    // all static objects are allocated before first use
     mut();
     cb();
     sem();
@@ -368,7 +370,7 @@ ecl::err generic_bus<PBus>::set_buffers(size_t size, uint8_t fill_byte)
 }
 
 template<class PBus>
-ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received)
+ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received, std::chrono::milliseconds timeout)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -396,7 +398,25 @@ ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received)
     auto rc = PBus::do_xfer();
 
     if (is_ok(rc)) {
-        sem().wait();
+        // Leveraging the fact that wait() if often simplier than try_wait()
+        // thus there is no need to call heavier implemnetation if timeout
+        // is infinite.
+        if (timeout == std::chrono::milliseconds::max()) {
+            sem().wait();
+        } else {
+            if (!sem().try_wait(timeout)) {
+                // Timeout hit. No need to wait for transfer
+                // TODO: check for error code
+                PBus::cancel_xfer();
+
+                // Check if transfer was not completed right after timeout was reached.
+                if (!(m_state & xfer_served)) {
+                    return err::timedout;
+                } // else {
+                    // Transfer completed.
+                // }
+            }
+        }
 
         // Errors can occur after transaction start, check this
         if (m_state & xfer_error) {

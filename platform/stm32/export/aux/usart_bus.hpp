@@ -1,4 +1,4 @@
-﻿//!
+//!
 //! \file
 //! \brief STM32 USART driver
 //!
@@ -104,58 +104,47 @@ public:
     usart_bus() = delete;
     ~usart_bus() = delete;
 
-    //!
     //! \brief Lazy initialization.
     //! \return Status of operation.
-    //!
     static ecl::err init();
 
-    //!
     //! \brief Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
-    //!
     static void set_rx(uint8_t *rx, size_t size);
 
-    //!
     //! \brief Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
-    //!
     static void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
-    //!
     //! \brief Sets tx buffer with given size.
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
-    //!
     static void set_tx(const uint8_t *tx, size_t size);
 
-    //!
     //! \brief Sets event handler.
     //! Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
-    //!
     static void set_handler(const handler_fn &handler);
 
-    //!
     //! \brief Reset xfer buffers.
     //! Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
-    //!
     static void reset_buffers();
 
-    //!
     //! \brief Resets previously set handler.
-    //!
     static void reset_handler();
 
-    //!
     //! \brief Executes xfer, using buffers previously set.
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
-    //!
     static ecl::err do_xfer();
+
+    //! \brief Cancels xfer.
+    //! After this call no xfer will occur.
+    //! \return Status of operation.
+    static ecl::err cancel_xfer();
 
     // Should not be copied.
     usart_bus &operator=(usart_bus&) = delete;
@@ -407,6 +396,24 @@ ecl::err usart_bus<dev>::do_xfer()
     return ecl::err::ok;
 }
 
+template<usart_device dev>
+ecl::err usart_bus<dev>::cancel_xfer()
+{
+    auto usart = pick_usart();
+    auto irqn  = pick_irqn();
+
+    USART_ITConfig(usart, USART_IT_TXE, DISABLE);
+    USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
+
+    irq::mask(irqn);
+    irq::clear(irqn);
+
+    set_tx_done();
+    set_rx_done();
+
+    return ecl::err::ok;
+}
+
 // -----------------------------------------------------------------------------
 // Private members
 
@@ -460,7 +467,7 @@ auto usart_bus<dev>::pick_rcc_fn()
         return RCC_APB1PeriphClockCmd;
     } else {
         // TODO: clarify
-        return static_cast< decltype(&RCC_APB1PeriphClockCmd) >(nullptr);
+        return static_cast<decltype(&RCC_APB1PeriphClockCmd)>(nullptr);
     }
 }
 
@@ -570,7 +577,7 @@ void usart_bus<dev>::irq_handler()
     }
 }
 
-}
+} // namespace ecl
 
 
 #endif // PLATFORM_USART_BUS_HPP_
