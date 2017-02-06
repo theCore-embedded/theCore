@@ -104,6 +104,14 @@ public:
         return err::ok;
     }
 
+    //!
+    //! \brief Cancels xfer.
+    //! After this call no xfer will occur.
+    //! \return Status of operation.
+    //!
+    static err cancel_xfer()
+    { return err::nosys; }
+
 private:
     static uint8_t           *m_rx;
     static const uint8_t     *m_tx;

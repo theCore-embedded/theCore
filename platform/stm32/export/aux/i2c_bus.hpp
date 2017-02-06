@@ -1,4 +1,4 @@
-﻿#ifndef PLATFORM_I2C_BUS_HPP_
+#ifndef PLATFORM_I2C_BUS_HPP_
 #define PLATFORM_I2C_BUS_HPP_
 
 #include <stm32_device.hpp>
@@ -106,6 +106,13 @@ public:
     //! \return Status of operation.
     //!
     static ecl::err do_xfer();
+
+    //!
+    //! \brief Cancels xfer.
+    //! After this call no xfer will occur.
+    //! \return Status of operation.
+    //!
+    static ecl::err cancel_xfer();
 
     //!
     //! \brief Sets slave address.
@@ -320,6 +327,14 @@ ecl::err i2c_bus<i2c_config>::do_xfer()
     }
 
     return ecl::err::ok;
+}
+
+template<class i2c_config>
+ecl::err i2c_bus<i2c_config>::cancel_xfer()
+{
+    // TODO: Implement cancelation of i2c. See #220
+    ecl_assert_msg(0, "Not implemeted here");
+    return ecl::err::nosys;
 }
 
 template<class i2c_config>
