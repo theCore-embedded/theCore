@@ -483,6 +483,24 @@ TEST(bus_is_ready, cancel_deferred_xfer)
     mock().checkExpectations();
 }
 
+TEST(bus_is_ready, xfer_timeout)
+{
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast<int>(ecl::err::ok));
+
+    mock("platform_bus")
+            .expectOneCall("cancel_xfer")
+            .andReturnValue(static_cast<int>(ecl::err::ok));
+
+    auto ret = bus_t::xfer(nullptr, nullptr, std::chrono::milliseconds(100));
+
+    // Retval must indicate timeout condition
+    CHECK_EQUAL(ecl::err::timedout, ret);
+
+    mock().checkExpectations();
+}
+
 //------------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
