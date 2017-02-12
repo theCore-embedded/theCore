@@ -12,11 +12,7 @@ endif()
 
 target_include_directories(stm32 PUBLIC export)
 
-target_link_libraries(stm32 PUBLIC stm32_family)
-target_link_libraries(stm32 PUBLIC types)
-target_link_libraries(stm32 PUBLIC platform_common)
-target_link_libraries(stm32 PUBLIC arch)
-target_link_libraries(stm32 PUBLIC containers)
+target_link_libraries(stm32 PUBLIC stm32_family types platform_common arch containers dbg)
 
 target_compile_definitions(stm32
         PRIVATE
