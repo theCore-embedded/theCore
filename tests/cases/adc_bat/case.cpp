@@ -2,7 +2,7 @@
 #include <unity_fixture.h>
 
 #include <ecl/unity_helpers.hpp>
-#include <platform/execution.h>
+#include <common/execution.h>
 
 #include <test_adc.hpp>
 

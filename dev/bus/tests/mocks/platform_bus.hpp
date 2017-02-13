@@ -76,6 +76,13 @@ public:
                 (mock("platform_bus").returnIntValueOrDefault(0));
     }
 
+    static ecl::err cancel_xfer()
+    {
+        mock("platform_bus").actualCall("cancel_xfer");
+        return static_cast<ecl::err>
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
 //------------------------------------------------------------------------------
 // Internally used by the test
 

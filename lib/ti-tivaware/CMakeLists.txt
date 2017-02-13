@@ -1,4 +1,4 @@
-﻿if(NOT CONFIG_PLATFORM MATCHES "tm4c")
+if(NOT CONFIG_PLATFORM MATCHES "tm4c")
     return()
 endif()
 
@@ -47,9 +47,9 @@ else()
 endif()
 
 target_include_directories(tivaware SYSTEM PUBLIC
-        ti-tivaware/
-        ti-tivaware/inc
-        ti-tivaware/driverlib)
+        ${CMAKE_CURRENT_LIST_DIR}/ti-tivaware
+        ${CMAKE_CURRENT_LIST_DIR}/ti-tivaware/inc
+        ${CMAKE_CURRENT_LIST_DIR}/ti-tivaware/driverlib)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_definitions(tivaware PUBLIC -DDEBUG)

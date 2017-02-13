@@ -1,4 +1,4 @@
-﻿//!
+//!
 //! \file
 //! \brief \todo
 //! \copyright
@@ -115,6 +115,14 @@ public:
     //! \return Status of operation.
     //!
     static err do_xfer()
+    { return err::nosys; }
+
+    //!
+    //! \brief Cancels xfer.
+    //! After this call no xfer will occur.
+    //! \return Status of operation.
+    //!
+    static err cancel_xfer()
     { return err::nosys; }
 };
 

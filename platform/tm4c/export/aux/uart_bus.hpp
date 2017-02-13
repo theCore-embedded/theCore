@@ -15,8 +15,8 @@
 #include <sysctl.h>
 #include <interrupt.h>
 
-#include <hw_memmap.h>
 #include <hw_ints.h>
+#include <hw_memmap.h>
 
 namespace ecl
 {
@@ -80,6 +80,11 @@ public:
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
     static err do_xfer();
+
+    //! \brief Cancels xfer.
+    //! After this call no xfer will occur.
+    //! \return Status of operation.
+    static err cancel_xfer();
 
     uart_bus(const uart_bus&) = delete;
     uart_bus &operator=(uart_bus&) = delete;
@@ -271,6 +276,7 @@ void uart_bus<dev>::irq_bus_handler()
         UARTIntDisable(periph, UART_INT_TX | UART_INT_RX);
         bus_ctx.h(bus_channel::meta, bus_event::tc, 0);
 
+        // TODO #219: possible redundant statement.
         irq::mask(uart_it);
     } else {
 
@@ -428,6 +434,24 @@ err uart_bus<dev>::do_xfer()
 
     irq::unmask(pick_it());
     UARTIntEnable(periph, int_flags);
+
+    return err::ok;
+}
+
+template<uart_device dev>
+err uart_bus<dev>::cancel_xfer()
+{
+    auto &bus_ctx = get_ctx();
+    constexpr auto uart_it = pick_it();
+    constexpr auto periph = static_cast<std::underlying_type_t<uart_device>>(dev);
+
+    UARTIntDisable(periph, UART_INT_TX | UART_INT_RX);
+    irq::mask(uart_it);
+
+    UARTIntClear(periph, UART_INT_TX | UART_INT_RX);
+    irq::clear(uart_it);
+
+    bus_ctx.status |= (ctx::tx_done & ctx::rx_done);
 
     return err::ok;
 }

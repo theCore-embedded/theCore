@@ -16,6 +16,7 @@
 #include <common/bus.hpp>
 
 #include <atomic>
+#include <chrono>
 
 namespace ecl
 {
@@ -46,14 +47,12 @@ public:
     //! \details Lazy initialization. Inits an underlying platform bus.
     //! \todo introduce init counter.
     //! \return Status of operation.
-    //!
     static err init();
 
     //! De-inits a bus.
     //! \pre Bus is initied.
     //! \todo use init counter to measure how many users are inited this bus.
     //! \return Status of operation.
-    //!
     static err deinit();
 
     //! Locks a bus.
@@ -63,7 +62,6 @@ public:
     //! \pre    Bus is inited successfully.
     //! \post   Bus is locked.
     //! \sa     unlock()
-    //!
     static void lock();
 
     //! Unlocks a bus.
@@ -76,7 +74,6 @@ public:
     //! \pre    Bus is locked.
     //! \post   Bus is unlocked.
     //! \sa     set_buffers()
-    //!
     static void unlock();
 
     //! Sets RX and TX buffers and their sizes.
@@ -134,7 +131,6 @@ public:
     //! \param[in] fill_byte    Byte which will be sent in TX stream.
     //! \retval    err::ok      Buffer successfully set and filled.
     //! \retval    err::busy    Device is still executing async xfer.
-    //!
     static err set_buffers(size_t size, uint8_t fill_byte = 0xff);
 
     //! Performs xfer in blocking mode using buffers set previously.
@@ -154,8 +150,8 @@ public:
     //! \retval     err::busy   Device is still executing async xfer.
     //! \retval     err::io     Transaction started but failed.
     //! \retval     err         Any other error that can occur in platform bus
-    //!
-    static err xfer(size_t *sent = nullptr, size_t *received = nullptr);
+    static err xfer(size_t *sent = nullptr, size_t *received = nullptr,
+                    std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     //! Performs xfer in async mode using buffers set previously.
     //! \details If underlying bus works in half-duplex mode then first
@@ -184,7 +180,6 @@ public:
     //! \retval    err::ok   Data is sent successfully.
     //! \retval    err::busy Device is still executing async xfer.
     //! \retval    err       Any other error that can occur in platform bus.
-    //!
     static err xfer(const bus_handler &handler, async_type type = async_type::immediate);
 
     //! Triggers continued or deffered xfer in async mode.
@@ -200,8 +195,18 @@ public:
     //! \pre       Bus is locked, buffers are set and async xfer is either
     //!            defered or executed.
     //! \post      Xfer is ongoing.
-    //!
     static err trigger_xfer();
+
+    //! Cancels xfer.
+    //! \details Capable of cancelling any previously started or scheduled xfer.
+    //! Keeps buffer and callback configured. Callable from ISR context.
+    //! \pre Bus locked, xfer started or scheduled. If bus is unlocked, behaviour
+    //! is undefined.
+    //! \todo Decide how platform bus should behave if cancel_xfer() called from
+    //! ISR. Is platform bus should generate 'transfer complete' event?
+    //! \post Xfer canceled, but buffers is not touched. Note that xfer can be
+    //! ongoing or even completed during this call.
+    static err cancel_xfer();
 
 private:
     //! Convinient alias.
@@ -274,7 +279,7 @@ err generic_bus<PBus>::init()
     PBus::set_handler(platform_handler);
 
     // Call these methods here to guarantee that
-    // all static objects were allocated before first use
+    // all static objects are allocated before first use
     mut();
     cb();
     sem();
@@ -393,7 +398,7 @@ ecl::err generic_bus<PBus>::set_buffers(size_t size, uint8_t fill_byte)
 }
 
 template<class PBus>
-ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received)
+ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received, std::chrono::milliseconds timeout)
 {
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
@@ -421,7 +426,25 @@ ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received)
     auto rc = PBus::do_xfer();
 
     if (is_ok(rc)) {
-        sem().wait();
+        // Leveraging the fact that wait() if often simplier than try_wait()
+        // thus there is no need to call heavier implemnetation if timeout
+        // is infinite.
+        if (timeout == std::chrono::milliseconds::max()) {
+            sem().wait();
+        } else {
+            if (!sem().try_wait(timeout)) {
+                // Timeout hit. No need to wait for transfer
+                // TODO: check for error code
+                PBus::cancel_xfer();
+
+                // Check if transfer was not completed right after timeout was reached.
+                if (!(m_state & xfer_served)) {
+                    return err::timedout;
+                } // else {
+                    // Transfer completed.
+                // }
+            }
+        }
 
         // Errors can occur after transaction start, check this
         if (m_state & xfer_error) {
@@ -491,7 +514,27 @@ ecl::err generic_bus<PBus>::trigger_xfer()
         m_state &= ~(async_mode);
     } else {
         // Events of this particular xfer is not yet served.
+        // TODO: possible concurrent situatiion when xfer is already executed,
+        // and this line will clear essential flag that otherwise should
+        // not be cleared. It should be investigated.
         m_state &= ~(xfer_served);
+    }
+
+    return rc;
+}
+
+template<class PBus>
+ecl::err generic_bus<PBus>::cancel_xfer()
+{
+    ecl_assert(m_state & bus_locked);  // Violating of pre-conditions
+
+    // No check for scheduled or running xfer here to avoid needless complexety.
+
+    auto rc =  PBus::cancel_xfer();
+
+    if (is_ok(rc)) {
+        // Pretend that xfer is completed.
+        m_state |= xfer_served;
     }
 
     return rc;

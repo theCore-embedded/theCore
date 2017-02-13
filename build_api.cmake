@@ -30,22 +30,25 @@ endif()
 # add_unit_host_test(NAME test_name
 #					 SOURCES test_sources_files...
 #					 [DEPENDS list_of_dependencies...]
-#					 [INC_DIRS list_of_include_directories...])
+#					 [INC_DIRS list_of_include_directories...]
+#                    [COMPILE_OPTIONS list_of_compiler_options...])
 function(add_unit_host_test)
-    # Set general flags for C\C++ compiler and linker
-    set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
-    set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")
+    set(CC_WARN_FLAGS -Wall -Wextra -Wpedantic -Werror)
+    set(CXX_WARN_FLAGS ${CC_WARN_FLAGS})
 
     # All test can use most recent standart
     set(CMAKE_CXX_STANDARD 14)
 
+    # Debug mode flags, for maximum debug info
+    set(CC_CXX_FLAGS_DEBUG -O0 -g3)
+
     # Protect from missing test utilities
-    if(${CPPUTEST_FOUND})
+    if(CPPUTEST_FOUND)
         cmake_parse_arguments(
                 UNIT_TEST
                 ""
                 "NAME"
-                "SOURCES;DEPENDS;INC_DIRS"
+                "SOURCES;DEPENDS;INC_DIRS;COMPILE_OPTIONS"
                 ${ARGN}
         )
 
@@ -76,7 +79,16 @@ function(add_unit_host_test)
                     ${UNIT_TEST_INC_DIRS})
         endif()
 
+        if(UNIT_TEST_COMPILE_OPTIONS)
+            message("	Test compile options: ${UNIT_TEST_COMPILE_OPTIONS}")
+            target_compile_options(${UNIT_TEST_NAME} PUBLIC ${UNIT_TEST_COMPILE_OPTIONS})
+        endif()
+
         target_include_directories(${UNIT_TEST_NAME} PRIVATE ${CPPUTEST_INCLUDE_DIRS})
+
+        target_compile_options(${UNIT_TEST_NAME} PUBLIC $<$<CONFIG:Debug>:${CC_CXX_FLAGS_DEBUG}>)
+        target_compile_options(${UNIT_TEST_NAME} PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${CXX_WARN_FLAGS}>)
+        target_compile_options(${UNIT_TEST_NAME} PUBLIC $<$<COMPILE_LANGUAGE:C>:${CC_WARN_FLAGS}>)
         message("-----------------------------------------------")
     endif()
 endfunction()

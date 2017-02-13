@@ -4,11 +4,11 @@
 # the project name.
 
 # Check if ARM Cortex-M core is requested
-if("${TARGET_MCU_ARCH}" MATCHES "^arm_cm")
+if(TARGET_MCU_ARCH MATCHES "^arm_cm")
     add_subdirectory(arm_cm)
-elseif("${TARGET_MCU_ARCH}" STREQUAL "") # Empty architecture allowed only when building for host
-    if(NOT "${PLATFORM_NAME}" STREQUAL "host")
-        message(FATAL_ERROR "Architecture is not set, abonring")
+elseif(NOT TARGET_MCU_ARCH) # Empty architecture allowed only when building for host
+    if(NOT PLATFORM_NAME STREQUAL "host")
+        message(FATAL_ERROR "Architecture is not set, aborting")
     endif()
 else()
     message(FATAL_ERROR "Unsupported architecture: ${TARGET_MCU_ARCH}")

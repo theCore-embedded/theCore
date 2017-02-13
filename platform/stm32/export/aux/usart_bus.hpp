@@ -1,4 +1,4 @@
-﻿//!
+//!
 //! \file
 //! \brief STM32 USART driver
 //!
@@ -8,10 +8,10 @@
 
 #include <common/bus.hpp>
 #include <ecl/err.hpp>
+#include <ecl/assert.h>
+#include <common/irq.hpp>
 
 #include <stm32_device.hpp>
-
-#include <common/irq.hpp>
 
 #include <cstdint>
 #include <unistd.h>
@@ -104,58 +104,62 @@ public:
     usart_bus() = delete;
     ~usart_bus() = delete;
 
-    //!
     //! \brief Lazy initialization.
     //! \return Status of operation.
-    //!
     static ecl::err init();
 
-    //!
     //! \brief Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
-    //!
     static void set_rx(uint8_t *rx, size_t size);
 
-    //!
     //! \brief Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
-    //!
     static void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
-    //!
     //! \brief Sets tx buffer with given size.
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
-    //!
     static void set_tx(const uint8_t *tx, size_t size);
 
-    //!
     //! \brief Sets event handler.
     //! Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
-    //!
     static void set_handler(const handler_fn &handler);
 
-    //!
     //! \brief Reset xfer buffers.
     //! Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
-    //!
     static void reset_buffers();
 
-    //!
     //! \brief Resets previously set handler.
-    //!
     static void reset_handler();
 
-    //!
     //! \brief Executes xfer, using buffers previously set.
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
-    //!
     static ecl::err do_xfer();
+
+    //! \brief Cancels xfer.
+    //! After this call no xfer will occur.
+    //! \return Status of operation.
+    static ecl::err cancel_xfer();
+
+    //! \brief Enables listen mode.
+    //! In listen mode, UART bus uses different semantics of the `transfer complete`
+    //! event. Previously set buffer will be used in circular manner and `transfer complete`
+    //! will be generated with every byte received.
+    //! In other words, if there is no free space left, UART bus will put next byte
+    //! to the start of the buffer. To prevent overflow, use \ref cancel_xfer
+    //! if buffer is full.
+    //! \note Can be called from ISR.
+    static ecl::err enable_listen_mode();
+
+    //! \brief Disables listen mode.
+    //! \note Can be called from ISR.
+    //! Changes buffer usage and `transfer compelte` event semantics back to normal.
+    static ecl::err disable_listen_mode();
 
     // Should not be copied.
     usart_bus &operator=(usart_bus&) = delete;
@@ -174,26 +178,35 @@ private:
     // Device status flags
 
     //! Bit set if device initialized.
-    static constexpr uint8_t m_inited     = 0x1;
+    static constexpr uint8_t m_inited      = 0x1;
     //! Bit set if tx is done.
-    static constexpr uint8_t m_tx_done    = 0x2;
+    static constexpr uint8_t m_tx_done     = 0x2;
     //! Bit set if rx is done.
-    static constexpr uint8_t m_rx_done    = 0x4;
+    static constexpr uint8_t m_rx_done     = 0x4;
+    //! Bit set if listen mode is enabled.
+    static constexpr uint8_t m_listen_mode = 0x8;
+    //! Bit set if xfer was canceled.
+    static constexpr uint8_t m_canceled    = 0x10;
 
     // Device status methods
 
-    static inline bool inited()           { return (m_status & m_inited)  != 0; }
-    static inline bool tx_done()          { return (m_status & m_tx_done) != 0; }
-    static inline bool rx_done()          { return (m_status & m_rx_done) != 0; }
+    static inline bool inited()           { return m_status & m_inited; }
+    static inline bool tx_done()          { return m_status & m_tx_done; }
+    static inline bool rx_done()          { return m_status & m_rx_done; }
+    static inline bool listen_mode()      { return m_status & m_listen_mode; }
+    static inline bool canceled()         { return m_status & m_canceled; }
 
     static inline void set_inited()       { m_status |= m_inited; }
     static inline void set_tx_done()      { m_status |= m_tx_done; }
     static inline void set_rx_done()      { m_status |= m_rx_done; }
+    static inline void set_listen_mode()  { m_status |= m_listen_mode; }
+    static inline void set_canceled()     { m_status |= m_canceled; }
 
     static inline void clear_inited()     { m_status &= ~(m_inited); }
     static inline void clear_tx_done()    { m_status &= ~(m_tx_done); }
     static inline void clear_rx_done()    { m_status &= ~(m_rx_done); }
-
+    static inline void clear_listen_mode(){ m_status &= ~(m_listen_mode); }
+    static inline void clear_canceled()   { m_status &= ~(m_canceled); }
 
     //! Handles IRQ events from a bus.
     static void irq_handler();
@@ -239,7 +252,6 @@ size_t usart_bus<dev>::m_rx_left;
 
 template<usart_device dev>
 uint8_t usart_bus<dev>::m_status;
-
 
 template<usart_device dev>
 ecl::err usart_bus<dev>::init()
@@ -306,10 +318,7 @@ ecl::err usart_bus<dev>::init()
 template<usart_device dev>
 void usart_bus<dev>::set_rx(uint8_t *rx, size_t size)
 {
-    // TODO: assert if not initialized
-    if (!inited()) {
-        return;
-    }
+    ecl_assert(inited());
 
     m_rx = rx;
     m_rx_size = size;
@@ -318,11 +327,9 @@ void usart_bus<dev>::set_rx(uint8_t *rx, size_t size)
 template<usart_device dev>
 void usart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 {
-    if (!inited()) {
-        return;
-    }
+    // TODO: implement
+    ecl_assert_msg(0, "Not implemeted!");
 
-    // TODO: assert if not initialized
     (void) size;
     (void) fill_byte;
 }
@@ -330,9 +337,7 @@ void usart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 template<usart_device dev>
 void usart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 {
-    if (!inited()) {
-        return;
-    }
+    ecl_assert(inited());
 
     // TODO: assert if not initialized
     m_tx = tx;
@@ -343,17 +348,14 @@ void usart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 template<usart_device dev>
 void usart_bus<dev>::set_handler(const handler_fn &handler)
 {
-    // It is possible (and recommended) to set handler before bus init.
+    ecl_assert(inited());
     event_handler() = handler;
 }
 
 template<usart_device dev>
 void usart_bus<dev>::reset_buffers()
 {
-    // TODO: assert if not initialized
-    if (!inited()) {
-        return;
-    }
+    ecl_assert(inited());
 
     m_tx = nullptr;
     m_rx = nullptr;
@@ -367,6 +369,8 @@ void usart_bus<dev>::reset_buffers()
 template<usart_device dev>
 void usart_bus<dev>::reset_handler()
 {
+    ecl_assert(inited());
+
     event_handler() = handler_fn{};
 }
 
@@ -374,9 +378,7 @@ template<usart_device dev>
 ecl::err usart_bus<dev>::do_xfer()
 {
     // TODO: assert if not initialized
-    if (!inited()) {
-        return ecl::err::generic;
-    }
+    ecl_assert(inited());
 
     auto irqn = pick_irqn();
     auto usart = pick_usart();
@@ -394,6 +396,7 @@ ecl::err usart_bus<dev>::do_xfer()
     }
 
     if (m_rx) {
+        m_rx_left = m_rx_size;
         clear_rx_done();
         USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
     } else {
@@ -402,7 +405,51 @@ ecl::err usart_bus<dev>::do_xfer()
         set_rx_done();
     }
 
+    // In case if previous xfer was canceled.
+    clear_canceled();
+
     irq::unmask(irqn);
+
+    return ecl::err::ok;
+}
+
+template<usart_device dev>
+ecl::err usart_bus<dev>::cancel_xfer()
+{
+    ecl_assert(inited());
+
+    auto usart = pick_usart();
+    auto irqn  = pick_irqn();
+
+    USART_ITConfig(usart, USART_IT_TXE, DISABLE);
+    USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
+
+    irq::mask(irqn);
+    irq::clear(irqn);
+
+    set_tx_done();
+    set_rx_done();
+    set_canceled();
+
+    return ecl::err::ok;
+}
+
+template<usart_device dev>
+ecl::err usart_bus<dev>::enable_listen_mode()
+{
+    // Meaningfull if RX is disabled
+    ecl_assert(m_rx && m_rx_size);
+
+    set_listen_mode();
+    return ecl::err::ok;
+}
+
+template<usart_device dev>
+ecl::err usart_bus<dev>::disable_listen_mode()
+{
+    // Meaningfull if listen mode is already disabled
+    ecl_assert(listen_mode());
+    clear_listen_mode();
 
     return ecl::err::ok;
 }
@@ -460,7 +507,7 @@ auto usart_bus<dev>::pick_rcc_fn()
         return RCC_APB1PeriphClockCmd;
     } else {
         // TODO: clarify
-        return static_cast< decltype(&RCC_APB1PeriphClockCmd) >(nullptr);
+        return static_cast<decltype(&RCC_APB1PeriphClockCmd)>(nullptr);
     }
 }
 
@@ -517,19 +564,15 @@ void usart_bus<dev>::irq_handler()
 {
     auto usart = pick_usart();
     auto irqn  = pick_irqn();
-    ITStatus status;
 
     irq::clear(irqn);
 
     // TODO: comment about flags clear sequence
 
     if (!tx_done()) {
-        status = USART_GetITStatus(usart, USART_IT_TXE);
-        if (status == SET && m_tx) {
+        if (USART_GetITStatus(usart, USART_IT_TXE) == SET && m_tx) {
             if (m_tx_left) {
-                USART_SendData(usart, *(m_tx + (m_tx_size - m_tx_left)));
-                m_tx_left--;
-                irq::unmask(irqn);
+                USART_SendData(usart, m_tx[m_tx_size - m_tx_left--]);
             } else {
                 // Last interrupt occurred, need to notify.
                 event_handler()(channel::tx, event::tc, m_tx_size);
@@ -539,38 +582,45 @@ void usart_bus<dev>::irq_handler()
                 USART_ITConfig(usart, USART_IT_TXE, DISABLE);
             }
         }
-    } else if (!rx_done()) {  // Perform RX only after TX is finished.
-        status = USART_GetITStatus(usart, USART_IT_RXNE);
+    }
 
-        if (status == SET) {
-            // Do not receive more than one byte. This is actually a small
-            // adaptation to console purposes. Every symbol must be immediately
-            // transferred to the client of the console driver (code that owns
-            // this bus).
-            // If throughput is the case, additional buffering may be applied,
-            // so this usart bus will accumulate some data (in other words,
-            // will buffer RX stream) even if the client not requesting anything.
+    // No need to wait tx_done flag if in listen mode. It is async by nature.
+    // Otherwise (regular mode) - wait till TX is done.
+    if (listen_mode() || (tx_done() && !rx_done())) {
+        if (USART_GetITStatus(usart, USART_IT_RXNE) == SET && m_rx) {
             auto data = USART_ReceiveData(usart);
-            *m_rx = static_cast< uint8_t >(data);
 
-            // Notify about that 1 byte is received.
-            event_handler()(channel::rx, event::tc, 1);
+            m_rx[m_rx_size - m_rx_left--] = static_cast<uint8_t>(data);
 
-            // Transaction complete.
-            set_rx_done();
-            USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
+            if (listen_mode()) {
+                // If buffer is full - start the next round
+                m_rx_left = m_rx_left ? m_rx_left : m_rx_size;
 
-            // 1 byte is received. No need to unmask interrupts.
+                // Notify about 1 byte reception.
+                event_handler()(channel::rx, event::tc, 1);
+            } else if (!m_rx_left) { // RX is over.
+                // Transaction complete.
+                set_rx_done();
+                USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
+
+                // Notify user
+                event_handler()(channel::rx, event::tc, m_rx_size);
+            }
         }
     }
 
     if (tx_done() && rx_done()) {
-        // Both TX and RX are finished. Notifying.
-        event_handler()(channel::meta, event::tc, 0);
+        if (!canceled()) {
+            // Both TX and RX are finished. Notifying.
+            event_handler()(channel::meta, event::tc, 0);
+        }
+    } else {
+        // Not yet finished - keep interrupts on.
+        irq::unmask(irqn);
     }
 }
 
-}
+} // namespace ecl
 
 
 #endif // PLATFORM_USART_BUS_HPP_

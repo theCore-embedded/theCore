@@ -67,15 +67,15 @@ public:
     static void power_off();
 
     //! Gets moisture value based on previously converted ADC sample.
-    //! \tparam Stype ADC sample type.
-    //! \tparam Rtype Type of resolution argument.
+    //! \tparam St Sample type.
+    //! \tparam Rt Resolution type.
     //! \param[in]  sample      ADC sample.
     //! \param[in]  resolution  ADC resolution, in bits.
     //! \param[out] moisture    Resulting moisture. Valid value can be read only
     //! if operation is successfull.
     //! \return Status of operation. err::ok indicates successfull operation.
-    template<typename Stype, typename Rtype>
-    static err get_moisture(Stype sample, Rtype resolution, fc28_defs::moisture_type &moisture);
+    template<typename St, typename Rt>
+    static err get_moisture(St sample, Rt resolution, fc28_defs::moisture_type &moisture);
 };
 
 //------------------------------------------------------------------------------
@@ -93,8 +93,8 @@ void fc28<PowerPin>::power_off()
 }
 
 template<typename PowerPin>
-template<typename Stype, typename Rtype>
-err fc28<PowerPin>::get_moisture(Stype sample, Rtype resolution, fc28_defs::moisture_type &moisture)
+template<typename St, typename Rt>
+err fc28<PowerPin>::get_moisture(St sample, Rt resolution, fc28_defs::moisture_type &moisture)
 {
     using namespace ecl::sensor::fc28_defs;
 

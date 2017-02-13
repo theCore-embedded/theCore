@@ -7,25 +7,30 @@
 #include <stdint.h>
 #include <stm32_device.h>
 
-//! \brief Waits in loop for a given amount of milliseconds.
-//! \details Uses DWT register.
-//! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
-//! \param[in] ms Milliseconds to wait
-static inline void ecl_spin_wait(uint32_t ms)
+//! \brief Gets core clock speed.
+//! \return Current clock speed.
+static inline uint32_t get_clk_spd()
 {
-    uint32_t start = DWT->CYCCNT;
-    uint32_t to_wait = ms * (SystemCoreClock / 1000L);
-
-    // Handles wraparound as well.
-    do { } while (DWT->CYCCNT - start < to_wait);
+    return SystemCoreClock;
 }
 
-// TODO #72: add add suspend() and resume() routines
+//! \brief Gets current clock count.
+//! \details Uses DWT register.
+//! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
+//! \return Current clock count.
+static inline uint32_t get_clk()
+{
+    return DWT->CYCCNT;
+}
+
+// TODO #72: add suspend() and resume() routines
+// TODO #213 add RTC support
 
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
 static inline void ecl_abort()
 {
+    __disable_irq();
     for(;;);
 }
 

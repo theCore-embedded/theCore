@@ -1,51 +1,58 @@
-﻿# Add thread support for valid kernel
+# Add thread support for valid kernel
 message(STATUS "Checking [CONFIG_OS]...")
 if(DEFINED CONFIG_OS)
-	message(STATUS "OS selected: ${CONFIG_OS}")
-	if(CONFIG_OS STREQUAL "freertos")
-		add_subdirectory(freertos)
-	else(CONFIG_OS STREQUAL "host")
-		if(UNIX)
-			add_subdirectory(posix)
-		else()
-			# Please, implement it if you see this message
-			message(FATAL_ERROR "	Your host system has no known thread support")
-		endif()
-	else()
-		message(FATAL_ERROR "	No thread support exist for given OS")
-	endif()
+    message(STATUS "OS selected: ${CONFIG_OS}")
+    if(CONFIG_OS STREQUAL "freertos")
+        add_subdirectory(freertos)
+    elseif(CONFIG_OS STREQUAL "host")
+        add_subdirectory(posix)
+    else()
+        message(FATAL_ERROR "No thread support exist for given OS: ${CONFIG_OS}")
+    endif()
 else()
-	message(STATUS "Be aware: no OS was selected. Thread support will be disabled."
-		" Stubs are provided for most synchronization primitives")
-	add_subdirectory(default)
+    message(STATUS "Be aware: no OS was selected. Thread support will be disabled."
+        " Stubs are provided for most synchronization primitives")
+    add_subdirectory(no_os)
 endif()
 
-add_subdirectory(common)
-
-# TODO: comment about lib names
+# Main library, acting like a proxy.
 add_library(thread INTERFACE)
-target_include_directories(thread INTERFACE export)
-target_link_libraries(thread INTERFACE thread_os)
 
-# Tests.
+# Implementation of particular thread support resides in thread_impl.
+target_link_libraries(thread INTERFACE thread_impl)
 
-# Semaphore test will be triggered for implementations based on the
-# host environment only.
-# This includes 'default' and 'std_host' implementations.
-# TODO: add here 'if' statemenent to somehow emphasize that some tests
-# are included depending on which library is used.
+# Posix semaphore test.
 add_unit_host_test(
-	NAME semaphore
-	SOURCES tests/semaphore_unit.cpp
-	# TODO: proper dependenices! What is about compilation on Win system?
-	DEPENDS thread_os pthread
+    NAME semaphore_posix
+    SOURCES tests/semaphore_unit.cpp posix/semaphore.cpp
+    INC_DIRS posix/export/
+    DEPENDS pthread types
 )
 
-if ("${CONFIG_OS}" STREQUAL "host")
-	add_unit_host_test(
-		NAME thread
-		SOURCES tests/thread_unit.cpp
-		# TODO: proper dependenices! What is about compilation on Win system?
-		DEPENDS thread_os pthread
-	)
-endif()
+# Posix thread tests. Requires semaphores as well.
+add_unit_host_test(
+    NAME thread_posix
+    SOURCES tests/thread_unit.cpp posix/thread.cpp posix/semaphore.cpp
+    INC_DIRS posix/export/
+    DEPENDS utils types dbg pthread
+    COMPILE_OPTIONS -Wno-error=strict-aliasing
+)
+
+# Semaphore for platforms without OS layer. Mocking time routines.
+add_unit_host_test(
+    NAME semaphore_no_os
+    SOURCES tests/semaphore_unit.cpp no_os/semaphore.cpp
+    INC_DIRS no_os/export/ tests/mocks/
+    DEPENDS pthread types
+    COMPILE_OPTIONS -DSEMAPHORE_TEST_MOCKED_TIME=1
+)
+
+# FreeRTOS semaphore test.
+add_unit_host_test(
+    NAME semaphore_freertos
+    SOURCES tests/semaphore_unit.cpp freertos/semaphore.cpp
+    INC_DIRS freertos/export/ tests/mocks/freertos tests/mocks/
+    DEPENDS types dbg pthread
+)
+
+# Cover FreeRTOS thread with unit test - #211

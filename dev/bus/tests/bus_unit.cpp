@@ -435,6 +435,96 @@ TEST(bus_is_ready, async_deffered)
     mock().checkExpectations();
 }
 
+TEST(bus_is_ready, cancel_async_xfer)
+{
+    ecl::err expected_ret;
+
+    // Should not be called
+    auto handler = [&](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
+        (void)ch;
+        (void)e;
+        (void)total;
+        mock("handler").actualCall("call");
+    };
+
+    expected_ret = ecl::err::ok;
+
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast<int>(expected_ret));
+
+    auto ret = bus_t::xfer(handler);
+    CHECK_EQUAL(expected_ret, ret);
+
+    // Platform bus xfer shouldn't be called.
+    mock().checkExpectations();
+
+    // Cancel xfer. Return some unusual error code.
+    expected_ret = ecl::err::acces;
+
+    mock("platform_bus")
+            .expectOneCall("cancel_xfer")
+            .andReturnValue(static_cast<int>(expected_ret));
+
+    ret = bus_t::cancel_xfer();
+    CHECK_EQUAL(expected_ret, ret);
+
+    mock().checkExpectations();
+}
+
+TEST(bus_is_ready, cancel_deferred_xfer)
+{
+    ecl::err expected_ret;
+
+    // Should not be called
+    auto handler = [&](ecl::bus_channel ch, ecl::bus_event e, size_t total) {
+        (void)ch;
+        (void)e;
+        (void)total;
+        mock("handler").actualCall("call");
+    };
+
+    expected_ret = ecl::err::ok;
+
+    auto ret = bus_t::xfer(handler, ecl::async_type::deferred);
+    CHECK_EQUAL(ecl::err::ok, ret);
+
+    // Platform bus xfer shouldn't be called.
+    mock().checkExpectations();
+
+    // Cancel xfer. Return some unusual error code.
+    expected_ret = ecl::err::acces;
+
+    mock("platform_bus")
+            .expectOneCall("cancel_xfer")
+            .andReturnValue(static_cast<int>(expected_ret));
+
+    ret = bus_t::cancel_xfer();
+    CHECK_EQUAL(expected_ret, ret);
+
+    mock().checkExpectations();
+}
+
+TEST(bus_is_ready, xfer_timeout)
+{
+    mock("platform_bus")
+            .expectOneCall("do_xfer")
+            .andReturnValue(static_cast<int>(ecl::err::ok));
+
+    mock("platform_bus")
+            .expectOneCall("cancel_xfer")
+            .andReturnValue(static_cast<int>(ecl::err::ok));
+
+    auto ret = bus_t::xfer(nullptr, nullptr, std::chrono::milliseconds(100));
+
+    // Retval must indicate timeout condition
+    CHECK_EQUAL(ecl::err::timedout, ret);
+
+    mock().checkExpectations();
+}
+
+//------------------------------------------------------------------------------
+
 int main(int argc, char *argv[])
 {
     return CommandLineTestRunner::RunAllTests(argc, argv);
