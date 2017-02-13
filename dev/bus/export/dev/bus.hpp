@@ -182,6 +182,8 @@ public:
     //! Keeps buffer and callback configured. Callable from ISR context.
     //! \pre Bus locked, xfer started or scheduled. If bus is unlocked, behaviour
     //! is undefined.
+    //! \todo Decide how platform bus should behave if cancel_xfer() called from
+    //! ISR. Is platform bus should generate 'transfer complete' event?
     //! \post Xfer canceled, but buffers is not touched. Note that xfer can be
     //! ongoing or even completed during this call.
     static err cancel_xfer();

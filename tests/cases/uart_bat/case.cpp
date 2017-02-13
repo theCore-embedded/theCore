@@ -115,7 +115,7 @@ TEST(uart_bat, receive_buf)
 // Some of platform drivers use RX feedback differently. To let tests pass,
 // this mode must be disabled.
 #ifndef UART_TEST_NO_RX_MODE
-    tx_complete = true; // Doesn't case about TX
+    tx_complete = true; // Doesn't care about TX
     constexpr size_t body = 10; // Well, tester must type 10 characters
     constexpr size_t offt = 10;
     constexpr size_t tail = 10;
@@ -133,6 +133,69 @@ TEST(uart_bat, receive_buf)
 
     ecl::test_uart::do_xfer();
     wait_transfer_complete();
+
+    TEST_ASSERT_EQUAL_STRING_LEN(expected_buf, rx_buf, expected_rx);
+    TEST_ASSERT_EQUAL_STRING_LEN("\0\0\0\0\0\0\0\0\0\0", buf, offt);
+    TEST_ASSERT_EQUAL_STRING_LEN("\0\0\0\0\0\0\0\0\0\0", rx_buf + offt, tail);
+#endif
+}
+
+TEST(uart_bat, listen_mode)
+{
+// Listen mode is not implemented for certain platforms
+#ifndef UART_TEST_NO_LISTEN_MODE
+    constexpr size_t body = 7; // Well, tester must type 7 characters
+    constexpr size_t offt = 10;
+    constexpr size_t tail = 10;
+
+    uint8_t buf[offt + body + tail] = {};
+
+    expected_rx = body;
+    const uint8_t expected_buf[] = "zxcvbnm";
+    uint8_t *rx_buf = buf + offt; // To check underflow
+    size_t actual_cnt = 0; // Actual count of symbols
+
+    // Handler context
+    struct h_ctx {
+       const uint8_t    *exp_buf;
+       uint8_t          *actual_buf;
+       size_t           *cnt;
+    } h_ctx { expected_buf, rx_buf, &actual_cnt };
+
+    // Handler must be called every time new character received
+    auto listen_mode_handler = [&h_ctx]
+            (ecl::bus_channel ch, ecl::bus_event type, size_t total) {
+
+        TEST_ASSERT_EQUAL(false, transfer_complete);
+
+        TEST_ASSERT_TRUE(ch == ecl::bus_channel::rx);
+        TEST_ASSERT_TRUE(type == ecl::bus_event::tc);
+        TEST_ASSERT_EQUAL_UINT(1, total);
+        TEST_ASSERT_EQUAL_HEX(h_ctx.exp_buf[*h_ctx.cnt], h_ctx.actual_buf[*h_ctx.cnt]);
+
+        (*h_ctx.cnt)++;
+
+        // All characters are transmitted
+        if (*h_ctx.cnt == body) {
+            transfer_complete = true;
+
+            // Cancel further transactions
+            ecl::test_uart::cancel_xfer();
+        }
+    };
+
+    UnityPrintWithEOL("Type \'zxcvbnm\' string to finish the test");
+
+    ecl::test_uart::set_rx(rx_buf, expected_rx);
+    ecl::test_uart::set_handler(listen_mode_handler);
+
+    // Enable required mode
+    ecl::test_uart::enable_listen_mode();
+
+    ecl::test_uart::do_xfer();
+    wait_transfer_complete();
+
+    TEST_ASSERT_EQUAL(expected_rx, actual_cnt);
 
     TEST_ASSERT_EQUAL_STRING_LEN(expected_buf, rx_buf, expected_rx);
     TEST_ASSERT_EQUAL_STRING_LEN("\0\0\0\0\0\0\0\0\0\0", buf, offt);

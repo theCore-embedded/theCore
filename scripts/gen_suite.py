@@ -45,11 +45,16 @@ for group, tests in grouped_tests.items():
 
 includes = '\n\n#include <unity.h>\n#include <unity_fixture.h>\n\n'
 
-board_init = 'extern void suite_board_init();\n\n' \
-             'extern "C" void board_init()\n' \
-             '{\n' \
-             '    suite_board_init();\n' \
-             '}\n\n'
+board_init = '''
+
+extern void suite_board_init();
+
+extern "C" void board_init()
+{
+    suite_board_init();
+}
+
+'''
 
 suite_runner_start = 'static void suite_runner()\n{\n'
 
@@ -63,20 +68,26 @@ group_runner_test_case = '    RUN_TEST_CASE({test_group}, {test_name});\n'
 
 group_runner_end ='}\n\n'
 
-suite_main = 'int main()\n' \
-             '{\n' \
-             '    UNITY_BEGIN();\n' \
-             '    suite_runner();\n' \
-             '    UNITY_END();\n' \
-             '    // Suite completed...\n' \
-             '    for (;;);\n ' \
-             '}\n\n'
+suite_main = '''
+int main()
+{
+    UNITY_BEGIN();
+    suite_runner();
+    UNITY_END();
+
+    // Suite completed...
+    for (;;);
+}
+
+'''
 
 # CMake test list
 
-cmake_test_template = '\nset(CASE_SOURCES)\n' \
-                      'include(${{TESTCASES_DIR}}/{test_name}/case_defs.cmake)\n' \
-                      'target_sources({suite_name} PUBLIC ${{CASE_SOURCES}})\n'
+cmake_test_template = '''
+set(CASE_SOURCES)
+include(${{TESTCASES_DIR}}/{test_name}/case_defs.cmake)
+target_sources({suite_name} PUBLIC ${{CASE_SOURCES}})
+'''
 
 # Print generated file
 
