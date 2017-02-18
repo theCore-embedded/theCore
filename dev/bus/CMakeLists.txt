@@ -12,3 +12,7 @@ add_unit_host_test(NAME bus
                    INC_DIRS export tests/mocks
                    # To provide headers for semaphore/mutex
                    ${CORE_DIR}/lib/thread/no_os/export)
+
+add_unit_host_test(NAME serial
+		   SOURCES tests/serial_unit.cpp
+		   INC_DIRS export tests/mocks)
