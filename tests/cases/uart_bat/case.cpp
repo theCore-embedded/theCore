@@ -166,21 +166,26 @@ TEST(uart_bat, listen_mode)
     auto listen_mode_handler = [&h_ctx]
             (ecl::bus_channel ch, ecl::bus_event type, size_t total) {
 
-        TEST_ASSERT_EQUAL(false, transfer_complete);
+        // RX still in progress
+        if (ch == ecl::bus_channel::rx) {
+            TEST_ASSERT_EQUAL(false, transfer_complete);
 
-        TEST_ASSERT_TRUE(ch == ecl::bus_channel::rx);
-        TEST_ASSERT_TRUE(type == ecl::bus_event::tc);
-        TEST_ASSERT_EQUAL_UINT(1, total);
-        TEST_ASSERT_EQUAL_HEX(h_ctx.exp_buf[*h_ctx.cnt], h_ctx.actual_buf[*h_ctx.cnt]);
+            TEST_ASSERT_TRUE(type == ecl::bus_event::tc);
+            TEST_ASSERT_EQUAL_UINT(*h_ctx.cnt, total);
+            TEST_ASSERT_EQUAL_HEX(h_ctx.exp_buf[*h_ctx.cnt], h_ctx.actual_buf[*h_ctx.cnt]);
 
-        (*h_ctx.cnt)++;
+            (*h_ctx.cnt)++;
 
-        // All characters are transmitted
-        if (*h_ctx.cnt == body) {
-            transfer_complete = true;
+            // All characters are transmitted. Next event should indicate
+            // transfer completition.
+            if (*h_ctx.cnt == body) {
+                transfer_complete = true;
+            }
+        } else if (ch == ecl::bus_channel::meta) {
+            TEST_ASSERT_TRUE(type == ecl::bus_event::tc);
 
-            // Cancel further transactions
-            ecl::test_uart::cancel_xfer();
+            // Check if we are expecting this event
+            TEST_ASSERT_EQUAL(true, transfer_complete);
         }
     };
 
@@ -200,5 +205,7 @@ TEST(uart_bat, listen_mode)
     TEST_ASSERT_EQUAL_STRING_LEN(expected_buf, rx_buf, expected_rx);
     TEST_ASSERT_EQUAL_STRING_LEN("\0\0\0\0\0\0\0\0\0\0", buf, offt);
     TEST_ASSERT_EQUAL_STRING_LEN("\0\0\0\0\0\0\0\0\0\0", rx_buf + offt, tail);
+
+    ecl::test_uart::disable_listen_mode();
 #endif
 }
