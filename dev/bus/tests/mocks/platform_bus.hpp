@@ -31,6 +31,10 @@ public:
     static void reset_buffers()
     {
         mock("platform_bus").actualCall("reset_buffers");
+        m_tx = nullptr;
+        m_rx = nullptr;
+        m_tx_size = 0;
+        m_rx_size = 0;
     }
 
     static void set_tx(const uint8_t *tx, size_t size)
@@ -39,6 +43,8 @@ public:
                 .actualCall("set_tx")
                 .withParameter("tx_buf", tx)
                 .withParameter("size", size);
+        m_tx = tx;
+        m_tx_size = size;
     }
 
     static void set_rx(uint8_t *rx, size_t size)
@@ -47,6 +53,8 @@ public:
                 .actualCall("set_rx")
                 .withParameter("rx_buf", rx)
                 .withParameter("size", size);
+        m_rx = rx;
+        m_rx_size = size;
     }
 
     static void set_tx(size_t size, uint8_t fill_byte)
@@ -55,6 +63,8 @@ public:
                 .actualCall("set_tx")
                 .withParameter("tx_size", size)
                 .withParameter("fill_byte", fill_byte);
+        m_tx = nullptr;
+        m_tx_size = size;
     }
 
     static void set_handler(const handler_fn &handler)
@@ -83,6 +93,20 @@ public:
                 (mock("platform_bus").returnIntValueOrDefault(0));
     }
 
+    static ecl::err enable_listen_mode()
+    {
+        mock("platform_bus").actualCall("enable_listen_mode");
+        return static_cast<ecl::err>
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
+    static ecl::err disable_listen_mode()
+    {
+        mock("platform_bus").actualCall("disable_listen_mode");
+        return static_cast<ecl::err>
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
 //------------------------------------------------------------------------------
 // Internally used by the test
 
@@ -91,11 +115,20 @@ public:
         m_handler(ch, e, total);
     }
 
+    static const uint8_t *m_tx;
+    static uint8_t *m_rx;
+    static size_t m_tx_size;
+    static size_t m_rx_size;
+
 private:
     static handler_fn m_handler;
 };
 
 // TODO: move it to cpp file to avoid link errors in future
 platform_mock::handler_fn platform_mock::m_handler = platform_mock::handler_fn{};
+const uint8_t *platform_mock::m_tx;
+uint8_t *platform_mock::m_rx;
+size_t platform_mock::m_tx_size;
+size_t platform_mock::m_rx_size;
 
 #endif
