@@ -1,4 +1,7 @@
-﻿if(PLATFORM_NAME STREQUAL host)
+# Check if separate manager is really required.
+# NVIC or similar will do it by itself.
+# Host platform is not in need of external IRQ manager as well.
+if(PLATFORM_NAME STREQUAL host OR TARGET_USE_NVIC_IRQ_NAMES)
     add_library(platform_common INTERFACE)
     target_include_directories(platform_common INTERFACE export)
 else()

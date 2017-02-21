@@ -16,9 +16,11 @@ include(CMakeParseArguments)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
 
 # Add test only if not cross-compiling
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+if(NOT CMAKE_CROSSCOMPILING)
+    include(CTest)
+
     find_package(CppUTest)
-    if(NOT ${CPPUTEST_FOUND})
+    if(NOT CPPUTEST_FOUND)
         message(WARNING "CppUTest library not present. Tests are disabled.")
     endif()
 endif()
@@ -33,6 +35,10 @@ endif()
 #					 [INC_DIRS list_of_include_directories...]
 #                    [COMPILE_OPTIONS list_of_compiler_options...])
 function(add_unit_host_test)
+    if(NOT BUILD_TESTING)
+        return()
+    endif()
+
     set(CC_WARN_FLAGS -Wall -Wextra -Wpedantic -Werror)
     set(CXX_WARN_FLAGS ${CC_WARN_FLAGS})
 

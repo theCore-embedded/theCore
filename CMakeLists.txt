@@ -1,7 +1,5 @@
 # ASM is crucial
 enable_language(ASM-ATT)
-# Subproject may use tests
-enable_testing()
 
 # Obvious requirement
 cmake_minimum_required(VERSION 3.4)
@@ -47,6 +45,10 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
 target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME})
+
+# Extra libraries, not enabled by default. Check corresponding libraries
+# for enabling switches.
+target_link_libraries(${PROJECT_NAME} INTERFACE core_extra_libs)
 
 # Platform is added in the first place in order to expose platform definitions
 # to the rest of the system
