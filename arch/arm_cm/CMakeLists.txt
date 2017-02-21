@@ -14,6 +14,10 @@ target_compile_definitions(arch PRIVATE
         -D__STARTUP_CLEAR_BSS
         -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 
+if(THECORE_USE_NVIC_IRQ_NAMES)
+    target_compile_definitions(arch PRIVATE -DTHECORE_USE_NVIC_IRQ_NAMES)
+endif()
+
 # Apply memory layout
 configure_file(gcc_arm_cm.ld ${CMAKE_CURRENT_BINARY_DIR}/gcc_arm_cm.ld)
 

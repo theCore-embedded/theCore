@@ -1,6 +1,6 @@
 message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
 
-if("${CONFIG_PLATFORM_DEVICE}" STREQUAL "TM4C123GH6PM")
+if(CONFIG_PLATFORM_DEVICE STREQUAL "TM4C123GH6PM")
     # All members of the TivaTM C Series, including the TM4C123GH6PM
     # microcontroller, are designed around an ARM Cortex-M4 processor core.
     set(TARGET_MCU_ARCH "arm_cm4" CACHE STRING "Processor arch")
