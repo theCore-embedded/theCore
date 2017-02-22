@@ -13,17 +13,31 @@ endif()
 set_source_files_properties(startup_arm_cm.S PROPERTIES LANGUAGE C)
 set_source_files_properties(startup_arm_cm0.S PROPERTIES LANGUAGE C)
 
-# ASM code requires some symbols present in outer libraries
+# ASM code requires some symbols present in outer libraries.
 target_link_libraries(arch PRIVATE sys)
 target_compile_definitions(arch PRIVATE
         -D__START=core_main
         -D__STARTUP_CLEAR_BSS
-        -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
+       )
 
 target_include_directories(arch PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 if(TARGET_USE_NVIC_IRQ_NAMES)
     target_compile_definitions(arch PRIVATE -DTARGET_USE_NVIC_IRQ_NAMES)
+    # IRQ handlers include is provided by the platform.
+    target_link_libraries(arch PRIVATE ${PLATFORM_NAME})
+else()
+    target_compile_definitions(arch PRIVATE -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
+endif()
+
+# Custom stack size
+if(TARGET_STACK_SIZE)
+    target_compile_definitions(arch PRIVATE -D__STACK_SIZE=${TARGET_STACK_SIZE})
+endif()
+
+# Custom heap size
+if(TARGET_HEAP_SIZE)
+    target_compile_definitions(arch PRIVATE -D__HEAP_SIZE=${TARGET_HEAP_SIZE})
 endif()
 
 # Apply memory layout

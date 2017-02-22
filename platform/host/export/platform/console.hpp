@@ -134,6 +134,6 @@ static inline void bypass_putc(char c)
     putchar(c);
 }
 
-}
+} // namespace ecl
 
 #endif // HOST_PLATFORM_CONSOLE_HPP_

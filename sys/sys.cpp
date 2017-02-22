@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <common/irq.hpp>
+#include <platform/irq.hpp>
 #include <platform/console.hpp>
 #include <common/execution.h>
 
