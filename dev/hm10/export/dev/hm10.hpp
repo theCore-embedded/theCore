@@ -4,8 +4,8 @@
 //! asynchronious versions of the driver.
 //! At this moment, only synchronous version is implemented.
 
-#ifndef DEV_BT_HC10_HPP_
-#define DEV_BT_HC10_HPP_
+#ifndef DEV_BT_HM10_HPP_
+#define DEV_BT_HM10_HPP_
 
 #include <ecl/err.hpp>
 #include <ecl/assert.h>
@@ -51,6 +51,19 @@ public:
     //! \return Status of operation.
     //! \retval err::ok         Module is ready to work.
     static err send(const uint8_t *buf, size_t sz);
+
+    //! Receives data from the module with given timeout.
+    //! \param[out]     buf Buffer to store incoming data.
+    //! \param[in,out]  sz  Size of the buffer as input, bytes effectively written
+    //!                     as output.
+    //! \param[in]      ms  Time to wait for incoming data.
+    //! \return Status of operation.
+    //! \retval err::timedout   Buffer was not filled completely before timeout hit.
+    //!                         It is still possible that some data was transferred.
+    //!                         Check \ref sz to understand how many bytes are there.
+    //! \retval err::ok         Whole buffer was populated before timeout reached.
+    static err recv(uint8_t *buf, size_t &sz,
+                    std::chrono::milliseconds ms = std::chrono::milliseconds::max());
 
 private:
     //! Sends command to the module and compares response with given expectatations.
@@ -118,6 +131,13 @@ err hm10_sync<Uart>::send(const uint8_t *buf, size_t sz)
     return xfer(buf, nullptr, sz, dummy_sz, std::chrono::milliseconds(1000));
 }
 
+template<typename Uart>
+err hm10_sync<Uart>::recv(uint8_t *buf, size_t &sz, std::chrono::milliseconds ms)
+{
+    size_t dummy_sz = 0;
+    return xfer(nullptr, buf, dummy_sz, sz, ms);
+}
+
 //------------------------------------------------------------------------------
 
 template<typename Uart>
@@ -176,4 +196,4 @@ err hm10_sync<Uart>::xfer(const uint8_t *tx, uint8_t *rx, size_t &tx_sz, size_t 
 
 } // namespace ecl
 
-#endif // DEV_BT_HC10_HPP_
+#endif // DEV_BT_HM10_HPP_
