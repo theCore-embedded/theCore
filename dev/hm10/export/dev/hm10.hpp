@@ -1,3 +1,9 @@
+//! \file
+//! \brief HM-10 BT module drivers.
+//! Header must expose both synchronous (simple but not so functional) and
+//! asynchronious versions of the driver.
+//! At this moment, only synchronous version is implemented.
+
 #ifndef DEV_BT_HC10_HPP_
 #define DEV_BT_HC10_HPP_
 
@@ -14,27 +20,66 @@
 namespace ecl
 {
 
-//! HC10 BT driver.
-//! \tparam Uart bus to work with.
+//! HM10 synchronous BT driver.
+//! \details This HM10 driver is simple and low-functional API to send and receive
+//! data from BT module. It lacks connection status detection and do not escape
+//! potential AT commands found in payload (yet). No flow control is used
+//! whatsoever.
+//! External protocol is required to control whether other end is ready to
+//! receive or send a data. Great advantage of this particular driver is its API.
+//! Straitforward and blocking it can be used for simple demo implementations.
+//! \note Driver _is_not_ a thread safe. Using driver routine from ISR context
+//! will lead to undefined behaviour.
+//! \tparam UART bus to work with.
 template<typename Uart>
-class hc10_sync
+class hm10_sync
 {
 public:
-    // Inits BT driver
+    //! Initializes BT module.
+    //! \return Status of operation.
+    //! \retval err::inval      Module respond with invalid data.
+    //! \retval err::timedout   Module did not respond at all.
+    //! \retval err::ok         Module is ready to work.
     static err init();
 
-    // Waits for connection
-    static err wait_connect(std::chrono::milliseconds ms = std::chrono::milliseconds::max());
-
-    // Sends data
+    //! Sends data to the module.
+    //! \warning It is possible that no one has connected to the device yet.
+    //! \warning Data that is sent to unconnected module will be lost.
+    //! \details Call blocks until all data will be sent.
+    //! \param[in] buf Buffer to send.
+    //! \param[in] sz  Size of buffer.
+    //! \return Status of operation.
+    //! \retval err::ok         Module is ready to work.
     static err send(const uint8_t *buf, size_t sz);
 
 private:
-    // Blocking send-recieve command with given timeout.
+    //! Sends command to the module and compares response with given expectatations.
+    //! \details Commands are ASCII-based strings, started with "AT".
+    //! Certain and unknown (for now) delay is used as a command terminator.
+    //! \param[in] cmd      Command to send.
+    //! \param[in] cmd_sz   Command size in bytes.
+    //! \param[in] exp_resp Expected response.
+    //! \param[in] exp_sz   Size of expected response.
+    //! \param[in] ms       Time to wait for response.
+    //! \return Status of operation.
+    //! \retval err::timedout   Response is not received within given timeout.
+    //! \retval err::inval      Response is received but it is invalid.
+    //! \retval err::ok         Command succeed.
+    //! \todo Use uint8_t instead of char*.
     static err send_cmd(const char *cmd, size_t cmd_sz, const char *exp_resp, size_t exp_sz,
                     std::chrono::milliseconds ms = std::chrono::milliseconds(1000));
 
-    // Blocking xfer.
+    //! Sends/receives data to the module with given timeout.
+    //! \param[in]      tx      Buffer to send.
+    //! \param[out]     rx      Buffer to store data to.
+    //! \param[in,out]  tx_sz   Size of the transmit buffer as input and
+    //!                         amount of bytes actually transmitted as output.
+    //! \param[in,out]  rx_sz   Size of the receive buffer as input and
+    //!                         amount of bytes actually written to the buffer as output.
+    //! \param[in] ms           Time to wait for response.
+    //! \return Status of operation.
+    //! \retval err::timedout   Response is not received within given timeout.
+    //! \retval err::ok         Command succeed.
     static err xfer(const uint8_t *tx, uint8_t *rx, size_t &tx_sz, size_t &rx_sz,
                     std::chrono::milliseconds ms);
 };
@@ -42,12 +87,10 @@ private:
 //------------------------------------------------------------------------------
 
 template<typename Uart>
-err hc10_sync<Uart>::init()
+err hm10_sync<Uart>::init()
 {
     constexpr char at_cmd[]             = "AT";
     constexpr char at_cmd_resp[]        = "OK";
-    constexpr char at_noti_cmd[]        = "AT+NOTI1";
-    constexpr char at_noti_resp[]       = "OK+Set:1";
 
     Uart::init();
     Uart::lock();
@@ -65,25 +108,11 @@ err hc10_sync<Uart>::init()
         return rc;
     }
 
-    // Set notification mode. When master will connect, module will respond with
-    // OK+CONN
-    rc = send_cmd(at_noti_cmd, sizeof(at_noti_cmd) - 1,
-                        at_noti_resp, sizeof(at_noti_resp) - 1);
-
     return rc;
 }
 
 template<typename Uart>
-err hc10_sync<Uart>::wait_connect(std::chrono::milliseconds ms)
-{
-    // TODO: assert if not inited
-
-    // Wait until somebody will connect
-    return send_cmd(nullptr, 0, "OK+CONN", sizeof("OK+CONN") - 1, ms);
-}
-
-template<typename Uart>
-err hc10_sync<Uart>::send(const uint8_t *buf, size_t sz)
+err hm10_sync<Uart>::send(const uint8_t *buf, size_t sz)
 {
     size_t dummy_sz = 0;
     return xfer(buf, nullptr, sz, dummy_sz, std::chrono::milliseconds(1000));
@@ -92,7 +121,7 @@ err hc10_sync<Uart>::send(const uint8_t *buf, size_t sz)
 //------------------------------------------------------------------------------
 
 template<typename Uart>
-err hc10_sync<Uart>::send_cmd(const char *cmd, size_t cmd_sz, const char *exp_resp,
+err hm10_sync<Uart>::send_cmd(const char *cmd, size_t cmd_sz, const char *exp_resp,
                                     size_t exp_sz, std::chrono::milliseconds ms)
 {
     char resp[32] = {0};
@@ -106,14 +135,15 @@ err hc10_sync<Uart>::send_cmd(const char *cmd, size_t cmd_sz, const char *exp_re
                    reinterpret_cast<uint8_t*>(resp),
                    cmd_sz, resp_sz, ms);
 
-    // Unexpected error
-    if (rc != err::timedout && is_error(rc)) {
+    // If no data is written to the TX buffer, then there is no need to proceed
+    // further.
+    if (!resp_sz && is_error(rc)) {
         return rc;
     }
 
-    // Check if some response is received befor timeout. Note that output _likely_
-    // is not null-terminated.
-    if (!resp_sz || strncmp(resp, exp_resp, resp_sz)) {
+    // Check response received. Note that output _likely_  is not null-terminated.
+    // Even if xfer failed due to timeout, incoming data is still useful.
+    if (strncmp(resp, exp_resp, resp_sz)) {
         // Unexpected response or no data is received for some reason.
         // TODO: what if there will be payload bytes after the command response?
         return err::inval;
@@ -123,7 +153,7 @@ err hc10_sync<Uart>::send_cmd(const char *cmd, size_t cmd_sz, const char *exp_re
 }
 
 template<typename Uart>
-err hc10_sync<Uart>::xfer(const uint8_t *tx, uint8_t *rx, size_t &tx_sz, size_t &rx_sz,
+err hm10_sync<Uart>::xfer(const uint8_t *tx, uint8_t *rx, size_t &tx_sz, size_t &rx_sz,
                                 std::chrono::milliseconds ms)
 {
     Uart::set_buffers(tx, rx, tx_sz, rx_sz);

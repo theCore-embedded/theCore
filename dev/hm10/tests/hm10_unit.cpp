@@ -1,4 +1,4 @@
-#include <dev/hc10.hpp>
+#include <dev/hm10.hpp>
 
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
@@ -126,7 +126,7 @@ bool hc10_uart_mock::m_locked;
 
 //------------------------------------------------------------------------------
 
-TEST_GROUP(hc10_sync_mode)
+TEST_GROUP(hm10_sync_mode)
 {
     void setup()
     {
@@ -143,12 +143,11 @@ TEST_GROUP(hc10_sync_mode)
 //------------------------------------------------------------------------------
 // HC-10 common mode tests
 
-using hc10_sync = ecl::hc10_sync<hc10_uart_mock>;
+using hm10_sync = ecl::hm10_sync<hc10_uart_mock>;
 
-TEST(hc10_sync_mode, init)
+TEST(hm10_sync_mode, init)
 {
     const char valid_resp[] = "OK";
-    const char noti_resp[] = "OK+Set:1";
 
     mock("uart_mock").strictOrder();
 
@@ -157,7 +156,6 @@ TEST(hc10_sync_mode, init)
 
     // Responses are not null-terminated (TODO: double check this)
     size_t valid_sz = sizeof(valid_resp) - 1;
-    size_t noti_sz = sizeof(noti_resp) - 1;
 
     // Query module
     mock("uart_mock").expectOneCall("set_buffers");
@@ -166,21 +164,14 @@ TEST(hc10_sync_mode, init)
             .withOutputParameterReturning("rx_sz", &valid_sz, sizeof(valid_sz))
             .withStringParameter("tx", "AT");
 
-    // Set notification mode
-    mock("uart_mock").expectOneCall("set_buffers");
-    mock("uart_mock").expectOneCall("xfer")
-            .withOutputParameterReturning("rx", noti_resp, sizeof(noti_resp) - 1)
-            .withOutputParameterReturning("rx_sz", &noti_sz, sizeof(noti_sz))
-            .withStringParameter("tx", "AT+NOTI1");
-
-    auto rc = hc10_sync::init();
+    auto rc = hm10_sync::init();
 
     CHECK_EQUAL(ecl::err::ok, rc);
 
     mock().checkExpectations();
 }
 
-TEST(hc10_sync_mode, init_invalid_resp)
+TEST(hm10_sync_mode, init_invalid_resp)
 {
     const char invalid_resp[] = "BZ";
     size_t inv_sz = sizeof(invalid_resp) - 1;
@@ -188,7 +179,7 @@ TEST(hc10_sync_mode, init_invalid_resp)
     mock("uart_mock").expectOneCall("init");
     mock("uart_mock").expectOneCall("lock");
 
-    // HC10 will try to query module 3 times before failing dur to invalid response.
+    // HM10 will try to query module 3 times before failing dur to invalid response.
 
     mock("uart_mock").expectNCalls(3, "set_buffers");
     mock("uart_mock").expectNCalls(3, "xfer")
@@ -196,11 +187,69 @@ TEST(hc10_sync_mode, init_invalid_resp)
             .withOutputParameterReturning("rx_sz", &inv_sz, sizeof(inv_sz))
             .withStringParameter("tx", "AT");
 
-    auto rc = hc10_sync::init();
+    auto rc = hm10_sync::init();
 
     CHECK_EQUAL(ecl::err::inval, rc);
 
     mock().checkExpectations();
+}
+
+TEST(hm10_sync_mode, init_timeout_valid_resp)
+{
+    // Even if timeout is hit, data from RX stream should be processed.
+
+    const char valid_resp[] = "OK";
+
+    mock("uart_mock").strictOrder();
+
+    mock("uart_mock").expectOneCall("init");
+    mock("uart_mock").expectOneCall("lock");
+
+    // Responses are not null-terminated (TODO: double check this)
+    size_t valid_sz = sizeof(valid_resp) - 1;
+
+    // Query module
+    mock("uart_mock").expectOneCall("set_buffers");
+    mock("uart_mock").expectOneCall("xfer")
+            .withOutputParameterReturning("rx", valid_resp, sizeof(valid_resp) - 1)
+            .withOutputParameterReturning("rx_sz", &valid_sz, sizeof(valid_sz))
+            .withStringParameter("tx", "AT")
+            .andReturnValue((int)ecl::err::timedout);
+
+    auto rc = hm10_sync::init();
+
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    mock().checkExpectations();
+}
+
+TEST(hm10_sync_mode, init_timeout_no_resp)
+{
+    // With no bytes written to RX, driver must return timeout in case if such
+    // was returned from UART.
+    size_t resp_sz = 0;
+
+    mock("uart_mock").expectOneCall("init");
+    mock("uart_mock").expectOneCall("lock");
+
+    // Query module
+    mock("uart_mock").expectNCalls(3, "set_buffers");
+    mock("uart_mock").expectNCalls(3, "xfer")
+            .withOutputParameterReturning("rx", "", 0)
+            .withOutputParameterReturning("rx_sz", &resp_sz, sizeof(resp_sz))
+            .withStringParameter("tx", "AT")
+            .andReturnValue((int)ecl::err::timedout);
+
+    auto rc = hm10_sync::init();
+
+    CHECK_EQUAL(ecl::err::timedout, rc);
+
+    mock().checkExpectations();
+}
+
+TEST(hm10_sync_mode, send)
+{
+
 }
 
 
