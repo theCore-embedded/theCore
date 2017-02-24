@@ -22,7 +22,7 @@ namespace ecl
 
 //! HM10 synchronous BT driver.
 //! \details This HM10 driver is simple and low-functional API to send and receive
-//! data from BT module. It lacks connection status detection and do not escape
+//! data from BT module. It lacks connection status detection and does not escape
 //! potential AT commands found in payload (yet). No flow control is used
 //! whatsoever.
 //! External protocol is required to control whether other end is ready to
@@ -35,9 +35,13 @@ template<typename Uart>
 class hm10_sync
 {
 public:
+    //! Defines internal timeout in milliseconds during which module has to
+    //! respond to commands.
+    static constexpr auto cmd_timeout() { return std::chrono::milliseconds(1000); }
+
     //! Initializes BT module.
     //! \return Status of operation.
-    //! \retval err::inval      Module respond with invalid data.
+    //! \retval err::inval      Module responded with invalid data.
     //! \retval err::timedout   Module did not respond at all.
     //! \retval err::ok         Module is ready to work.
     static err init();
@@ -46,17 +50,18 @@ public:
     //! \warning It is possible that no one has connected to the device yet.
     //! \warning Data that is sent to unconnected module will be lost.
     //! \details Call blocks until all data will be sent.
-    //! \param[in] buf Buffer to send.
-    //! \param[in] sz  Size of buffer.
+    //! \param[in]      buf Buffer to send.
+    //! \param[in,out]  sz  Size of buffer as input, bytes written as output.
     //! \return Status of operation.
-    //! \retval err::ok         Module is ready to work.
-    static err send(const uint8_t *buf, size_t sz);
+    //! \retval err::ok         Data sent successfully.
+    static err send(const uint8_t *buf, size_t &sz);
 
     //! Receives data from the module with given timeout.
     //! \param[out]     buf Buffer to store incoming data.
     //! \param[in,out]  sz  Size of the buffer as input, bytes effectively written
     //!                     as output.
-    //! \param[in]      ms  Time to wait for incoming data.
+    //! \param[in]      ms  Optional. Defines overall time to wait for incoming data.
+    //!                     Defaults to infinite time.
     //! \return Status of operation.
     //! \retval err::timedout   Buffer was not filled completely before timeout hit.
     //!                         It is still possible that some data was transferred.
@@ -80,7 +85,7 @@ private:
     //! \retval err::ok         Command succeed.
     //! \todo Use uint8_t instead of char*.
     static err send_cmd(const char *cmd, size_t cmd_sz, const char *exp_resp, size_t exp_sz,
-                    std::chrono::milliseconds ms = std::chrono::milliseconds(1000));
+                    std::chrono::milliseconds ms = cmd_timeout());
 
     //! Sends/receives data to the module with given timeout.
     //! \param[in]      tx      Buffer to send.
@@ -125,7 +130,7 @@ err hm10_sync<Uart>::init()
 }
 
 template<typename Uart>
-err hm10_sync<Uart>::send(const uint8_t *buf, size_t sz)
+err hm10_sync<Uart>::send(const uint8_t *buf, size_t &sz)
 {
     size_t dummy_sz = 0;
     return xfer(buf, nullptr, sz, dummy_sz, std::chrono::milliseconds(1000));

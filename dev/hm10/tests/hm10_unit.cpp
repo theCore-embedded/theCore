@@ -292,6 +292,7 @@ TEST(hm10_sync_mode_inited, send)
 
     // No response is required
     size_t resp_sz = 0;
+    size_t send_sz = sizeof(send_buf);
 
     mock("uart_mock").expectOneCall("set_buffers");
     mock("uart_mock").expectOneCall("xfer")
@@ -299,8 +300,10 @@ TEST(hm10_sync_mode_inited, send)
             .withOutputParameterReturning("rx", "", 0)
             .withOutputParameterReturning("rx_sz", &resp_sz, sizeof(resp_sz));
 
-    auto rc = hm10_sync::send((const uint8_t *)send_buf, sizeof(send_buf));
+    auto rc = hm10_sync::send((const uint8_t *)send_buf, send_sz);
+
     CHECK_EQUAL(ecl::err::ok, rc);
+    CHECK_EQUAL(sizeof(send_buf), send_sz);
 
     mock().checkExpectations();
 }
