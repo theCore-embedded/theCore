@@ -1,11 +1,13 @@
-#include <unity.h>
-#include <unity_fixture.h>
-
 #include <ecl/utils.hpp>
 
 #include <common/execution.h>
 
 #include "test_gpio.hpp"
+
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
+#include <unity.h>
+#include <unity_fixture.h>
 
 //! Test executor.
 //! \tparam Ts List of GPIOs to execute test.

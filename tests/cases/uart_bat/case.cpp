@@ -1,11 +1,13 @@
-#include <unity.h>
-#include <unity_fixture.h>
-
 #include <ecl/unity_helpers.hpp>
 
 #include "test_uart.hpp"
 
 #include <atomic>
+
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
+#include <unity.h>
+#include <unity_fixture.h>
 
 static bool uart_inited;
 static volatile std::atomic_bool transfer_complete;
