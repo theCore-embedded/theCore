@@ -149,6 +149,8 @@ public:
     //! \brief Enables listen mode.
     //! In listen mode, UART bus uses different semantics of the `transfer complete`
     //! event. `transfer complete` will be generated with every byte received.
+    //! bus_handler will be called with `total` argument that equal to current
+    //! count of bytes written to the buffer.
     //! \note Can be called from ISR.
     static ecl::err enable_listen_mode();
 
@@ -589,11 +591,12 @@ void usart_bus<dev>::irq_handler()
             m_rx[m_rx_size - m_rx_left--] = static_cast<uint8_t>(data);
 
             if (listen_mode()) {
-                // Notify about state of the buffer.
-                event_handler()(channel::rx, event::tc, m_rx_size - m_rx_left);
-            }
+                // If buffer is full - start the next round
+                m_rx_left = m_rx_left ? m_rx_left : m_rx_size;
 
-            if (!m_rx_left) { // RX is over.
+                // Notify about 1 byte reception.
+                event_handler()(channel::rx, event::tc, 1);
+            } else if (!m_rx_left) { // RX is over.
                 // Transaction complete.
                 set_rx_done();
                 USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
