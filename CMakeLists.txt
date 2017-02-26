@@ -59,7 +59,9 @@ if(CMAKE_CROSSCOMPILING)
     add_subdirectory(sys)
 
     # Newlib is theCore default C library (with some limitations).
-    target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
+    if(NOT CONFIG_DISABLE_CORE_NEWLIB)
+        target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
+    endif()
 endif()
 
 # Rest of modules
