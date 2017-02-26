@@ -3,7 +3,7 @@ if(NOT CONFIG_PLATFORM MATCHES "tm4c")
 endif()
 
 # override warnings, since library contains few of them
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -Wno-error=sign-compare -Wno-error=type-limits -Wno-error=old-style-declaration")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error")
 
 add_library(tivaware STATIC
         ti-tivaware/driverlib/adc.c

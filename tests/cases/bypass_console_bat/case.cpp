@@ -1,9 +1,10 @@
 #include <common/execution.h>
 #include <platform/console.hpp>
 
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
 #include <unity.h>
 #include <unity_fixture.h>
-
 
 TEST_GROUP(bypass_console_bat);
 

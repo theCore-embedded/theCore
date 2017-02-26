@@ -202,6 +202,28 @@ TEST(bus_is_ready, set_buffers_invalid)
 
 TEST(bus_is_ready, set_buffers)
 {
+    size_t tx_size = buf_size / 2;
+    size_t rx_size = buf_size / 3;
+
+    mock("platform_bus").expectOneCall("reset_buffers");
+    mock("platform_bus")
+            .expectOneCall("set_tx")
+            .withConstPointerParameter("tx_buf", tx_buf)
+            .withParameter("size", tx_size);
+    mock("platform_bus")
+            .expectOneCall("set_rx")
+            .withParameter("rx_buf", rx_buf)
+            .withParameter("size", rx_size);
+
+    auto rc = bus_t::set_buffers(tx_buf, rx_buf, tx_size, rx_size);
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    mock().checkExpectations();
+}
+
+
+TEST(bus_is_ready, set_buffers_non_equal_size)
+{
     mock("platform_bus").expectOneCall("reset_buffers");
     mock("platform_bus")
             .expectOneCall("set_tx")

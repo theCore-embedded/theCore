@@ -62,12 +62,7 @@ public:
 
 public:
     //! EXTI trigger.
-    enum class trigger
-    {
-        rising  = gpio_hw::int_source::rising,  //!< Trigger on rising edge.
-        falling = gpio_hw::int_source::falling, //!< Trigger on falling edge.
-        both    = gpio_hw::int_source::both,    //!< Trigger on both edges.
-    };
+    using trigger = gpio_hw::int_source;
 
     //! Construction isn't allowed
     exti_manager() = delete;

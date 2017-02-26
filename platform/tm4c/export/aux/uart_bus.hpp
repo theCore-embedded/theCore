@@ -292,6 +292,8 @@ void uart_bus<dev>::irq_bus_handler()
 template<uart_device dev>
 err uart_bus<dev>::init()
 {
+    // POD-type fields of ctx will be initialized to 0, so it is valid to access
+    // flags there.
     auto &bus_ctx = get_ctx();
 
     ecl_assert(!bus_ctx.status);
@@ -299,7 +301,7 @@ err uart_bus<dev>::init()
     constexpr auto periph = static_cast<std::underlying_type_t<uart_device>>(dev);
     constexpr auto periph_sysctl = pick_sysctl();
 
-    new (&m_ctx_storage) ctx;
+    m_ctx_storage.init();
 
     SysCtlPeripheralEnable(periph_sysctl);
 

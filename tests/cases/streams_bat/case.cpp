@@ -1,7 +1,9 @@
+#include <ecl/iostream.hpp>
+
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
 #include <unity.h>
 #include <unity_fixture.h>
-
-#include <ecl/iostream.hpp>
 
 TEST_GROUP(streams_bat);
 

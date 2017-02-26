@@ -2,6 +2,7 @@
 //! \brief Implementation of the semaphore for targets without OS support.
 
 #include <ecl/thread/semaphore.hpp>
+#include <common/execution.h>
 #include <common/time.hpp>
 
 void ecl::semaphore::signal()
@@ -20,7 +21,10 @@ void ecl::semaphore::wait()
 
 bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
 {
-    auto till = get_ms_time() + ms;
+    // Some platform support not yet include RTC.
+    // Time reference is possibly provided by simple clock counting, which
+    // can be wrapped.
+    auto now = std::chrono::milliseconds(0);
 
     int cnt;
     bool exch = false;
@@ -33,8 +37,10 @@ bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
                // is not modified by other threads.
                || !(exch = m_counter.compare_exchange_weak(cnt, cnt - 1)))
            // Keep track of timeout.
-           && get_ms_time() < till)
-    { }
+           && now++ < ms)
+    {
+        ecl_spin_wait(1);
+    }
 
     return exch;
 }
@@ -53,12 +59,15 @@ void ecl::binary_semaphore::wait()
 
 bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
 {
-    auto till = get_ms_time() + ms;
+    // Some platform support not yet include RTC.
+    // Time reference is possibly provided by simple clock counting, which
+    // can be wrapped.
+    auto now = std::chrono::milliseconds(0);
 
     bool ex;
 
-    while (!(ex = m_flag.exchange(false)) && get_ms_time() < till) {
-
+    while (!(ex = m_flag.exchange(false)) && now++ < ms) {
+        ecl_spin_wait(1);
     }
 
     // If last exchanged value is false, it means that timeout was reached.

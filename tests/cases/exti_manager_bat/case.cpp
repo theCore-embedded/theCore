@@ -1,11 +1,13 @@
-#include <unity.h>
-#include <unity_fixture.h>
-
 #include <ecl/unity_helpers.hpp>
 
 #include <test_gpio.hpp>
 
 #include <platform/exti_manager.hpp>
+
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
+#include <unity.h>
+#include <unity_fixture.h>
 
 // Holds info about expectancy of handler call.
 static volatile bool                call_is_expected    = false;

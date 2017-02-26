@@ -5,6 +5,8 @@
 #ifndef PLATFORM_ADC_HPP_
 #define PLATFORM_ADC_HPP_
 
+#include "platform/execution.h"
+
 #include <stm32_device.hpp>
 
 #include <ecl/utils.hpp>

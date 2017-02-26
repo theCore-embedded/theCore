@@ -40,7 +40,7 @@ function(add_unit_host_test)
     set(CMAKE_CXX_STANDARD 14)
 
     # Debug mode flags, for maximum debug info
-    set(CC_CXX_FLAGS_DEBUG -O0 -g3)
+    set(CC_CXX_FLAGS_DEBUG -O0 -g3 -ggdb)
 
     # Protect from missing test utilities
     if(CPPUTEST_FOUND)

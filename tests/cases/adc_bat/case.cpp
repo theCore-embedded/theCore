@@ -1,10 +1,12 @@
-#include <unity.h>
-#include <unity_fixture.h>
-
 #include <ecl/unity_helpers.hpp>
 #include <common/execution.h>
 
 #include <test_adc.hpp>
+
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
+#include <unity.h>
+#include <unity_fixture.h>
 
 TEST_GROUP(adc_bat);
 
