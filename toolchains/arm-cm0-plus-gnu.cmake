@@ -35,8 +35,8 @@ set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
 # common flags for current platform
-set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m0plus -mthumb -fdata-sections \
-	-ffunction-sections -fno-common")
+set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m0plus -mthumb -march=armv6s-m \
+    -fdata-sections -ffunction-sections -fno-common")
 
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
 # why????
@@ -73,7 +73,7 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL}
 	CACHE STRING "Minsize C++ flags")
 
 # Debug mode, no LTO and maximum debug info
-set(CMAKE_C_FLAGS_DEBUG  "-O0 -g3 "
+set(CMAKE_C_FLAGS_DEBUG  "-Og -g3 "
 	CACHE STRING "Debug C flags")
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG}
 	CACHE STRING "Debug C++ flags")
@@ -81,7 +81,7 @@ set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG}
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy CACHE STRING "Objcopy executable")
 
 set(CMAKE_ASM-ATT_COMPILE_OBJECT
-  "<CMAKE_ASM-ATT_COMPILER> -mcpu=cortex-m0plus -o <OBJECT> <SOURCE>")
+  "<CMAKE_ASM-ATT_COMPILER> -mthumb -march=armv6s-m -mcpu=cortex-m0plus -o <OBJECT> <SOURCE>")
 set(CMAKE_C_LINK_EXECUTABLE
 	"${CMAKE_C_LINKER} <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 set(CMAKE_CXX_LINK_EXECUTABLE
