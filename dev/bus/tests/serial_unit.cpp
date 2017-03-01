@@ -178,6 +178,70 @@ TEST(serial, try_start_xfer)
     mock().checkExpectations();
 }
 
+TEST(serial, send_byte_basic)
+{
+    // This test implies that the internal tx buffer is empty
+    // and no xfer is in progress currently
+    // It also covers basic send_buf test.
+    uint8_t byte = 0x42;
+    auto expected_ret = ecl::err::ok;
+    mock("platform_bus")
+        .expectOneCall("cancel_xfer")
+        .andReturnValue(static_cast<int>(ecl::err::ok));
+    mock("platform_bus")
+        .expectOneCall("set_buffers")
+        .andReturnValue(static_cast<int>(ecl::err::ok));
+    mock("platform_bus")
+        .expectOneCall("do_xfer")
+        .andReturnValue(static_cast<int>(ecl::err::ok));
+    auto actual_ret = serial_t::send_byte(byte);
+    CHECK_EQUAL(expected_ret, actual_ret);
+    CHECK_EQUAL(byte, platform_mock::m_tx[0]);
+    mock().checkExpectations();
+}
+
+TEST(serial, recv_buf_send_buf)
+{
+    // Send and receive buffer at the same time
+    uint8_t recv_buf[serial_t::buffer_size];
+    size_t recv_size = sizeof(recv_buf);
+    uint8_t send_buf[serial_t::buffer_size];
+    size_t send_size = sizeof(send_buf);
+    auto expected_ret = ecl::err::ok;
+
+    for (size_t i = 0; i < serial_t::buffer_size; i++) {
+        platform_mock::invoke(ecl::bus_channel::rx, ecl::bus_event::tc, i+1);
+    }
+
+    auto actual_ret = serial_t::recv_buf(recv_buf, recv_size);
+    CHECK_EQUAL(expected_ret, actual_ret);
+    CHECK_EQUAL(serial_t::buffer_size, recv_size);
+
+    mock("platform_bus")
+        .expectOneCall("cancel_xfer")
+        .andReturnValue(static_cast<int>(ecl::err::ok));
+    mock("platform_bus")
+        .expectOneCall("set_buffers")
+        .andReturnValue(static_cast<int>(ecl::err::ok));
+    mock("platform_bus")
+        .expectOneCall("do_xfer")
+        .andReturnValue(static_cast<int>(ecl::err::ok));
+    actual_ret = serial_t::send_buf(send_buf, send_size);
+    CHECK_EQUAL(expected_ret, actual_ret);
+    CHECK_EQUAL(serial_t::buffer_size, send_size);
+    mock().checkExpectations();
+}
+
+TEST(serial, send_buff_larger)
+{
+    uint8_t buf[serial_t::buffer_size+1];
+    size_t buf_size = sizeof(buf);
+    auto expected_ret = ecl::err::ok;
+    auto actual_ret = serial_t::send_buf(buf, buf_size);
+    CHECK_EQUAL(expected_ret, actual_ret);
+    CHECK_EQUAL(serial_t::buffer_size, buf_size);
+}
+
 //------------------------------------------------------------------------------
 
 int main(int argc, char *argv[])

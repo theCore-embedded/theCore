@@ -264,6 +264,21 @@ err serial<PBus, buf_size>::try_start_xfer()
     return err::ok;
 }
 
+template <class PBus, size_t buf_size>
+err serial<PBus, buf_size>::send_byte(uint8_t byte)
+{
+    size_t sz = 1;
+    return send_buf(&byte, sz);
+}
+
+template <class PBus, size_t buf_size>
+err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
+{
+    static_cast<void>(buf);
+    static_cast<void>(size);
+    return ecl::err::ok;
+}
+
 } // namespace ecl
 
 #endif // DEV_BUS_SERIAL_HPP_
