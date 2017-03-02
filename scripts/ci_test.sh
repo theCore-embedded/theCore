@@ -28,3 +28,11 @@ cd build_test_cases
 cmake ../tests
 make
 cd ..
+
+# Documentation build
+
+mkdir -p docs
+cd docs
+cmake ../doc
+make core_doc
+cd ..
