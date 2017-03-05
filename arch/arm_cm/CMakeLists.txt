@@ -40,6 +40,11 @@ if(TARGET_HEAP_SIZE)
     target_compile_definitions(arch PRIVATE -D__HEAP_SIZE=${TARGET_HEAP_SIZE})
 endif()
 
+# Kinetis-specific definitions
+if(TARGET_KINETIS_FLASH_PROTECT_SECTION)
+    target_compile_definitions(arch PRIVATE -DTARGET_KINETIS_FLASH_PROTECT_SECTION=1)
+endif()
+
 # Apply memory layout
 configure_file(gcc_arm_cm.ld ${CMAKE_CURRENT_BINARY_DIR}/gcc_arm_cm.ld)
 

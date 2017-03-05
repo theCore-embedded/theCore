@@ -101,8 +101,45 @@ __Vectors:
     .endr
 #endif
 
-
     .size	__Vectors, . - __Vectors
+
+    /* Flash protect - only for Freescale Kinetis */
+#ifdef TARGET_KINETIS_FLASH_PROTECT_SECTION
+    .equ BackDoorK0, 0xFF
+    .equ BackDoorK1, 0xFF
+    .equ BackDoorK2, 0xFF
+    .equ BackDoorK3, 0xFF
+    .equ BackDoorK4, 0xFF
+    .equ BackDoorK5, 0xFF
+    .equ BackDoorK6, 0xFF
+    .equ BackDoorK7, 0xFF
+
+    .equ EEPROT,     0xFF
+
+    .equ FPROT,      0xFF
+
+    .equ FSEC,       0xFE
+
+    .equ FOPT,       0xFE
+
+    .org    0x400
+    .byte   BackDoorK0
+    .byte   BackDoorK1
+    .byte   BackDoorK2
+    .byte   BackDoorK3
+    .byte   BackDoorK4
+    .byte   BackDoorK5
+    .byte   BackDoorK6
+    .byte   BackDoorK7
+    .byte   0xFF /* Reserved */
+    .byte   0xFF /* Reserved */
+    .byte   0xFF /* Reserved */
+    .byte   0xFF /* Reserved */
+    .byte   EEPROT
+    .byte   FPROT
+    .byte   FSEC
+    .byte   FOPT
+#endif
 
     .text
     .thumb
