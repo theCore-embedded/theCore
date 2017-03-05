@@ -4,23 +4,28 @@
 //!
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include <platform/irq.hpp>
 #include <platform/console.hpp>
 #include <common/execution.h>
 
-// TODO: move it somewhere
-void operator delete(void *) noexcept
+void *operator new(unsigned int sz)
 {
-    // TODO: call to abort routine
-    for(;;);
+    return malloc(sz);
 }
 
 // TODO: move it somewhere
-void operator delete(void *, unsigned int) noexcept
+void operator delete(void *chunk) noexcept
 {
-    // TODO: call to abort routine
-    for(;;);
+    free(chunk);
+}
+
+// TODO: move it somewhere
+void operator delete(void *chunk, unsigned int sz) noexcept
+{
+    (void)sz;
+    free(chunk);
 }
 
 // TODO: move this to toolchain-dependent module

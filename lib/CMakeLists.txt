@@ -27,4 +27,5 @@ endif()
 # Not enabled by default. Enabling this requires cloning of Unity submodule.
 if(CONFIG_USE_UNITY OR BUILD_TESTING)
     add_subdirectory(unity)
+    target_link_libraries(core_extra_libs INTERFACE unity)
 endif()

@@ -8,5 +8,5 @@ set(TARGET_MCU_RAM_SIZE  0xc00      CACHE STRING "RAM region size")    # 3072 by
 
 # TODO: Provide two-segment memory values. (see RM)
 
-set(TARGET_STACK_SIZE    0x1ff     CACHE STRING "Stack size")
-set(TARGET_HEAP_SIZE     0x1ff     CACHE STRING "Heap size")
+set(TARGET_STACK_SIZE    0xff     CACHE STRING "Stack size")
+set(TARGET_HEAP_SIZE     0xff     CACHE STRING "Heap size")
