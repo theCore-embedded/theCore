@@ -18,7 +18,7 @@ namespace ecl
 //! \details The serial allows to abstract async,
 //! interrupt-driven nature of platform-level drivers and
 //! provide synchronus, buffered data management interface.
-//! \tparam PBus Exclusevely owned platform bus.
+//! \tparam PBus Exclusively owned platform bus.
 //! \tparam buf_size Size of internal rx and tx buffers.
 template<class PBus, size_t buf_size = 128>
 class serial
@@ -98,23 +98,28 @@ private:
 
     static err try_start_xfer();
 
+    static bool m_is_inited;
+    static std::atomic_bool m_new_xfer_allowed;
+
     static uint8_t m_rx_buffer[buf_size];
-    static uint8_t m_tx_buffer[buf_size];
-
-    static std::atomic_bool m_rx_new_xfer_allowed;
-    static std::atomic_bool m_rx_buffer_empty;
-
     static std::atomic_size_t m_rx_write_iter; //!< Used for accepting data from the bus
     static std::atomic_size_t m_rx_read_iter; //!< Used for returning data to the user
+    static binary_semaphore m_rx_is_data_available; //!< Signals if rx buffer is available for reading
 
-    static bool m_is_inited;
+    static uint8_t m_tx_buffer[buf_size];
+    static std::atomic_size_t m_tx_write_iter; //!< Used for accepting data from the user
+    static std::atomic_size_t m_tx_read_iter; //!< Used for writing data on the bus
+    static binary_semaphore m_tx_is_buffer_available; //!< Signals if tx buffer has at least one available byte
 };
 
 template <class PBus, size_t buf_size>
-uint8_t serial<PBus, buf_size>::m_rx_buffer[buf_size];
+bool serial<PBus, buf_size>::m_is_inited;
 
 template <class PBus, size_t buf_size>
-uint8_t serial<PBus, buf_size>::m_tx_buffer[buf_size];
+std::atomic_bool serial<PBus, buf_size>::m_new_xfer_allowed;
+
+template <class PBus, size_t buf_size>
+uint8_t serial<PBus, buf_size>::m_rx_buffer[buf_size];
 
 template <class PBus, size_t buf_size>
 std::atomic_size_t serial<PBus, buf_size>::m_rx_write_iter;
@@ -123,13 +128,19 @@ template <class PBus, size_t buf_size>
 std::atomic_size_t serial<PBus, buf_size>::m_rx_read_iter;
 
 template <class PBus, size_t buf_size>
-bool serial<PBus, buf_size>::m_is_inited;
+binary_semaphore serial<PBus, buf_size>::m_rx_is_data_available;
 
 template <class PBus, size_t buf_size>
-std::atomic_bool serial<PBus, buf_size>::m_rx_new_xfer_allowed;
+uint8_t serial<PBus, buf_size>::m_tx_buffer[buf_size];
 
 template <class PBus, size_t buf_size>
-std::atomic_bool serial<PBus, buf_size>::m_rx_buffer_empty;
+std::atomic_size_t serial<PBus, buf_size>::m_tx_write_iter;
+
+template <class PBus, size_t buf_size>
+std::atomic_size_t serial<PBus, buf_size>::m_tx_read_iter;
+
+template <class PBus, size_t buf_size>
+binary_semaphore serial<PBus, buf_size>::m_tx_is_buffer_available;
 
 template <class PBus, size_t buf_size>
 err serial<PBus, buf_size>::init()
@@ -144,9 +155,10 @@ err serial<PBus, buf_size>::init()
     if (is_error(result)) {
         return result;
     }
-    m_rx_new_xfer_allowed = true;
-    m_rx_buffer_empty = true;
+    m_new_xfer_allowed = true;
     PBus::set_rx(m_rx_buffer, buffer_size);
+    PBus::set_tx(nullptr, 0);
+    m_tx_is_buffer_available.signal();
     result = PBus::do_xfer();
     if (is_ok(result)) {
         m_is_inited = true;
@@ -171,17 +183,21 @@ void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t 
 {
     if (ch == bus_channel::rx) {
         ecl_assert(type == bus_event::tc);
+        ecl_assert(m_rx_write_iter + 1 == total);
+
+        // It is possible that the buffer was empty before the current byte arrived
+        // We then need to signal the semaphore to indicate that the data is available
+        if (m_rx_read_iter == m_rx_write_iter) {
+            m_rx_is_data_available.signal();
+        }
         m_rx_write_iter++;
-        ecl_assert(m_rx_write_iter == total);
-        m_rx_buffer_empty = false;
 
         // The buffer has been overflowed.
         // Move read iterator to point to the most relevant data
         //
-        // It might be a bit unclear why the same expression
-        // m_rx_read_iter == m_rx_write_iter both means that the buffer is
-        // overflown and empty (see recv_buf()).
-        // However, the context of bus_handler() implies that the
+        // The expression m_rx_read_iter == m_rx_write_iter means
+        // here that the buffer is full.
+        // That's bacause the current context implies that the
         // read iterator is "approached" by write iterator from behind
         // and we properly adjust the position of read iterator to be
         // always ahead of the write iterator.
@@ -193,7 +209,7 @@ void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t 
         }
 
         // Start new xfer if needed and allowed
-        if (m_rx_new_xfer_allowed) {
+        if (m_new_xfer_allowed) {
             try_start_xfer();
         }
     }
@@ -213,12 +229,13 @@ err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
     ecl_assert(m_is_inited);
     err result = err::ok;
 
-    // Restrict starting new xfer from bus_handler()
-    // to prevent data loss
-    m_rx_new_xfer_allowed = false;
+    // Disallow starting new xfer from bus_handler()
+    m_new_xfer_allowed = false;
 
     // Wait until data is available on the read end
-    while ((m_rx_read_iter == m_rx_write_iter && m_rx_buffer_empty)) { }
+    if (m_rx_read_iter == m_rx_write_iter) {
+        m_rx_is_data_available.wait();
+    }
 
     // Save atomic variables on the stack
     size_t write_pos = m_rx_write_iter;
@@ -227,12 +244,7 @@ err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
     // Take into account relative positions of read and write iterators
     sz = std::min(sz, write_pos > read_pos ? write_pos - read_pos
             : buffer_size - read_pos);
-    std::copy(m_rx_buffer + read_pos,
-            m_rx_buffer + read_pos + sz, buf);
-
-    if (m_rx_read_iter == m_rx_write_iter) {
-        m_rx_buffer_empty = true;
-    }
+    std::copy(m_rx_buffer + read_pos, m_rx_buffer + read_pos + sz, buf);
 
     // The read iterator might have been changed by the bus_handler during copying.
     // If it wasn't, it's safe to advance iterator by the number of bytes copied above
@@ -242,6 +254,7 @@ err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
         result = err::nobufs;
     }
 
+    // Wrap rx read iterator
     if (m_rx_read_iter == buffer_size) {
         m_rx_read_iter = 0;
     }
@@ -250,7 +263,7 @@ err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
     try_start_xfer();
 
     // Allow starting new xfer from bus_handler()
-    m_rx_new_xfer_allowed = true;
+    m_new_xfer_allowed = true;
     return result;
 }
 
@@ -276,6 +289,31 @@ err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
 {
     static_cast<void>(buf);
     static_cast<void>(size);
+
+    // Disallow starting new xfer from bus_handler()
+    m_new_xfer_allowed = false;
+
+    // Wait until at least one byte of free space becomes available
+    m_tx_is_buffer_available.wait();
+
+    // Save atomic variables on stack
+    size_t read_pos = m_tx_read_iter;
+    size_t write_pos = m_tx_write_iter;
+
+    size = std::min(size, write_pos < read_pos ?
+            read_pos - write_pos : buffer_size - write_pos);
+    std::copy(buf, buf + size, m_tx_buffer + write_pos);
+
+    m_tx_write_iter += size;
+
+    // Signal buffer_available sempahore if buffer is not full
+    if (m_tx_read_iter != m_tx_write_iter) {
+        m_tx_is_buffer_available.signal();
+    } else {
+        try_start_xfer();
+    }
+
+    m_new_xfer_allowed = true;
     return ecl::err::ok;
 }
 
