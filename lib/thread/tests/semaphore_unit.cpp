@@ -241,6 +241,76 @@ TEST(semaphore, multiple_threads)
     test_for_each(objs, [](auto &obj) { obj.thread.join(); });
 }
 
+//------------------------------------------------------------------------------
+
+TEST_GROUP(binary_semaphore)
+{
+    void setup()
+    {
+    }
+
+    void teardown()
+    {
+        mock_time = 0;
+    }
+};
+
+TEST(binary_semaphore, try_wait)
+{
+    // Should complete without a hang
+    ecl::binary_semaphore sem;
+
+    sem.signal();
+
+    auto rc = sem.try_wait();
+    CHECK_EQUAL(true, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(false, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(false, rc);
+
+    // Signal same semaphore again
+    // to make sure counter is in valid state
+    sem.signal();
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(true, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(false, rc);
+}
+
+TEST(binary_semaphore, more_than_one_signal)
+{
+    // Should complete without a hang and only one event must be reported
+    ecl::binary_semaphore sem;
+
+    sem.signal();
+    sem.signal(); // Second should be 'ignored' as semaphore is already raised.
+
+    sem.wait();
+
+    auto rc = sem.try_wait();
+    CHECK_EQUAL(false, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(false, rc);
+
+    // Signal same semaphore again
+    // to make sure counter is in valid state
+    sem.signal();
+    sem.signal();
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(true, rc);
+
+    rc = sem.try_wait();
+    CHECK_EQUAL(false, rc);
+}
+
+
 int main(int argc, char *argv[])
 {
     return CommandLineTestRunner::RunAllTests(argc, argv);

@@ -50,6 +50,7 @@ void ecl::binary_semaphore::signal()
     std::unique_lock<std::mutex> lock(m_mutex);
     m_flag = true;
     lock.unlock();
+
     m_cond.notify_one();
 }
 
@@ -57,9 +58,17 @@ bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
 
+    // Already rised
+    if (m_flag) {
+        m_flag = false;
+        return true;
+    }
+
+    // Give a chance to raise flag
     m_cond.wait_for(lock, ms, [&] { return m_flag.load(); });
 
-    auto rc = m_flag ? true : false;
+    // If flag is still false then semaphore was not raised during timeout.
+    auto rc = m_flag.load();
     m_flag = false;
     return rc;
 }
@@ -67,6 +76,15 @@ bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
 void ecl::binary_semaphore::wait()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
+
+    // Already rised
+    if (m_flag) {
+        m_flag = false;
+        return;
+    }
+
+    // Give a chance to raise flag
     m_cond.wait(lock, [&] { return m_flag.load(); });
+
     m_flag = false;
 }
