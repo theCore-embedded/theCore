@@ -40,10 +40,8 @@ public:
         }
 
         // Give a chance to raise flag
-        m_cond.wait_for(lock, ms, [&] { return m_flag.load(); });
+        auto rc = m_cond.wait_for(lock, ms, [&] { return m_flag.load(); });
 
-        // If flag is still false then semaphore was not raised during timeout.
-        auto rc = m_flag.load();
         m_flag = false;
         return rc;
     }
