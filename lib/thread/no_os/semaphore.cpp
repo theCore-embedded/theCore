@@ -55,6 +55,7 @@ void ecl::binary_semaphore::signal()
 void ecl::binary_semaphore::wait()
 {
     while (!m_flag);
+    m_flag = false; // Semaphore taken.
 }
 
 bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
