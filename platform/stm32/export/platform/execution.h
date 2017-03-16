@@ -34,5 +34,13 @@ static inline void ecl_abort()
     for(;;);
 }
 
+//! Waits for interrupts.
+//! \details Processor will stop executing until any interrupt will occur.
+//! See also: http://infocenter.arm.com/help/topic/com.arm.doc.ihi0014q/CJAJGICJ.html
+static inline void ecl_wfi()
+{
+    __WFI();
+}
+
 
 #endif // THE_CORE_EXECUTION_H_
