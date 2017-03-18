@@ -16,17 +16,17 @@ static inline void ecl_abort()
 
 //! \brief Gets core clock speed.
 //! \return Current clock speed. Unreliable on host platform.
-static inline uint64_t get_clk_spd()
+static inline uint64_t ecl_get_clk_spd()
 {
     return 1000; // Pretend that there is a 1 kHz clock.
 }
 
 //! \brief Gets current clock count.
 //! \return Current clock count.
-static inline uint64_t get_clk()
+static inline uint64_t ecl_get_clk()
 {
     // Host platform is unreliable in terms of clock speed, so just return
-    // seconds since epoch here. See also get_clk_spd()
+    // seconds since epoch here. See also ecl_get_clk_spd()
     return time(NULL) * 1000;
 }
 

@@ -9,7 +9,7 @@
 
 //! \brief Gets core clock speed.
 //! \return Current clock speed.
-static inline uint32_t get_clk_spd()
+static inline uint32_t ecl_get_clk_spd()
 {
     return SystemCoreClock;
 }
@@ -18,7 +18,7 @@ static inline uint32_t get_clk_spd()
 //! \details Uses DWT register.
 //! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
 //! \return Current clock count.
-static inline uint32_t get_clk()
+static inline uint32_t ecl_get_clk()
 {
     return DWT->CYCCNT;
 }

@@ -12,11 +12,11 @@
 //! \todo Use RTC instead of relying on clock. See #213 also.
 static inline void ecl_spin_wait(uint32_t ms)
 {
-    uint32_t start = get_clk();
-    uint32_t to_wait = ms * (get_clk_spd() / 1000L);
+    uint32_t start = ecl_get_clk();
+    uint32_t to_wait = ms * (ecl_get_clk_spd() / 1000L);
 
     // Handles wraparound as well.
-    do { } while (get_clk() - start < to_wait);
+    do { } while (ecl_get_clk() - start < to_wait);
 }
 
 #endif // PLATFORM_COMMON_EXECUTION_H_

@@ -14,8 +14,8 @@ namespace ecl
 //! \todo: substitute it with platform's RTC. See #213
 static inline std::chrono::milliseconds get_ms_time()
 {
-    auto spd = get_clk_spd() / 1000; // In kHz
-    auto clk = get_clk();
+    auto spd = ecl_get_clk_spd() / 1000; // In kHz
+    auto clk = ecl_get_clk();
 
     return std::chrono::milliseconds(clk / spd);
 }

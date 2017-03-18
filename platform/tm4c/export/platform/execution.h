@@ -494,7 +494,7 @@ typedef struct
 
 //! \brief Gets core clock speed.
 //! \return Current clock speed.
-static inline uint32_t get_clk_spd()
+static inline uint32_t ecl_get_clk_spd()
 {
     return SysCtlClockGet();
 }
@@ -502,7 +502,7 @@ static inline uint32_t get_clk_spd()
 //! \brief Gets current clock count.
 //! \details Uses DWT register.
 //! \return Current clock count.
-static inline uint32_t get_clk()
+static inline uint32_t ecl_get_clk()
 {
     return DWT->CYCCNT;
 }
