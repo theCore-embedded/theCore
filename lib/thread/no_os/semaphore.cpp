@@ -15,7 +15,11 @@ void ecl::semaphore::wait()
     int cnt;
 
     if ((cnt = m_counter.fetch_sub(1)) <= 0) {
-        while (m_counter.load() < cnt) { }
+        while (m_counter.load() < cnt) {
+#ifdef USE_WFI_WFE
+            ecl_wfi();
+#endif
+        }
     }
 }
 
@@ -54,7 +58,13 @@ void ecl::binary_semaphore::signal()
 
 void ecl::binary_semaphore::wait()
 {
-    while (!m_flag);
+    while (!m_flag) {
+#ifdef USE_WFI_WFE
+        ecl_wfi();
+#endif
+    }
+
+    m_flag = false; // Semaphore taken.
 }
 
 bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
