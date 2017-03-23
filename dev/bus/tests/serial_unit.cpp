@@ -70,7 +70,7 @@ TEST(serial, multiple_recv_no_block)
 {
     // Fill internal rx buffer and read less bytes in multiple calls
     mock("platform_bus")
-        .expectOneCall("do_xfer")
+        .expectOneCall("do_rx")
         .andReturnValue(static_cast<int>(ecl::err::ok));
     for (size_t i = 0; i < serial_t::buffer_size; i++) {
         platform_mock::m_rx[i] = static_cast<uint8_t>(i);
@@ -98,7 +98,7 @@ TEST(serial, multiple_recv_block_and_unblock)
 {
     // Fill internal rx buffer and read all bytes in multiple calls
     mock("platform_bus")
-        .expectOneCall("do_xfer")
+        .expectOneCall("do_rx")
         .andReturnValue(static_cast<int>(ecl::err::ok));
     for (size_t i = 0; i < serial_t::buffer_size; i++) {
         platform_mock::m_rx[i] = static_cast<uint8_t>(i);
@@ -144,7 +144,7 @@ TEST(serial, multiple_recv_block_and_unblock)
 TEST(serial, recv_bigger_than_available)
 {
     mock("platform_bus")
-        .expectOneCall("do_xfer")
+        .expectOneCall("do_rx")
         .andReturnValue(static_cast<int>(ecl::err::ok));
     for (size_t i = 0; i < serial_t::buffer_size; i++) {
         platform_mock::m_rx[i] = static_cast<uint8_t>(i);
@@ -172,7 +172,7 @@ TEST(serial, try_start_xfer)
     }
 
     mock("platform_bus")
-        .expectOneCall("do_xfer")
+        .expectOneCall("do_rx")
         .andReturnValue(static_cast<int>(ecl::err::ok));
     platform_mock::invoke(ecl::bus_channel::rx, ecl::bus_event::tc, serial_t::buffer_size);
     mock().checkExpectations();

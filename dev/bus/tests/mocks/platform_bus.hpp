@@ -86,9 +86,37 @@ public:
                 (mock("platform_bus").returnIntValueOrDefault(0));
     }
 
+    static ecl::err do_tx()
+    {
+        mock("platform_bus").actualCall("do_tx");
+        return static_cast< ecl::err >
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
+    static ecl::err do_rx()
+    {
+        mock("platform_bus").actualCall("do_rx");
+        return static_cast< ecl::err >
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
     static ecl::err cancel_xfer()
     {
         mock("platform_bus").actualCall("cancel_xfer");
+        return static_cast<ecl::err>
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
+    static ecl::err cancel_tx()
+    {
+        mock("platform_bus").actualCall("cancel_tx");
+        return static_cast<ecl::err>
+                (mock("platform_bus").returnIntValueOrDefault(0));
+    }
+
+    static ecl::err cancel_rx()
+    {
+        mock("platform_bus").actualCall("cancel_rx");
         return static_cast<ecl::err>
                 (mock("platform_bus").returnIntValueOrDefault(0));
     }

@@ -159,7 +159,7 @@ err serial<PBus, buf_size>::init()
     PBus::set_rx(m_rx_buffer, buffer_size);
     PBus::set_tx(nullptr, 0);
     m_tx_is_buffer_available.signal();
-    result = PBus::do_xfer();
+    result = PBus::do_rx();
     if (is_ok(result)) {
         m_is_inited = true;
     }
@@ -272,7 +272,7 @@ err serial<PBus, buf_size>::try_start_xfer()
 {
     if (m_rx_write_iter == buffer_size) {
         m_rx_write_iter = 0;
-        return PBus::do_xfer();
+        return PBus::do_rx();
     }
     return err::ok;
 }
