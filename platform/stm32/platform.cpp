@@ -1,4 +1,4 @@
-#include "common/execution.h"
+#include "common/execution.hpp"
 #include "platform/exti_manager.hpp"
 #include "common/irq.hpp"
 
@@ -19,7 +19,7 @@ void assert_param(int exp)
     (void)exp;
 #else
     if (!exp) {
-        ecl_abort();
+        ecl::abort();
     }
 #endif
 }

@@ -5,7 +5,7 @@
 
 #include <ecl/assert.h>
 #include <platform/irq.hpp>
-#include <common/execution.h>
+#include <common/execution.hpp>
 
 #include <new>
 
@@ -22,7 +22,7 @@ static handler_storage storage[IRQ_COUNT];
 //! Unhandled interrupt must cause the abort
 static void default_handler()
 {
-    ecl_abort();
+    ecl::abort();
 }
 
 //! Effectively casts IRQ storage
