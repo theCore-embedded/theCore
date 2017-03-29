@@ -5,7 +5,7 @@
 #ifndef PLATFORM_ADC_HPP_
 #define PLATFORM_ADC_HPP_
 
-#include "platform/execution.h"
+#include "platform/execution.hpp"
 
 #include <stm32_device.hpp>
 
@@ -346,7 +346,7 @@ void adc_irq_dispatcher::irqh()
 void adc_irq_dispatcher::default_evh(adc_event)
 {
     // Event not handled - abort execution.
-    ecl_abort();
+    ecl::abort();
 }
 
 //------------------------------------------------------------------------------

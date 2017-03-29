@@ -1,15 +1,21 @@
 //! \file
-//! \brief Module aggregates routines that are control execution flow of the MCU.
-//!
-#ifndef THE_CORE_EXECUTION_H_
-#define THE_CORE_EXECUTION_H_
+//! \brief Various routines for CM* platform, altering execution flow.
 
-#include <stdint.h>
-#include <stm32_device.h>
+#ifndef CORE_ARCH_EXECUTION_HPP_
+#define CORE_ARCH_EXECUTION_HPP_
+
+#ifdef arm_cm4
+#include <core_cm4.h>
+#elif defined arm_cm3
+#include <core_cm3.h>
+#endif
+
+namespace ecl
+{
 
 //! \brief Gets core clock speed.
 //! \return Current clock speed.
-static inline uint32_t ecl_get_clk_spd()
+static inline uint32_t clk_spd()
 {
     return SystemCoreClock;
 }
@@ -18,17 +24,14 @@ static inline uint32_t ecl_get_clk_spd()
 //! \details Uses DWT register.
 //! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
 //! \return Current clock count.
-static inline uint32_t ecl_get_clk()
+static inline uint32_t clk()
 {
     return DWT->CYCCNT;
 }
 
-// TODO #72: add suspend() and resume() routines
-// TODO #213 add RTC support
-
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
-static inline void ecl_abort()
+static inline void abort()
 {
     __disable_irq();
     for(;;);
@@ -37,10 +40,12 @@ static inline void ecl_abort()
 //! Waits for interrupts.
 //! \details Processor will stop executing until any interrupt will occur.
 //! See also: http://infocenter.arm.com/help/topic/com.arm.doc.ihi0014q/CJAJGICJ.html
-static inline void ecl_wfi()
+static inline void wfi()
 {
     __WFI();
 }
 
+} // namespace ecl
 
-#endif // THE_CORE_EXECUTION_H_
+
+#endif // CORE_ARCH_EXECUTION_HPP_

@@ -7,7 +7,7 @@
 
 #include <common/irq.hpp>
 #include <platform/console.hpp>
-#include <common/execution.h>
+#include <common/execution.hpp>
 
 // TODO: move it somewhere
 void operator delete(void *) noexcept
@@ -92,7 +92,7 @@ extern "C" void core_main()
 	// bypass console will be used.
 	// It should be fixed by configuring console GPIO directly in the platform,
     // not in the user's `board_init()` routine. See issue #151.
-    ecl_spin_wait(50);
+    ecl::spin_wait(50);
 #endif // CONFIG_USE_BYPASS_CONSOLE
     kernel_main();
 }

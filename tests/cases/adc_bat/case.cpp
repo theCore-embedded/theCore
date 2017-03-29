@@ -1,5 +1,5 @@
 #include <ecl/unity_helpers.hpp>
-#include <common/execution.h>
+#include <common/execution.hpp>
 
 #include <test_adc.hpp>
 
@@ -41,6 +41,6 @@ TEST(adc_bat, single_run)
             UNITY_PRINT_EOL();
         }
 
-        ecl_spin_wait(1000);
+        ecl::spin_wait(1000);
     }
 }

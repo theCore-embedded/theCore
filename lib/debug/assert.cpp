@@ -2,7 +2,7 @@
 
 #include <ecl/iostream.hpp>
 #include <platform/console.hpp>
-#include <platform/execution.h>
+#include <platform/execution.hpp>
 
 using ecl::bypass_putc;
 
@@ -60,5 +60,5 @@ void ecl_assert_failed(const char *assertion,
         bypass_puts("\r\n");
     }
 
-    ecl_abort();
+    ecl::abort();
 }

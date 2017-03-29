@@ -4,7 +4,7 @@
 #ifndef PLATFORM_IRQ_HPP_
 #define PLATFORM_IRQ_HPP_
 
-#include <platform/execution.h>
+#include <platform/execution.hpp>
 
 #include <ecl/err.hpp>
 

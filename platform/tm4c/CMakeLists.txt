@@ -38,3 +38,6 @@ if(CONFIG_USE_BYPASS_CONSOLE)
 
     message(STATUS "Bypass console is supported and enabled by the platform")
 endif()
+
+# Platform supports WFI/WFE semantics
+set(TARGET_MCU_WFI_WFE_PRESENT 1 CACHE BOOL "WFI flag" INTERNAL)

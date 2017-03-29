@@ -58,5 +58,4 @@ else()
 endif()
 
 # Platform supports WFI/WFE semantics
-set(TARGET_MCU_WFI_WFE_PRESENT 1)
-
+set(TARGET_MCU_WFI_WFE_PRESENT 1 CACHE BOOL "WFI flag" INTERNAL)

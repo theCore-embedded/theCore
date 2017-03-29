@@ -2,7 +2,7 @@
 //! \brief Implementation of the semaphore for targets without OS support.
 
 #include <ecl/thread/semaphore.hpp>
-#include <common/execution.h>
+#include <common/execution.hpp>
 #include <common/time.hpp>
 
 void ecl::semaphore::signal()
@@ -17,7 +17,7 @@ void ecl::semaphore::wait()
     if ((cnt = m_counter.fetch_sub(1)) <= 0) {
         while (m_counter.load() < cnt) {
 #ifdef USE_WFI_WFE
-            ecl_wfi();
+            ecl::wfi();
 #endif
         }
     }
@@ -43,7 +43,7 @@ bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
            // Keep track of timeout.
            && now++ < ms)
     {
-        ecl_spin_wait(1);
+        ecl::spin_wait(1);
     }
 
     return exch;
@@ -60,7 +60,7 @@ void ecl::binary_semaphore::wait()
 {
     while (!m_flag) {
 #ifdef USE_WFI_WFE
-        ecl_wfi();
+        ecl::wfi();
 #endif
     }
 
@@ -77,7 +77,7 @@ bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
     bool ex;
 
     while (!(ex = m_flag.exchange(false)) && now++ < ms) {
-        ecl_spin_wait(1);
+        ecl::spin_wait(1);
     }
 
     // If last exchanged value is false, it means that timeout was reached.

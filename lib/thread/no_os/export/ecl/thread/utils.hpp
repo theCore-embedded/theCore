@@ -4,7 +4,7 @@
 #ifndef LIB_THREAD_NO_OS_UTILS_HPP_
 #define LIB_THREAD_NO_OS_UTILS_HPP_
 
-#include <common/execution.h>
+#include <common/execution.hpp>
 
 namespace ecl
 {
@@ -18,7 +18,7 @@ namespace this_thread
 //!
 static inline void sleep_for(uint32_t ms)
 {
-    ecl_spin_wait(ms);
+    ecl::spin_wait(ms);
 }
 
 } // namespace this_thread
