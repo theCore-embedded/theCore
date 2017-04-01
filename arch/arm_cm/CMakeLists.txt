@@ -16,6 +16,24 @@ target_compile_definitions(arch PRIVATE
 
 target_compile_definitions(arch PUBLIC -D${TARGET_MCU_ARCH})
 
+# CMSIS compliant platform must provide device.hpp header, that will be used
+# by CMSIS core drivers. Otherwise, architecture modules cannot provide
+# any CMSIS-based implementation, such as execution control and platform
+# must implement that functions on its size.
+if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
+    # Use systick unless otherwise is explicitly stated
+    if(NOT CONFIG_OS AND NOT DEFINED CONFIG_USE_SYSTMR_SYSTICK)
+       set(CONFIG_USE_SYSTMR_SYSTICK 1)
+    endif()
+
+    if(CONFIG_USE_SYSTMR_SYSTICK)
+        target_compile_definitions(arch PUBLIC -DUSE_SYSTMR_SYSTICK=1)
+        target_sources(arch PUBLIC ${CMAKE_CURRENT_LIST_DIR}/execution.cpp)
+    endif()
+
+    target_compile_definitions(arch PUBLIC -DPLATFORM_CMSIS_COMPLIANT)
+endif()
+
 # Apply memory layout
 configure_file(gcc_arm_cm.ld ${CMAKE_CURRENT_BINARY_DIR}/gcc_arm_cm.ld)
 
