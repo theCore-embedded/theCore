@@ -155,32 +155,31 @@ TEST(uart_bat, listen_mode)
     expected_rx = body;
     const uint8_t expected_buf[] = "zxcvbnm";
     uint8_t *rx_buf = buf + offt; // To check underflow
-    size_t actual_cnt = 0; // Actual count of symbols
 
     // Handler context
     struct h_ctx {
        const uint8_t    *exp_buf;
        uint8_t          *actual_buf;
-       size_t           *cnt;
-    } h_ctx { expected_buf, rx_buf, &actual_cnt };
+       size_t           cnt;
+    } h_ctx { expected_buf, rx_buf, 0 };
 
     // Handler must be called every time new character received
-    auto listen_mode_handler = [&h_ctx]
-            (ecl::bus_channel ch, ecl::bus_event type, size_t total) {
+    auto listen_mode_handler
+            = [&h_ctx](ecl::bus_channel ch, ecl::bus_event type, size_t total) {
 
         // RX still in progress
         if (ch == ecl::bus_channel::rx) {
-            TEST_ASSERT_EQUAL(false, transfer_complete);
+            TEST_ASSERT_FALSE(transfer_complete);
 
             TEST_ASSERT_TRUE(type == ecl::bus_event::tc);
-            TEST_ASSERT_EQUAL_UINT(*h_ctx.cnt, total);
-            TEST_ASSERT_EQUAL_HEX(h_ctx.exp_buf[*h_ctx.cnt], h_ctx.actual_buf[*h_ctx.cnt]);
+            TEST_ASSERT_EQUAL_UINT(h_ctx.cnt + 1, total);
+            TEST_ASSERT_EQUAL_HEX(h_ctx.exp_buf[h_ctx.cnt], h_ctx.actual_buf[h_ctx.cnt]);
 
-            (*h_ctx.cnt)++;
+            h_ctx.cnt++;
 
             // All characters are transmitted. Next event should indicate
             // transfer completition.
-            if (*h_ctx.cnt == body) {
+            if (h_ctx.cnt == body) {
                 transfer_complete = true;
             }
         } else if (ch == ecl::bus_channel::meta) {
@@ -202,7 +201,7 @@ TEST(uart_bat, listen_mode)
     ecl::test_uart::do_xfer();
     wait_transfer_complete();
 
-    TEST_ASSERT_EQUAL(expected_rx, actual_cnt);
+    TEST_ASSERT_EQUAL(expected_rx, h_ctx.cnt);
 
     TEST_ASSERT_EQUAL_STRING_LEN(expected_buf, rx_buf, expected_rx);
     TEST_ASSERT_EQUAL_STRING_LEN("\0\0\0\0\0\0\0\0\0\0", buf, offt);
