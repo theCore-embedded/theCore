@@ -41,21 +41,21 @@ private:
     static void set_reset()
     {
         Gpio::set();
-        ecl::spin_wait(1000);
+        ecl::wait_for(1000);
 
         Gpio::reset();
-        ecl::spin_wait(1000);
+        ecl::wait_for(1000);
     }
 
     template<typename Gpio>
     static void toggle()
     {
         Gpio::toggle();
-        ecl::spin_wait(1000);
+        ecl::wait_for(1000);
         TEST_ASSERT_TRUE(Gpio::get());
 
         Gpio::toggle();
-        ecl::spin_wait(1000);
+        ecl::wait_for(1000);
     }
 
     template<typename Gpio>

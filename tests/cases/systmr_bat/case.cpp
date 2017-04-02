@@ -6,12 +6,9 @@
 #include <platform/execution.hpp>
 
 static volatile uint32_t test_cnt;
-static volatile bool tmr_enabled;
 
 extern "C" void systmr_handler(void)
 {
-    // Should not be called if timer is disabled
-    TEST_ASSERT_TRUE(tmr_enabled);
     test_cnt++;
 }
 
@@ -32,14 +29,12 @@ TEST(systmr, on_off)
     // previously.
     auto events_now = ecl::systmr::events();
 
-    tmr_enabled = true;
     ecl::systmr::enable();
 
     // Dumb delay
     while (!test_cnt);
 
     ecl::systmr::disable();
-    tmr_enabled = false;
 
     TEST_ASSERT_EQUAL(test_cnt, ecl::systmr::events() - events_now);
 }
@@ -51,7 +46,6 @@ TEST(systmr, five_seconds)
 
     auto expected_cnt = ecl::systmr::speed() * 5;
 
-    tmr_enabled = true;
     ecl::systmr::enable();
 
     // Delay until deadline will be reached.
@@ -59,6 +53,5 @@ TEST(systmr, five_seconds)
 
     ecl::systmr::disable();
 
-    tmr_enabled = false;
     UnityPrintWithEOL("5 seconds delay completed");
 }

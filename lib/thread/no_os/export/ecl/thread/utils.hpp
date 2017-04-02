@@ -18,7 +18,7 @@ namespace this_thread
 //!
 static inline void sleep_for(uint32_t ms)
 {
-    ecl::spin_wait(ms);
+    ecl::wait_for(ms);
 }
 
 } // namespace this_thread

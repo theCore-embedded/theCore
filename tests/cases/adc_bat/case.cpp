@@ -41,6 +41,6 @@ TEST(adc_bat, single_run)
             UNITY_PRINT_EOL();
         }
 
-        ecl::spin_wait(1000);
+        ecl::wait_for(1000);
     }
 }
