@@ -13,7 +13,7 @@ namespace ecl
 
 //! Waits conditionally not less than given amount of milliseconds.
 //! \tparam Predicate Predicate type.
-//! \param[in] ms Milliseconds to wait.
+//! \param[in] ms Milliseconds to wait. Can be 0.
 //! \param[in] pred Predicate to check.
 //! \todo Use RTC instead of relying on clock. See #213 also.
 //! \details Stops waiting if predicate returns true. Guarantees that predicate
@@ -26,7 +26,10 @@ namespace ecl
 template<class Predicate>
 static inline bool wait_for(uint32_t ms, Predicate pred)
 {
-    ecl_assert(ms);
+    // Small optimization - do not start timers if there is zero wait time.
+    if (!ms) {
+        return pred();
+    }
 
 #ifdef USE_SYSTMR
     // Current events count
