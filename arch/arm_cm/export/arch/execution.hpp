@@ -51,7 +51,17 @@ static inline void wfi()
     __WFI();
 }
 
-#if USE_SYSTMR_SYSTICK
+//! Waits for events.
+//! \details Processor will stop executing until any event will occur.
+//! \note Event flag will be set regardless of execution state. To track
+//! spurious wakeup, additional flags must be checked.
+//! See also: http://infocenter.arm.com/help/topic/com.arm.doc.ihi0014q/CJAJGICJ.html
+static inline void wfe()
+{
+    __WFE();
+}
+
+#if USE_SYSTMR
 
 namespace systmr
 {
@@ -89,7 +99,7 @@ uint32_t events();
 
 } // namespace systmr
 
-#endif // USE_SYSTMR_SYSTICK
+#endif // USE_SYSTMR
 
 
 } // namespace ecl

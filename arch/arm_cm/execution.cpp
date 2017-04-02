@@ -3,7 +3,7 @@
 namespace ecl
 {
 
-#if USE_SYSTMR_SYSTICK
+#if USE_SYSTMR
 
 static uint32_t event_cnt;
 
@@ -17,11 +17,11 @@ uint32_t events()
 
 } // namespace systmr
 
-#endif // USE_SYSTMR_SYSTICK
+#endif // USE_SYSTMR
 
 } // namespace ecl
 
-#if USE_SYSTMR_SYSTICK
+#if USE_SYSTMR
 
 // User can override systimer handler to receive events on its side.
 extern "C" void systmr_handler(void) __attribute__((weak));
@@ -36,4 +36,4 @@ extern "C" void SysTick_Handler(void)
     systmr_handler();
 }
 
-#endif // USE_SYSTMR_SYSTICK
+#endif // USE_SYSTMR

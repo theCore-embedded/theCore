@@ -27,11 +27,13 @@ if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
     endif()
 
     if(CONFIG_USE_SYSTMR_SYSTICK)
-        target_compile_definitions(arch PUBLIC -DUSE_SYSTMR_SYSTICK=1)
+        target_compile_definitions(arch PUBLIC -DUSE_SYSTMR=1)
         target_sources(arch PUBLIC ${CMAKE_CURRENT_LIST_DIR}/execution.cpp)
     endif()
 
-    target_compile_definitions(arch PUBLIC -DPLATFORM_CMSIS_COMPLIANT)
+    target_compile_definitions(arch PUBLIC
+            -DPLATFORM_CMSIS_COMPLIANT
+            -DUSE_WFI_WFE=1) # Architecture provides CMSIS-based WFI/WFE routines.
 endif()
 
 # Apply memory layout
