@@ -40,7 +40,7 @@ if(CONFIG_USE_BYPASS_CONSOLE)
 endif()
 
 # Platform is not CMSIS-compliant
-set(TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT 1 CACHE BOOL "Compiancy status" INTERNAL)
+set(TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT 1 CACHE BOOL "Compiancy status" FORCE)
 
 # Platform provides its own implementation of WFI/WFE routines.
 target_compile_definitions(tm4c PUBLIC -DUSE_WFI_WFE=1)
