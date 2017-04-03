@@ -10,6 +10,7 @@
 #include <ecl/thread/semaphore.hpp>
 
 #include <atomic>
+#include <iostream>
 
 namespace ecl
 {
@@ -91,12 +92,11 @@ public:
     //!                     size will be updated with amount of bytes
     //!                     successfully sent before error occur.
     //! \return Operation status.
+    //! \retval err:again The buffer was not consumed entirely.
     static err send_buf(const uint8_t *buf, size_t &sz);
 
 private:
     static void bus_handler(bus_channel ch, bus_event type, size_t total);
-
-    static err try_start_xfer();
 
     static bool m_is_inited;
     static std::atomic_bool m_new_xfer_allowed;
@@ -157,7 +157,7 @@ err serial<PBus, buf_size>::init()
     }
     m_new_xfer_allowed = true;
     PBus::set_rx(m_rx_buffer, buffer_size);
-    PBus::set_tx(nullptr, 0);
+    PBus::set_tx(m_tx_buffer, buffer_size);
     m_tx_is_buffer_available.signal();
     result = PBus::do_rx();
     if (is_ok(result)) {
@@ -174,6 +174,8 @@ err serial<PBus, buf_size>::deinit()
     PBus::reset_buffers();
     m_rx_read_iter = 0;
     m_rx_write_iter = 0;
+    m_tx_read_iter = 0;
+    m_tx_write_iter = 0;
     m_is_inited = false;
     return err::ok;
 }
@@ -210,10 +212,18 @@ void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t 
 
         // Start new xfer if needed and allowed
         if (m_new_xfer_allowed) {
-            try_start_xfer();
+            if (m_rx_write_iter == buffer_size) {
+                m_rx_write_iter = 0;
+                PBus::do_rx();
+            }
         }
+    } else if (ch == bus_channel::tx) {
+        ecl_assert(type == bus_event::tc);
+        ecl_assert(buffer_size == total);
+
+        m_tx_read_iter = 0;
+        m_tx_is_buffer_available.signal();
     }
-    // TODO: handle TX events
 }
 
 template <class PBus, size_t buf_size>
@@ -260,21 +270,14 @@ err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
     }
 
     // Start new xfer if required
-    try_start_xfer();
+    if (m_rx_write_iter == buffer_size) {
+        m_rx_write_iter = 0;
+        PBus::do_rx();
+    }
 
     // Allow starting new xfer from bus_handler()
     m_new_xfer_allowed = true;
     return result;
-}
-
-template <class PBus, size_t buf_size>
-err serial<PBus, buf_size>::try_start_xfer()
-{
-    if (m_rx_write_iter == buffer_size) {
-        m_rx_write_iter = 0;
-        return PBus::do_rx();
-    }
-    return err::ok;
 }
 
 template <class PBus, size_t buf_size>
@@ -290,8 +293,7 @@ err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
     static_cast<void>(buf);
     static_cast<void>(size);
 
-    // Disallow starting new xfer from bus_handler()
-    m_new_xfer_allowed = false;
+    err ret = err::ok;
 
     // Wait until at least one byte of free space becomes available
     m_tx_is_buffer_available.wait();
@@ -300,21 +302,30 @@ err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
     size_t read_pos = m_tx_read_iter;
     size_t write_pos = m_tx_write_iter;
 
-    size = std::min(size, write_pos < read_pos ?
+    size_t new_size = std::min(size, write_pos < read_pos ?
             read_pos - write_pos : buffer_size - write_pos);
     std::copy(buf, buf + size, m_tx_buffer + write_pos);
 
-    m_tx_write_iter += size;
-
-    // Signal buffer_available sempahore if buffer is not full
-    if (m_tx_read_iter != m_tx_write_iter) {
-        m_tx_is_buffer_available.signal();
-    } else {
-        try_start_xfer();
+    if (new_size < size) {
+        ret = err::again;
     }
 
-    m_new_xfer_allowed = true;
-    return ecl::err::ok;
+    size = new_size;
+
+    m_tx_write_iter += new_size;
+
+    // Signal buffer_available semaphore if buffer is not full
+    if (m_tx_read_iter != m_tx_write_iter) {
+        m_tx_is_buffer_available.signal();
+    }
+
+    auto tmp = buffer_size;
+    // We issue new tx transfer only when the tx_buffer is full
+    if (m_tx_write_iter.compare_exchange_weak(tmp, 0)) {
+        PBus::do_tx();
+    }
+
+    return ret;
 }
 
 } // namespace ecl
