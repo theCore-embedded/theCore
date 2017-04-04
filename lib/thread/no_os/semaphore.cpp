@@ -27,6 +27,9 @@ bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
 {
     bool exch = false;
 
+    // Systimer implementation allows to use more robust and convinient
+    // version of wait_for.
+    // TODO: Drop conditional compilation when #247 will be ready.
 #ifdef USE_SYSTMR
     wait_for(ms.count(), [&exch, this] {
         int cnt;
@@ -86,9 +89,11 @@ void ecl::binary_semaphore::wait()
 
 bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
 {
-
     bool ex;
 
+    // Systimer implementation allows to use more robust and convinient
+    // version of wait_for.
+    // TODO: Drop conditional compilation when #247 will be ready.
 #ifdef USE_SYSTMR
     wait_for(ms.count(), [&ex, this] {
         return ex = m_flag.exchange(false);
