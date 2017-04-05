@@ -141,8 +141,8 @@ add_suite(platform_bat
 
 # GNU suite
 add_suite(platform_bat
-        CASES               gpio_bat exti_manager_bat bypass_console_bat uart_bat
-                            adc_bat
+        CASES               systmr_bat uart_bat gpio_bat exti_manager_bat
+                            bypass_console_bat adc_bat
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         stm32f4discovery_simple)
 

@@ -39,5 +39,8 @@ if(CONFIG_USE_BYPASS_CONSOLE)
     message(STATUS "Bypass console is supported and enabled by the platform")
 endif()
 
-# Platform supports WFI/WFE semantics
-set(TARGET_MCU_WFI_WFE_PRESENT 1 CACHE BOOL "WFI flag" INTERNAL)
+# Platform is not CMSIS-compliant
+set(TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT 1 CACHE BOOL "Compliance status" FORCE)
+
+# Platform provides its own implementation of WFI/WFE routines.
+target_compile_definitions(tm4c PUBLIC -DUSE_WFI_WFE=1)

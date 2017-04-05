@@ -6,7 +6,7 @@
 namespace ecl
 {
 
-static inline void spin_wait(uint32_t ms)
+static inline void wait_for(uint32_t ms)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }

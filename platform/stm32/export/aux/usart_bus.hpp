@@ -590,11 +590,6 @@ void usart_bus<dev>::irq_handler()
 
             m_rx[m_rx_size - m_rx_left--] = static_cast<uint8_t>(data);
 
-            if (listen_mode()) {
-                // Notify about state of the buffer.
-                event_handler()(channel::rx, event::tc, m_rx_size - m_rx_left);
-            }
-
             if (!m_rx_left) { // RX is over.
                 // Transaction complete.
                 set_rx_done();
@@ -602,6 +597,11 @@ void usart_bus<dev>::irq_handler()
 
                 // Notify user
                 event_handler()(channel::rx, event::tc, m_rx_size);
+            } else if (listen_mode()) { // RX is not over, but listen mode
+                                        // enabled. User must be notified
+                                        // for every byte received..
+                // Notify about state of the buffer.
+                event_handler()(channel::rx, event::tc, m_rx_size - m_rx_left);
             }
         }
     }

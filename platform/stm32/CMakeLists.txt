@@ -56,6 +56,3 @@ else()
             ${CMAKE_CURRENT_BINARY_DIR}/generated/platform/console.hpp)
     target_include_directories(stm32 PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 endif()
-
-# Platform supports WFI/WFE semantics
-set(TARGET_MCU_WFI_WFE_PRESENT 1 CACHE BOOL "WFI flag" INTERNAL)

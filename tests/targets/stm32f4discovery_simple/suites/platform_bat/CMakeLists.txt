@@ -18,7 +18,10 @@ target_compile_definitions(platform_bat PUBLIC
 # Expose suite headers to the test cases
 include_directories(${CMAKE_CURRENT_LIST_DIR}/export)
 
-# Suite setup not needed - all done by target
+# Suite additional configuration
+
+# Explicitely enable systick and use it as system timer.
+set(CONFIG_USE_SYSTMR_SYSTICK 1)
 
 # Suite tests
 include(${AUTOGEN_DIR}/suite_tests.cmake)
