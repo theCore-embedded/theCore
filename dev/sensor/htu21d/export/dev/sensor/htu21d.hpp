@@ -399,7 +399,7 @@ bool htu21d<i2c_dev>::is_heater_enabled()
 }
 
 template <class i2c_dev>
-err htu21d<i2c_dev>:: enable_heater()
+err htu21d<i2c_dev>::enable_heater()
 {
     uint8_t user_reg = 0;
     err rc = read_user_register(user_reg);
