@@ -5,7 +5,7 @@ namespace ecl
 
 #if USE_SYSTMR
 
-static uint32_t event_cnt;
+static volatile uint32_t event_cnt;
 
 namespace systmr
 {
