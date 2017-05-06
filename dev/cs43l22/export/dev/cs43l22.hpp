@@ -1,4 +1,4 @@
-﻿//!
+//!
 //! \file
 //! \brief Contains implementation for CS43L22 driver.
 //! \details The CS43L22 is a highly integrated,
@@ -373,7 +373,6 @@ err cs43l22< I2c, I2s, Rst_gpio >::power_up()
     Rst_gpio::set();
 
     uint8_t value {0};
-    I2c::platform_handle::set_slave_addr(i2c_address);
 
     // power up sequence according to RM
     err rc = register_write(pwr_ctrl1, 0x01);

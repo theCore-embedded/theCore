@@ -179,7 +179,7 @@ private:
     static safe_storage<handler_fn> m_handler_storage;
 
     //! Gets event handler
-    static constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
+    static constexpr auto &get_handler() { return m_handler_storage.get(); }
 };
 
 template<class i2c_config>
