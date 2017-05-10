@@ -176,7 +176,7 @@ err htu21d<i2c_dev>::init()
 template <class i2c_dev>
 err htu21d<i2c_dev>::soft_reset()
 {
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
     uint8_t cmd = SOFT_RESET;
 
@@ -195,7 +195,7 @@ err htu21d<i2c_dev>::read_user_register(uint8_t &value)
 {
     uint8_t cmd = READ_USER_REG;
 
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
     i2c_dev::lock();
     err rc = i2c_dev::set_buffers(&cmd, &value, 1);
@@ -212,7 +212,7 @@ err htu21d<i2c_dev>::write_user_register(uint8_t value)
 {
     uint8_t tx_buff[] = {WRITE_USER_REG, value};
 
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
     i2c_dev::lock();
     err rc = i2c_dev::set_buffers(tx_buff, nullptr, sizeof(tx_buff));
@@ -229,9 +229,8 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
 {
     // MSB, LSB, CRC
     uint8_t data[3] = {};
-    uint16_t value = 0;
 
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
     // send command to start measuring
     i2c_dev::lock();
