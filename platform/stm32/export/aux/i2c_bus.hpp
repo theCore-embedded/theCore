@@ -4,10 +4,12 @@
 #include <stm32_device.hpp>
 #include <common/irq.hpp>
 
+#include <common/bus.hpp>
 #include <common/i2c.hpp>
 
 #include <sys/types.h>
 #include <ecl/utils.hpp>
+#include <ecl/assert.h>
 
 namespace ecl
 {
