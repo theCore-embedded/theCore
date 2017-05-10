@@ -283,7 +283,7 @@ err htu21d<i2c_dev>::get_temperature(int &value)
     // since they contain status information
     sample &= ~3;
 
-    value = -46850 + ((175000 * static_cast<uint64_t>(sample)) / (1 << 16));
+    value = -46850 + ((175720 * static_cast<uint64_t>(sample)) / (1 << 16));
 
     return rc;
 }
