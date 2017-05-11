@@ -4,14 +4,6 @@
 #include <CppUTest/CommandLineTestRunner.h>
 #include <CppUTestExt/MockSupport.h>
 
-// Error code helper
-// TODO: move it to 'utils' headers and protect with check of
-// current test state (enabled or disabled)
-static SimpleString StringFrom(ecl::err err)
-{
-    return SimpleString{ecl::err_to_str(err)};
-}
-
 //------------------------------------------------------------------------------
 // HM10 block mode mocks
 

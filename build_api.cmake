@@ -84,6 +84,8 @@ function(add_unit_host_test)
             target_compile_options(${UNIT_TEST_NAME} PUBLIC ${UNIT_TEST_COMPILE_OPTIONS})
         endif()
 
+        target_compile_definitions(${UNIT_TEST_NAME} PUBLIC CORE_TESTS_ENABLED=1)
+
         target_include_directories(${UNIT_TEST_NAME} PRIVATE ${CPPUTEST_INCLUDE_DIRS})
 
         target_compile_options(${UNIT_TEST_NAME} PUBLIC $<$<CONFIG:Debug>:${CC_CXX_FLAGS_DEBUG}>)

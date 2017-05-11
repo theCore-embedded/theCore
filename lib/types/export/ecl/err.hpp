@@ -103,4 +103,13 @@ const char* err_to_str(err error);
 
 }
 
+#ifdef CORE_TESTS_ENABLED
+#include <CppUTest/SimpleString.h>
+
+static inline SimpleString StringFrom(ecl::err err)
+{
+    return SimpleString{ecl::err_to_str(err)};
+}
+#endif // CORE_TESTS_ENABLED
+
 #endif // ECL_LIB_UTILS_ERR_HPP_
