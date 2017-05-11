@@ -1,7 +1,7 @@
 //!
 //! \file
 //! \brief Driver for HTU21D digital humidity sensor with temperature output
-//!  See, http://www.meas-spec.com/downloads/HTU21D.pdf
+//!  See, https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf
 //!
 
 #ifndef __DEV_SENSOR_HTU21D_HPP__
@@ -283,7 +283,8 @@ err htu21d<i2c_dev>::get_temperature(int &value)
     // since they contain status information
     sample &= ~3;
 
-    value = -46850 + ((175000 * static_cast<uint64_t>(sample)) / (1 << 16));
+    // See datasheet, page 15
+    value = -46850 + ((175720 * static_cast<uint64_t>(sample)) >> 16);
 
     return rc;
 }
@@ -302,7 +303,8 @@ err htu21d<i2c_dev>::get_humidity(int &value)
     // since they contain status information
     sample &= ~3;
 
-    value = -6000 + ((125000 * static_cast<uint64_t>(sample)) / (1 << 16));
+    // See datasheet, page 15
+    value = -6000 + ((125000 * static_cast<uint64_t>(sample)) >> 16);
 
     return rc;
 }
