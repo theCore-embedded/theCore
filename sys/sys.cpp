@@ -1,6 +1,6 @@
 //!
 //! \file
-//! \brief The Core system initialization module.
+//! \brief theCore system initialization module.
 //!
 #include <stdint.h>
 #include <stddef.h>

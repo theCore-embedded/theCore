@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4)
 # Special module will separate builds for each example project.
 include(ExternalProject)
 
-# Root project for bunch of The Core examples.
+# Root project for bunch of theCore examples.
 project(example_hub)
 
 # Convinient alias

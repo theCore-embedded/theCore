@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
-# The Core framework directory.
+# theCore framework directory.
 set(CORE_DIR ../../)
 
 # Required.
@@ -30,5 +30,5 @@ target_link_libraries(hello host)
 # Enable console.
 set(CONFIG_USE_CONSOLE 1)
 
-# Include The Core into the build process
+# Include theCore into the build process
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)

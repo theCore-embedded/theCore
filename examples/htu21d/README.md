@@ -1,4 +1,4 @@
-# The Core _HTU21D temperature and humidity sensor_ example
+# theCore _HTU21D temperature and humidity sensor_ example
 
  ```
  target:            stm32f4 Discovery board
@@ -28,7 +28,7 @@ Do not forget ground.
 
 ## Building
 
-Toolchain is required to build this application. The Core already has one suitable for this target.
+Toolchain is required to build this application. theCore already has one suitable for this target.
 
 ```
 mkdir build
@@ -41,7 +41,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=../../toolchains/arm-cm4-gnu.cmake ..
 Flash firmware via `openocd` and `gdb`.
 
 1. Attach stm32f4 Discovery board and USB <-> UART converter to the PC.
-1. Launch openocd in separate terminal using script provided by The Core. Alternatively, you can use script from `openocd` installation.
+1. Launch openocd in separate terminal using script provided by theCore. Alternatively, you can use script from `openocd` installation.
 
     ```
     openocd -f ~/path/to/the/core/scripts/stm32f4discovery.cfg
