@@ -400,15 +400,10 @@ void usart_bus<dev>::reset_handler()
 template<usart_device dev>
 ecl::err usart_bus<dev>::do_xfer()
 {
-    auto err = do_tx();
-
-    if (is_error(err)) {
-        do_rx();
-    } else {
-        err = do_rx();
-    }
-
-    return err;
+    do_tx();
+    do_rx();
+    
+    return ecl::err::ok;
 }
 
 template<usart_device dev>

@@ -10,7 +10,6 @@
 #include <ecl/thread/semaphore.hpp>
 
 #include <atomic>
-#include <iostream>
 
 namespace ecl
 {
@@ -79,7 +78,6 @@ public:
     //! \param[in] byte Byte to send.
     //! \return Operation status.
     static err send_byte(uint8_t byte);
-
 
     //! Sends buffer to a serial stream.
     //! \pre Driver is initialized.
@@ -184,8 +182,7 @@ template <class PBus, size_t buf_size>
 void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t total)
 {
     if (ch == bus_channel::rx) {
-        ecl_assert(type == bus_event::tc);
-        ecl_assert(m_rx_write_iter + 1 == total);
+        ecl_assert(type == bus_event::tc && m_rx_write_iter + 1 == total);
 
         // It is possible that the buffer was empty before the current byte arrived
         // We then need to signal the semaphore to indicate that the data is available
@@ -218,8 +215,7 @@ void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t 
             }
         }
     } else if (ch == bus_channel::tx) {
-        ecl_assert(type == bus_event::tc);
-        ecl_assert(buffer_size == total);
+        ecl_assert(type == bus_event::tc && buffer_size == total);
 
         m_tx_read_iter = 0;
         m_tx_is_buffer_available.signal();
