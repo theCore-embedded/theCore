@@ -1,20 +1,13 @@
+#include "dev/serial.hpp"
+
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
 #include <CppUTestExt/MockSupport.h>
 
-#include "dev/serial.hpp"
 #include "mocks/platform_bus.hpp"
 #include "ecl/thread/semaphore.hpp"
 
 #include <thread>
-
-// Error code helper
-// TODO: move it to 'utils' headers and protect with check of
-// current test state (enabled or disabled)
-static SimpleString StringFrom(ecl::err err)
-{
-    return SimpleString{ecl::err_to_str(err)};
-}
 
 using serial_t = ecl::serial<platform_mock>;
 
