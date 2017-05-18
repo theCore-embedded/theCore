@@ -6,6 +6,7 @@
 
 #include <ecl/err.hpp>
 #include <ecl/assert.h>
+#include <ecl/utils.hpp>
 #include <common/bus.hpp>
 #include <ecl/thread/semaphore.hpp>
 
@@ -102,12 +103,12 @@ private:
     static uint8_t m_rx_buffer[buf_size];
     static std::atomic_size_t m_rx_write_iter; //!< Used for accepting data from the bus
     static std::atomic_size_t m_rx_read_iter; //!< Used for returning data to the user
-    static binary_semaphore m_rx_is_data_available; //!< Signals if rx buffer is available for reading
+    static safe_storage<binary_semaphore> m_rx_is_data_available; //!< Signals if rx buffer is available for reading
 
     static uint8_t m_tx_buffer[buf_size];
     static std::atomic_size_t m_tx_write_iter; //!< Used for accepting data from the user
     static std::atomic_size_t m_tx_read_iter; //!< Used for writing data on the bus
-    static binary_semaphore m_tx_is_buffer_available; //!< Signals if tx buffer has at least one available byte
+    static safe_storage<binary_semaphore> m_tx_is_buffer_available; //!< Signals if tx buffer has at least one available byte
 };
 
 template <class PBus, size_t buf_size>
@@ -126,7 +127,7 @@ template <class PBus, size_t buf_size>
 std::atomic_size_t serial<PBus, buf_size>::m_rx_read_iter;
 
 template <class PBus, size_t buf_size>
-binary_semaphore serial<PBus, buf_size>::m_rx_is_data_available;
+safe_storage<binary_semaphore> serial<PBus, buf_size>::m_rx_is_data_available;
 
 template <class PBus, size_t buf_size>
 uint8_t serial<PBus, buf_size>::m_tx_buffer[buf_size];
@@ -138,12 +139,14 @@ template <class PBus, size_t buf_size>
 std::atomic_size_t serial<PBus, buf_size>::m_tx_read_iter;
 
 template <class PBus, size_t buf_size>
-binary_semaphore serial<PBus, buf_size>::m_tx_is_buffer_available;
+safe_storage<binary_semaphore> serial<PBus, buf_size>::m_tx_is_buffer_available;
 
 template <class PBus, size_t buf_size>
 err serial<PBus, buf_size>::init()
 {
     ecl_assert(!m_is_inited);
+    m_tx_is_buffer_available.init();
+    m_rx_is_data_available.init();
     auto result = PBus::init();
     if (is_error(result)) {
         return result;
@@ -156,7 +159,7 @@ err serial<PBus, buf_size>::init()
     m_new_xfer_allowed = true;
     PBus::set_rx(m_rx_buffer, buffer_size);
     PBus::set_tx(m_tx_buffer, buffer_size);
-    m_tx_is_buffer_available.signal();
+    m_tx_is_buffer_available.get().signal();
     result = PBus::do_rx();
     if (is_ok(result)) {
         m_is_inited = true;
@@ -175,6 +178,8 @@ err serial<PBus, buf_size>::deinit()
     m_tx_read_iter = 0;
     m_tx_write_iter = 0;
     m_is_inited = false;
+    m_rx_is_data_available.deinit();
+    m_tx_is_buffer_available.deinit();
     return err::ok;
 }
 
@@ -187,7 +192,7 @@ void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t 
         // It is possible that the buffer was empty before the current byte arrived
         // We then need to signal the semaphore to indicate that the data is available
         if (m_rx_read_iter == m_rx_write_iter) {
-            m_rx_is_data_available.signal();
+            m_rx_is_data_available.get().signal();
         }
         m_rx_write_iter++;
 
@@ -218,7 +223,7 @@ void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t 
         ecl_assert(type == bus_event::tc && buffer_size == total);
 
         m_tx_read_iter = 0;
-        m_tx_is_buffer_available.signal();
+        m_tx_is_buffer_available.get().signal();
     }
 }
 
@@ -240,7 +245,7 @@ err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
 
     // Wait until data is available on the read end
     if (m_rx_read_iter == m_rx_write_iter) {
-        m_rx_is_data_available.wait();
+        m_rx_is_data_available.get().wait();
     }
 
     // Save atomic variables on the stack
@@ -292,7 +297,7 @@ err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
     err ret = err::ok;
 
     // Wait until at least one byte of free space becomes available
-    m_tx_is_buffer_available.wait();
+    m_tx_is_buffer_available.get().wait();
 
     // Save atomic variables on stack
     size_t read_pos = m_tx_read_iter;
@@ -312,7 +317,7 @@ err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
 
     // Signal buffer_available semaphore if buffer is not full
     if (m_tx_read_iter != m_tx_write_iter) {
-        m_tx_is_buffer_available.signal();
+        m_tx_is_buffer_available.get().signal();
     }
 
     auto tmp = buffer_size;

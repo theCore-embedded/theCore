@@ -1,6 +1,6 @@
 add_library(bus INTERFACE)
 target_include_directories(bus INTERFACE export)
-target_link_libraries(bus INTERFACE dbg platform_common thread)
+target_link_libraries(bus INTERFACE dbg platform_common thread utils)
 
 add_unit_host_test(NAME bus
                     SOURCES tests/bus_unit.cpp
@@ -18,5 +18,5 @@ find_package(Threads REQUIRED)
 add_unit_host_test(NAME serial
                     SOURCES tests/serial_unit.cpp
                     ${CORE_DIR}/lib/types/err.cpp
-                    DEPENDS thread dbg platform_common ${CMAKE_THREAD_LIBS_INIT}
+                    DEPENDS thread dbg platform_common utils ${CMAKE_THREAD_LIBS_INIT}
                     INC_DIRS export tests/mocks)
