@@ -18,7 +18,7 @@ if(CONFIG_USE_CONSOLE)
     # Console is enabled and driver is provided by the platform.
     # Work here is to create aliases of bus/bus_pipe classes tied with console.
     target_link_libraries(core_cpp INTERFACE ${PLATFORM_NAME})
-    target_compile_definitions(core_cpp INTERFACE -DUSE_CONSOLE=1)
+    target_compile_definitions(core_cpp INTERFACE -DTHECORE_USE_CONSOLE=1)
     target_link_libraries(core_cpp INTERFACE bus)
 else()
     message(STATUS "Console is not enabled.")

@@ -54,10 +54,18 @@ add_subdirectory(platform)
 
 # Required layer only when cross-compiling
 if(CMAKE_CROSSCOMPILING)
-    add_subdirectory(sys)
+    if(NOT TARGET_FORCE_NO_SYS)
+        add_subdirectory(sys)
+    else()
+        # It is possible that other modules, like platform libraries,
+        # already provides functionality similar to the sys.
+        message(STATUS "System module is disabled")
+    endif()
 
-    # Newlib is theCore default C library (with some limitations).
-    target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
+    if(NOT TARGET_FORCE_NO_NEWLIB)
+        # Newlib is theCore default C library (with some limitations).
+        target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
+    endif()
 endif()
 
 # Rest of modules

@@ -1,5 +1,5 @@
 //! \file
-//! \brief Various routines for CM* platform, altering execution flow.
+//! \brief Various routines for CM* architectures, altering execution flow.
 
 #ifndef CORE_ARCH_EXECUTION_HPP_
 #define CORE_ARCH_EXECUTION_HPP_

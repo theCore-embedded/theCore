@@ -46,29 +46,43 @@ public:
     //! Initializes storage.
     //! \tparam Args Types of the constructor args.
     //! \param  args T's ctor arguments.
-    //! \pre  Storage not yet initialized, i.e. ctor wasn't called yet.
+    //! \pre  Storage not yet initialized, i.e. ctor wasn't called yet
+    //!       or storage was deinitialized earlier.
     //! \post Storage initialized and object is ready to work.
     //! \note Violating pre-conditions leads to undefined behaviour.
     template<class ...Args>
-    static void init(Args ...args)
+    void init(Args&& ...args)
     {
-        new (&m_stor) T{args...};
+        new (&m_stor) T{std::forward<Args>(args)...};
     }
 
-    //! Gets object reference.
+    //! Deinitializes storage.
+    //! \pre  Storage is initialized.
+    //! \post Storage is deinitialized and stored object is destructed.
+    //! \note Violating pre-conditions leads to undefined behaviour.
+    void deinit()
+    {
+        get().~T();
+    }
+
+    //! Gets reference to the stored object.
     //! \pre Storage initialized, i.e. init() was called once.
-    static T& get()
+    T& get()
+    {
+        return reinterpret_cast<T&>(m_stor);
+    }
+
+    //! Gets const reference to the stored object.
+    //! \pre Storage initialized, i.e. init() was called once.
+    const T& get() const
     {
         return reinterpret_cast<T&>(m_stor);
     }
 
 private:
     //! Storage for the T object.
-    static std::aligned_storage_t<sizeof(T), alignof(T)> m_stor;
+    std::aligned_storage_t<sizeof(T), alignof(T)> m_stor {};
 };
-
-template<class T>
-std::aligned_storage_t<sizeof(T), alignof(T)> safe_storage<T>::m_stor;
 
 //------------------------------------------------------------------------------
 

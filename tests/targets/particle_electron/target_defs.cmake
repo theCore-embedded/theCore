@@ -1,0 +1,3 @@
+theCore_enable_platform(particle_electron)
+
+theCore_electron_enable_console()

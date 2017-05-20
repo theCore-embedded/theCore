@@ -157,6 +157,12 @@ add_suite(platform_bat
         CASES               bypass_console_bat
         TARGET_NAME         host)
 
+add_suite(platform_bat
+        CASES               bypass_console_bat uart_bat
+        TOOLCHAIN_NAME      arm-cm3-gnu-electron.cmake
+        TARGET_NAME         particle_electron)
+
+
 #-------------------------------------------------------------------------------
 # Unity demo test suite
 
@@ -173,6 +179,11 @@ add_suite(unity_demo
         CASES               unity_demo
         TOOLCHAIN_NAME      arm-cm4-gnu.cmake
         TARGET_NAME         tivac_tm4)
+
+add_suite(unity_demo
+        CASES               unity_demo
+        TOOLCHAIN_NAME      arm-cm3-gnu-electron.cmake
+        TARGET_NAME         particle_electron)
 
 
 #-------------------------------------------------------------------------------
