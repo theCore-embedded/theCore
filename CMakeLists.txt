@@ -39,7 +39,7 @@ endif()
 
 message(STATUS "Platform will be used: ${CONFIG_PLATFORM}")
 
-set(PLATFORM_NAME ${CONFIG_PLATFORM}) # For convinience
+set(PLATFORM_NAME ${CONFIG_PLATFORM}) # For convenience
 
 # Linker definitions is propagated by the platform.
 include(${CORE_DIR}/platform/common/linker.cmake)
@@ -54,15 +54,15 @@ add_subdirectory(platform)
 
 # Required layer only when cross-compiling
 if(CMAKE_CROSSCOMPILING)
-    if(NOT TARGET_FORCE_NO_SYS)
+    if(NOT THECORE_FORCE_NO_SYS)
         add_subdirectory(sys)
     else()
         # It is possible that other modules, like platform libraries,
-        # already provides functionality similar to the sys.
+        # already provide functionality similar to the sys.
         message(STATUS "System module is disabled")
     endif()
 
-    if(NOT TARGET_FORCE_NO_NEWLIB)
+    if(NOT THECORE_FORCE_NO_NEWLIB)
         # Newlib is theCore default C library (with some limitations).
         target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
     endif()

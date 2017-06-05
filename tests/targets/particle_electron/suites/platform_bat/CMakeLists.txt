@@ -15,7 +15,6 @@ target_link_libraries(platform_bat the_core unity utils platform_common)
 # or implemented with some details.
 target_compile_definitions(platform_bat PUBLIC
         -DUART_TEST_NO_FILL_MODE
-        -DUART_TEST_NO_RX_MODE
         -DUART_TEST_NO_LISTEN_MODE)
 
 # Expose suite headers to the test cases

@@ -26,6 +26,7 @@ endfunction()
 function(theCore_electron_enable_console)
     # Enable console automatically on Serial0
     set(THECORE_PARTICLE_CONSOLE_ENABLED "0" CACHE INTERNAL "Serial bypass")
+    set(THECORE_CONFIG_USE_CONSOLE "YES" CACHE BOOL "Console is enabled")
     __theCore_enable_serial(0)
 endfunction()
 

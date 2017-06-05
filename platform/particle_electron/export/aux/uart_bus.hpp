@@ -1,17 +1,21 @@
 //! \file
-//! \brief Electron UART driver
+//! \brief Electron UART driver.
+//! \details Based on Serial driver:
+//! https://docs.particle.io/reference/firmware/electron/#serial
 #ifndef PLATFORM_UART_BUS_HPP_
 #define PLATFORM_UART_BUS_HPP_
 
 #include <common/bus.hpp>
 #include <ecl/err.hpp>
 #include <ecl/utils.hpp>
+#include <ecl/assert.h>
 
 #include <cstdint>
 #include <unistd.h>
 
 #include <functional>
 #include <type_traits>
+#include <atomic>
 
 #include <application.h>
 
@@ -19,6 +23,8 @@ namespace ecl
 {
 
 //! Represents distinct peripheral devices
+//! According to the particle electron wiring and docs, there are no
+//! Serial3 device. See RM.
 enum class uart_device
 {
     serial0,
@@ -28,10 +34,20 @@ enum class uart_device
     serial5,
 };
 
+//------------------------------------------------------------------------------
+
+void serial_tx_dispatch();
+
+template<uart_device dev>
+void serial_rx_dispatch();
+
 //! \brief Electron UART bus wrapper
 template<uart_device dev>
 class uart_bus
 {
+    friend void serial_tx_dispatch();
+    friend void serial_rx_dispatch<dev>();
+
 public:
     // Convenient type aliases.
     using channel       = ecl::bus_channel;
@@ -83,14 +99,20 @@ public:
     //! \return Status of operation.
     static err do_xfer();
 
+    static err do_tx();
+    static err do_rx();
+
     //! \brief Cancels xfer.
     //! After this call no xfer will occur.
     //! \return Status of operation.
     static err cancel_xfer();
 
 private:
-    //! Gets correct serial object for the device.
+    //! Handles events from Particle Serial drivers.
+    //! \param[in] ev Serial channel that produced an event - RX or TX.
+    static void serial_event(channel ch);
 
+    //! Gets correct serial object for the device.
     template<uart_device d = dev, typename std::enable_if_t<d == uart_device::serial0, int> = 0>
     static constexpr USBSerial &get_serial();
 
@@ -98,18 +120,29 @@ private:
     template<uart_device d = dev, typename std::enable_if_t<d != uart_device::serial0, int> = 0>
     static constexpr USARTSerial &get_serial();
 
+    //! Set in m_status field if TX already done.
+    //! \details While examining this bit, serial dispatcher decides whether
+    //! event should be triggered or not.
+    static constexpr uint8_t tx_done = 1;
+    //! Set in m_status field if RX is pending.
+    //! \details While examining this bit, serial dispatcher decides whether
+    //! RX should be performed or not.
+    static constexpr uint8_t rx_pend = 1 << 1;
+
+    static safe_storage<handler_fn>     m_ev_handler;    //! Storage for event handler.
+
     static const uint8_t                *m_tx;           //! Transmit buffer.
     static size_t                       m_tx_size;       //! TX buffer size.
     static uint8_t                      *m_rx;           //! Receive buffer.
     static size_t                       m_rx_size;       //! RX buffer size.
-
-    static safe_storage<handler_fn>     m_ev_storage;    //! Storage for event handler.
+    static size_t                       m_rx_next;       //! Next byte to fill in RX buffer.
+    static std::atomic<uint8_t>         m_status;        //! Driver status
 };
 
 //------------------------------------------------------------------------------
 
 template<uart_device dev>
-safe_storage<typename uart_bus<dev>::handler_fn> uart_bus<dev>::m_ev_storage;
+safe_storage<typename uart_bus<dev>::handler_fn> uart_bus<dev>::m_ev_handler;
 
 template<uart_device dev>
 const uint8_t *uart_bus<dev>::m_tx;
@@ -123,15 +156,23 @@ size_t uart_bus<dev>::m_tx_size;
 template<uart_device dev>
 size_t uart_bus<dev>::m_rx_size;
 
+template<uart_device dev>
+size_t uart_bus<dev>::m_rx_next;
+
+template<uart_device dev>
+std::atomic<uint8_t> uart_bus<dev>::m_status;
+
 //------------------------------------------------------------------------------
 
 template<uart_device dev>
 err uart_bus<dev>::init()
 {
+    // TODO: assert if not inited
+
     auto &serial = get_serial();
 
     serial.begin();
-    m_ev_storage.init();
+    m_ev_handler.init();
 
     return err::ok;
 }
@@ -139,8 +180,11 @@ err uart_bus<dev>::init()
 template<uart_device dev>
 err uart_bus<dev>::set_rx(uint8_t *rx, size_t size)
 {
+    // TODO: assert if not inited
+
     m_rx = rx;
     m_rx_size = size;
+    m_rx_next = 0;
 
     return err::ok;
 }
@@ -157,6 +201,8 @@ err uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 template<uart_device dev>
 err uart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 {
+    // TODO: assert if not inited
+
     m_tx = tx;
     m_tx_size = size;
 
@@ -166,18 +212,24 @@ err uart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 template<uart_device dev>
 err uart_bus<dev>::set_handler(const handler_fn &handler)
 {
-    m_ev_storage.get() = handler;
+    // TODO: assert if not inited
+    m_ev_handler.get() = handler;
     return err::ok;
 }
 
 template<uart_device dev>
 err uart_bus<dev>::reset_buffers()
 {
+    // TODO: assert if not inited
+
+    m_status &= ~(tx_done | rx_pend);
+
     m_tx = nullptr;
     m_tx_size = 0;
 
     m_rx = nullptr;
     m_rx_size = 0;
+    m_rx_next = 0;
 
     return err::ok;
 }
@@ -185,25 +237,50 @@ err uart_bus<dev>::reset_buffers()
 template<uart_device dev>
 err uart_bus<dev>::reset_handler()
 {
-    m_ev_storage.get() = handler_fn{};
+    // TODO: assert if not inited
+
+    m_ev_handler.get() = handler_fn{};
+    return err::ok;
+}
+
+template<uart_device dev>
+err uart_bus<dev>::do_tx()
+{
+    // TODO: assert if not inited
+
+    auto &serial = get_serial();
+
+    if (m_tx) {
+        serial.write(m_tx, m_tx_size);
+        m_status |= tx_done;
+    }
+
+    return err::ok;
+}
+
+template<uart_device dev>
+err uart_bus<dev>::do_rx()
+{
+    // TODO: assert if not inited
+
+    if (m_rx) {
+        m_status |= rx_pend;
+    }
+
     return err::ok;
 }
 
 template<uart_device dev>
 err uart_bus<dev>::do_xfer()
 {
-    auto &serial = get_serial();
+    // TODO: assert if not inited
 
-    if (m_tx) {
-        serial.write(m_tx, m_tx_size);
-        m_ev_storage.get()(channel::tx, event::tc, m_tx_size);
+    auto rc = do_tx();
+    if (is_error(rc)) {
+        return rc;
     }
 
-    m_ev_storage.get()(channel::meta, event::tc, 0);
-
-    // TODO: RX.
-
-    return err::ok;
+    return do_rx();
 }
 
 template<uart_device dev>
@@ -216,13 +293,51 @@ err uart_bus<dev>::cancel_xfer()
 //------------------------------------------------------------------------------
 
 template<uart_device dev>
+void uart_bus<dev>::serial_event(channel ch)
+{
+    // TODO: assert if not inited
+
+    auto &serial = get_serial();
+    auto &handler = m_ev_handler.get();
+
+    switch (ch) {
+    case channel::tx:
+        // Particle API allows to transfer bulk data and it is fine
+        // at this moment. No intermediate events take place, only last one.
+        // TX is completed.
+        ecl_assert(m_status & tx_done);
+        handler(channel::tx, event::tc, m_tx_size);
+        m_status &= ~tx_done;
+        break;
+    case channel::rx:
+        ecl_assert(m_status & rx_pend);
+        while (serial.available()) {
+            auto ch = serial.read();
+            m_rx[m_rx_next++] = ch;
+
+            // RX is completed
+            if (m_rx_next >= m_rx_size) {
+                handler(channel::rx, event::tc, m_rx_size);
+                m_rx_next = 0;
+                m_status &= ~rx_pend;
+                break;
+            }
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (!(m_status & (rx_pend | tx_done))) {
+        handler(channel::meta, event::tc, 0);
+    }
+}
+
+template<uart_device dev>
 template<uart_device d, typename std::enable_if_t<d == uart_device::serial0, int>>
 constexpr USBSerial &uart_bus<dev>::get_serial()
 {
-    switch (dev) {
-    case uart_device::serial0:
-        return Serial;
-    }
+    return Serial;
 }
 
 template<uart_device dev>

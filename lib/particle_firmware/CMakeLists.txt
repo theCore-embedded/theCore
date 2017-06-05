@@ -4,7 +4,10 @@ endif()
 
 include(ExternalProject)
 
-# Common definitions for all firmware project
+set(USER_FIRMWARE_IMAGE_LOCATION 0x8080000)
+set(USER_FIRMWARE_IMAGE_SIZE 0x20000)
+
+# Common definitions for all firmware projects
 set(COMMON_DEFS
     -DSTM32_DEVICE
     -DSTM32F2XX
@@ -35,8 +38,8 @@ set(COMMON_DEFS
     -DUSE_SPI=SPI
     -DUSE_CS=A2
     -DUSE_THREADING=0
-    -DUSER_FIRMWARE_IMAGE_SIZE=0x20000
-    -DUSER_FIRMWARE_IMAGE_LOCATION=0x8080000
+    -DUSER_FIRMWARE_IMAGE_SIZE=${USER_FIRMWARE_IMAGE_SIZE}
+    -DUSER_FIRMWARE_IMAGE_LOCATION=${USER_FIRMWARE_IMAGE_LOCATION}
     -DMODULAR_FIRMWARE=1
     -DMODULE_VERSION=4
     -DMODULE_FUNCTION=5
@@ -119,8 +122,8 @@ target_link_libraries(particle_firmware INTERFACE
     -L${PARTICLE_FIRMWARE_DIR}/modules/electron/system-part2
     -L${PARTICLE_FIRMWARE_DIR}/modules/electron/user-part/
     -T${PARTICLE_FIRMWARE_DIR}/modules/electron/user-part/linker.ld
-    -Wl,--defsym,USER_FIRMWARE_IMAGE_SIZE=0x20000
-    -Wl,--defsym,USER_FIRMWARE_IMAGE_LOCATION=0x8080000
+    -Wl,--defsym,USER_FIRMWARE_IMAGE_SIZE=${USER_FIRMWARE_IMAGE_SIZE}
+    -Wl,--defsym,USER_FIRMWARE_IMAGE_LOCATION=${USER_FIRMWARE_IMAGE_LOCATION}
 )
 
 target_compile_definitions(particle_firmware INTERFACE

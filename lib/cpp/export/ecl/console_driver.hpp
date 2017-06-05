@@ -1,7 +1,7 @@
 #ifndef DEFAULT_CONSOLE_DRIVER_HPP_
 #define DEFAULT_CONSOLE_DRIVER_HPP_
 
-#if THECORE_USE_CONSOLE
+#if THECORE_CONFIG_USE_CONSOLE
 
 #include <platform/console.hpp>
 #include <dev/bus.hpp>
@@ -16,7 +16,7 @@ using console_driver = ecl::bus_pipe<console_bus>;
 
 }
 
-#else // THECORE_USE_CONSOLE
+#else // THECORE_CONFIG_USE_CONSOLE
 
 #include <cstdint>
 #include <unistd.h>
@@ -49,6 +49,6 @@ public:
 
 }
 
-#endif // THECORE_USE_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 #endif // DEFAULT_CONSOLE_DRIVER_HPP_

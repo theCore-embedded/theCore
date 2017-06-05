@@ -36,7 +36,7 @@ public:
 
     //!
     //! \brief Inits a pipe.
-    //! Lazy initialization. Inis a bus.
+    //! Lazy initialization. Inits a bus.
     //! \return Status of operation.
     //!
     ecl::err init();
@@ -50,7 +50,7 @@ public:
     //! bytes requested or zero, indicating amount of bytes that were
     //! successfully written to a pipe.
     //! Last error can be obtained via \sa last_error() call
-    //! Caller will be blocked until all bytes will be transfered
+    //! Caller will be blocked until all bytes will be transferred
     //! or error will occur.
     //! \pre Bus is initialized.
     //! \param[in]  data     Data to write. Must not be null.

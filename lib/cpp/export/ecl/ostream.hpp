@@ -158,6 +158,7 @@ ostream<IO_device> &ostream< IO_device >::operator<<(const char *string)
         }
 
         if (m_device->write((const uint8_t *) &string[i], 1) < 0) {
+            //Serial.printlnf("\n>%d<\n", count);
             break; //FIXME: add error handling
         }
 
