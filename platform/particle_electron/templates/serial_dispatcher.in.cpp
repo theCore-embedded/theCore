@@ -61,7 +61,6 @@ void serial_rx_dispatch()
 
 } // namespace ecl
 
-
 // Overriding Particle event handlers for RX stream
 
 /*[[[cog

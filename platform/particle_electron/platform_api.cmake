@@ -49,3 +49,9 @@ endfunction()
 function(theCore_electron_enable_serial5)
     __theCore_enable_serial(5)
 endfunction()
+
+# Allows theCore to use Particle timers
+function(theCore_electron_use_systmr)
+    set(THECORE_PARTICLE_USE_SYSTMR 1 CACHE BOOL "Allows to use timer by theCore")
+endfunction()
+

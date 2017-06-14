@@ -5,26 +5,20 @@
 #define PLATFORM_EXECUTION_HPP_
 
 #include <stdint.h>
+#include <application.h>
+#include "platform/defines.hpp"
 
 namespace ecl
 {
 
-//! \brief Gets core clock speed.
-//! \return Current clock speed.
-static inline uint32_t clk_spd()
-{
-    // TODO
-    return 1;
-}
+//! Temporary define that notifies system that delay routine is present
+//! Will stay here before #247 will be implemented
+#define THECORE_PLATFORM_STUB_DEFINE_SPIN_WAIT
 
-//! \brief Gets current clock count.
-//! \details Uses DWT register.
-//! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
-//! \return Current clock count.
-static inline uint32_t clk()
+//! Waits not less than given amount of milliseconds.
+static inline void spin_wait(unsigned ms)
 {
-    // TODO
-    return 1;
+    ::delay(ms);
 }
 
 //! \brief Aborts execution of currently running code. Never return.
@@ -34,6 +28,29 @@ static inline void abort()
     // TODO
     for(;;);
 }
+
+namespace systmr
+{
+
+ //! Enables timer, start counting
+void enable();
+
+//! Disables timer, stop counting
+void disable();
+
+//! Gets speed in which timer generate events.
+//! \details _Each event generates interrupt_, but not necessarily timer interrupt
+//! is passed to the user. In other words, each event will wake-up processor.
+//! Useful in conjunction with WFI.
+//! \retval System timer events generation speed in Hz.
+uint32_t speed();
+
+//! Gets amount of events occurred so far.
+//! \details Events counter may not reset after disable() call.
+//! \retval Amount of events occured so far
+uint32_t events();
+
+} // namespace systmr
 
 } // namespace ecl
 

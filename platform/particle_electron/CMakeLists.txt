@@ -25,7 +25,7 @@ set(THECORE_FORCE_NO_NEWLIB 1 CACHE "Disable newlib module" INTERNAL)
 set(THECORE_FORCE_NO_FS_MODULE 1 CACHE "Disable fs module" INTERNAL)
 
 # Device definitions
-# TODO: use real count
+# TODO: drop it when side activities of #234 and #227 will be done
 set(TARGET_MCU_IRQ_COUNT 1 CACHE STRING "Available interrupts")
 
 #-------------------------------------------------------------------------------
@@ -33,9 +33,11 @@ set(TARGET_MCU_IRQ_COUNT 1 CACHE STRING "Available interrupts")
 
 set(IN_SERIAL_HDR ${CMAKE_CURRENT_LIST_DIR}/templates/serial_cfgs.in.hpp)
 set(IN_SERIAL_CPP ${CMAKE_CURRENT_LIST_DIR}/templates/serial_dispatcher.in.cpp)
+set(IN_DEFS_HDR ${CMAKE_CURRENT_LIST_DIR}/templates/defines.in.hpp)
 
 set(OUT_SERIAL_HDR ${CMAKE_CURRENT_BINARY_DIR}/export/platform/serial_cfgs.hpp)
-set(OUT_SERIAL_CPP ${CMAKE_CURRENT_BINARY_DIR}/export/platform/serial_dispatcher.cpp)
+set(OUT_SERIAL_CPP ${CMAKE_CURRENT_BINARY_DIR}/serial_dispatcher.cpp)
+set(OUT_DEFS_HDR ${CMAKE_CURRENT_BINARY_DIR}/export/platform/defines.hpp)
 
 if(DEFINED THECORE_PARTICLE_SERIALS_ENABLED)
     # Definitions must come before input file
@@ -54,18 +56,30 @@ add_custom_command(
     COMMAND cog.py ${COG_HDR_ARGS}
     COMMAND cog.py ${COG_CPP_ARGS}
     DEPENDS ${IN_SERIAL_HDR} ${IN_SERIAL_CPP}
-    COMMENT "Generating ${OUT_SERIAL_HDR}."
+    COMMENT "Generating ${OUT_SERIAL_HDR} and ${OUT_SERIAL_CPP}"
 )
 
 # Write a dummy file to avoid errors with INTERFACE libraries
 # and not-yet-generated source files.
-file(WRITE ${OUT_SERIAL_CPP} "")
+if(NOT EXISTS ${OUT_SERIAL_CPP})
+    file(WRITE ${OUT_SERIAL_CPP} "")
+endif()
+
+#-------------------------------------------------------------------------------
+# Systimer enable flag. Propagated by configure_file() below
+if(THECORE_PARTICLE_USE_SYSTMR)
+    message("Hello!**********")
+    set(USE_SYSTMR 1)
+endif()
+
+# Create a file with platform-related definitions
+configure_file(${IN_DEFS_HDR} ${OUT_DEFS_HDR})
 
 #-------------------------------------------------------------------------------
 
-# Tie all auto-generated code together and specify correct dependenices
+# Tie all auto-generated code together and specify correct dependencies
 
-add_custom_target(platform_generated DEPENDS ${OUT_SERIAL_HDR} ${OUT_SERIAL_CPP})
+add_custom_target(platform_generated DEPENDS ${OUT_SERIAL_HDR} ${OUT_DEFS_HDR} ${OUT_SERIAL_CPP})
 add_dependencies(particle_electron platform_generated)
 target_include_directories(particle_electron INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/export/)
 target_sources(particle_electron INTERFACE ${OUT_SERIAL_CPP})

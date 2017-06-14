@@ -3,7 +3,6 @@
 
 #include <ecl/thread/semaphore.hpp>
 #include <common/execution.hpp>
-#include <common/time.hpp>
 
 void ecl::semaphore::signal()
 {
@@ -27,7 +26,7 @@ bool ecl::semaphore::try_wait(std::chrono::milliseconds ms)
 {
     bool exch = false;
 
-    // Systimer implementation allows to use more robust and convinient
+    // Systimer implementation allows to use more robust and convenient
     // version of wait_for.
     // TODO: Drop conditional compilation when #247 will be ready.
 #ifdef USE_SYSTMR
@@ -91,7 +90,7 @@ bool ecl::binary_semaphore::try_wait(std::chrono::milliseconds ms)
 {
     bool ex;
 
-    // Systimer implementation allows to use more robust and convinient
+    // Systimer implementation allows to use more robust and convenient
     // version of wait_for.
     // TODO: Drop conditional compilation when #247 will be ready.
 #ifdef USE_SYSTMR
