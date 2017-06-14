@@ -31,6 +31,8 @@ PD8 (USART TX) - module's RX
 
 Do not forget ground.
 
+![stm32f4_exti example](stm32f4_exti.jpg)
+
 ## Building
 
 Toolchain is required to build this application. The Core already has one suitable
@@ -112,6 +114,4 @@ After each button press:
 ```
 Button pressed!
 ```
-
-
 

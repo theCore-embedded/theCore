@@ -21,6 +21,8 @@ module according to following pinout:
 
 Do not forget ground.
 
+![cs43l22_audio example](cs43l22_audio.jpg)
+
 ## Building
 
 Toolchain is required to build this application. The Core already has one suitable
@@ -98,5 +100,4 @@ Playing audio sample...
 ```
 
 In headphones you should hear cool 8-bit sound.
-
 
