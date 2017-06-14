@@ -26,6 +26,8 @@ module according to following pinout:
 
 Do not forget ground.
 
+![htu21d example](htu21d.jpg)
+
 ## Building
 
 Toolchain is required to build this application. theCore already has one suitable for this target.
@@ -101,3 +103,4 @@ Temperature: 21.712 Celsius   Humidity: 40.859%
 Temperature: 21.701 Celsius   Humidity: 40.852%
 ...
 ```
+
