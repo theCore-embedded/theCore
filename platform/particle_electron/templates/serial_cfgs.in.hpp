@@ -1,4 +1,5 @@
-//! \file Particle Serial drivers configuration template
+//! \file
+//! \brief Particle Serial drivers configuration template
 #ifndef PLATFORM_SERIAL_CFGS_HPP_
 #define PLATFORM_SERIAL_CFGS_HPP_
 

@@ -3,7 +3,7 @@
 #ifndef PARTICLE_PLATFORM_BAT_TEST_UART_HPP_
 #define PARTICLE_PLATFORM_BAT_TEST_UART_HPP_
 
-#include <platform/serial_cfgs.hpp>
+#include <aux/serial_cfgs.hpp>
 
 namespace ecl
 {

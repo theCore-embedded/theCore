@@ -1,13 +1,13 @@
-//! \file Particle Serial dispatcher template
+//! \file
+//! \brief Particle Serial dispatcher template
 
-#include <platform/serial_cfgs.hpp>
+#include <aux/serial_cfgs.hpp>
 
 /*[[[cog
 import cog
 ]]]*/
 
 //[[[end]]]
-
 
 namespace ecl
 {

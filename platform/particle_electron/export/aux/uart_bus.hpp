@@ -1,5 +1,5 @@
 //! \file
-//! \brief Electron UART driver.
+//! Electron UART driver.
 //! \details Based on Serial driver:
 //! https://docs.particle.io/reference/firmware/electron/#serial
 #ifndef PLATFORM_UART_BUS_HPP_
@@ -36,17 +36,14 @@ enum class uart_device
 
 //------------------------------------------------------------------------------
 
-void serial_tx_dispatch();
-
-template<uart_device dev>
-void serial_rx_dispatch();
-
-//! \brief Electron UART bus wrapper
+//! Electron UART bus wrapper
 template<uart_device dev>
 class uart_bus
 {
     friend void serial_tx_dispatch();
-    friend void serial_rx_dispatch<dev>();
+
+    template<uart_device d>
+    friend void serial_rx_dispatch();
 
 public:
     // Convenient type aliases.
@@ -62,47 +59,48 @@ public:
     uart_bus &operator=(uart_bus&) = delete;
     uart_bus(uart_bus&) = delete;
 
-    //! \brief Lazy initialization.
+    //! Lazy initialization.
     //! \return Status of operation.
     static err init();
 
-    //! \brief Sets rx buffer with given size.
+    //! Sets rx buffer with given size.
     //! \param[in,out]  rx      Buffer to write data to. Optional.
     //! \param[in]      size    Size
-    static err set_rx(uint8_t *rx, size_t size);
+    static void set_rx(uint8_t *rx, size_t size);
 
-    //! \brief Sets tx buffer made-up from sequence of similar bytes.
+    //! Sets tx buffer made-up from sequence of similar bytes.
     //! \param[in] size         Size of sequence
     //! \param[in] fill_byte    Byte to fill a sequence. Optional.
-    static err set_tx(size_t size, uint8_t fill_byte = 0xff);
+    static void set_tx(size_t size, uint8_t fill_byte = 0xff);
 
-    //! \brief Sets tx buffer with given size.
+    //! Sets tx buffer with given size.
     //! \param[in] tx   Buffer to transmit. Optional.
     //! \param[in] size Buffer size.
-    static err set_tx(const uint8_t *tx, size_t size);
+    static void set_tx(const uint8_t *tx, size_t size);
 
-    //! \brief Sets event handler.
+    //! Sets event handler.
     //! Handler will be used by the bus, until reset_handler() will be called.
     //! \param[in] handler Handler itself.
-    static err set_handler(const handler_fn &handler);
+    static void set_handler(const handler_fn &handler);
 
-    //! \brief Reset xfer buffers.
-    //! Buffers that were set by \sa set_tx() and \sa set_rx()
+    //! Reset xfer buffers.
+    //! \details Buffers that were set by \sa set_tx() and \sa set_rx()
     //! will be no longer used after this call.
-    static err reset_buffers();
+    static void reset_buffers();
 
-    //! \brief Resets previously set handler.
-    static err reset_handler();
+    //! Resets previously set handler.
+    static void reset_handler();
 
-    //! \brief Executes xfer, using buffers previously set.
+    //! Executes xfer, using buffers previously set.
     //! When it will be done, handler will be invoked.
     //! \return Status of operation.
     static err do_xfer();
 
+    //!
     static err do_tx();
     static err do_rx();
 
-    //! \brief Cancels xfer.
+    //! Cancels xfer.
     //! After this call no xfer will occur.
     //! \return Status of operation.
     static err cancel_xfer();
@@ -167,8 +165,6 @@ std::atomic<uint8_t> uart_bus<dev>::m_status;
 template<uart_device dev>
 err uart_bus<dev>::init()
 {
-    // TODO: assert if not inited
-
     auto &serial = get_serial();
 
     serial.begin();
@@ -178,50 +174,37 @@ err uart_bus<dev>::init()
 }
 
 template<uart_device dev>
-err uart_bus<dev>::set_rx(uint8_t *rx, size_t size)
+void uart_bus<dev>::set_rx(uint8_t *rx, size_t size)
 {
-    // TODO: assert if not inited
-
     m_rx = rx;
     m_rx_size = size;
     m_rx_next = 0;
-
-    return err::ok;
 }
 
 template<uart_device dev>
-err uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
+void uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 {
     (void)size;
     (void)fill_byte;
     // TODO
-    return err::generic;
 }
 
 template<uart_device dev>
-err uart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
+void uart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
 {
-    // TODO: assert if not inited
-
     m_tx = tx;
     m_tx_size = size;
-
-    return err::ok;
 }
 
 template<uart_device dev>
-err uart_bus<dev>::set_handler(const handler_fn &handler)
+void uart_bus<dev>::set_handler(const handler_fn &handler)
 {
-    // TODO: assert if not inited
     m_ev_handler.get() = handler;
-    return err::ok;
 }
 
 template<uart_device dev>
-err uart_bus<dev>::reset_buffers()
+void uart_bus<dev>::reset_buffers()
 {
-    // TODO: assert if not inited
-
     m_status &= ~(tx_done | rx_pend);
 
     m_tx = nullptr;
@@ -230,24 +213,17 @@ err uart_bus<dev>::reset_buffers()
     m_rx = nullptr;
     m_rx_size = 0;
     m_rx_next = 0;
-
-    return err::ok;
 }
 
 template<uart_device dev>
-err uart_bus<dev>::reset_handler()
+void uart_bus<dev>::reset_handler()
 {
-    // TODO: assert if not inited
-
     m_ev_handler.get() = handler_fn{};
-    return err::ok;
 }
 
 template<uart_device dev>
 err uart_bus<dev>::do_tx()
 {
-    // TODO: assert if not inited
-
     auto &serial = get_serial();
 
     if (m_tx) {
@@ -261,8 +237,6 @@ err uart_bus<dev>::do_tx()
 template<uart_device dev>
 err uart_bus<dev>::do_rx()
 {
-    // TODO: assert if not inited
-
     if (m_rx) {
         m_status |= rx_pend;
     }
@@ -273,14 +247,20 @@ err uart_bus<dev>::do_rx()
 template<uart_device dev>
 err uart_bus<dev>::do_xfer()
 {
-    // TODO: assert if not inited
+    extern void notify_xfer_start();
 
     auto rc = do_tx();
     if (is_error(rc)) {
         return rc;
     }
 
-    return do_rx();
+    rc = do_rx();
+    if (is_error(rc)) {
+        return rc;
+    }
+
+    notify_xfer_start();
+    return rc;
 }
 
 template<uart_device dev>
@@ -295,8 +275,6 @@ err uart_bus<dev>::cancel_xfer()
 template<uart_device dev>
 void uart_bus<dev>::serial_event(channel ch)
 {
-    // TODO: assert if not inited
-
     auto &serial = get_serial();
     auto &handler = m_ev_handler.get();
 

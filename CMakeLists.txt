@@ -46,7 +46,7 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
-target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME})
+target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp)
 
 # Platform is added in the first place in order to expose platform definitions
 # to the rest of the system

@@ -4,6 +4,6 @@
 #define PLATFORM_CONSOLE_DRIVER_HPP_
 
 // All console definitions are generated in the serial config header
-#include <platform/serial_cfgs.hpp>
+#include <aux/serial_cfgs.hpp>
 
 #endif // PLATFORM_CONSOLE_DRIVER_HPP_

@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 #include <application.h>
-#include "platform/defines.hpp"
+#include "aux/platform_defines.hpp"
 
 namespace ecl
 {
@@ -21,11 +21,11 @@ static inline void spin_wait(unsigned ms)
     ::delay(ms);
 }
 
-//! \brief Aborts execution of currently running code. Never return.
+//! Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
 static inline void abort()
 {
-    // TODO
+    // TODO: disable interrupts
     for(;;);
 }
 
