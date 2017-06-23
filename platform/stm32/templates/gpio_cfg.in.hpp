@@ -1,0 +1,55 @@
+//! \file
+//! \brief Header provides template of GPIO driver configuration.
+//! \detials Pin assignment is configured in pinmux.in.cpp.
+#ifndef STM32XX_GPIO_CFGS_HPP_
+#define STM32XX_GPIO_CFGS_HPP_
+
+#include <aux/platform_defines.hpp>
+#include <platform/gpio_device.hpp>
+
+namespace ecl
+{
+
+/*[[[cog
+import cog
+import json
+import re
+
+cfg = json.load(open(JSON_CFG))
+
+]]]*/
+//[[[end]]]
+
+// GPIO drivers ----------------------------------------------------------------
+
+/*[[[cog
+
+# GPIO driver template
+template_gpio = '\nusing %s = gpio<gpio_port::%s, gpio_num::pin%d>;'
+
+export_gpio = {}
+
+if 'export_gpio' in cfg:
+    export_gpio = cfg['export_gpio']
+
+for gpio in export_gpio:
+    desc = re.findall('(\w)(\d+)', gpio['id'])
+    pin_port = desc[-1][0].lower()
+    pin_num = int(desc[-1][1])
+    drv_name = 'GPIO_P%s%d_driver' % (pin_port.upper(), pin_num)
+
+    if 'comment' in gpio:
+        cog.outl('/' + '* ' + gpio['comment'] + ' *' + '/\n')
+
+    cog.outl(template_gpio % (drv_name, pin_port, pin_num))
+
+    if 'alias' in gpio:
+        cog.outl('using %s = %s;' % (gpio['alias'], drv_name))
+
+
+]]]*/
+//[[[end]]]
+
+} // namespace ecl
+
+#endif // STM32XX_GPIO_CFGS_HPP_

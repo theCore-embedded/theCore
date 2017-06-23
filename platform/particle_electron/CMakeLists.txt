@@ -110,9 +110,4 @@ target_link_libraries(particle_electron PUBLIC
 target_link_libraries(particle_electron INTERFACE
     particle_user_side)
 
-# This is something clearly uncommon, but due to some device event processing
-# tweaks, semaphores are required within private platform code.
-# Thus this dependency is required.
-# target_link_libraries(particle_electron PRIVATE thread)
-
 add_dependencies(particle_electron platform_generated)

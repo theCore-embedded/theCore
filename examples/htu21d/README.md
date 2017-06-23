@@ -20,8 +20,8 @@
  - Attach any preferable UART-to-USB converter ([such as this](http://www.geekfactory.mx/wp-content/uploads/2013/06/converdidor_usb_ttl_rs232_pl_2303hx_01.jpg))
 module according to following pinout:
    ```
-   PD5 (USART RX) - module's TX
-   PD6 (USART TX) - module's RX
+   PD9 (USART RX) - module's TX
+   PD8 (USART TX) - module's RX
    ```
 
 Do not forget ground.

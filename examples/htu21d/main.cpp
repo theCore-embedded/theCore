@@ -11,7 +11,7 @@
 extern "C"
 void board_init()
 {
-    gpio_init();
+    gpio_init_generated();
 }
 
 struct measurement {

@@ -22,7 +22,7 @@
 extern "C"
 void board_init()
 {
-    gpio_init();
+    gpio_init_generated();
 }
 
 //! 16 bits per one sample.
@@ -109,7 +109,7 @@ int main()
     // Set volumes, so audio can be heard.
 
     ecl::cs43l22_instance::set_master_volume(0x90);
-    ecl::cs43l22_instance::set_headphone_volume(0xe0);    
+    ecl::cs43l22_instance::set_headphone_volume(0xe0);
     ecl::cs43l22_instance::headphone_unmute();
 
     // Set audio properties.

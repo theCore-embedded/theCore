@@ -2,6 +2,8 @@
 #include "platform/exti_manager.hpp"
 #include "common/irq.hpp"
 
+#include <aux/platform_defines.hpp>
+
 // Header from stm32 miscellaneous firmware library functions
 // (add-on to CMSIS functions). See SPL.
 #include <misc.h>
