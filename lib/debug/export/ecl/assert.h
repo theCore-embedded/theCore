@@ -1,7 +1,9 @@
 #ifndef LIB_UTILS_ASSERT_HPP_
 #define LIB_UTILS_ASSERT_HPP_
 
-#if __STDC_HOSTED__
+// Some platforms have __STDC_HOSTED__ set to 1, while still lacks some
+// libnano definitions for asserts
+#if __STDC_HOSTED__ && THECORE_NATIVE_ASSERT
 #include <assert.h>
 #include <stdio.h>
 #endif
@@ -14,7 +16,7 @@ extern "C" {
 
 #ifndef NDEBUG // No-debug switch
 
-#if __STDC_HOSTED__
+#if __STDC_HOSTED__ && THECORE_NATIVE_ASSERT
 // Assert itself
 #define ecl_assert(cond) \
     assert(cond)
@@ -23,7 +25,7 @@ extern "C" {
 #define ecl_assert_msg(cond, message) \
     do { if (!(cond)) { puts(message); assert(cond); } } while (0)
 
-#else // __STDC_HOSTED__
+#else // __STDC_HOSTED__ && THECORE_NATIVE_ASSERT
 
 // These two is same as above but just works without libc implementation
 
@@ -48,7 +50,7 @@ void ecl_assert_failed(const char *assertion,
                        const char *func,
                        unsigned int line);
 
-#endif // __STDC_HOSTED__
+#endif // __STDC_HOSTED__ && THECORE_NATIVE_ASSERT
 
 #else // NDEBUG
 

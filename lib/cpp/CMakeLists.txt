@@ -13,12 +13,13 @@ target_include_directories(core_cpp
 
 message(STATUS "CORE: Checking [CONFIG_USE_CONSOLE]...")
 # Generate stub
-if(CONFIG_USE_CONSOLE)
+# TODO: remove legacy github #261
+if(CONFIG_USE_CONSOLE OR THECORE_CONFIG_USE_CONSOLE)
     message(STATUS "Console is enabled.")
     # Console is enabled and driver is provided by the platform.
     # Work here is to create aliases of bus/bus_pipe classes tied with console.
     target_link_libraries(core_cpp INTERFACE ${PLATFORM_NAME})
-    target_compile_definitions(core_cpp INTERFACE -DUSE_CONSOLE=1)
+    target_compile_definitions(core_cpp INTERFACE -DTHECORE_CONFIG_USE_CONSOLE=1)
     target_link_libraries(core_cpp INTERFACE bus)
 else()
     message(STATUS "Console is not enabled.")

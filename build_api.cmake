@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.2)
 # Set for latter use
 set(CORE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-# Requried to improve function managament
+# Required to improve function management
 include(CMakeParseArguments)
 
 # Add modules dir to search path
@@ -28,9 +28,9 @@ endif()
 #
 # Syntax:
 # add_unit_host_test(NAME test_name
-#					 SOURCES test_sources_files...
-#					 [DEPENDS list_of_dependencies...]
-#					 [INC_DIRS list_of_include_directories...]
+#                    SOURCES test_sources_files...
+#                    [DEPENDS list_of_dependencies...]
+#                    [INC_DIRS list_of_include_directories...]
 #                    [COMPILE_OPTIONS list_of_compiler_options...])
 function(add_unit_host_test)
     set(CC_WARN_FLAGS -Wall -Wextra -Wpedantic -Werror)
@@ -116,3 +116,55 @@ function(strip_executable exec_name)
     set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
             $<TARGET_FILE:${exec_name}>.bin)
 endfunction()
+
+#-------------------------------------------------------------------------------
+
+# Enables one of theCore platforms and exposes its API to the user, if present.
+# Syntax:
+# theCore_enable_platform(platform_name)
+macro(theCore_enable_platform PLATFORM_NAME)
+    # TODO: remove this legacy variable
+    set(CONFIG_PLATFORM "${PLATFORM_NAME}")
+
+    set(THECORE_CONFIG_PLATFORM "${PLATFORM_NAME}" CACHE STRING "Desired platform")
+
+    set(PLATFORM_API_MODULE ${CORE_DIR}/platform/${PLATFORM_NAME}/platform_api.cmake)
+    if(EXISTS ${PLATFORM_API_MODULE})
+        include(${PLATFORM_API_MODULE})
+    endif()
+
+    message(STATUS "Requested to enable platform: ${PLATFORM_NAME}")
+    unset(PLATFORM_API_MODULE)
+endmacro()
+
+#-------------------------------------------------------------------------------
+
+# Create custom command - COG runner
+# See https://nedbatchelder.com/code/cog/ for details.
+# Syntax:
+# theCore_create_cog_runner(IN input_file OUT output_file [ARGS args ...])
+#   - input_file    - input file for COG
+#   - output_file   - resulting file for COG
+#   - args          - optional arguments for COG
+macro(theCore_create_cog_runner)
+    cmake_parse_arguments(
+            COG
+            ""
+            "IN;OUT"
+            "ARGS"
+            ${ARGN}
+    )
+
+    if(NOT DEFINED COG_IN OR NOT DEFINED COG_OUT)
+        message(FATAL_ERROR "Input or output files are not specified")
+    endif()
+
+    set_source_files_properties(${COG_OUT} PROPERTIES GENERATED TRUE)
+
+    add_custom_command(
+        OUTPUT ${COG_OUT}
+        COMMAND cog.py ${COG_ARGS} -d -o ${COG_OUT} ${COG_IN}
+        DEPENDS ${COG_IN}
+        COMMENT "Generating: ${COG_IN} -> ${COG_OUT}"
+    )
+endmacro()
