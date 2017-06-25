@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 script="$0"
 basename="$(dirname $script)"

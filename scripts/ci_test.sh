@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # Builds and executes tests.
 
 set -e # Stop on error
