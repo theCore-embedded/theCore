@@ -5,5 +5,5 @@ elseif(CONFIG_PLATFORM_DEVICE MATCHES "STM32L1")
 elseif(CONFIG_PLATFORM_DEVICE MATCHES "STM32")
     # Probably in future this fatal error message will be removed,
     # since there are a lot of STM32 devices does not supported by the SPL.
-    message(FATAL_ERROR "Unsupported STM32 device: ${CONFIG_PLATFORM_DEVICE}")
+    msg_fatal("Unsupported STM32 device: ${CONFIG_PLATFORM_DEVICE}")
 endif()

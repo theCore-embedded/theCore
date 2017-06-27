@@ -1,4 +1,4 @@
-message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
+msg_trace(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
 
 if("${CONFIG_PLATFORM_DEVICE}" STREQUAL "TM4C123GH6PM")
     # All members of the TivaTM C Series, including the TM4C123GH6PM
@@ -26,4 +26,4 @@ if("${CONFIG_PLATFORM_DEVICE}" STREQUAL "TM4C123GH6PM")
     return()
 endif()
 
-message(FATAL_ERROR "${CONFIG_PLATFORM_DEVICE} is not supported")
+msg_fatal("${CONFIG_PLATFORM_DEVICE} is not supported")

@@ -1,11 +1,11 @@
 # Notify whole system about which processor is used
 set(TARGET_MCU_ARCH "arm_cm4" CACHE STRING "Processor arch")
 
-message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
+msg_trace("Checking [CONFIG_PLATFORM_DEVICE]...")
 
 # Deprecated configuration value
 if(CONFIG_PLATFORM_DEVICE STREQUAL STM32F40_41xxx)
-    message(WARNING "Deprecated device config: STM32F40_41xxx"
+    msg_warn("Deprecated device config: STM32F40_41xxx"
             ", defaulting to STM32F407VG")
     set(CONFIG_PLATFORM_DEVICE STM32F407VG)
 endif()
@@ -49,4 +49,4 @@ endif()
 
 # Additional implementation will be required to cover unsupported
 # devices from stm32f4xx line.
-message(FATAL_ERROR "Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")
+msg_fatal("Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")

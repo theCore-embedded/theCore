@@ -33,7 +33,7 @@ set(OUT_SERIAL_CPP ${CMAKE_CURRENT_BINARY_DIR}/serial_dispatcher.cpp)
 set(OUT_DEFS_HDR ${CMAKE_CURRENT_BINARY_DIR}/export/aux/platform_defines.hpp)
 
 if(DEFINED THECORE_CONFIG_PARTICLE_SERIALS_ENABLED)
-    message(STATUS "Serial drivers enabled")
+    msg_info("Serial drivers enabled")
     # Definitions must come before input file
     list(APPEND COG_ARGS "-DSERIALS=\"${THECORE_CONFIG_PARTICLE_SERIALS_ENABLED}\"")
 endif()
@@ -52,7 +52,7 @@ set(I2C_ARGS)
 
 if(THECORE_CONFIG_I2C_ENABLE)
     # Apply default configuration
-    message(STATUS "I2C enabled")
+    msg_info("I2C enabled")
     if(NOT DEFINED THECORE_CONFIG_I2C_SPEED)
         set(THECORE_CONFIG_I2C_SPEED 20000)
     endif()
