@@ -43,7 +43,7 @@ add_library(tivaware STATIC
 if(CONFIG_PLATFORM_DEVICE MATCHES TM4C123GH6PM)
     target_compile_definitions(tivaware PUBLIC -DPART_TM4C123GH6PM)
 else()
-    message(FATAL_ERROR "Unknown device: ${CONFIG_PLATFORM_DEVICE}")
+    msg_fatal("Unknown device: ${CONFIG_PLATFORM_DEVICE}")
 endif()
 
 target_include_directories(tivaware SYSTEM PUBLIC

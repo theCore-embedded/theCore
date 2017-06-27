@@ -16,8 +16,8 @@ elseif(NOT TARGET_MCU_ARCH) # Empty architecture allowed in some cases
     endif()
 
     if(NOT PLATFORM_NAME STREQUAL "host")
-        message(FATAL_ERROR "Architecture is not set, aborting")
+        msg_fatal("Architecture is not set, aborting")
     endif()
 else()
-    message(FATAL_ERROR "Unsupported architecture: ${TARGET_MCU_ARCH}")
+    msg_fatal("Unsupported architecture: ${TARGET_MCU_ARCH}")
 endif()
