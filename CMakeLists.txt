@@ -59,7 +59,7 @@ if(CMAKE_CROSSCOMPILING)
     else()
         # It is possible that other modules, like platform libraries,
         # already provide functionality similar to the sys.
-        message(STATUS "System module is disabled")
+        msg_info("System module is disabled")
     endif()
 
     if(NOT THECORE_FORCE_NO_NEWLIB)

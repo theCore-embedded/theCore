@@ -11,7 +11,7 @@ elseif(NOT TARGET_MCU_ARCH) # Empty architecture allowed in some cases
         # Architecture definitions and functionality is provided elsewhere.
         # This is often a case if the platform uses some weird kind of linker
         # scripts, custom startup code etc.
-        message(STATUS "Architecture module is disabled")
+        msg_info("Architecture module is disabled")
         return()
     endif()
 

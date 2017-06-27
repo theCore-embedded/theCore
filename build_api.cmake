@@ -159,7 +159,7 @@ macro(theCore_enable_platform PLATFORM_NAME)
         include(${PLATFORM_API_MODULE})
     endif()
 
-    message(STATUS "Requested to enable platform: ${PLATFORM_NAME}")
+    msg_info("Requested to enable platform: ${PLATFORM_NAME}")
     unset(PLATFORM_API_MODULE)
 endmacro()
 
@@ -182,7 +182,7 @@ macro(theCore_create_cog_runner)
     )
 
     if(NOT DEFINED COG_IN OR NOT DEFINED COG_OUT)
-        message(FATAL_ERROR "Input or output files are not specified")
+        msg_fatal("Input or output files are not specified")
     endif()
 
     set_source_files_properties(${COG_OUT} PROPERTIES GENERATED TRUE)
