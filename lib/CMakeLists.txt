@@ -3,7 +3,7 @@ if(CMAKE_CROSSCOMPILING)
     # TODO: not all platfotms that theCore will support are bare-metals.
     # Some platforms may not need newlib. This should be checked.
     if(THECORE_FORCE_NO_NEWLIB)
-        message(STATUS "Newlib is disabled")
+        msg_info("Newlib is disabled")
     else()
         add_subdirectory(newlib)
     endif()

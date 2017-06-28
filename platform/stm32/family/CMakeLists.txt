@@ -5,7 +5,7 @@ elseif(CONFIG_PLATFORM_DEVICE MATCHES "STM32L1")
 else()
     # Likely that additional implementation is required in order to add new stm32
     # family
-    message(FATAL_ERROR "Device ${CONFIG_PLATFORM_DEVICE} doesn't belong to any stm32 family")
+    msg_fatal("Device ${CONFIG_PLATFORM_DEVICE} doesn't belong to any stm32 family")
 endif()
 
 # Prevent warnings in sources provided by ST
