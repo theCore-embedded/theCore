@@ -13,6 +13,9 @@ set(SUITE_LIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/suite_list.txt)
 # Variable holding suites for suite files
 set(SUITE_LIST "")
 
+# theCore directory and its API. Used mainly for nice printing in this module.
+set(CORE_DIR ${CMAKE_CURRENT_LIST_DIR}/../)
+include(${CORE_DIR}/build_api.cmake)
 
 # Adds theCore test suite and sets suite parameters.
 #
@@ -39,7 +42,7 @@ function(add_suite suite_name)
             set(SUITE_SUFFIX ".clang")
         else()
             # Must be filled if assertion hit.
-            message(FATAL_ERROR "Toolchain: ${TEST_TOOLCHAIN_NAME} not recognized")
+            msg_fatal(FATAL_ERROR "Toolchain: ${TEST_TOOLCHAIN_NAME} not recognized")
         endif()
     endif()
 
@@ -54,7 +57,6 @@ function(add_suite suite_name)
     set(AUTOGEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/${TEST_TARGET_NAME}/${suite_name}${SUITE_SUFFIX}/)
     file(MAKE_DIRECTORY ${AUTOGEN_DIR})
 
-    set(CORE_DIR ${CMAKE_CURRENT_LIST_DIR}/../)
     set(TOOLCHAINS_DIR ${CORE_DIR}/toolchains)
 
     # Collect test cases sources
@@ -67,11 +69,8 @@ function(add_suite suite_name)
         list(APPEND TEST_SOURCES ${CASE_SOURCES})
     endforeach()
 
-    # Be verbose
-    message("${GENSUITE_OUTPUT}")
-
     if(GENTEST_RESULT)
-        message(FATAL_ERROR "Unable to generate test runners: ${GENSUITE_RESULT}")
+        msg_fatal(FATAL_ERROR "Unable to generate test runners: ${GENSUITE_RESULT}")
     endif()
 
     # Arguments for the test project
@@ -91,11 +90,11 @@ function(add_suite suite_name)
 
     set(COMPLETE_TEST_NAME "${suite_name}_${TEST_TARGET_NAME}${SUITE_SUFFIX}")
 
-    message("-----------------------------------------------")
-    message("   Suite added:   ${COMPLETE_TEST_NAME}")
-    message("   Suite dir:     ${SUITE_SOURCE_DIR}")
-    message("   Target:        ${TEST_TARGET_NAME}")
-    message("-----------------------------------------------")
+    msg_info("-----------------------------------------------")
+    msg_info("   Suite added:   ${COMPLETE_TEST_NAME}")
+    msg_info("   Suite dir:     ${SUITE_SOURCE_DIR}")
+    msg_info("   Target:        ${TEST_TARGET_NAME}")
+    msg_info("-----------------------------------------------\n")
 
     # Records suite for external tooling.
 
