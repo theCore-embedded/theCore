@@ -10,7 +10,7 @@ elseif(STM32_DEVICE MATCHES "STM32L1")
 else()
     # Likely that additional implementation is required in order to add new stm32
     # family
-    message(FATAL_ERROR "Device ${STM32_DEVICE} doesn't have any linker flags defined")
+    msg_fatal("Device ${CONFIG_PLATFORM_DEVICE} doesn't have any linker flags defined")
 endif()
 
 # TODO: alter FPU flags based on device used

@@ -20,7 +20,7 @@ if(CMAKE_C_COMPILER MATCHES "clang")
         OUTPUT_VARIABLE PATCH_OUTPUT
         ERROR_VARIABLE PATCH_OUTPUT)
 
-    message("CMSIS patch: ${PATCH_OUTPUT}")
+    msg_info("CMSIS patch: ${PATCH_OUTPUT}")
 else()
     target_include_directories(cmsis SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/CMSIS/CMSIS/Include)
 endif()

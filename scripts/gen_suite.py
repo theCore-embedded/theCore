@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import argparse
 import re
@@ -124,4 +124,3 @@ output_cmake = args.output_cmake
 test_dirnames = [ os.path.basename(os.path.dirname(f.name)) for f in args.input ]
 for test in test_dirnames:
     output_cmake.write(cmake_test_template.format(test_name=test, suite_name=args.suite_name))
-

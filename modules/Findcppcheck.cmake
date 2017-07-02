@@ -65,8 +65,7 @@ set(CMAKE_FIND_APPBUNDLE ${_oldappbundlesetting})
 get_filename_component(_cppcheckmoddir ${CMAKE_CURRENT_LIST_FILE} PATH)
 set(_cppcheckdummyfile "${_cppcheckmoddir}/Findcppcheck.cpp")
 if(NOT EXISTS "${_cppcheckdummyfile}")
-	message(FATAL_ERROR
-		"Missing file ${_cppcheckdummyfile} - should be alongside Findcppcheck.cmake, can be found at https://github.com/rpavlik/cmake-modules")
+	msg_fatal("Missing file ${_cppcheckdummyfile} - should be alongside Findcppcheck.cmake, can be found at https://github.com/rpavlik/cmake-modules")
 endif()
 
 function(_cppcheck_test_arg _resultvar _arg)
@@ -137,8 +136,7 @@ if(CPPCHECK_EXECUTABLE)
 		set(CPPCHECK_WARN_REGULAR_EXPRESSION "[(]style[)]")
 	else()
 		# No idea - some other issue must be getting in the way
-		message(STATUS
-			"WARNING: Can't detect whether CPPCHECK wants new or old-style arguments!")
+		msg_warn("WARNING: Can't detect whether CPPCHECK wants new or old-style arguments!")
 	endif()
 
 	set(CPPCHECK_QUIET_ARG "--quiet")

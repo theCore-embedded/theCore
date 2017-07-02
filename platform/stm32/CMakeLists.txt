@@ -20,10 +20,10 @@ target_link_libraries(stm32 PUBLIC
 # Get proper MCU definitions
 add_subdirectory(family)
 
-message(STATUS "Checking [CONFIG_MAX_ISR_PRIORITY]...")
+msg_trace("Checking [CONFIG_MAX_ISR_PRIORITY]...")
 if(NOT DEFINED CONFIG_MAX_ISR_PRIORITY)
     set(CONFIG_MAX_ISR_PRIORITY 0xff)
-    message(STATUS "CONFIG_MAX_ISR_PRIORITY not set,"
+    msg_trace("CONFIG_MAX_ISR_PRIORITY not set,"
             " using default value: ${CONFIG_MAX_ISR_PRIORITY}")
 endif()
 
@@ -40,7 +40,7 @@ function(generate_source IN_NAME OUT_NAME)
     if(OUT_NAME MATCHES "\.hpp$")
         set(OUT_DIR ${GEN_DIR}/export/aux)
     else()
-        set(OUT_DIR ${GEN_DIR}/)
+        set(OUT_DIR ${GEN_DIR})
     endif()
 
     set(OUT_PATH "${OUT_DIR}/${OUT_NAME}")

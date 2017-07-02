@@ -43,8 +43,7 @@ endif()
 
 function(add_cppcheck _name)
     if(NOT TARGET ${_name})
-        message(FATAL_ERROR
-                "add_cppcheck given a target name that does not exist: '${_name}' !")
+        msg_fatal("add_cppcheck given a target name that does not exist: '${_name}' !")
     endif()
     if(CPPCHECK_FOUND)
         set(_cppcheck_args)

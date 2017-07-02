@@ -15,11 +15,37 @@ include(CMakeParseArguments)
 # Add modules dir to search path
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
 
+# Colorize cmake output
+string(ASCII 27 THECORE_ESC)
+set(THECORE_INFO_COLOR "${THECORE_ESC}[96m")
+set(THECORE_WARN_COLOR "${THECORE_ESC}[93m")
+set(THECORE_TRACE_COLOR "${THECORE_ESC}[94m")
+set(THECORE_FATAL_COLOR "${THECORE_ESC}[1;31m")
+set(THECORE_COLOR_RESET "${THECORE_ESC}[m")
+
+function(msg_info msg_body)
+    message("${THECORE_INFO_COLOR}[INFO ]: ${msg_body} ${THECORE_COLOR_RESET}")
+endfunction(msg_info)
+
+function(msg_warn msg_body)
+    message("${THECORE_WARN_COLOR}[WARN ]: ${msg_body} ${THECORE_COLOR_RESET}")
+    message(WARNING)
+endfunction(msg_warn)
+
+function(msg_fatal msg_body)
+    message("${THECORE_FATAL_COLOR}[FATAL]: ${msg_body} ${THECORE_COLOR_RESET}")
+    message(FATAL_ERROR)
+endfunction(msg_fatal)
+
+function(msg_trace msg_body)
+    message("${THECORE_TRACE_COLOR}[TRACE]: ${msg_body} ${THECORE_COLOR_RESET}")
+endfunction(msg_trace)
+
 # Add test only if not cross-compiling
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
     find_package(CppUTest)
     if(NOT ${CPPUTEST_FOUND})
-        message(WARNING "CppUTest library not present. Tests are disabled.")
+        msg_warn("CppUTest library not present. Tests are disabled.")
     endif()
 endif()
 
@@ -54,25 +80,25 @@ function(add_unit_host_test)
 
         if(DEFINED UNIT_TEST_NAME AND DEFINED UNIT_TEST_SOURCES)
             set(UNIT_TEST_NAME unit_test_${UNIT_TEST_NAME})
-            message("-----------------------------------------------")
-            message("	Test added: ${UNIT_TEST_NAME}")
-            message("	Test sources: ${UNIT_TEST_SOURCES}")
+            msg_info("-----------------------------------------------")
+            msg_info("	Test added: ${UNIT_TEST_NAME}")
+            msg_info("	Test sources: ${UNIT_TEST_SOURCES}")
 
             add_executable(${UNIT_TEST_NAME} ${UNIT_TEST_SOURCES})
             add_test(NAME ${UNIT_TEST_NAME} COMMAND ${UNIT_TEST_NAME})
             target_link_libraries(${UNIT_TEST_NAME} CppUTest)
             target_link_libraries(${UNIT_TEST_NAME} CppUTestExt)
         else()
-            message(FATAL_ERROR "Test sources and name must be defined!")
+            msg_fatal("Test sources and name must be defined!")
         endif()
 
         if(UNIT_TEST_DEPENDS)
-            message("	Test dependencies: ${UNIT_TEST_DEPENDS}")
+            msg_info("	Test dependencies: ${UNIT_TEST_DEPENDS}")
             target_link_libraries(${UNIT_TEST_NAME} ${UNIT_TEST_DEPENDS})
         endif()
 
         if(UNIT_TEST_INC_DIRS)
-            message("	Test includes: ${UNIT_TEST_INC_DIRS}")
+            msg_info("	Test includes: ${UNIT_TEST_INC_DIRS}")
             target_include_directories(
                     ${UNIT_TEST_NAME}
                     PRIVATE
@@ -80,7 +106,7 @@ function(add_unit_host_test)
         endif()
 
         if(UNIT_TEST_COMPILE_OPTIONS)
-            message("	Test compile options: ${UNIT_TEST_COMPILE_OPTIONS}")
+            msg_info("	Test compile options: ${UNIT_TEST_COMPILE_OPTIONS}")
             target_compile_options(${UNIT_TEST_NAME} PUBLIC ${UNIT_TEST_COMPILE_OPTIONS})
         endif()
 
@@ -91,7 +117,7 @@ function(add_unit_host_test)
         target_compile_options(${UNIT_TEST_NAME} PUBLIC $<$<CONFIG:Debug>:${CC_CXX_FLAGS_DEBUG}>)
         target_compile_options(${UNIT_TEST_NAME} PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${CXX_WARN_FLAGS}>)
         target_compile_options(${UNIT_TEST_NAME} PUBLIC $<$<COMPILE_LANGUAGE:C>:${CC_WARN_FLAGS}>)
-        message("-----------------------------------------------")
+        msg_info("-----------------------------------------------")
     endif()
 endfunction()
 
@@ -135,7 +161,7 @@ macro(theCore_enable_platform PLATFORM_NAME)
         include(${PLATFORM_API_MODULE})
     endif()
 
-    message(STATUS "Requested to enable platform: ${PLATFORM_NAME}")
+    msg_info("Requested to enable platform: ${PLATFORM_NAME}")
     unset(PLATFORM_API_MODULE)
 endmacro()
 
@@ -183,7 +209,7 @@ macro(theCore_create_cog_runner)
     )
 
     if(NOT DEFINED COG_IN OR NOT DEFINED COG_OUT)
-        message(FATAL_ERROR "Input or output files are not specified")
+        msg_fatal("Input or output files are not specified")
     endif()
 
     set_source_files_properties(${COG_OUT} PROPERTIES GENERATED TRUE)
