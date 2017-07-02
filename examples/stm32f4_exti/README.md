@@ -1,4 +1,4 @@
-# The Core _STM32 EXTI_ example
+# theCore _STM32 EXTI_ example
 
  ```
 
@@ -31,9 +31,11 @@ PD8 (USART TX) - module's RX
 
 Do not forget ground.
 
+![stm32f4_exti example](stm32f4_exti.jpg)
+
 ## Building
 
-Toolchain is required to build this application. The Core already has one suitable
+Toolchain is required to build this application. theCore already has one suitable
 for this target.
 
 ```
@@ -47,7 +49,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=../../toolchains/arm-cm4-gnu.cmake ..
 Flash firmware via `openocd` and `gdb`.
 
 1. Attach stm32f4 Discovery board and USB <-> UART converter to the PC.
-1. Launch openocd in separate terminal using script provided by The Core.
+1. Launch openocd in separate terminal using script provided by theCore.
     Alternatively, you can use script from `openocd` installation.
 
     ```
@@ -112,6 +114,4 @@ After each button press:
 ```
 Button pressed!
 ```
-
-
 

@@ -18,9 +18,12 @@ namespace ecl
 //! \todo Use RTC instead of relying on clock. See #213 also.
 //! \details Stops waiting if predicate returns true. Guarantees that predicate
 //! will be called at least once.
-//! \note If WFE is present and used, MCU will go to sleep waiting for events.
-//! Events will wake up MCU, allowing predicate to be executed.
-//! In such manner, granurality of predicate checks depends on events rate.
+//! \note If WFE and systimer are present and used, MCU will go to sleep,
+//! waiting for events.
+//! External events or interrupts will wake up MCU, allowing predicate
+//! to be executed. This also means that at minimum, MCU will wake up on every
+//! timer interrupt.
+//! In such manner, granularity of predicate checks depends on events rate.
 //! \retval false Timeout reached and predicate is still false.
 //! \retval true Predicate returned true before timeout was hit.
 template<class Predicate>
@@ -67,6 +70,21 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
     }
 
     ecl::systmr::disable();
+#elif defined THECORE_PLATFORM_STUB_DEFINE_SPIN_WAIT // spin_wait exists. Hack till #247
+    // Amount of millisecond to spin in one step.
+    // Predicate will be checked once per quant.
+    // No rational reasoning behind this value.
+    constexpr auto delay_quant = 25;
+
+    while (ms) {
+        if (pred()) { // Make sure that predicate is called at least once.
+            return true;
+        } else {
+            spin_wait(delay_quant);
+            ms = ms > delay_quant ? ms - delay_quant : 0;
+        }
+    }
+
 #else // No system timer
     uint32_t start = ecl::clk();
     uint32_t to_wait = ms * (ecl::clk_spd() / 1000L);
@@ -77,10 +95,6 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
         } else if (ecl::clk() - start >= to_wait) { // Handles wraparound.
             break;
         }
-
-#ifdef USE_WFI_WFE
-        ecl::wfe();
-#endif // USE_WFI_WFE
     }
 #endif // USE_SYSTMR
 

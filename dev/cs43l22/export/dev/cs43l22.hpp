@@ -3,7 +3,7 @@
 //! \brief Contains implementation for CS43L22 driver.
 //! \details The CS43L22 is a highly integrated,
 //!  low power stereo DAC with headphone and ClassD speaker amplifiers
-//!  See: https://www.cirrus.com/cn/pubs/proDatasheet/CS43L22_F2.pdf
+//!  See: https://www.cirrus.com/products/cs43l22/
 //!
 //!  Restrictions: Current implementation supports only I2S audio format.
 //!  Sample size is fixed and equal to 16 bits. Also, DAC requires external clock (MCLK)

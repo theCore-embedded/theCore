@@ -19,7 +19,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_FIND_ROOT_PATH $ENV{GCC_ARM_EMBEDDED_PATH})
 
 if(NOT CMAKE_FIND_ROOT_PATH)
-    message(FATAL_ERROR "Path to GCC ARM installation must be set in order to use its libraries with clang")
+    msg_fatal("Path to GCC ARM installation must be set in order to use its libraries with clang")
 endif()
 
 # search for programs in the build host directories

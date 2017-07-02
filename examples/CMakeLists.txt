@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4)
 # Special module will separate builds for each example project.
 include(ExternalProject)
 
-# Root project for bunch of The Core examples.
+# Root project for bunch of theCore examples.
 project(example_hub)
 
 # Convinient alias
@@ -52,6 +52,18 @@ ExternalProject_Add(stm32f4_cs43l22_audio
 
 ExternalProject_Add(stm32f4_htu21d_example
         SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/htu21d
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_TOOLCHAIN_FILE=${ARM_CM4_GNU_TOOLCHAIN}
+        BUILD_ALWAYS 1 # Allows to rebuild external project if its files changes
+        INSTALL_COMMAND echo "Install isn't required, skipping...")
+
+################################################################################
+# TM4C Led example.
+################################################################################
+
+ExternalProject_Add(tm4c_led_example
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/tm4c_led
         CMAKE_ARGS
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DCMAKE_TOOLCHAIN_FILE=${ARM_CM4_GNU_TOOLCHAIN}

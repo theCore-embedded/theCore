@@ -1,4 +1,4 @@
-#include "assert.h"
+#include "ecl/assert.h"
 
 #include <ecl/iostream.hpp>
 #include <platform/console.hpp>

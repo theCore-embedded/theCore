@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # Script takes list of suite binaries and connected boards and tries to flash
 # binaries into the boards connected

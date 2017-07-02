@@ -65,7 +65,7 @@ void gpio<Port, Pin>::toggle()
 
     auto pin_val = GPIOPinRead(port, pin);
     pin_val ^= pin;
-    GPIOPinWrite(port, pin_val, pin_val);
+    GPIOPinWrite(port, pin, pin_val);
 }
 
 template<gpio_hw::port Port, gpio_hw::num Pin>

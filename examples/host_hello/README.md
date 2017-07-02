@@ -1,4 +1,4 @@
-# The Core _Hello World_ host example
+# theCore _Hello World_ host example
 
  ```
 
@@ -9,7 +9,7 @@
  ```
 
 
-This application shows The Core running on the host target.
+This application shows theCore running on the host target.
 By _host_ target is understood an environment capable to compile and run
 theCore applications.
 

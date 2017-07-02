@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
-# The Core framework directory.
+# theCore framework directory.
 set(CORE_DIR ../../)
 
 # Required.
@@ -31,7 +31,7 @@ set(CONFIG_CONSOLE_DEVICE_NUM 2)
 # Baud rate of the console
 set(CONFIG_CONSOLE_BAUD 115200)
 
-# Include The Core into the build process
+# Include theCore into the build process
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
 
 # Produce complete binary, suitable for flashing to the target

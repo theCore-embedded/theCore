@@ -1,9 +1,9 @@
+#include <platform/execution.hpp>
+
 #include <unity.h>
 #include <unity_fixture.h>
 
 #include <ecl/unity_helpers.hpp>
-
-#include <platform/execution.hpp>
 
 static volatile uint32_t test_cnt;
 

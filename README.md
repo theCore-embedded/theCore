@@ -33,6 +33,11 @@ In order to proceed with theCore itself, start cloning this repository:
 git clone https://github.com/forGGe/theCore.git
 ```
 
+After it, run:
+```
+git submodule update --init --recursive
+```
+
 When the code is received, you have to download and install all the dependencies.
 The process can take some time.
 To make it easier, I’d strongly recommend to download and install `nix`.

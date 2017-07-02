@@ -15,16 +15,16 @@ include(CppcheckTargets)
 
 # TODO: add same configuration mechanism for choosing right kernel
 
-message(STATUS "Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")
+msg_trace("Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")
 
 if(NOT CMAKE_CROSSCOMPILING)
     if(DEFINED CONFIG_PLATFORM)
         if(NOT CONFIG_PLATFORM STREQUAL "host")
-            message(FATAL_ERROR "Cross-compiler is required for platform other than 'host'.")
+            msg_fatal("Cross-compiler is required for platform other than 'host'.")
         endif()
     else()
         # It is fine to omit platform name if not cross-compiling
-        message(STATUS "CONFIG_PLATFORM not set, defauluting to 'host'...")
+        msg_info("CONFIG_PLATFORM not set, defauluting to 'host'...")
         set(CONFIG_PLATFORM "host")
     endif()
 
@@ -33,20 +33,20 @@ if(NOT CMAKE_CROSSCOMPILING)
 else()
     # When cross-compiling, platform must be set explicitly.
     if(NOT DEFINED CONFIG_PLATFORM)
-        message(FATAL_ERROR "CONFIG_PLATFORM must be set when cross-compiling")
+        msg_fatal("CONFIG_PLATFORM must be set when cross-compiling")
     endif()
 endif()
 
-message(STATUS "Platform will be used: ${CONFIG_PLATFORM}")
+msg_trace("Platform will be used: ${CONFIG_PLATFORM}")
 
-set(PLATFORM_NAME ${CONFIG_PLATFORM}) # For convinience
+set(PLATFORM_NAME ${CONFIG_PLATFORM}) # For convenience
 
 # Linker definitions is propagated by the platform.
 include(${CORE_DIR}/platform/common/linker.cmake)
 
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
-target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME})
+target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp)
 
 # Platform is added in the first place in order to expose platform definitions
 # to the rest of the system
@@ -54,10 +54,18 @@ add_subdirectory(platform)
 
 # Required layer only when cross-compiling
 if(CMAKE_CROSSCOMPILING)
-    add_subdirectory(sys)
+    if(NOT THECORE_FORCE_NO_SYS)
+        add_subdirectory(sys)
+    else()
+        # It is possible that other modules, like platform libraries,
+        # already provide functionality similar to the sys.
+        msg_info("System module is disabled")
+    endif()
 
-    # Newlib is theCore default C library (with some limitations).
-    target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
+    if(NOT THECORE_FORCE_NO_NEWLIB)
+        # Newlib is theCore default C library (with some limitations).
+        target_link_libraries(${PROJECT_NAME} INTERFACE newlib_stubs)
+    endif()
 endif()
 
 # Rest of modules

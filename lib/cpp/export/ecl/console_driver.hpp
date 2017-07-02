@@ -1,7 +1,7 @@
 #ifndef DEFAULT_CONSOLE_DRIVER_HPP_
 #define DEFAULT_CONSOLE_DRIVER_HPP_
 
-#if USE_CONSOLE
+#if THECORE_CONFIG_USE_CONSOLE
 
 #include <platform/console.hpp>
 #include <dev/bus.hpp>
@@ -11,12 +11,12 @@ namespace ecl
 {
 
 // Required aliases
-using console_bus = ecl::generic_bus< platform_console >;
-using console_driver = ecl::bus_pipe< console_bus >;
+using console_bus = ecl::generic_bus<platform_console>;
+using console_driver = ecl::bus_pipe<console_bus>;
 
 }
 
-#else // USE_CONSOLE
+#else // THECORE_CONFIG_USE_CONSOLE
 
 #include <cstdint>
 #include <unistd.h>
@@ -26,7 +26,7 @@ namespace ecl
 {
 
 // Do nothing class. Must be used in case if console driver doesn't needed.
-// Must have the same interface as platform's console driver has
+// Must have the same interface as platform's console driver.
 class console_driver
 {
 public:
@@ -49,6 +49,6 @@ public:
 
 }
 
-#endif // USE_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 #endif // DEFAULT_CONSOLE_DRIVER_HPP_

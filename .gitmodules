@@ -18,3 +18,6 @@
 [submodule "lib/fs/fat/pff"]
 	path = lib/fs/fat/pff
 	url = https://github.com/forGGe/petite-fat
+[submodule "lib/particle_firmware/firmware"]
+	path = lib/particle_firmware/firmware
+	url = https://github.com/forGGe/firmware.git 

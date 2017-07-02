@@ -1,4 +1,4 @@
-# The Core _CS43L22 audio_ example
+# theCore _CS43L22 audio_ example
 
  ```
 
@@ -21,9 +21,11 @@ module according to following pinout:
 
 Do not forget ground.
 
+![cs43l22_audio example](cs43l22_audio.jpg)
+
 ## Building
 
-Toolchain is required to build this application. The Core already has one suitable
+Toolchain is required to build this application. theCore already has one suitable
 for this target.
 
 ```
@@ -37,7 +39,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=../../toolchains/arm-cm4-gnu.cmake ..
 Flash firmware via `openocd` and `gdb`.
 
 1. Attach stm32f4 Discovery board and USB <-> UART converter to the PC.
-1. Launch openocd in separate terminal using script provided by The Core. Alternatively, you can use script from `openocd` installation.
+1. Launch openocd in separate terminal using script provided by theCore. Alternatively, you can use script from `openocd` installation.
 
     ```
     openocd -f ~/path/to/the/core/scripts/stm32f4discovery.cfg
@@ -98,5 +100,4 @@ Playing audio sample...
 ```
 
 In headphones you should hear cool 8-bit sound.
-
 

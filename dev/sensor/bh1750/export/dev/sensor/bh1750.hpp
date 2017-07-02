@@ -239,8 +239,8 @@ ecl::err bh1750<i2c_dev, address>::get_illuminance(uint32_t &value)
 }
 
 
-}; // namespace sensor
+} // namespace sensor
 
-}; // namespace ecl
+} // namespace ecl
 
 #endif // DEV_SENSOR_BH1750_HPP_

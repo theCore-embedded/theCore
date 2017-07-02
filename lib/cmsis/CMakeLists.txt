@@ -17,4 +17,4 @@ execute_process(COMMAND "patch"  "-p2"  "-i"  "clang-cmsis.patch"
     OUTPUT_VARIABLE PATCH_OUTPUT
     ERROR_VARIABLE PATCH_OUTPUT)
 
-message("CMSIS patch: ${PATCH_OUTPUT}")
+msg_info("CMSIS patch: ${PATCH_OUTPUT}")

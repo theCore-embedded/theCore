@@ -2,8 +2,8 @@
 //! \file
 //! \brief Header provides template of console driver configuration
 
-#ifndef STM32L1XX_CONSOLE_DRIVER_HPP_
-#define STM32L1XX_CONSOLE_DRIVER_HPP_
+#ifndef STM32XX_CONSOLE_DRIVER_HPP_
+#define STM32XX_CONSOLE_DRIVER_HPP_
 
 #include <aux/usart_bus.hpp>
 
@@ -39,4 +39,4 @@ void bypass_putc(char c);
 } // namespace ecl
 
 
-#endif // STM32L1XX_CONSOLE_DRIVER_HPP_
+#endif // STM32XX_CONSOLE_DRIVER_HPP_
