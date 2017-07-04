@@ -83,8 +83,8 @@ namespace systmr
 static const uint32_t systmr_freq_min = 20;
 static const uint32_t systmr_freq_max = 1000;
 
-static_assert((THECORE_CONFIG_SYSTMR_FREQ > systmr_freq_min) &&
-               (THECORE_CONFIG_SYSTMR_FREQ < systmr_freq_max),
+static_assert((THECORE_CONFIG_SYSTMR_FREQ >= systmr_freq_min) &&
+               (THECORE_CONFIG_SYSTMR_FREQ <= systmr_freq_max),
                "The value of the THECORE_CONFIG_SYSTMR_FREQ frequency is out of the range.");
 
  //! Enables timer, start counting

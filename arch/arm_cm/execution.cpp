@@ -4,11 +4,10 @@ namespace ecl
 {
 
 #if USE_SYSTMR
-
-static volatile uint32_t event_cnt;
-
 namespace systmr
 {
+
+static volatile uint32_t event_cnt;
 
 uint32_t events()
 {
@@ -32,7 +31,7 @@ extern "C" void systmr_handler(void)
 
 extern "C" void SysTick_Handler(void)
 {
-    ecl::event_cnt++;
+    ecl::systmr::event_cnt++;
     systmr_handler();
 }
 

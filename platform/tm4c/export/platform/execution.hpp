@@ -6,8 +6,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <sysctl.h>
+#include <systick.h>
+#include <limits.h>
 #include <interrupt.h>
 
+#include <hw_nvic.h>
+#include <hw_types.h>
 #include <hw_memmap.h>
 
 // ARM-CM architecture exports execution header that includes ARM CMSIS
@@ -134,6 +138,8 @@ typedef struct
 
 //------------------------------------------------------------------------------
 
+extern "C" void systick_irq_handler(void);
+
 namespace ecl
 {
 
@@ -178,7 +184,82 @@ static inline void wfe()
     asm volatile ("wfe");
 }
 
-} // namespace ecl
+#if USE_SYSTMR
 
+namespace systmr
+{
+
+//! Represents the minimum and the maximun possible values for SYSTMR frequency.
+//! This allows to guarantee the correct SYSTRM frequency regardless of SystemCoreClock.
+static const uint32_t systmr_freq_min = 20;
+static const uint32_t systmr_freq_max = 1000;
+
+static_assert((THECORE_CONFIG_SYSTMR_FREQ >= systmr_freq_min) &&
+               (THECORE_CONFIG_SYSTMR_FREQ <= systmr_freq_max),
+               "The value of the THECORE_CONFIG_SYSTMR_FREQ frequency is out of the range.");
+
+ //! Enables timer, start counting
+static inline void enable()
+{
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * clk_spd() / 1000;
+
+    SysTickPeriodSet(reload_val);
+
+    // reset SysTick counter
+    HWREG(NVIC_ST_CURRENT) = 0;
+
+    SysTickIntEnable();
+    SysTickEnable();
+}
+
+//! Disables timer, stop counting
+static inline void disable()
+{
+    SysTickDisable();
+    SysTickIntDisable();
+}
+
+//! Gets speed in which timer generate events.
+//! \details _Each event generates interrupt_, but not necessarily timer interrupt
+//! is passed to the user. In other words, each event will wake-up processor.
+//! Useful in conjunction with WFI.
+//! \retval System timer events generation speed in Hz.
+static inline auto speed()
+{
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * clk_spd() / 1000;
+
+    return clk_spd() / reload_val;
+}
+
+//! Gets amount of events occurred so far.
+//! \details Events counter may not reset after disable() call.
+//! \retval Amount of events occured so far
+uint32_t events();
+
+} // namespace systmr
+
+#endif // USE_SYSTMR
+
+//! \brief Performs a dummy busy wait for specified amount of milliseconds.
+//! \param ms number of milliseconds to wait.
+//!
+//! This function is useful for a short delays.
+//!
+//! \return None.
+static inline void spin_wait(uint32_t ms)
+{
+    const short SysCtlDelay_ticks = 3;
+
+    // handle overflow
+    uint64_t ticks_left = (ecl::clk_spd() / 1000L / SysCtlDelay_ticks) * ms;
+    while (UINT_MAX < ticks_left) {
+        SysCtlDelay(UINT_MAX);
+        ticks_left -= UINT_MAX;
+    }
+
+    SysCtlDelay(ticks_left);
+}
+
+} // namespace ecl
 
 #endif  // TM4C_EXECUTION_HPP_
