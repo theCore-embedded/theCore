@@ -155,7 +155,7 @@ add_suite(platform_bat
 #        TARGET_NAME         stm32f4discovery_simple)
 
 add_suite(platform_bat
-        CASES               bypass_console_bat
+        CASES               bypass_console_bat delay_bat
         TARGET_NAME         host)
 
 add_suite(platform_bat

@@ -138,25 +138,8 @@ typedef struct
 
 //------------------------------------------------------------------------------
 
-extern "C" void systick_irq_handler(void);
-
 namespace ecl
 {
-
-//! \brief Gets core clock speed.
-//! \return Current clock speed.
-static inline uint32_t clk_spd()
-{
-    return SysCtlClockGet();
-}
-
-//! \brief Gets current clock count.
-//! \details Uses DWT register.
-//! \return Current clock count.
-static inline uint32_t clk()
-{
-    return DWT->CYCCNT;
-}
 
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
@@ -201,7 +184,7 @@ static_assert((THECORE_CONFIG_SYSTMR_FREQ >= systmr_freq_min) &&
  //! Enables timer, start counting
 static inline void enable()
 {
-    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * clk_spd() / 1000;
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * SysCtlClockGet() / 1000;
 
     SysTickPeriodSet(reload_val);
 
@@ -226,9 +209,9 @@ static inline void disable()
 //! \retval System timer events generation speed in Hz.
 static inline auto speed()
 {
-    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * clk_spd() / 1000;
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * SysCtlClockGet() / 1000;
 
-    return clk_spd() / reload_val;
+    return SysCtlClockGet() / reload_val;
 }
 
 //! Gets amount of events occurred so far.
@@ -251,7 +234,7 @@ static inline void spin_wait(uint32_t ms)
     const short SysCtlDelay_ticks = 3;
 
     // handle overflow
-    uint64_t ticks_left = (ecl::clk_spd() / 1000L / SysCtlDelay_ticks) * ms;
+    uint64_t ticks_left = (SysCtlClockGet() / 1000L / SysCtlDelay_ticks) * ms;
     while (UINT_MAX < ticks_left) {
         SysCtlDelay(UINT_MAX);
         ticks_left -= UINT_MAX;

@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <thread>
+#include <chrono>
 
 namespace ecl
 {
@@ -17,20 +19,15 @@ static inline void abort()
     abort();
 }
 
-//! \brief Gets core clock speed.
-//! \return Current clock speed. Unreliable on host platform.
-static inline uint64_t clk_spd()
+//! \brief Performs a dummy busy wait for specified amount of milliseconds.
+//! \param ms number of milliseconds to wait.
+//!
+//! This function is useful for a short delays.
+//!
+//! \return None.
+static inline void spin_wait(unsigned ms)
 {
-    return 1000; // Pretend that there is a 1 kHz clock.
-}
-
-//! \brief Gets current clock count.
-//! \return Current clock count.
-static inline uint64_t clk()
-{
-    // Host platform is unreliable in terms of clock speed, so just return
-    // seconds since epoch here. See also ecl::clk_spd()
-    return time(NULL) * 1000;
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 } // namespace ecl

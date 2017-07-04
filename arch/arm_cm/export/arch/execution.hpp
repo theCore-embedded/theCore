@@ -31,22 +31,6 @@ extern "C" void arch_delay(uint32_t loop_count);
 namespace ecl
 {
 
-//! \brief Gets core clock speed.
-//! \return Current clock speed.
-static inline uint32_t clk_spd()
-{
-    return SystemCoreClock;
-}
-
-//! \brief Gets current clock count.
-//! \details Uses DWT register.
-//! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
-//! \return Current clock count.
-static inline uint32_t clk()
-{
-    return DWT->CYCCNT;
-}
-
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
 static inline void abort()
@@ -138,7 +122,7 @@ static inline void arch_spin_wait(uint32_t ms)
     const short arch_delay_ticks = 3;
 
     // handle overflow
-    uint64_t ticks_left = (ecl::clk_spd() / 1000L / arch_delay_ticks) * ms;
+    uint64_t ticks_left = (SystemCoreClock / 1000L / arch_delay_ticks) * ms;
     while (UINT_MAX < ticks_left) {
         arch_delay(UINT_MAX);
         ticks_left -= UINT_MAX;
