@@ -31,22 +31,6 @@ extern "C" void arch_delay(uint32_t loop_count);
 namespace ecl
 {
 
-//! \brief Gets core clock speed.
-//! \return Current clock speed.
-static inline uint32_t clk_spd()
-{
-    return SystemCoreClock;
-}
-
-//! \brief Gets current clock count.
-//! \details Uses DWT register.
-//! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
-//! \return Current clock count.
-static inline uint32_t clk()
-{
-    return DWT->CYCCNT;
-}
-
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
 static inline void abort()
@@ -83,8 +67,8 @@ namespace systmr
 static const uint32_t systmr_freq_min = 20;
 static const uint32_t systmr_freq_max = 1000;
 
-static_assert((THECORE_CONFIG_SYSTMR_FREQ > systmr_freq_min) &&
-               (THECORE_CONFIG_SYSTMR_FREQ < systmr_freq_max),
+static_assert((THECORE_CONFIG_SYSTMR_FREQ >= systmr_freq_min) &&
+               (THECORE_CONFIG_SYSTMR_FREQ <= systmr_freq_max),
                "The value of the THECORE_CONFIG_SYSTMR_FREQ frequency is out of the range.");
 
  //! Enables timer, start counting
@@ -138,7 +122,7 @@ static inline void arch_spin_wait(uint32_t ms)
     const short arch_delay_ticks = 3;
 
     // handle overflow
-    uint64_t ticks_left = (ecl::clk_spd() / 1000L / arch_delay_ticks) * ms;
+    uint64_t ticks_left = (SystemCoreClock / 1000L / arch_delay_ticks) * ms;
     while (UINT_MAX < ticks_left) {
         arch_delay(UINT_MAX);
         ticks_left -= UINT_MAX;

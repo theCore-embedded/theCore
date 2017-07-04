@@ -1,5 +1,5 @@
 # ARM Cortex-M architecture
-add_library(arch STATIC startup_arm_cm.S)
+add_library(arch STATIC startup_arm_cm.S arch.cpp)
 
 # By default CMake do not pass compile definitions to ASM files.
 # Probably due to the fact that it depends on assembler used and some of the

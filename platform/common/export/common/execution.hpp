@@ -70,7 +70,7 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
     }
 
     ecl::systmr::disable();
-#elif defined THECORE_PLATFORM_STUB_DEFINE_SPIN_WAIT // spin_wait exists. Hack till #247
+#else
     // Amount of millisecond to spin in one step.
     // Predicate will be checked once per quant.
     // No rational reasoning behind this value.
@@ -82,18 +82,6 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
         } else {
             spin_wait(delay_quant);
             ms = ms > delay_quant ? ms - delay_quant : 0;
-        }
-    }
-
-#else // No system timer
-    uint32_t start = ecl::clk();
-    uint32_t to_wait = ms * (ecl::clk_spd() / 1000L);
-
-    while (1) {
-        if (pred()) { // Make sure that predicate is called at least once.
-            return true;
-        } else if (ecl::clk() - start >= to_wait) { // Handles wraparound.
-            break;
         }
     }
 #endif // USE_SYSTMR
