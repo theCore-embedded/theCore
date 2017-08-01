@@ -1,0 +1,7 @@
+# To not forget:
+
+sphinx-versioning -l ./doc/sphinx/source/conf.py -v build -r g0_docs_sandbox -B g0_docs_sandbox -p branches  -b doc/sphinx/source/ doc/sphinx/build/
+env SPHINX_ROOT_URL=(pwd)/build make singlehtml html
+
+env SPHINX_ROOT_URL=(pwd)/doc/sphinx/build/ sphinx-versioning -l ./doc/sphinx/source/conf.py -v build -r g0_docs_sandbox -b doc/sphinx/source/ doc/sphinx/build/html -- -b html
+env SPHINX_ROOT_URL=(pwd)/doc/sphinx/build/ sphinx-versioning -l ./doc/sphinx/source/conf.py -v build -r g0_docs_sandbox -b doc/sphinx/source/ doc/sphinx/build/singlehtml -- -b singlehtml
