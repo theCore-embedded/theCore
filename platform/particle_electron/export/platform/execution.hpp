@@ -11,10 +11,6 @@
 namespace ecl
 {
 
-//! Temporary define that notifies system that delay routine is present
-//! Will stay here before #247 will be implemented
-#define THECORE_PLATFORM_STUB_DEFINE_SPIN_WAIT
-
 //! Waits not less than given amount of milliseconds.
 static inline void spin_wait(unsigned ms)
 {

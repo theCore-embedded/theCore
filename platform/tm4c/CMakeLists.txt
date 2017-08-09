@@ -42,5 +42,22 @@ endif()
 # Platform is not CMSIS-compliant
 set(TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT 1 CACHE BOOL "Compliance status" FORCE)
 
+# Represents default value for the THECORE_CONFIG_SYSTMR_FREQ (if SYSTMR is enabled)
+# The value of the THECORE_CONFIG_SYSTMR_FREQ must be in the range [20Hz, 1000Hz]
+set(THECORE_DEFAULT_SYSTMR_FREQ 50)
+
+# Use systick unless otherwise is explicitly stated
+if(NOT CONFIG_OS AND NOT DEFINED CONFIG_USE_SYSTMR_SYSTICK)
+    set(CONFIG_USE_SYSTMR_SYSTICK 1)
+endif()
+
+if(CONFIG_USE_SYSTMR_SYSTICK)
+    if (NOT THECORE_CONFIG_SYSTMR_FREQ)
+        set(THECORE_CONFIG_SYSTMR_FREQ ${THECORE_DEFAULT_SYSTMR_FREQ})
+    endif()
+
+    target_compile_definitions(tm4c PUBLIC -DUSE_SYSTMR=1 -DTHECORE_CONFIG_SYSTMR_FREQ=${THECORE_CONFIG_SYSTMR_FREQ})
+endif()
+
 # Platform provides its own implementation of WFI/WFE routines.
 target_compile_definitions(tm4c PUBLIC -DUSE_WFI_WFE=1)

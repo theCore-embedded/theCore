@@ -33,7 +33,7 @@ TEST(delay_bat, platform_spin_wait)
 
 TEST(delay_bat, common_wait_for)
 {
-    ("Wait for 100 ms");
+    UnityPrintWithEOL("Wait for 100 ms");
     ecl::wait_for(100);
 
     UnityPrintWithEOL("Wait for 2500 ms");

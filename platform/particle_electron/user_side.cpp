@@ -59,7 +59,7 @@ static struct dispatcher_timer
 static Timer dev_tmr(1000, &dispatcher_timer::check_xfer, dispatcher_obj);
 
 //! Notifies main loop about pending transactions.
-//! \detail Unfortunately, particle firmware does not provide access to control,
+//! \details Unfortunately, particle firmware does not provide access to control,
 //! or at least get interrupts notifications (except for some slave-side cases
 //! in I2C and SPI).
 //! It is something that differs from theCore event model,

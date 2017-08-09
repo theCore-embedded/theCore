@@ -1,3 +1,8 @@
+//! \addtogroup platform_stm32 STM32 platform definitions and drivers.
+//! @{
+
+//! \file
+//! \details I2C bus driver for stm32 platform.
 #ifndef PLATFORM_I2C_BUS_HPP_
 #define PLATFORM_I2C_BUS_HPP_
 
@@ -14,12 +19,23 @@
 namespace ecl
 {
 
+//! Mode of event handling.
 enum class i2c_mode
 {
     POLL,
     IRQ
 };
 
+//! I2C configuration struct.
+//! \tparam dev             Device for which configuration is provided.
+//! \tparam mode            Mode of event handling.
+//! \tparam clock_speed     Specifies the clock frequency in Hz.
+//! \tparam operation_mode  I2C operation mode - pure I2C or SMBus.
+//! \tparam duty_cycle      Specifies the I2C fast mode duty cycle.
+//! \tparam own_address     Specifies the first device own address. This parameter
+//!                         can be a 7-bit or 10-bit address
+//! \tparam ack             Enables or disables the acknowledgement.
+//! \tparam ack_addr        Specifies if 7-bit or 10-bit address is acknowledged
 template< i2c_device        dev,
           i2c_mode          mode,
           uint32_t          clock_speed,
@@ -27,7 +43,7 @@ template< i2c_device        dev,
           uint16_t          duty_cycle,
           uint16_t          own_address,
           uint16_t          ack,
-          uint16_t          acknowledged_address>
+          uint16_t          ack_addr>
 struct i2c_config
 {
     static constexpr I2C_InitTypeDef m_init_obj = {
@@ -36,13 +52,14 @@ struct i2c_config
         duty_cycle,
         own_address,
         ack,
-        acknowledged_address
+        ack_addr
     };
 
     static constexpr i2c_device m_dev = dev;
     static constexpr i2c_mode m_mode = mode;
 };
 
+//! I2C bus itself.
 template<class i2c_config>
 class i2c_bus
 {
@@ -710,5 +727,8 @@ void i2c_bus<i2c_config>::set_slave_addr(uint16_t addr)
     m_slave_addr = addr;
 }
 
-}
+} // namespace ecl
+
+//! }@
+
 #endif /* PLATFORM_I2C_BUS_HPP_ */
