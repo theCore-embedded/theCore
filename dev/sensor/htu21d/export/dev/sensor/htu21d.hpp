@@ -8,6 +8,8 @@
 #define __DEV_SENSOR_HTU21D_HPP__
 
 #include <ecl/err.hpp>
+#include <platform/console.hpp>
+#include <ecl/iostream.hpp>
 
 namespace ecl
 {
@@ -187,6 +189,12 @@ err htu21d<i2c_dev>::soft_reset()
     }
     i2c_dev::unlock();
 
+    if (rc == err::ok) {
+        bypass_putc('1');
+    } else {
+        bypass_putc('2');
+    }
+
     return rc;
 }
 
@@ -236,11 +244,14 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
     i2c_dev::lock();
     err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
     if (rc == err::ok) {
+        bypass_putc('n');
         rc = i2c_dev::xfer();
+        bypass_putc('m');
     }
     i2c_dev::unlock();
 
     if (rc != err::ok) {
+        bypass_putc('9');
         return rc;
     }
 
@@ -251,6 +262,10 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
         rc = i2c_dev::xfer();
     }
     i2c_dev::unlock();
+
+    if (rc != err::ok) {
+        bypass_putc('0');
+    }
 
     sample = ((data[0] << 8) | data[1]);
 

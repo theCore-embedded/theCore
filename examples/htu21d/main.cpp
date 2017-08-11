@@ -36,12 +36,10 @@ int main()
     // Initialize HTU21D sensor
     ecl::htu21d::init();
     ecl::htu21d::soft_reset();
-    // Allow HTU21D complete reset before issuing the read command
-    ecl::this_thread::sleep_for(15);
 
     ecl::cout << "Reset done" << ecl::endl;
 
-    while (true) {
+    //while (true) {
         int temperature = 0;
         ecl::htu21d::get_temperature(temperature);
 
@@ -54,7 +52,7 @@ int main()
 
         // Sleep for a second.
         ecl::this_thread::sleep_for(1000);
-    }
+    //}
 
     return 0;
 }

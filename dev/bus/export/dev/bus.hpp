@@ -10,6 +10,8 @@
 #include <ecl/thread/mutex.hpp>
 #include <ecl/thread/semaphore.hpp>
 #include <ecl/assert.h>
+#include <platform/console.hpp>
+#include <ecl/iostream.hpp>
 
 #include <common/bus.hpp>
 
