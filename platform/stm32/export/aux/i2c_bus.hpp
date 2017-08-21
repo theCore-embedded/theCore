@@ -583,7 +583,6 @@ void i2c_bus<i2c_config>::send_bytes(size_t count)
 template<class i2c_config>
 void i2c_bus<i2c_config>::irq_ev_handler()
 {
-    bypass_putc('t');
     constexpr auto irqn  = pick_ev_irqn();
     constexpr auto i2c = pick_i2c();
 
@@ -696,7 +695,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 
             // rx always last, so transfer is complete
             get_handler()(channel::meta, event::tc, m_rx_size);
-            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
+            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
 
             return;
         }
@@ -708,11 +707,31 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 template<class i2c_config>
 void i2c_bus<i2c_config>::irq_er_handler()
 {
+    /*constexpr auto irqn  = pick_er_irqn();
+
+    irq::clear(irqn);*/
     bypass_putc('r');
     constexpr auto i2c = pick_i2c();
     
     uint32_t lastEvent = I2C_GetLastEvent(i2c);
-    if (lastEvent & I2C_FLAG_BERR) {
+    if (lastEvent & I2C_FLAG_TRA) {
+        bypass_putc('t');
+        m_tx_left = 0;
+        get_handler()(channel::tx, event::tc, m_tx_size);
+        get_handler()(channel::tx, event::err, 0);
+    }
+    if (!(lastEvent & I2C_FLAG_TRA)) {
+        bypass_putc('r');
+        m_rx_left = 0;
+        get_handler()(channel::rx, event::tc, m_rx_size);
+        get_handler()(channel::rx, event::err, 0);
+    }
+
+    get_handler()(channel::meta, event::tc, 0);
+    //I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
+    //irq::unmask(irqn);
+
+    /*if (lastEvent & I2C_FLAG_BERR) {
         bypass_putc('a');      
         if (lastEvent & I2C_FLAG_TRA) {
             get_handler()(channel::tx, event::err, 0);
@@ -767,7 +786,7 @@ void i2c_bus<i2c_config>::irq_er_handler()
         } else {
             get_handler()(channel::rx, event::err, 0);
         }
-    }
+    }*/
 
     // TODO add error handling
 }

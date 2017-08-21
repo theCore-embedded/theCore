@@ -246,7 +246,11 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
     if (rc == err::ok) {
         bypass_putc('n');
         rc = i2c_dev::xfer();
-        bypass_putc('m');
+        if (rc == err::ok) {
+            bypass_putc('6');
+        } else {
+            bypass_putc('m');
+        }
     }
     i2c_dev::unlock();
 
@@ -257,9 +261,13 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
 
     // read data, last byte is CRC
     i2c_dev::lock();
+    bypass_putc('1');
     rc = i2c_dev::set_buffers(nullptr, data, sizeof(data));
+    bypass_putc('2');
     if (rc == err::ok) {
+        bypass_putc('3');
         rc = i2c_dev::xfer();
+        bypass_putc('4');
     }
     i2c_dev::unlock();
 
