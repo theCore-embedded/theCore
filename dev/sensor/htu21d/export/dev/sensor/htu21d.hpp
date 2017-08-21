@@ -272,7 +272,7 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
     i2c_dev::unlock();
 
     if (rc != err::ok) {
-        bypass_putc('0');
+        bypass_putc('|');
     }
 
     sample = ((data[0] << 8) | data[1]);

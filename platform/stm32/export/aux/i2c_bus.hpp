@@ -707,9 +707,9 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 template<class i2c_config>
 void i2c_bus<i2c_config>::irq_er_handler()
 {
-    /*constexpr auto irqn  = pick_er_irqn();
+    constexpr auto irqn  = pick_er_irqn();
 
-    irq::clear(irqn);*/
+    irq::clear(irqn);
     bypass_putc('r');
     constexpr auto i2c = pick_i2c();
     
@@ -727,9 +727,11 @@ void i2c_bus<i2c_config>::irq_er_handler()
         get_handler()(channel::rx, event::err, 0);
     }
 
+    I2C_GenerateSTOP(i2c, ENABLE);
+
     get_handler()(channel::meta, event::tc, 0);
-    //I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
-    //irq::unmask(irqn);
+    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
+    irq::unmask(irqn);
 
     /*if (lastEvent & I2C_FLAG_BERR) {
         bypass_putc('a');      
