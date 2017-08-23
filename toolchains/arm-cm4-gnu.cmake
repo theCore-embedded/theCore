@@ -61,7 +61,7 @@ set(CMAKE_CXX_FLAGS
 	CACHE STRING "C++ flags")
 
 # Release flags, optimization is on,
-set(CMAKE_C_FLAGS_RELEASE "-O3 -flto=4 -ffat-lto-objects -DNDEBUG "
+set(CMAKE_C_FLAGS_RELEASE "-O3 -g3 -DNDEBUG "
 	CACHE STRING "Release C flags")
 set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE}
 	CACHE STRING "Release C++ flags")
