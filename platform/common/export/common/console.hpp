@@ -9,6 +9,7 @@
 namespace ecl
 {
 
+//! Bypasses console drivers and puts string directly to the UART.
 static inline void bypass_puts(const char *str)
 {
     char ch;

@@ -341,8 +341,10 @@ ecl::err i2c_bus<i2c_config>::do_xfer()
         }
 
         constexpr auto irqn = pick_ev_irqn();
+        constexpr auto err_irqn = pick_er_irqn();
         i2c_setup_xfer_irq();
         irq::unmask(irqn);
+        irq::unmask(err_irqn);
     }
 
     return ecl::err::ok;
@@ -379,7 +381,7 @@ ecl::err i2c_bus<i2c_config>::i2c_setup_xfer_irq()
     while (I2C_GetFlagStatus(i2c, I2C_FLAG_BUSY) == SET);
 
     // TODO Add error handling and enable error irq
-    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
+    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, ENABLE);
 
     I2C_GenerateSTART(i2c, ENABLE);
 
@@ -652,7 +654,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
                 get_handler()(channel::tx, event::tc, m_tx_size);
                 // transfer is complete
                 get_handler()(channel::meta, event::tc, m_tx_size);
-                I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
+                I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
                 return;
             }
         }
@@ -706,7 +708,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 
             // rx always last, so transfer is complete
             get_handler()(channel::meta, event::tc, m_rx_size);
-            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
+            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
 
             return;
         }
@@ -718,7 +720,39 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 template<class i2c_config>
 void i2c_bus<i2c_config>::irq_er_handler()
 {
-    // TODO add error handling
+    constexpr auto irqn  = pick_er_irqn();
+
+    irq::clear(irqn);
+    constexpr auto i2c = pick_i2c();
+
+    // I2C_GetLastEvent() is suitable when multiple flags are monitored at the same time.
+    // The return type is compatible with I2C_FLAG_* definitions.
+    // Using the function I2C_GetFlagStatus() return the status of one single flag.
+
+    uint32_t lastEvent = I2C_GetLastEvent(i2c);
+
+    auto ch = lastEvent & I2C_FLAG_TRA ? channel::tx : channel::rx;
+    get_handler()(ch, event::err, 0);
+
+    // After checking on an interrupt event you should clear it using I2C_ClearFlag()
+    // or I2C_ClearITPendingBit() and/or I2C_GenerateStop() in order to clear
+    // the error flag and source and return to correct communication status.
+    I2C_ClearFlag(i2c, lastEvent);
+
+    // Now for any error interrupts was used common plan of action:
+    // 1) clear error flags
+    // 2) generate stop
+    // This may not work for some error states
+
+    // TODO: Create error handling for every error flags
+    I2C_GenerateSTOP(i2c, ENABLE);
+
+    // According to I2C library software reset I2C_SoftwareResetCmd should help recover
+    // from error state, but when placed here it causes a hang
+
+    get_handler()(channel::meta, event::tc, 0);
+    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
+    irq::unmask(irqn);
 }
 
 template<class i2c_config>
