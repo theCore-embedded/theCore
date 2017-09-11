@@ -8,6 +8,7 @@
 #define __DEV_SENSOR_HTU21D_HPP__
 
 #include <ecl/err.hpp>
+#include <common/execution.hpp>
 
 namespace ecl
 {
@@ -117,6 +118,11 @@ public:
     //!
     static err get_resolution_mode(htu21d_resolution &mode);
 
+    //! \brief Try set buffer for rx\tx and do_xfer several times if error occurred
+    //! \retval Status of the operation
+    //!
+    static err try_xfer(uint8_t cmd, uint8_t *data, size_t data_size);
+
 private:
     //! Sensor I2C commands
     enum
@@ -180,12 +186,7 @@ err htu21d<i2c_dev>::soft_reset()
 
     uint8_t cmd = SOFT_RESET;
 
-    i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
-    if (rc == err::ok) {
-        rc = i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
+    err rc = try_xfer(cmd, nullptr, 1);
 
     return rc;
 }
@@ -197,12 +198,7 @@ err htu21d<i2c_dev>::read_user_register(uint8_t &value)
 
     i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
-    i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(&cmd, &value, 1);
-    if (rc == err::ok) {
-        i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
+    err rc = try_xfer(cmd, &value, 1);
 
     return rc;
 }
@@ -214,10 +210,32 @@ err htu21d<i2c_dev>::write_user_register(uint8_t value)
 
     i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
+    err rc = try_xfer(tx_buff, nullptr, sizeof(tx_buff));
+
+    return rc;
+}
+
+template <class i2c_dev>
+err htu21d<i2c_dev>::try_xfer(uint8_t cmd, uint8_t *data, size_t data_size)
+{
     i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(tx_buff, nullptr, sizeof(tx_buff));
+    err rc;
+
+    if (!cmd) {
+        rc = i2c_dev::set_buffers(nullptr, data, data_size);
+    } else {
+        rc = i2c_dev::set_buffers(&cmd, data, data_size);
+    }
+
     if (rc == err::ok) {
-        i2c_dev::xfer();
+        // For full reset htu21d sensor need less than 15 ms as written in documentation
+        for (int i = 0; i < 4; i++) {
+            rc = i2c_dev::xfer();
+            if (rc == err::ok) {
+                break;
+            }
+            spin_wait(5);
+        }
     }
     i2c_dev::unlock();
 
@@ -233,24 +251,14 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
     i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
     // send command to start measuring
-    i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
-    if (rc == err::ok) {
-        rc = i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
+    err rc = try_xfer(cmd, nullptr, 1);
 
     if (rc != err::ok) {
         return rc;
     }
 
     // read data, last byte is CRC
-    i2c_dev::lock();
-    rc = i2c_dev::set_buffers(nullptr, data, sizeof(data));
-    if (rc == err::ok) {
-        rc = i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
+    rc = try_xfer(0, data, sizeof(data));
 
     sample = ((data[0] << 8) | data[1]);
 
