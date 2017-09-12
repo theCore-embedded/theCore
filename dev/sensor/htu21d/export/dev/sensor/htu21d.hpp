@@ -8,6 +8,8 @@
 #define __DEV_SENSOR_HTU21D_HPP__
 
 #include <ecl/err.hpp>
+#include <platform/console.hpp>
+#include <ecl/iostream.hpp>
 
 namespace ecl
 {
@@ -187,6 +189,12 @@ err htu21d<i2c_dev>::soft_reset()
     }
     i2c_dev::unlock();
 
+    if (rc == err::ok) {
+        bypass_putc('1');
+    } else {
+        bypass_putc('2');
+    }
+
     return rc;
 }
 
@@ -236,21 +244,36 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
     i2c_dev::lock();
     err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
     if (rc == err::ok) {
+        bypass_putc('n');
         rc = i2c_dev::xfer();
+        if (rc == err::ok) {
+            bypass_putc('6');
+        } else {
+            bypass_putc('m');
+        }
     }
     i2c_dev::unlock();
 
     if (rc != err::ok) {
+        bypass_putc('9');
         return rc;
     }
 
     // read data, last byte is CRC
     i2c_dev::lock();
+    bypass_putc('1');
     rc = i2c_dev::set_buffers(nullptr, data, sizeof(data));
+    bypass_putc('2');
     if (rc == err::ok) {
+        bypass_putc('3');
         rc = i2c_dev::xfer();
+        bypass_putc('4');
     }
     i2c_dev::unlock();
+
+    if (rc != err::ok) {
+        bypass_putc('|');
+    }
 
     sample = ((data[0] << 8) | data[1]);
 

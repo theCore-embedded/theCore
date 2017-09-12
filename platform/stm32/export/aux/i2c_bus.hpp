@@ -13,8 +13,12 @@
 #include <common/i2c.hpp>
 
 #include <sys/types.h>
+#include <platform/console.hpp>
+#include <ecl/iostream.hpp>
 #include <ecl/utils.hpp>
 #include <ecl/assert.h>
+
+using ecl::bypass_putc;
 
 namespace ecl
 {
@@ -341,8 +345,10 @@ ecl::err i2c_bus<i2c_config>::do_xfer()
         }
 
         constexpr auto irqn = pick_ev_irqn();
+        constexpr auto err_irqn = pick_er_irqn();
         i2c_setup_xfer_irq();
         irq::unmask(irqn);
+        irq::unmask(err_irqn);
     }
 
     return ecl::err::ok;
@@ -379,7 +385,7 @@ ecl::err i2c_bus<i2c_config>::i2c_setup_xfer_irq()
     while (I2C_GetFlagStatus(i2c, I2C_FLAG_BUSY) == SET);
 
     // TODO Add error handling and enable error irq
-    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
+    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, ENABLE);
 
     I2C_GenerateSTART(i2c, ENABLE);
 
@@ -652,7 +658,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
                 get_handler()(channel::tx, event::tc, m_tx_size);
                 // transfer is complete
                 get_handler()(channel::meta, event::tc, m_tx_size);
-                I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
+                I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
                 return;
             }
         }
@@ -706,7 +712,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 
             // rx always last, so transfer is complete
             get_handler()(channel::meta, event::tc, m_rx_size);
-            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
+            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
 
             return;
         }
@@ -718,6 +724,89 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 template<class i2c_config>
 void i2c_bus<i2c_config>::irq_er_handler()
 {
+    constexpr auto irqn  = pick_er_irqn();
+
+    irq::clear(irqn);
+    bypass_putc('r');
+    constexpr auto i2c = pick_i2c();
+    
+    uint32_t lastEvent = I2C_GetLastEvent(i2c);
+    if (lastEvent & I2C_FLAG_TRA) {
+        bypass_putc('t');
+        m_tx_left = 0;
+        get_handler()(channel::tx, event::tc, m_tx_size);
+        get_handler()(channel::tx, event::err, 0);
+    }
+    if (!(lastEvent & I2C_FLAG_TRA)) {
+        bypass_putc('r');
+        m_rx_left = 0;
+        get_handler()(channel::rx, event::tc, m_rx_size);
+        get_handler()(channel::rx, event::err, 0);
+    }
+
+    I2C_GenerateSTOP(i2c, ENABLE);
+
+    get_handler()(channel::meta, event::tc, 0);
+    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
+    irq::unmask(irqn);
+
+    /*if (lastEvent & I2C_FLAG_BERR) {
+        bypass_putc('a');      
+        if (lastEvent & I2C_FLAG_TRA) {
+            get_handler()(channel::tx, event::err, 0);
+        } else {
+            get_handler()(channel::rx, event::err, 0);
+        }
+    }
+    if (lastEvent & I2C_FLAG_ARLO) {
+        bypass_putc('b'); 
+        if (lastEvent & I2C_FLAG_TRA) {
+            get_handler()(channel::tx, event::err, 0);
+        } else {
+            get_handler()(channel::rx, event::err, 0);
+        }
+    }
+    if (lastEvent & I2C_FLAG_AF) {
+        bypass_putc('c');
+        if (lastEvent & I2C_FLAG_TRA) {
+            get_handler()(channel::tx, event::err, 0);
+        } else {
+            get_handler()(channel::rx, event::err, 0);
+        }
+    }
+    if (lastEvent & I2C_FLAG_OVR) {
+        bypass_putc('d'); 
+        if (lastEvent & I2C_FLAG_TRA) {
+            get_handler()(channel::tx, event::err, 0);
+        } else {
+            get_handler()(channel::rx, event::err, 0);
+        }
+    }
+    if (lastEvent & I2C_FLAG_PECERR) {
+        bypass_putc('e'); 
+        if (lastEvent & I2C_FLAG_TRA) {
+            get_handler()(channel::tx, event::err, 0);
+        } else {
+            get_handler()(channel::rx, event::err, 0);
+        }
+    }
+    if (lastEvent & I2C_FLAG_TIMEOUT) {
+        bypass_putc('f'); 
+        if (lastEvent & I2C_FLAG_TRA) {
+            get_handler()(channel::tx, event::err, 0);
+        } else {
+            get_handler()(channel::rx, event::err, 0);
+        }
+    }
+    if (lastEvent & I2C_FLAG_SMBALERT) {
+        bypass_putc('g'); 
+        if (lastEvent & I2C_FLAG_TRA) {
+            get_handler()(channel::tx, event::err, 0);
+        } else {
+            get_handler()(channel::rx, event::err, 0);
+        }
+    }*/
+
     // TODO add error handling
 }
 
