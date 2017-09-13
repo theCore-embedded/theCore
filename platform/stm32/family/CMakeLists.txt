@@ -2,13 +2,6 @@ set(DMA_CFG_HPP ${CMAKE_CURRENT_BINARY_DIR}/export/family_dma_cfg.hpp)
 
 if(CONFIG_PLATFORM_DEVICE MATCHES "STM32F4")
     set(STM32_FAMILY f4xx)
-
-    theCore_create_cog_runner(
-        IN      ${CMAKE_CURRENT_LIST_DIR}/templates/stm32f4xx_dma_cfg.in.hpp
-        OUT     ${DMA_CFG_HPP}
-        DEPENDS ${THECORE_TARGET_CONFIG_FILE}
-        ARGS    "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}")
-
 elseif(CONFIG_PLATFORM_DEVICE MATCHES "STM32L1")
     set(STM32_FAMILY l1xx)
     # TODO: implement generator for L1 family
@@ -18,6 +11,12 @@ else()
     # family
     msg_fatal("Device ${CONFIG_PLATFORM_DEVICE} doesn't belong to any stm32 family")
 endif()
+
+theCore_create_cog_runner(
+    IN      ${CMAKE_CURRENT_LIST_DIR}/${STM32_FAMILY}/templates/dma_cfg.in.hpp
+    OUT     ${DMA_CFG_HPP}
+    DEPENDS ${THECORE_TARGET_CONFIG_FILE}
+    ARGS    "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}")
 
 # Prevent warnings in sources provided by ST
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-function")
