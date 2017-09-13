@@ -9,8 +9,10 @@
 /*[[[cog
 import cog
 import json
+import os
 
 cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
 
 # Some default UART configuration.
 uart_defaults = {
@@ -100,7 +102,7 @@ for uart_cfg in uart_cfgs:
     # Place comment line if needed
     if 'comment' in uart_cfg:
         # Avoid using begin and end comment section tokens
-        cog.outl(('%s* ' + uart_cfg['comment'] + ' *%s') % ('/', '/'))
+        cog.outl(('\n%s* ' + uart_cfg['comment'] + ' *%s') % ('/', '/'))
 
     # Config
     cog.outl(template_uart_cfg % (

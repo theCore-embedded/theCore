@@ -16,6 +16,7 @@ import json
 
 f = open(JSON_CFG)
 cfg = json.load(f)
+cfg = cfg['platform']
 
 if 'console' in cfg:
     cog.outl('#define CONFIG_USE_CONSOLE 1')

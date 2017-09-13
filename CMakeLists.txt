@@ -20,7 +20,7 @@ else()
     file(READ ${THECORE_TARGET_CONFIG_FILE} THECORE_JSON_BODY)
     # Lower case for better readability.
     sbeParseJson(thecore_cfg THECORE_JSON_BODY)
-    set(CONFIG_PLATFORM ${thecore_cfg.platform})
+    set(CONFIG_PLATFORM ${thecore_cfg.platform.name})
 endif()
 
 msg_trace("Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")

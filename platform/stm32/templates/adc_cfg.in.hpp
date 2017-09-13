@@ -14,6 +14,7 @@ import cog
 import json
 
 cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
 
 ]]]*/
 //[[[end]]]
@@ -58,6 +59,7 @@ for adc_cfg in adc_cfgs:
     adc_num = int(adc_cfg['id'][-1])
 
     if mode == 'DMA':
+        cog.msg(str(adc_cfg))
         cog.outl(template_adc_cfg_dma % (adc_num, adc_cfg['dma_id']))
     elif mode == 'IRQ':
         cog.outl(template_adc_cfg_irq % adc_num)

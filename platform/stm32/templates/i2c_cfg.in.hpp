@@ -16,6 +16,7 @@ import cog
 import json
 
 cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
 
 # Mapping between json-friendly and SPL/theCore definitions
 i2c_cfg_map = {

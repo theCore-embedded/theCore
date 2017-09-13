@@ -16,6 +16,7 @@ import json
 import re
 
 cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
 
 ]]]*/
 //[[[end]]]

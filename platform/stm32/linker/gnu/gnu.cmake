@@ -1,7 +1,7 @@
 # Linker flags.
 # TODO: check redundancy when using -msoft-float and -mfloat-abi=soft together
 
-set(STM32_DEVICE "${thecore_cfg.device}")
+set(STM32_DEVICE "${thecore_cfg.platform.device}")
 
 if(STM32_DEVICE MATCHES "STM32F4")
     set(FAMILY_CORE "-mcpu=cortex-m4")

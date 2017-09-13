@@ -14,6 +14,7 @@ import cog
 import json
 
 cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
 
 ]]]*/
 //[[[end]]]
