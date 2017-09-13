@@ -77,6 +77,8 @@ Expected output
   hello: /home/user/projects/thecore/examples/host_hello/main.cpp:7: int main(): Assertion `1 == 0' failed.
   Aborted (core dumped)
 
+.. _theCore_stm32f4_cs43l22:
+
 STM32F4 discovery audio example with CS43L22 audio DAC
 ------------------------------------------------------
 
@@ -179,6 +181,11 @@ In ``minicom`` you should be able to see::
 
 
 In headphones you should hear cool 8-bit sound.
+
+Target JSON config for the audio example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../../../examples/cs43l22_audio/stm32f4_cs43l22.json
 
 STM32F4 discovery and HTU21D temperature and humidity sensor
 ------------------------------------------------------------
@@ -297,6 +304,11 @@ In ``minicom`` you should be able to see::
   Temperature: 21.712 Celsius   Humidity: 40.859%
   Temperature: 21.701 Celsius   Humidity: 40.852%
   ...
+
+Target JSON config for the temperature and humidity example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../../../examples/htu21d/stm32f4_htu21d.json
 
 STM32F4 discovery and external interrupts from user button
 ----------------------------------------------------------
@@ -420,6 +432,12 @@ In ``minicom`` you should be able to see:
 - After each button press::
 
     Button pressed!
+
+Target JSON config for the EXTI example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../../../examples/stm32f4_exti/stm32f4_exti.json
+
 
 TM4C123G LaunchPad blinky
 -------------------------
