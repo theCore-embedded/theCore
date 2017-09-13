@@ -12,6 +12,14 @@ file(MAKE_DIRECTORY ${GEN_DIR}/export/aux)
 
 add_library(stm32 platform.cpp exti_manager.cpp console.cpp ${GEN_DIR}/pin_mux.cpp)
 
+# Validate incoming JSON
+add_custom_target(stm32_validate
+    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/validate.py ${THECORE_TARGET_CONFIG_FILE}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/schemas
+    VERBATIM
+    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/validate.py ${THECORE_TARGET_CONFIG_FILE}
+    COMMENT "Validating platform configuration")
+
 target_include_directories(stm32 PUBLIC export)
 
 target_link_libraries(stm32 PUBLIC
@@ -74,14 +82,13 @@ generate_source(i2c_cfg.in.hpp i2c_cfg.hpp)
 # Generate SPI and I2S definitions
 generate_source(spi_i2s_cfg.in.hpp spi_i2s_cfg.hpp)
 
-# Generate
+# Generate pins definitions
 generate_source(pin_mux.in.cpp pin_mux.cpp)
 
 #-------------------------------------------------------------------------------
 
 # Tie all generated code together.
 
-add_custom_target(platform_generated DEPENDS ${GENERATED_FILES})
+add_custom_target(platform_generated DEPENDS stm32_validate ${GENERATED_FILES})
 add_dependencies(stm32 platform_generated)
 target_include_directories(stm32 PUBLIC ${GEN_DIR}/export/)
-#target_sources(stm32 PUBLIC ${GEN_DIR}/pin_mux.cpp)
