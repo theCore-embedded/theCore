@@ -10,11 +10,12 @@ using ecl::exti_manager;
 using ecl::cout;
 using ecl::endl;
 using ecl::semaphore;
+using ecl::usr_btn; // Defined in stm32discovery.json
 
 extern "C"
 void board_init()
 {
-    gpio_init();
+    gpio_init_generated();
 }
 
 void user_button_handler(void *ctx)

@@ -12,8 +12,16 @@ project(the_core LANGUAGES C CXX)
 include(build_api.cmake)
 include(Findcppcheck)
 include(CppcheckTargets)
+include(JSONParser)
 
-# TODO: add same configuration mechanism for choosing right kernel
+if(NOT EXISTS ${THECORE_TARGET_CONFIG_FILE})
+    msg_warn("Invalid JSON config file: ${THECORE_TARGET_CONFIG_FILE}")
+else()
+    file(READ ${THECORE_TARGET_CONFIG_FILE} THECORE_JSON_BODY)
+    # Lower case for better readability.
+    sbeParseJson(thecore_cfg THECORE_JSON_BODY)
+    set(CONFIG_PLATFORM ${thecore_cfg.platform.name})
+endif()
 
 msg_trace("Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")
 

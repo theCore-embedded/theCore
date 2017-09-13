@@ -1,0 +1,18 @@
+{
+    "platform": {
+        "uart": [
+            {
+                "id": "USART3",
+                "baud": 115200,
+                "comment": "Console UART",
+                "alias": "console_uart"
+            },
+            {
+                "id": "UART1",
+                "baud": 9600,
+                "comment": "Just another driver",
+                "alias": "my_uart"
+            }
+        ]
+    }
+}

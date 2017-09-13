@@ -4,6 +4,8 @@
 #include <stm32_device.hpp>
 #include "platform/console.hpp"
 
+#if CONFIG_USE_BYPASS_CONSOLE
+
 namespace ecl
 {
 
@@ -22,13 +24,12 @@ struct bypass_console
         rcc_fn(rcc_periph, ENABLE);
 
         // Configure UART
-        init_struct.USART_BaudRate = usart_cfg<ECL_CONSOLE_DEVICE>::baudrate;
-        init_struct.USART_WordLength = usart_cfg<ECL_CONSOLE_DEVICE>::word_len;
-        init_struct.USART_StopBits = usart_cfg<ECL_CONSOLE_DEVICE>::stop_bit;
-        init_struct.USART_Parity = usart_cfg<ECL_CONSOLE_DEVICE>::parity;
-        init_struct.USART_Mode = usart_cfg<ECL_CONSOLE_DEVICE>::mode;
-        init_struct.USART_HardwareFlowControl
-                = usart_cfg<ECL_CONSOLE_DEVICE>::hw_flow;
+        init_struct.USART_BaudRate              = bypass_config::baudrate;
+        init_struct.USART_WordLength            = bypass_config::word_len;
+        init_struct.USART_StopBits              = bypass_config::stop_bit;
+        init_struct.USART_Parity                = bypass_config::parity;
+        init_struct.USART_Mode                  = bypass_config::mode;
+        init_struct.USART_HardwareFlowControl   = bypass_config::hw_flow;
 
         USART_Init(usart, &init_struct);
         USART_Cmd(usart, ENABLE);
@@ -55,4 +56,4 @@ void ecl::bypass_putc(char c)
     ecl::bypass_console::putc(c);
 }
 
-
+#endif // CONFIG_USE_BYPASS_CONSOLE
