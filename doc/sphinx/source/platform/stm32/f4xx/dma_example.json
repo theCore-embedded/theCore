@@ -1,0 +1,22 @@
+{
+    "platform": {
+        "name": "stm32",
+        "device": "STM32F407VG",
+        "dma": [
+            {
+                "num": 1,
+                "stream": 5,
+                "channel": 0,
+                "alias": "i2s3_tx_dma",
+                "comment": "I2S3 TX DMA"
+            },
+            {
+                "num": 1,
+                "stream": 0,
+                "channel": 0,
+                "alias": "i2s3_rx_dma",
+                "comment": "I2S3 RX DMA"
+            }
+        ]
+    }
+}

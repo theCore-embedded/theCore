@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "array",
+
+  "items": {
+    "type": "object",
+
+    "properties": {
+      "id":      { "type": "string", "pattern": "^ADC\\d$" },
+      "mode":    { "type": "string", "enum": [ "IRQ", "DMA" ] },
+      "dma_id":  { "type": "string" },
+      "alias":   { "type": "string" },
+      "comment": { "type": "string" }
+    },
+
+    "required": [ "id" ]
+  }
+}

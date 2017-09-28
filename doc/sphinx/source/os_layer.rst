@@ -1,3 +1,5 @@
+.. _theCore_OS:
+
 OS abstraction layer
 ====================
 

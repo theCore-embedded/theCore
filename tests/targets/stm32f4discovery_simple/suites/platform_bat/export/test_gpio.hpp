@@ -4,6 +4,7 @@
 #define STM32DISC_PLATFORM_BAT_TEST_GPIO_HPP_
 
 #include <platform/gpio_device.hpp>
+#include <aux/generated.hpp>
 
 namespace ecl
 {
@@ -17,18 +18,11 @@ struct gpio_list
     using executor = E<Gs...>;
 };
 
-// Device LEDs
-
-using red_led = gpio<gpio_port::d, gpio_num::pin14>;
-using blue_led = gpio<gpio_port::d, gpio_num::pin15>;
-using green_led = gpio<gpio_port::d, gpio_num::pin12>;
-using orange_leds = gpio<gpio_port::d, gpio_num::pin13>;
+// Device LEDs and push button are defined in target_defs.json
 
 //! Exported list of GPIOs.
-using test_gpios = gpio_list<red_led, blue_led, green_led, orange_leds>;
+using test_gpios = gpio_list<red_led, blue_led, green_led, orange_led>;
 
-//! Push button
-using push_button = gpio<gpio_port::a, gpio_num::pin0>;
 
 } // namespace ecl
 

@@ -42,7 +42,7 @@ function(msg_trace msg_body)
 endfunction(msg_trace)
 
 # Add test only if not cross-compiling
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME)
     find_package(CppUTest)
     if(NOT ${CPPUTEST_FOUND})
         msg_warn("CppUTest library not present. Tests are disabled.")
@@ -122,7 +122,7 @@ function(add_unit_host_test)
 endfunction()
 
 # Strips executable, effectively making binary file from it.
-# Use it, if binary is convinient form to deploy code into the board.
+# Use it, if binary is convenient form to deploy code into the board.
 #
 # Syntax:
 # strip_executable(exe_name)
@@ -148,11 +148,13 @@ endfunction()
 # Enables one of theCore platforms and exposes its API to the user, if present.
 # Syntax:
 # theCore_enable_platform(platform_name)
+#   - platform_name - valid platform name. See `platform` directory to get
+#                     insights on the list of available platforms.
 macro(theCore_enable_platform PLATFORM_NAME)
-    # TODO: remove this legacy variable
+    # TODO: rename this variable. See #261.
     set(CONFIG_PLATFORM "${PLATFORM_NAME}")
 
-    set(THECORE_CONFIG_PLATFORM "${PLATFORM_NAME}" CACHE STRING "Desired platform")
+    set(THECORE_CONFIG_PLATFORM "${PLATFORM_NAME}" CACHE STRING "Desired platform" FORCE)
 
     set(PLATFORM_API_MODULE ${CORE_DIR}/platform/${PLATFORM_NAME}/platform_api.cmake)
     if(EXISTS ${PLATFORM_API_MODULE})
@@ -163,21 +165,46 @@ macro(theCore_enable_platform PLATFORM_NAME)
     unset(PLATFORM_API_MODULE)
 endmacro()
 
+# Enables particular OS.
+# Syntax:
+# theCore_enable_os(os_name)
+#   - os_name - valid OS name. Right now only FreeRTOS is supported.
+macro(theCore_enable_os OS_NAME)
+    # TODO: rename this variable. See #261.
+    set(CONFIG_OS "${OS_NAME}")
+
+    # Rest of API will be included based on selected OS.
+    include(${CORE_DIR}/lib/thread/thread_api.cmake)
+endmacro()
+
+# Exposes hardware configuration to theCore in json form.
+# Syntax:
+# theCore_set_hw_config(jsonpath)
+#   - jsonpath - path to a JSON file, describing target hardware.
+function(theCore_set_target_config jsonpath)
+    set(THECORE_TARGET_CONFIG_FILE "${jsonpath}" CACHE STRING "Path to a json config" FORCE)
+endfunction()
+
 #-------------------------------------------------------------------------------
 
 # Create custom command - COG runner
 # See https://nedbatchelder.com/code/cog/ for details.
 # Syntax:
-# theCore_create_cog_runner(IN input_file OUT output_file [ARGS args ...])
+# theCore_create_cog_runner(IN input_file
+#                           OUT output_file
+#                           [ARGS args ...]
+#                           [DEPENDS dependency ...])
 #   - input_file    - input file for COG
 #   - output_file   - resulting file for COG
 #   - args          - optional arguments for COG
+#   - dependency    - optional. One or more additional files
+#                     that output file is depends on.
 macro(theCore_create_cog_runner)
     cmake_parse_arguments(
             COG
             ""
             "IN;OUT"
-            "ARGS"
+            "ARGS;DEPENDS"
             ${ARGN}
     )
 
@@ -190,7 +217,7 @@ macro(theCore_create_cog_runner)
     add_custom_command(
         OUTPUT ${COG_OUT}
         COMMAND cog.py ${COG_ARGS} -d -o ${COG_OUT} ${COG_IN}
-        DEPENDS ${COG_IN}
+        DEPENDS ${COG_IN} ${COG_DEPENDS}
         COMMENT "Generating: ${COG_IN} -> ${COG_OUT}"
     )
 endmacro()
