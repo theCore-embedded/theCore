@@ -12,6 +12,7 @@ target_include_directories(core_cpp
         INTERFACE ${CMAKE_CURRENT_LIST_DIR}/export)
 
 msg_trace("CORE: Checking [CONFIG_USE_CONSOLE]...")
+
 # Generate stub
 # TODO: remove legacy github #261
 if(CONFIG_USE_CONSOLE OR THECORE_CONFIG_USE_CONSOLE)
@@ -19,6 +20,11 @@ if(CONFIG_USE_CONSOLE OR THECORE_CONFIG_USE_CONSOLE)
     # Console is enabled and driver is provided by the platform.
     # Work here is to create aliases of bus/bus_pipe classes tied with console.
     target_link_libraries(core_cpp INTERFACE ${PLATFORM_NAME})
+
+    # TODO: remove this definition, when #239 will be ready.
+    # Also, related to the #260, since this definition should:
+    # a) be provided by the platform
+    # b) moved to the header rather than placed in CMake
     target_compile_definitions(core_cpp INTERFACE -DTHECORE_CONFIG_USE_CONSOLE=1)
     target_link_libraries(core_cpp INTERFACE bus)
 else()
