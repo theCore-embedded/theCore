@@ -19,10 +19,10 @@ cfg = json.load(f)
 cfg = cfg['platform']
 
 if 'console' in cfg:
-    cog.outl('#define CONFIG_USE_CONSOLE 1')
+    cog.outl('#define THECORE_CONFIG_USE_CONSOLE 1')
 
 if 'bypass_console' in cfg:
-    cog.outl('#define CONFIG_USE_BYPASS_CONSOLE 1')
+    cog.outl('#define THECORE_CONFIG_USE_BYPASS_CONSOLE 1')
 
 ]]]*/
 //[[[end]]]

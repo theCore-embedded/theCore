@@ -1,10 +1,17 @@
 # New-to-old API bridges
 
 set(CONFIG_PLATFORM_DEVICE  "${thecore_cfg.platform.device}"
-    CACHE STRING "stm32 device id" FORCE)
+    CACHE STRING "stm32 device id" FORCE
+)
 # TODO: what if clock is not HSE?
 set(CONFIG_PLATFORM_HSE_VAL "${thecore_cfg.platform.clock.speed}"
-    CACHE STRING "HSE speed" FORCE)
+    CACHE STRING "HSE speed" FORCE
+)
+
+# Check if console must be enabled.
+if(thecore_cfg.platform.console)
+    set(THECORE_CONFIG_USE_CONSOLE 1 CACHE STRING "stm32 console" FORCE)
+endif()
 
 # Create directories required for auto-generated files
 set(GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/)
