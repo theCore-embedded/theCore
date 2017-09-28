@@ -12,6 +12,6 @@ install:
     - travis_retry curl https://nixos.org/nix/install -o nix_install.sh
     - sh nix_install.sh
     - . $HOME/.nix-profile/etc/profile.d/nix.sh
-    - travis_retry nix-shell --pure --run true
+    - travis_retry nix-shell --pure --run true -j 2 --cores 2 -Q
 
 script: nix-shell --pure --run ./scripts/ci_test.sh

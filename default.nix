@@ -9,6 +9,7 @@ let
 in with pkgs; {
   coreEnv = stdenv.mkDerivation {
     name = "thecore";
+    hardeningDisable = [ "all" ];
     buildInputs = [
       # With Python configuration requiring a special wrapper
       (python35.buildEnv.override {
@@ -23,7 +24,8 @@ in with pkgs; {
 
       which cmake gcc6 gdb cppcheck
       cpputest gcc-arm-embedded-5 dfu-util
-      doxygen clang openocd perlPackages.ArchiveZip xxd
+      doxygen  llvmPackages.clang-unwrapped openocd
+      perlPackages.ArchiveZip xxd
       fulltoc ];
 
     shellHook = ''

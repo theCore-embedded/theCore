@@ -42,7 +42,7 @@ function(msg_trace msg_body)
 endfunction(msg_trace)
 
 # Add test only if not cross-compiling
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL ${CMAKE_SYSTEM_NAME})
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME)
     find_package(CppUTest)
     if(NOT ${CPPUTEST_FOUND})
         msg_warn("CppUTest library not present. Tests are disabled.")
