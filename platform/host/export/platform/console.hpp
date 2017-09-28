@@ -4,6 +4,8 @@
 #include <iostream>
 #include <functional>
 
+#include <aux/platform_defines.hpp>
+
 #include <common/bus.hpp>
 #include <ecl/err.hpp>
 #include <stdio.h>
@@ -134,6 +136,6 @@ static inline void bypass_putc(char c)
     putchar(c);
 }
 
-}
+} // namespace ecl
 
 #endif // HOST_PLATFORM_CONSOLE_HPP_

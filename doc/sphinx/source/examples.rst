@@ -33,6 +33,8 @@ simple project that uses onboard LEDs.
 
 Refer to `the dedicated repository`_ to check how to build and run the example.
 
+.. _theCore_host_hello:
+
 Simple host hello world example
 -------------------------------
 
@@ -76,6 +78,11 @@ Expected output
   This is an assert demonstration. Application will abort.
   hello: /home/user/projects/thecore/examples/host_hello/main.cpp:7: int main(): Assertion `1 == 0' failed.
   Aborted (core dumped)
+
+Target JSON for Hello World example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../../../examples/host_hello/host.json
 
 .. _theCore_stm32f4_cs43l22:
 
