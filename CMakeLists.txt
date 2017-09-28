@@ -14,6 +14,20 @@ include(Findcppcheck)
 include(CppcheckTargets)
 include(JSONParser)
 
+# Check if theCore should be placed in the test mode.
+# Benefit here is supporting of CMake invocation without
+# THECORE_TARGET_CONFIG_FILE. It will reduce hassle when running unit tests,
+# dropping unnecessary variable that not used in tests anyway.
+if(NOT DEFINED THECORE_TARGET_CONFIG_FILE AND NOT CMAKE_CROSSCOMPILING)
+    msg_info("Enabled test mode for theCore")
+
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test.json
+        "{\"platform\":{\"name\":\"host\",\"console\":true}}"
+    )
+    set(THECORE_TARGET_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/test.json"
+        CACHE PATH "Test JSON file")
+endif()
+
 if(NOT EXISTS ${THECORE_TARGET_CONFIG_FILE})
     msg_warn("Invalid JSON config file: ${THECORE_TARGET_CONFIG_FILE}")
 else()
@@ -30,10 +44,6 @@ if(NOT CMAKE_CROSSCOMPILING)
         if(NOT CONFIG_PLATFORM STREQUAL "host")
             msg_fatal("Cross-compiler is required for platform other than 'host'.")
         endif()
-    else()
-        # It is fine to omit platform name if not cross-compiling
-        msg_info("CONFIG_PLATFORM not set, defauluting to 'host'...")
-        set(CONFIG_PLATFORM "host")
     endif()
 
     # C++14 is required

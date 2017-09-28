@@ -1,19 +1,10 @@
 #include "ecl/assert.h"
 
-#include <ecl/iostream.hpp>
-#include <platform/console.hpp>
+#include <common/console.hpp>
 #include <platform/execution.hpp>
 
 using ecl::bypass_putc;
-
-// TODO: find better place for this routine
-static void bypass_puts(const char *msg)
-{
-    char c;
-    while ((c = *msg++)) {
-        bypass_putc(c);
-    }
-}
+using ecl::bypass_puts;
 
 // TODO: move it to the separate module working with integer to string conversions
 static void print_line(unsigned int line)

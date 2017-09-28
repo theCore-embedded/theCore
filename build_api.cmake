@@ -86,15 +86,15 @@ function(add_unit_host_test)
 
             add_executable(${UNIT_TEST_NAME} ${UNIT_TEST_SOURCES})
             add_test(NAME ${UNIT_TEST_NAME} COMMAND ${UNIT_TEST_NAME})
-            target_link_libraries(${UNIT_TEST_NAME} CppUTest)
-            target_link_libraries(${UNIT_TEST_NAME} CppUTestExt)
+            target_link_libraries(${UNIT_TEST_NAME} PRIVATE CppUTest)
+            target_link_libraries(${UNIT_TEST_NAME} PRIVATE CppUTestExt)
         else()
             msg_fatal("Test sources and name must be defined!")
         endif()
 
         if(UNIT_TEST_DEPENDS)
             msg_info("	Test dependencies: ${UNIT_TEST_DEPENDS}")
-            target_link_libraries(${UNIT_TEST_NAME} ${UNIT_TEST_DEPENDS})
+            target_link_libraries(${UNIT_TEST_NAME} PRIVATE ${UNIT_TEST_DEPENDS})
         endif()
 
         if(UNIT_TEST_INC_DIRS)
@@ -107,10 +107,10 @@ function(add_unit_host_test)
 
         if(UNIT_TEST_COMPILE_OPTIONS)
             msg_info("	Test compile options: ${UNIT_TEST_COMPILE_OPTIONS}")
-            target_compile_options(${UNIT_TEST_NAME} PUBLIC ${UNIT_TEST_COMPILE_OPTIONS})
+            target_compile_options(${UNIT_TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_OPTIONS})
         endif()
 
-        target_compile_definitions(${UNIT_TEST_NAME} PUBLIC CORE_TESTS_ENABLED=1)
+        target_compile_definitions(${UNIT_TEST_NAME} PRIVATE CORE_TESTS_ENABLED=1)
 
         target_include_directories(${UNIT_TEST_NAME} PRIVATE ${CPPUTEST_INCLUDE_DIRS})
 
