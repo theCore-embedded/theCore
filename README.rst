@@ -6,9 +6,9 @@ theCore: C++ Embedded Framework
 Description
 -----------
 
-theCore is the open source, highly configurable and straightforward C++ framework aimed
-to reduce development, testing and hardware migration efforts for a wide range of
-bare-metal embedded applications.
+theCore is the open source, highly configurable and straightforward C++ embedded
+framework aimed to reduce development, testing and hardware migration
+efforts for a wide range of bare-metal embedded applications.
 
 theCore tries to provide all that is necessary to create portable application code:
 
@@ -99,7 +99,7 @@ open some issues and we will do our best to handle this ASAP. Good luck!
 .. _GitHub: https://github.com/forGGe/theCore/
 .. _github issues: https://github.com/forGGe/theCore/issues
 .. _multi-page HTML: https://forgge.github.io/theCore/
-.. _single-page HTML: https://forgge.github.io/theCore/singlehtml/
+.. _single-page HTML: https://forgge.github.io/theCore/singlehtml/contents.html
 .. _the standalone blinky example project: https://github.com/forGGe/theCore-blinky
 .. _cog: https://nedbatchelder.com/code/cog/
 .. _Doxygen: http://www.stack.nl/~dimitri/doxygen/

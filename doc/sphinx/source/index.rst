@@ -3,46 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-theCore: highly configurable and straightforward C++ embedded framework
-=======================================================================
+.. Following markup serves only one main purpose - include readme into the sphinx,
+   and allow to process its ToC as needed.
 
-.. note:: This documentation is under construction.
-          You may find that many sections are incomplete.
+.. include:: ../../../README.rst
+   :end-before: LINKS TO BE AUTOMATICALLY SUBSTITUTED BY SPHINX
 
-.. only:: builder_html
-
-   .. note::
-
-      This is a multi-page version of theCore documentation. If you want
-      single-page version, click :sphinx_root_url:`here<singlehtml/index.html>`.
-
-.. only:: builder_singlehtml
-
-   .. note::
-
-      This is a single-page version of theCore documentation.
-      For multi-page version, click :sphinx_root_url:`here<index.html>`.
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   readme
-   guides
-   examples
-   project_structure
-   arch
-   platforms
-   drivers
-   utilities
-   os_layer
-   community
-   docs
-   testing
-   credits
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
+.. |Roadmap| replace:: :ref:`theCore_Roadmap`
+.. |Branching| replace:: :ref:`theCore_Branching`
+.. |Guides| replace:: :ref:`theCore_Guides`
+.. |Examples| replace:: :ref:`theCore_Examples`
+.. |Platforms| replace:: :ref:`theCore_Platforms`
+.. |Credits| replace:: :ref:`theCore_Credits`
+.. |DeveloperDocs| replace:: :ref:`theCore_DeveloperDocs`

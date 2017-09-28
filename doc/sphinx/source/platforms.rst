@@ -9,7 +9,7 @@ STM32
 -----
 
 The STM32 is a family of 32-bit Flash microcontrollers based on the
-ARM® Cortex®-M processor. theCore supports two families of STM32: STM32F4 and STM32L1
+ARM Cortex-M processor. theCore supports two families of STM32: STM32F4 and STM32L1
 
 .. important:: The platform is configured by theCore configurator.
     To make sure you are familiar with it, check the :ref:`theCore_Configurator`
