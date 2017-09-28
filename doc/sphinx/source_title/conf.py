@@ -33,16 +33,8 @@ sys.path.insert(0, os.path.abspath('_ext'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.extlinks',
-    'sphinxcontrib.fulltoc',
     ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -75,10 +67,10 @@ rst_epilog = '''
 source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'contents'
+master_doc = 'index'
 
 # General information about the project.
-project = 'theCore'
+project = 'theCore: C++ embedded framework'
 copyright = 'Max Olender, 2017'
 author = 'Max Olender'
 
@@ -123,9 +115,8 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # documentation.
 #
 html_theme_options = {
-#     'collapse_navigation': False,
-     'display_version': True,
-#     'navigation_depth': 3,
+    'collapse_navigation': True,
+    'logo_only': True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

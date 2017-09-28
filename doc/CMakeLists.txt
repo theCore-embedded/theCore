@@ -116,6 +116,9 @@ if(Sphinx_FOUND)
 	# Single-page HTML output directory
 	set(SPHINX_SINGLE_HTML_DIR "${BINARY_BUILD_DIR}/singlehtml")
 
+	# Title page output directory for forgge.github.io index page
+	set(SPHINX_TITLE_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
+
 	add_custom_target(core_sphinx
 		# Multi-page HTML build
 		${CMAKE_COMMAND} -E env SPHINX_ROOT_URL=http://forgge.github.io/theCore
@@ -126,6 +129,7 @@ if(Sphinx_FOUND)
 			"${SPHINX_HTML_DIR}"
 		# Make sure additional files are generated first (like examples from config JSON)
 		DEPENDS ${GENERATED_FILES}
+
 		COMMAND # Single HTML build
 		${CMAKE_COMMAND} -E env SPHINX_ROOT_URL=http://forgge.github.io/theCore
 		${SPHINX_EXECUTABLE}
@@ -133,5 +137,15 @@ if(Sphinx_FOUND)
 			-c "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/source"
 			"${CMAKE_CURRENT_SOURCE_DIR}/sphinx/source"
 			"${SPHINX_SINGLE_HTML_DIR}"
-		COMMENT "Building HTML documentation with Sphinx")
+		COMMENT "Building HTML documentation with Sphinx"
+
+		COMMAND # Title HTML build
+		${CMAKE_COMMAND} -E env SPHINX_ROOT_URL=http://forgge.github.io/theCore
+		${SPHINX_EXECUTABLE}
+			-b singlehtml
+			-c "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/source_title"
+			"${CMAKE_CURRENT_SOURCE_DIR}/sphinx/source_title"
+			"${SPHINX_TITLE_HTML_DIR}"
+		COMMENT "Building title page documentation with Sphinx"
+		)
 endif()
