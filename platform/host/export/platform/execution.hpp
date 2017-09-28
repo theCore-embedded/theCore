@@ -16,7 +16,7 @@ namespace ecl
 //! \brief Aborts execution of currently running code. Never return.
 static inline void abort()
 {
-    abort();
+    ::abort();
 }
 
 //! \brief Performs a dummy busy wait for specified amount of milliseconds.
