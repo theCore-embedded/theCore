@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 msg_trace(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
 
 if("${CONFIG_PLATFORM_DEVICE}" STREQUAL "TM4C123GH6PM")
