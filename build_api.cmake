@@ -221,3 +221,47 @@ macro(theCore_create_cog_runner)
         COMMENT "Generating: ${COG_IN} -> ${COG_OUT}"
     )
 endmacro()
+
+# Creates custom target - JSON validation runner against provided schema.
+# theCore_create_json_validator_runner(NAME     target_name
+#                                      JSON     path_to_json
+#                                      SCHEMA   path_to_json_schema
+#                                      WORKDIR  working_directory)
+#   - target_name           - name for a CMake target to be created
+#   - path_to_json          - path to JSON file for validation
+#   - path_to_json_schema   - path to JSON schema
+#   - working_directory     - path to working directory, required to correctly
+#                             process schema references with relative paths.
+macro(theCore_create_json_validator_runner)
+    cmake_parse_arguments(
+        JSON_VALIDATOR
+        ""
+        "NAME;JSON;SCHEMA;WORKDIR"
+        ""
+        ${ARGN}
+    )
+
+    msg_info("${JSON_VALIDATOR_JSON}")
+
+    if(NOT DEFINED JSON_VALIDATOR_NAME
+        OR NOT DEFINED JSON_VALIDATOR_JSON
+        OR NOT DEFINED JSON_VALIDATOR_SCHEMA
+        OR NOT DEFINED JSON_VALIDATOR_WORKDIR)
+        msg_fatal("Incorrect arguments passed to validator function: ${ARGN}")
+    endif()
+
+    set(VALIDATOR_SCRIPT "${CORE_DIR}/scripts/validate_platform.py")
+
+    add_custom_target(${JSON_VALIDATOR_NAME}
+        COMMAND python ${VALIDATOR_SCRIPT}
+            ${JSON_VALIDATOR_JSON}
+            ${JSON_VALIDATOR_SCHEMA}
+        WORKING_DIRECTORY ${JSON_VALIDATOR_WORKDIR}
+        VERBATIM
+        DEPENDS ${VALIDATOR_SCRIPT} ${JSON_VALIDATOR_JSON} ${JSON_VALIDATOR_SCHEMA}
+        COMMENT "Validating platform configuration"
+    )
+
+    unset(VALIDATOR_SCRIPT)
+
+endmacro()

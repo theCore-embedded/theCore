@@ -1,13 +1,11 @@
 add_library(host console.cpp)
 add_library(startup INTERFACE)
 
-# Validate incoming JSON
-add_custom_target(host_validate
-    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/validate.py ${THECORE_TARGET_CONFIG_FILE}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/schemas
-    VERBATIM
-    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/validate.py ${THECORE_TARGET_CONFIG_FILE}
-    COMMENT "Validating platform configuration"
+theCore_create_json_validator_runner(
+    NAME host_validate
+    JSON ${THECORE_TARGET_CONFIG_FILE}
+    SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/host.schema.json
+    WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
 )
 
 # Check if console must be enabled.
