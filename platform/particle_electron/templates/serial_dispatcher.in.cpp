@@ -4,7 +4,14 @@
 #include <aux/serial_cfgs.hpp>
 
 /*[[[cog
+
 import cog
+import json
+import os
+
+cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
+
 ]]]*/
 
 //[[[end]]]
@@ -31,12 +38,12 @@ void serial_tx_dispatch()
 
     '''
 
-    if 'SERIALS' in globals():
-        serials = SERIALS.split(' ')
+    serials = []
+    if 'serial' in cfg:
+        serials = cfg['serial']
 
-        for serial in serials:
-            num = int(serial)
-            cog.outl(template_tx % num)
+    for serial in serials:
+        cog.outl(template_tx % serial)
 
     ]]]*/
 
@@ -80,13 +87,9 @@ devmap = {
     5 : 'serialEvent5'
 }
 
-if 'SERIALS' in globals():
-    serials = SERIALS.split(' ')
-    cog.msg("Serials enabled: " + str(serials))
-
-    for serial in serials:
-        num = int(serial)
-        cog.outl(template_rx % (devmap[num], num))
+for serial in serials:
+    num = int(serial)
+    cog.outl(template_rx % (devmap[num], num))
 
 ]]]*/
 

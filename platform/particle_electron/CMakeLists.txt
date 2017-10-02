@@ -32,38 +32,22 @@ set(OUT_SERIAL_HDR ${CMAKE_CURRENT_BINARY_DIR}/export/aux/serial_cfgs.hpp)
 set(OUT_SERIAL_CPP ${CMAKE_CURRENT_BINARY_DIR}/serial_dispatcher.cpp)
 set(OUT_DEFS_HDR ${CMAKE_CURRENT_BINARY_DIR}/export/aux/platform_defines.hpp)
 
-if(DEFINED THECORE_CONFIG_PARTICLE_SERIALS_ENABLED)
-    msg_info("Serial drivers enabled")
-    # Definitions must come before input file
-    list(APPEND COG_ARGS "-DSERIALS=\"${THECORE_CONFIG_PARTICLE_SERIALS_ENABLED}\"")
-endif()
+theCore_create_cog_runner(
+    IN ${IN_SERIAL_HDR}
+    OUT ${OUT_SERIAL_HDR}
+    ARGS "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}"
+    DEPENDS "${THECORE_TARGET_CONFIG_FILE}"
+)
 
-if(DEFINED THECORE_PARTICLE_CONSOLE_ENABLED)
-    list(APPEND COG_ARGS "-DCONSOLE=${THECORE_PARTICLE_CONSOLE_ENABLED}")
-endif()
-
-theCore_create_cog_runner(IN ${IN_SERIAL_HDR} OUT ${OUT_SERIAL_HDR} ARGS ${COG_ARGS})
-theCore_create_cog_runner(IN ${IN_SERIAL_CPP} OUT ${OUT_SERIAL_CPP} ARGS ${COG_ARGS})
+theCore_create_cog_runner(
+    IN ${IN_SERIAL_CPP}
+    OUT ${OUT_SERIAL_CPP}
+    ARGS "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}"
+    DEPENDS "${THECORE_TARGET_CONFIG_FILE}"
+)
 
 #-------------------------------------------------------------------------------
 # I2C configuration
-
-set(I2C_ARGS)
-
-if(THECORE_CONFIG_I2C_ENABLE)
-    # Apply default configuration
-    msg_info("I2C enabled")
-    if(NOT DEFINED THECORE_CONFIG_I2C_SPEED)
-        set(THECORE_CONFIG_I2C_SPEED 20000)
-    endif()
-
-    if(NOT DEFINED THECORE_CONFIG_I2C_STRETCH_CLK)
-        set(THECORE_CONFIG_I2C_STRETCH_CLK 0)
-    endif()
-
-    set(I2C_ARGS
-        "-DI2C_ENABLED=1;-DI2C_CFG=\"${THECORE_CONFIG_I2C_SPEED};${THECORE_CONFIG_I2C_STRETCH_CLK}\"")
-endif()
 
 set(IN_I2C_HDR ${CMAKE_CURRENT_LIST_DIR}/templates/i2c_wire_cfgs.in.hpp)
 set(OUT_I2C_HDR ${CMAKE_CURRENT_BINARY_DIR}/export/aux/i2c_wire_cfgs.hpp)
@@ -71,18 +55,29 @@ set(OUT_I2C_HDR ${CMAKE_CURRENT_BINARY_DIR}/export/aux/i2c_wire_cfgs.hpp)
 set(IN_I2C_CPP ${CMAKE_CURRENT_LIST_DIR}/templates/i2c_wire_dispatcher.in.cpp)
 set(OUT_I2C_CPP ${CMAKE_CURRENT_BINARY_DIR}/i2c_wire_dispatcher.cpp)
 
-theCore_create_cog_runner(IN ${IN_I2C_HDR} OUT ${OUT_I2C_HDR} ARGS ${I2C_ARGS})
-theCore_create_cog_runner(IN ${IN_I2C_CPP} OUT ${OUT_I2C_CPP} ARGS ${I2C_ARGS})
+theCore_create_cog_runner(
+    IN ${IN_I2C_HDR}
+    OUT ${OUT_I2C_HDR}
+    ARGS "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}"
+    DEPENDS "${THECORE_TARGET_CONFIG_FILE}"
+)
 
-#-------------------------------------------------------------------------------
-# Systimer enable flag. Propagated by configure_file() below
-if(THECORE_CONFIG_PARTICLE_USE_SYSTMR)
-    set(USE_SYSTMR 1)
-endif()
+theCore_create_cog_runner(
+    IN ${IN_I2C_CPP}
+    OUT ${OUT_I2C_CPP}
+    ARGS "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}"
+    DEPENDS "${THECORE_TARGET_CONFIG_FILE}"
+)
 
 #-------------------------------------------------------------------------------
 # Create a file with platform-related definitions
-configure_file(${IN_DEFS_HDR} ${OUT_DEFS_HDR})
+
+theCore_create_cog_runner(
+    IN ${IN_DEFS_HDR}
+    OUT ${OUT_DEFS_HDR}
+    ARGS "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}"
+    DEPENDS "${THECORE_TARGET_CONFIG_FILE}"
+)
 
 #-------------------------------------------------------------------------------
 # Tie all auto-generated code together and specify correct dependencies

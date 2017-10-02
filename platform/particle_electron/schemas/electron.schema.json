@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+
+  "properties": {
+    "name":       { "type": "string", "pattern": "^particle_electron$" },
+
+    "serial":
+    {
+      "type": "array",
+      "items": { "type": "integer" }
+    },
+
+    "i2c":
+    {
+      "type": "object",
+      "properties": {
+        "speed":        { "type": "integer" },
+        "stretch_clk":  { "type": "boolean" }
+      }
+    },
+
+    "use_systmr":  { "type": "boolean" },
+    "use_console": { "type": "boolean" }
+  },
+
+  "required": [ "name" ]
+}

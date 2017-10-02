@@ -145,25 +145,25 @@ endfunction()
 
 #-------------------------------------------------------------------------------
 
-# Enables one of theCore platforms and exposes its API to the user, if present.
-# Syntax:
-# theCore_enable_platform(platform_name)
-#   - platform_name - valid platform name. See `platform` directory to get
-#                     insights on the list of available platforms.
-macro(theCore_enable_platform PLATFORM_NAME)
-    # TODO: rename this variable. See #261.
-    set(CONFIG_PLATFORM "${PLATFORM_NAME}")
+# # Enables one of theCore platforms and exposes its API to the user, if present.
+# # Syntax:
+# # theCore_enable_platform(platform_name)
+# #   - platform_name - valid platform name. See `platform` directory to get
+# #                     insights on the list of available platforms.
+# macro(theCore_enable_platform PLATFORM_NAME)
+#     # TODO: rename this variable. See #261.
+#     set(CONFIG_PLATFORM "${PLATFORM_NAME}")
 
-    set(THECORE_CONFIG_PLATFORM "${PLATFORM_NAME}" CACHE STRING "Desired platform" FORCE)
+#     set(THECORE_CONFIG_PLATFORM "${PLATFORM_NAME}" CACHE STRING "Desired platform" FORCE)
 
-    set(PLATFORM_API_MODULE ${CORE_DIR}/platform/${PLATFORM_NAME}/platform_api.cmake)
-    if(EXISTS ${PLATFORM_API_MODULE})
-        include(${PLATFORM_API_MODULE})
-    endif()
+#     set(PLATFORM_API_MODULE ${CORE_DIR}/platform/${PLATFORM_NAME}/platform_api.cmake)
+#     if(EXISTS ${PLATFORM_API_MODULE})
+#         include(${PLATFORM_API_MODULE})
+#     endif()
 
-    msg_info("Requested to enable platform: ${PLATFORM_NAME}")
-    unset(PLATFORM_API_MODULE)
-endmacro()
+#     msg_info("Requested to enable platform: ${PLATFORM_NAME}")
+#     unset(PLATFORM_API_MODULE)
+# endmacro()
 
 # Enables particular OS.
 # Syntax:

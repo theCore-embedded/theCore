@@ -12,6 +12,11 @@ namespace ecl
 
 /*[[[cog
 import cog
+import os
+import json
+
+cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
 
 i2c_cfg_template = '''
 template<>
@@ -22,10 +27,14 @@ struct i2c_bus_cfg<i2c_device::wire0>
 };
 '''
 
-if 'I2C_ENABLED' in globals():
-    cfgs = I2C_CFG.split(' ')
-    speed = int(cfgs[0])
-    clk_stretch = bool(cfgs[1])
+if 'i2c' in cfg:
+    i2c = cfg['i2c']
+    speed = i2c['speed']
+
+    if 'stretch_clk' in i2c:
+        clk_stretch = i2c['stretch_clk']
+    else:
+        clk_stretch = False
 
     if clk_stretch:
         clk_stretch = 'true'

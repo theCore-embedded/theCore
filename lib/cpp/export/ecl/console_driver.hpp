@@ -14,7 +14,7 @@ namespace ecl
 using console_bus = ecl::generic_bus<platform_console>;
 using console_driver = ecl::bus_pipe<console_bus>;
 
-}
+} // namespace ecl
 
 #else // THECORE_CONFIG_USE_CONSOLE
 
@@ -47,7 +47,7 @@ public:
     }
 };
 
-}
+} // namespace ecl
 
 #endif // THECORE_CONFIG_USE_CONSOLE
 
