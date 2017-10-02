@@ -60,7 +60,20 @@ in |Platforms| section.
 License
 -------
 
-The source code is distributed under LGPL v3.0 License.
+The source code is distributed under `MPL v2.0 License`_ (Mozilla Public License
+Version 2.0).
+
+MPL is like LGPL, but with static linking exception.
+
+For many practical cases it means that **you can use theCore in your proprietary
+embedded applications without disclosing the application source code**.
+
+Keep it private, if needed. MPL allows you to do that.
+
+Pay note though, that MPL is still a copy-left license. So you are obligated
+to distribute any changes of theCore itself if there were any.
+
+It is strongly recommended to read `MPL 2.0 FAQ`_ to get more familiar with it.
 
 Technologies and projects used
 ------------------------------
@@ -101,6 +114,8 @@ open some issues and we will do our best to handle this ASAP. Good luck!
 .. _multi-page HTML: https://forgge.github.io/theCore/
 .. _single-page HTML: https://forgge.github.io/theCore/singlehtml/contents.html
 .. _the standalone blinky example project: https://github.com/forGGe/theCore-blinky
+.. _MPL v2.0 License: https://www.mozilla.org/en-US/MPL/
+.. _MPL 2.0 FAQ: https://www.mozilla.org/en-US/MPL/2.0/FAQ/
 .. _cog: https://nedbatchelder.com/code/cog/
 .. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
 .. _Sphinx: http://www.sphinx-doc.org/
