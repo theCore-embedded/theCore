@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # `arm_cm*` not an architectures, but ARM cores.
 # Still, it is better to threat them as `architectures` of some kind since
 # the `core` term is something that peculiar to ARM and collides with

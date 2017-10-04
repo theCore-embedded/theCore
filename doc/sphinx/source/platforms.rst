@@ -156,7 +156,7 @@ Example output for STM32F4 family (user-defined aliases are highlighted):
 .. literalinclude:: _static/generated/stm32/uart_example.hpp
     :language: cpp
     :linenos:
-    :lines: 10-49,57
+    :lines: 14-53,61
     :emphasize-lines: 22,39
 
 `Full STM32 UART example header <_static/generated/stm32/uart_example.hpp>`_
@@ -234,7 +234,7 @@ Example output for STM32F4 family:
 .. literalinclude:: _static/generated/stm32/adc_example.hpp
     :language: cpp
     :linenos:
-    :lines: 9-37
+    :lines: 13-41
 
 `Full STM32 ADC example header <_static/generated/stm32/adc_example.hpp>`_
 
@@ -293,7 +293,7 @@ Example output:
 .. literalinclude:: _static/generated/stm32/i2c_example.hpp
     :language: cpp
     :linenos:
-    :lines: 9-30
+    :lines: 13-34
 
 `Full STM32 I2C example header <_static/generated/stm32/i2c_example.hpp>`_
 
@@ -356,7 +356,7 @@ Example output (**DMA configuration header is omitted for clarity**):
 .. literalinclude:: _static/generated/stm32/i2s_example.hpp
     :language: cpp
     :linenos:
-    :lines: 17-42
+    :lines: 20-46
 
 `Full STM32 I2S example header <_static/generated/stm32/i2s_example.hpp>`_
 
@@ -440,7 +440,7 @@ Refer to the :ref:`RM <STM32 RM>` for allowed DMA configuration for selected per
   .. literalinclude:: _static/generated/stm32/f4xx/dma_example.hpp
       :language: cpp
       :linenos:
-      :lines: 8-18
+      :lines: 12-23
 
   `Full STM32F4 DMA example header <_static/generated/stm32/f4xx/dma_example.hpp>`_
 
