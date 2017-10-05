@@ -20,12 +20,11 @@ cfg = cfg['platform']
 if 'console' in cfg and cfg['console']:
     cog.outl('#define THECORE_CONFIG_USE_CONSOLE 1')
 
-# Check systimer flag.
-if 'use_systmr' in cfg and cfg['use_systmr']:
-    cog.outl('#define USE_SYSTMR 1')
-
 ]]]*/
 
 //[[[end]]]
+
+// Particle Electron timers is always avaliable for theCore.
+#define USE_SYSTMR 1
 
 #endif // PARTICLE_PLATFORM_DEFINES_

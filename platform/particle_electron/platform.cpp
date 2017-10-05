@@ -5,9 +5,6 @@
 #include "application.h"
 #include "stdarg.h"
 
-// Lack of counting semaphore
-// #include <ecl/thread/semaphore.hpp>
-
 //------------------------------------------------------------------------------
 // System timer
 

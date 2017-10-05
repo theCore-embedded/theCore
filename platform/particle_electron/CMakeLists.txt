@@ -25,6 +25,9 @@ set(THECORE_FORCE_NO_FS_MODULE 1 CACHE "Disable fs module" INTERNAL)
 # TODO: drop it when side activities of #234 and #227 will be done
 set(TARGET_MCU_IRQ_COUNT 1 CACHE STRING "Available interrupts")
 
+# Create directory for auto-generated files
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/export/aux/")
+
 #-------------------------------------------------------------------------------
 # Generate serial driver definitions
 

@@ -26,7 +26,7 @@ i2c_cfg_template = '''
 template<>
 struct i2c_bus_cfg<i2c_device::wire0>
 {
-    static constexpr auto speed         = %d; // 10 kHz
+    static constexpr auto speed         = %d;
     static constexpr auto stretch_clk   = %s;
 };
 '''

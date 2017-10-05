@@ -19,7 +19,6 @@
       }
     },
 
-    "use_systmr":  { "type": "boolean" },
     "use_console": { "type": "boolean" }
   },
 

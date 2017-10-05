@@ -2,7 +2,6 @@
     "platform": {
         "name":         "particle_electron",
         "serial":       [ 0 ],
-        "console":      true,
-        "use_systmr":   true
+        "console":      true
     }
 }
