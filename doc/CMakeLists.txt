@@ -69,7 +69,9 @@ function(generate_source CONFIG_PATH IN_PATH OUT_PATH)
 		ARGS    "-DJSON_CFG=${CONFIG_PATH}")
 endfunction()
 
+################################################################################
 # STM32 examples
+################################################################################
 
 set(STM32_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/platform/stm32)
 set(STM32F4_DOC_DIR ${STM32_DOC_DIR}/f4xx)
@@ -108,6 +110,26 @@ generate_source(${STM32_DOC_DIR}/i2s_example.json
 generate_source(${STM32F4_DOC_DIR}/dma_example.json
 	${STM32F4_TEMPLATE_DIR}/dma_cfg.in.hpp
 	${STM32F4_OUT_DIR}/dma_example.hpp
+)
+
+################################################################################
+# Particle electron examples
+################################################################################
+
+set(PARTICLE_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/platform/particle_electron)
+set(PARTICLE_TEMPLATE_DIR ${CORE_DIR}/platform/particle_electron/templates)
+set(PARTICLE_OUT_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/_static/generated/particle_electron)
+
+# Serial for a particle electron example.
+generate_source(${PARTICLE_DOC_DIR}/serial_example.json
+	${PARTICLE_TEMPLATE_DIR}/serial_cfgs.in.hpp
+	${PARTICLE_OUT_DIR}/serial_example.hpp
+)
+
+# I2C/Wire for a particle electron example.
+generate_source(${PARTICLE_DOC_DIR}/i2c_example.json
+	${PARTICLE_TEMPLATE_DIR}/i2c_wire_cfgs.in.hpp
+	${PARTICLE_OUT_DIR}/i2c_example.hpp
 )
 
 if(Sphinx_FOUND)
