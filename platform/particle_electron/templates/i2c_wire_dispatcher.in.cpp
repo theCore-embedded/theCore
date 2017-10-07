@@ -72,8 +72,13 @@ void i2c_dispatch()
 
     /*[[[cog
     import cog
+    import os
+    import json
 
-    if 'I2C_ENABLED' in globals():
+    cfg = json.load(open(JSON_CFG))
+    cfg = cfg['platform']
+
+    if 'i2c' in cfg:
         cog.outl('dispatch<i2c_dev>();')
     ]]]*/
 

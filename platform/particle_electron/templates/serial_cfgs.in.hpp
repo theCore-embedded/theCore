@@ -16,15 +16,21 @@ namespace ecl
 
 /*[[[cog
 import cog
+import json
+import os
 
-# No serial configuration is requested, aborting.
-if 'SERIALS' in globals():
-    serials = SERIALS.split(' ')
+cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
+
+serials = []
+
+if 'serial' in cfg:
+    serials = cfg['serial']
     cog.msg("Serials enabled: " + str(serials))
 
-    for serial in serials:
-        cog.outl("using serial_device{} = uart_bus<uart_device::serial{}>;"
-            .format(serial, serial))
+for serial in serials:
+    cog.outl("using serial_device{} = uart_bus<uart_device::serial{}>;"
+        .format(serial, serial))
 ]]]*/
 
 //[[[end]]]
@@ -32,9 +38,10 @@ if 'SERIALS' in globals():
 // Console definitions (if enabled)
 
 /*[[[cog
-if 'CONSOLE' in globals():
-    cog.msg('Enabling console on serial device ' + str(CONSOLE))
-    cog.outl('using platform_console = serial_device{};'.format(CONSOLE))
+if 'console' in cfg and cfg['console']:
+    cog.msg('Enabling console on serial device 0')
+    cog.outl('using platform_console = serial_device0;')
+
 ]]]*/
 //[[[end]]]
 
@@ -42,12 +49,8 @@ if 'CONSOLE' in globals():
 static inline void bypass_init()
 {
     /*[[[cog
-    if 'CONSOLE' in globals():
-        num = int(CONSOLE)
-        if num == 0:
-            cog.outl('Serial.begin();')
-        else:
-            cog.outl('Serial{}.begin();'.format(num))
+    if 'console' in cfg and cfg['console']:
+        cog.outl('Serial.begin();')
     ]]]*/
     //[[[end]]]
 }
@@ -56,12 +59,8 @@ static inline void bypass_init()
 static inline void bypass_putc(char c)
 {
     /*[[[cog
-    if 'CONSOLE' in globals():
-        num = int(CONSOLE)
-        if num == 0:
-            cog.outl('Serial.write(c);')
-        else:
-            cog.outl('Serial{}.write(c);'.format(num))
+    if 'console' in cfg and cfg['console']:
+        cog.outl('Serial.write(c);')
     else:
         cog.outl('(void)c;')
     ]]]*/

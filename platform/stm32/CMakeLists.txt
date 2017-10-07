@@ -24,12 +24,12 @@ file(MAKE_DIRECTORY ${GEN_DIR}/export/aux)
 add_library(stm32 platform.cpp exti_manager.cpp console.cpp ${GEN_DIR}/pin_mux.cpp)
 
 # Validate incoming JSON
-add_custom_target(stm32_validate
-    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/validate.py ${THECORE_TARGET_CONFIG_FILE}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/schemas
-    VERBATIM
-    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/validate.py ${THECORE_TARGET_CONFIG_FILE}
-    COMMENT "Validating platform configuration")
+theCore_create_json_validator_runner(
+    NAME stm32_validate
+    JSON ${THECORE_TARGET_CONFIG_FILE}
+    SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/stm32.schema.json
+    WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
+)
 
 target_include_directories(stm32 PUBLIC export)
 

@@ -7,6 +7,24 @@
 #ifndef PARTICLE_PLATFORM_DEFINES_
 #define PARTICLE_PLATFORM_DEFINES_
 
-#cmakedefine USE_SYSTMR
+/*[[[cog
+import cog
+import json
+import os
+
+cfg = json.load(open(JSON_CFG))
+cfg = cfg['platform']
+
+# Check if console has to be enabled
+
+if 'console' in cfg and cfg['console']:
+    cog.outl('#define THECORE_CONFIG_USE_CONSOLE 1')
+
+]]]*/
+
+//[[[end]]]
+
+// Particle Electron timers is always avaliable for theCore.
+#define USE_SYSTMR 1
 
 #endif // PARTICLE_PLATFORM_DEFINES_

@@ -26,8 +26,8 @@ set(THECORE_DEFAULT_SYSTMR_FREQ 50)
 
 # CMSIS compliant platform must provide device.hpp header, that will be used
 # by CMSIS core drivers. Otherwise, architecture modules cannot provide
-# any CMSIS-based implementation, such as execution control and platform
-# must implement that functions on its size.
+# any CMSIS-based implementation, such as execution control and a platform
+# must implement that functions on its side.
 if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
     # Use systick unless otherwise is explicitly stated
     if(NOT CONFIG_OS AND NOT DEFINED CONFIG_USE_SYSTMR_SYSTICK)
