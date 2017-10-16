@@ -7,6 +7,7 @@
 #ifndef TIVAC_PLATFORM_BAT_TEST_GPIO_HPP_
 #define TIVAC_PLATFORM_BAT_TEST_GPIO_HPP_
 
+#include <aux/generated.hpp>
 #include <platform/gpio_device.hpp>
 
 namespace ecl
@@ -21,17 +22,8 @@ struct gpio_list
     using executor = E<Gs...>;
 };
 
-// Device LEDs
-
-using red_led = gpio<gpio_hw::port::f, gpio_hw::num::pin1>;
-using blue_led = gpio<gpio_hw::port::f, gpio_hw::num::pin2>;
-using green_led = gpio<gpio_hw::port::f, gpio_hw::num::pin3>;
-
 //! Exported list of GPIOs.
 using test_gpios = gpio_list<red_led, blue_led, green_led>;
-
-//! Push button - required for EXTI manager test
-using push_button = gpio<gpio_hw::port::f, gpio_hw::num::pin4>;
 
 } // namespace ecl
 

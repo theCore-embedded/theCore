@@ -44,10 +44,10 @@ add_library(tivaware STATIC
         ti-tivaware/driverlib/watchdog.c
         )
 
-if(CONFIG_PLATFORM_DEVICE MATCHES TM4C123GH6PM)
+if(thecore_cfg.platform.device MATCHES "TM4C123GH6PM")
     target_compile_definitions(tivaware PUBLIC -DPART_TM4C123GH6PM)
 else()
-    msg_fatal("Unknown device: ${CONFIG_PLATFORM_DEVICE}")
+    msg_fatal("Unknown device: ${thecore_cfg.platform.device}")
 endif()
 
 target_include_directories(tivaware SYSTEM PUBLIC

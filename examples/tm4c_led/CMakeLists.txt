@@ -14,24 +14,13 @@ set(CORE_DIR ../../)
 include(${CORE_DIR}/build_api.cmake)
 
 # Our demo sources.
-add_executable(tm4c_led main.cpp target.cpp)
+add_executable(tm4c_led main.cpp)
 
 # Some dependencies
 target_link_libraries(tm4c_led the_core core_cpp)
 
-# Configuraion parameters
-
-# Target processor platform and its configuration
-set(CONFIG_PLATFORM tm4c)
-# STM32 discovery is running with STM32F407VG processor
-set(CONFIG_PLATFORM_DEVICE TM4C123GH6PM)
-
-# Enable console
-set(CONFIG_USE_CONSOLE 1)
-# USART #2 used for console output
-set(CONFIG_CONSOLE_DEVICE_NUM 0)
-# Baud rate of the console
-set(CONFIG_CONSOLE_BAUD 115200)
+# Configuration parameters
+theCore_set_target_config(${CMAKE_CURRENT_LIST_DIR}/target_defs.json)
 
 # Include theCore into the build process
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
