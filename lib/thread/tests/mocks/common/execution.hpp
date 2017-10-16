@@ -10,9 +10,19 @@
 namespace ecl
 {
 
-static inline void wait_for(uint32_t ms)
+template<class Predicate>
+static inline bool wait_for(uint32_t ms, Predicate pred)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    const uint32_t quant = 20;
+
+    while (static_cast<int>(ms -= 20) > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(quant));
+        if (pred()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 } // namespace ecl

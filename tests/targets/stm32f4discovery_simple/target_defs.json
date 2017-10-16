@@ -78,7 +78,7 @@
                 "comment": "Push button"
             }
         ],
-        "export_gpio": [
+        "gpio_alias": [
             {
                 "id": "PD12",
                 "alias": "green_led"

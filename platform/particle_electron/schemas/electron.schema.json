@@ -4,6 +4,15 @@
   "properties": {
     "name":       { "type": "string", "pattern": "^particle_electron$" },
 
+    "systmr_cfg":
+    {
+      "type": "object",
+      "properties": {
+        "freq_hz":  { "type": "integer" },
+        "owner":    { "enum": [ "thecore", "user" ] }
+      }
+    },
+
     "serial":
     {
       "type": "array",
@@ -20,6 +29,7 @@
     },
 
     "use_console": { "type": "boolean" }
+
   },
 
   "required": [ "name" ]

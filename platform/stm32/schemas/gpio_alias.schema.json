@@ -1,15 +1,16 @@
 {
     "$schema": "http://json-schema.org/schema#",
-    "type": "array",
 
+    "type": "array",
     "items": {
         "type": "object",
 
         "properties": {
-            "trigger": { "enum": "SW" },
-            "nums":    { "type": "array", "items": { "type": "integer" } },
+            "id":      { "type": "string", "pattern": "^P\\w\\d{1,2}$" },
             "alias":   { "type": "string" },
             "comment": { "type": "string" }
-        }
+        },
+
+        "required": [ "id", "alias" ]
     }
 }

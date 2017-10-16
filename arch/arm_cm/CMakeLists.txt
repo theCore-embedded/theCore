@@ -29,23 +29,29 @@ set(THECORE_DEFAULT_SYSTMR_FREQ 50)
 # any CMSIS-based implementation, such as execution control and a platform
 # must implement that functions on its side.
 if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
-    # Use systick unless otherwise is explicitly stated
-    if(NOT CONFIG_OS AND NOT DEFINED CONFIG_USE_SYSTMR_SYSTICK)
-       set(CONFIG_USE_SYSTMR_SYSTICK 1)
-    endif()
+    if(NOT CONFIG_OS)
+        if(CONFIG_USE_SYSTMR_SYSTICK)
+            target_compile_definitions(arch PUBLIC -DTHECORE_OWNS_SYSTMR=1)
+        endif()
 
-    if(CONFIG_USE_SYSTMR_SYSTICK)
         if (NOT THECORE_CONFIG_SYSTMR_FREQ)
             set(THECORE_CONFIG_SYSTMR_FREQ ${THECORE_DEFAULT_SYSTMR_FREQ})
         endif()
 
-        target_compile_definitions(arch PUBLIC -DUSE_SYSTMR=1 -DTHECORE_CONFIG_SYSTMR_FREQ=${THECORE_CONFIG_SYSTMR_FREQ})
-        target_sources(arch PUBLIC ${CMAKE_CURRENT_LIST_DIR}/execution.cpp)
+        target_compile_definitions(arch PUBLIC
+            -DPLATFORM_CMSIS_COMPLIANT
+            -DTHECORE_ENABLE_SYSTMR_API # Timer API is enabled in any case, even if not used by theCore.
+            -DTHECORE_CONFIG_SYSTMR_FREQ=${THECORE_CONFIG_SYSTMR_FREQ}
+            -DUSE_WFI_WFE=1  # Architecture provides CMSIS-based WFI/WFE routines
+        )
     endif()
 
     target_compile_definitions(arch PUBLIC
             -DPLATFORM_CMSIS_COMPLIANT
-            -DUSE_WFI_WFE=1) # Architecture provides CMSIS-based WFI/WFE routines.
+            -DUSE_WFI_WFE=1  # Architecture provides CMSIS-based WFI/WFE routines
+    )
+
+    target_sources(arch PUBLIC ${CMAKE_CURRENT_LIST_DIR}/execution.cpp)
 endif()
 
 # Apply memory layout

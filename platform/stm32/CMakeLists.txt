@@ -7,6 +7,7 @@
 set(CONFIG_PLATFORM_DEVICE  "${thecore_cfg.platform.device}"
     CACHE STRING "stm32 device id" FORCE
 )
+
 # TODO: what if clock is not HSE?
 set(CONFIG_PLATFORM_HSE_VAL "${thecore_cfg.platform.clock.speed}"
     CACHE STRING "HSE speed" FORCE

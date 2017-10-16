@@ -61,7 +61,7 @@ static inline void wfe()
     __WFE();
 }
 
-#if USE_SYSTMR
+#if THECORE_ENABLE_SYSTMR_API
 
 namespace systmr
 {
@@ -113,7 +113,7 @@ uint32_t events();
 
 } // namespace systmr
 
-#endif // USE_SYSTMR
+#endif // THECORE_ENABLE_SYSTMR_API
 
 //! \brief Performs a dummy busy wait for specified amount of milliseconds.
 //! \param ms number of milliseconds to wait.
