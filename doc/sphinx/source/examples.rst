@@ -498,6 +498,11 @@ In ``minicom`` you should be able to see::
   Welcome to theCore
   Starting TM4C led demo...
 
+Target JSON config for the TM4C LED example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../../../examples/tm4c_led/tm4c_led.json
+
 On-board LED will blink with the different (RGB) colors.
 
 .. _the dedicated repository: https://github.com/forGGe/theCore-blinky

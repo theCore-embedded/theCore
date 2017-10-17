@@ -20,7 +20,7 @@ add_executable(tm4c_led main.cpp)
 target_link_libraries(tm4c_led the_core core_cpp)
 
 # Configuration parameters
-theCore_set_target_config(${CMAKE_CURRENT_LIST_DIR}/target_defs.json)
+theCore_set_target_config(${CMAKE_CURRENT_LIST_DIR}/tm4c_led.json)
 
 # Include theCore into the build process
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)

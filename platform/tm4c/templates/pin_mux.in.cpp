@@ -95,6 +95,25 @@ extern "C" void gpio_init_generated()
         );
     '''
 
+    # Collect all ports required to enable periphery via sysctl.
+    # Should be done before any pin is configured to avoid usage fault.
+
+    ports = set([])
+
+    for pincfg in pincfgs:
+        for pin in pincfg['ids']:
+            port = pin[1:-1].lower()
+            ports |= set([ port ])
+
+    for port in ports:
+        cog.outl('ecl::gpio_hw::enable_periph<ecl::gpio_hw::port::%s>();' % port)
+
+    ]]]*/
+    //[[[end]]]
+
+    /*[[[cog
+    # Configure individual pins.
+
     for pincfg in pincfgs:
         dir = extract_dir(pincfg)
         pin_type = extract_pintype(pincfg)

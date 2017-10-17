@@ -6,7 +6,6 @@
 #define COMMON_EXECUTION_MOCK_HPP_
 
 #include <thread>
-#include <iostream>
 
 namespace ecl
 {
@@ -21,7 +20,6 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
             return true;
         }
 
-        std::cout << "CHECK" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(quant));
     } while (static_cast<int>(ms -= 20) > 0);
 

@@ -6,7 +6,6 @@
         "uart": [
             {
                 "id": "UART0",
-                "alias": "test_uart",
                 "comment": "UART-over-USB console output"
             }
         ],

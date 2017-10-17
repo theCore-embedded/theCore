@@ -106,6 +106,11 @@ Note that to use any of periphery, corresponding pins must be configured too.
 **Do not forget to include pin multiplexing configuration for each desired periphery.**
 Proceed to the `STM32 Multiplexing`_ for more details.
 
+Timer allocation
+~~~~~~~~~~~~~~~~
+
+.. note:: This section is under construction
+
 U(S)ART
 ~~~~~~~
 
@@ -122,13 +127,15 @@ information about selecting particular UART as a console output.
 STM32 theCore UART supports only IRQ mode, where interrupt is generated after
 each byte transmission. DMA mode is not yet implemented.
 
-Schema:
+JSON schema
++++++++++++
 
 .. literalinclude:: ../../../platform/stm32/schemas/uart.schema.json
     :language: json
     :linenos:
 
-Properties:
+Properties
+++++++++++
 
 * ``id`` - UART periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
   Examples are: ``UART1`` or ``USART4``. Depends on MCU family.
@@ -145,13 +152,17 @@ Properties:
 
 .. _STM32 UART example:
 
-Example configuration:
+Example configuration
++++++++++++++++++++++
 
 .. literalinclude:: platform/stm32/uart_example.json
     :language: json
     :linenos:
 
-Example output for STM32F4 family (user-defined aliases are highlighted):
+Example output for STM32F4 family
++++++++++++++++++++++++++++++++++
+
+User-defined aliases are highlighted.
 
 .. literalinclude:: _static/generated/stm32/uart_example.hpp
     :language: cpp
@@ -161,12 +172,13 @@ Example output for STM32F4 family (user-defined aliases are highlighted):
 
 `Full STM32 UART example header <_static/generated/stm32/uart_example.hpp>`_
 
-Usage:
+Usage
++++++
 
 .. note:: This section is under construction
 
 ADC and channels
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. warning:: ADC was tested only with STM32F4 family.
 
@@ -178,13 +190,15 @@ ADC configuration split onto two entities. First is configuration of the ADC
 itself, second is the configuration for particular channels. In such way,
 it is possible to have different set of ADC channels used with the same ADC.
 
-ADC schema:
+ADC schema
+++++++++++
 
 .. literalinclude:: ../../../platform/stm32/schemas/adc.schema.json
     :language: json
     :linenos:
 
-Properties:
+Properties
+++++++++++
 
 * ``id`` - ADC periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
   Examples are: ``ADC1`` or ``ADC2``.
@@ -204,7 +218,8 @@ Properties:
 * ``comment`` - user-defined string, describes driver purpose. Must be valid
   string, suitable for C/C++ comments.
 
-Channels schema:
+Channels schema
++++++++++++++++
 
 .. literalinclude:: ../../../platform/stm32/schemas/adc_channels.schema.json
     :language: json
@@ -223,13 +238,15 @@ Channels schema:
 * ``comment`` - user-defined string, describes driver purpose. Must be valid
   string, suitable for C/C++ comments.
 
-Example configuration (IRQ mode):
+Example configuration (IRQ mode)
+++++++++++++++++++++++++++++++++
 
 .. literalinclude:: platform/stm32/adc_example.json
     :language: json
     :linenos:
 
-Example output for STM32F4 family:
+Example output for STM32F4 family
++++++++++++++++++++++++++++++++++
 
 .. literalinclude:: _static/generated/stm32/adc_example.hpp
     :language: cpp
@@ -238,7 +255,8 @@ Example output for STM32F4 family:
 
 `Full STM32 ADC example header <_static/generated/stm32/adc_example.hpp>`_
 
-Usage:
+Usage
++++++
 
 .. note:: This section is under construction
 
@@ -248,13 +266,15 @@ I2C
 :Driver source:     ``platform/stm32/export/aux/i2c_bus.hpp``
 :Template file:     ``platform/stm32/templates/i2c_cfg.in.hpp``
 
-JSON schema:
+JSON schema
++++++++++++
 
 .. literalinclude:: ../../../platform/stm32/schemas/i2c.schema.json
     :language: json
     :linenos:
 
-Properties:
+Properties
+++++++++++
 
 * ``id`` - I2C periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
   Examples are: ``I2C1`` or ``I2C2``.
@@ -297,20 +317,23 @@ Example output:
 
 `Full STM32 I2C example header <_static/generated/stm32/i2c_example.hpp>`_
 
-Usage:
+Usage
++++++
 
 .. note:: This section is under construction
 
 I2S
 ~~~
 
-JSON schema:
+JSON schema
++++++++++++
 
 .. literalinclude:: ../../../platform/stm32/schemas/i2s.schema.json
     :language: json
     :linenos:
 
-Properties:
+Properties
+++++++++++
 
 * ``id`` - I2S periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
   Examples are: ``I2S`` or ``I2S``.
@@ -342,7 +365,8 @@ Properties:
 
 .. _STM32 I2S example:
 
-Example configuration:
+Example configuration
++++++++++++++++++++++
 
 .. literalinclude:: platform/stm32/i2s_example.json
     :language: json
@@ -360,7 +384,8 @@ Example output (**DMA configuration header is omitted for clarity**):
 
 `Full STM32 I2S example header <_static/generated/stm32/i2s_example.hpp>`_
 
-Usage:
+Usage
++++++
 
 .. note:: This section is under construction
 
@@ -378,8 +403,8 @@ SPI
 
 .. _STM32 DMA:
 
-DMA
-~~~
+DMA overview
+~~~~~~~~~~~~
 
 :Driver sources:    ``platform/stm32/family/export/stm32_dma_wrap_interface.hpp``
                     ``platform/stm32/family/f4xx/export/stm32_dma_wrap.hpp``
@@ -400,56 +425,62 @@ Each driver with DMA support will include corresponding DMA example.
 Configuration parameters (stream, channel, etc.) heavily depends on MCU model.
 Refer to the :ref:`RM <STM32 RM>` for allowed DMA configuration for selected periphery.
 
-* STM32F4 MCU family
+DMA in STM32F4 MCU family
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  Schema:
+Schema
+++++++
 
-  .. literalinclude:: ../../../platform/stm32/family/f4xx/schemas/dma.schema.json
-      :language: json
-      :linenos:
+.. literalinclude:: ../../../platform/stm32/family/f4xx/schemas/dma.schema.json
+    :language: json
+    :linenos:
 
-  Properties:
+Properties
+++++++++++
 
-  * ``num`` - DMA number. There are 2 DMAs on STM32F4. There are two DMA controllers in STM32F4.
-    Refer to the section *10. DMA controller (DMA)* of the :ref:`RM <STM32 RM>`
-    to get more information.
+* ``num`` - DMA number. There are 2 DMAs on STM32F4. There are two DMA controllers in STM32F4.
+  Refer to the section *10. DMA controller (DMA)* of the :ref:`RM <STM32 RM>`
+  to get more information.
 
-  * ``stream`` - DMA stream number. There are 8 streams for each DMA controller,
-    numbered from 0 to 7. See section *10.3.5 DMA streams* in the :ref:`RM <STM32 RM>`
-    for more details.
+* ``stream`` - DMA stream number. There are 8 streams for each DMA controller,
+  numbered from 0 to 7. See section *10.3.5 DMA streams* in the :ref:`RM <STM32 RM>`
+  for more details.
 
-  * ``channel`` - DMA channel number. There are up to 8 channels (requests) per
-    each DMA stream, numbered from 0 to 7.
-    See section *10.3.3 Channel selection* in the :ref:`RM <STM32 RM>` for more details.
+* ``channel`` - DMA channel number. There are up to 8 channels (requests) per
+  each DMA stream, numbered from 0 to 7.
+  See section *10.3.3 Channel selection* in the :ref:`RM <STM32 RM>` for more details.
 
-  * ``alias`` - user-defined typename, which can be used as a reference to an
-    concrete DMA driver instance in configuration JSON.
-    Must be valid C++ identifier. Refer to individual periphery documentation
-    for examples.
+* ``alias`` - user-defined typename, which can be used as a reference to an
+  concrete DMA driver instance in configuration JSON.
+  Must be valid C++ identifier. Refer to individual periphery documentation
+  for examples.
 
-  * ``comment`` - user-defined string, describes DMA purpose. Must be valid
-    string, suitable for C/C++ comments.
+* ``comment`` - user-defined string, describes DMA purpose. Must be valid
+  string, suitable for C/C++ comments.
 
-  Example configuration:
+Example configuration
++++++++++++++++++++++
 
-  .. literalinclude:: platform/stm32/f4xx/dma_example.json
-      :language: json
-      :linenos:
+.. literalinclude:: platform/stm32/f4xx/dma_example.json
+    :language: json
+    :linenos:
 
-  Example output:
+Example output
+++++++++++++++
 
-  .. literalinclude:: _static/generated/stm32/f4xx/dma_example.hpp
-      :language: cpp
-      :linenos:
-      :lines: 12-23
+.. literalinclude:: _static/generated/stm32/f4xx/dma_example.hpp
+    :language: cpp
+    :linenos:
+    :lines: 12-23
 
-  `Full STM32F4 DMA example header <_static/generated/stm32/f4xx/dma_example.hpp>`_
+`Full STM32F4 DMA example header <_static/generated/stm32/f4xx/dma_example.hpp>`_
 
-* STM32L1 MCU family
+DMA in STM32L1 MCU family
+~~~~~~~~~~~~~~~~~~~~~~~~~
+  .. note:: This section is under construction
 
-  .. note:: This section is under construction.
-
-Usage:
+DMA Usage
+~~~~~~~~~
 
 .. note:: This section is under construction
 
@@ -483,7 +514,7 @@ Console
 Kinetis KE02Z
 -------------
 
-.. note:: This section is under construction.
+.. note:: This section is under construction
 
 Particle Electron
 -----------------
@@ -513,13 +544,15 @@ two USB serial channels.
 theCore allows to enable particular Serial by its number on default baud rate.
 Desired serial number must put into array with ``serial`` name.
 
-Example configuration:
+Example configuration
++++++++++++++++++++++
 
 .. literalinclude:: platform/particle_electron/serial_example.json
     :language: json
     :linenos:
 
-Example output:
+Example output
+++++++++++++++
 
 .. literalinclude:: _static/generated/particle_electron/serial_example.hpp
     :language: cpp
@@ -561,13 +594,15 @@ Wire (I2C)
    * ``SCL`` => ``D1``
    * ``SDA`` => ``D0``
 
-Example configuration:
+Example configuration
++++++++++++++++++++++
 
 .. literalinclude:: platform/particle_electron/i2c_example.json
     :language: json
     :linenos:
 
-Example output:
+Example output
+++++++++++++++
 
 .. literalinclude:: _static/generated/particle_electron/i2c_example.hpp
     :language: cpp
@@ -576,7 +611,8 @@ Example output:
 
 `Full Particle Electron I2C/Wire example header <_static/generated/particle_electron/i2c_example.hpp>`_
 
-Properties:
+Properties
+++++++++++
 
 * ``speed`` - `I2C clock speed`_. Required field.
 * ``stretch_clk`` - `I2C clock stretching`_.
@@ -600,10 +636,263 @@ To flash resulting binary to the board, follow next sequence:
 .. _`I2C clock stretching`: https://docs.particle.io/reference/firmware/electron/#stretchclock-
 .. _`Particle Electron documentation for software timers`: https://docs.particle.io/reference/firmware/electron/#software-timers
 
-Tiva C series TM4C123G
-----------------------
+Texas Instruments Tiva C TM4C123G
+---------------------------------
 
-.. note:: This section is under construction.
+Tiva C TM4C123G is a Cortex-M4 based microcontroller from Texas Instruments.
+
+:Module location:
+    ``platform/tm4c``
+:Supported devices:
+    TM4C123GH6PM
+:Data sheets/Reference manuals:
+    `TM4C123GH6PM <TM4C123GH6PM datasheet>`_
+
+.. _`TM4C123GH6PM datasheet`: http://www.ti.com/lit/ds/spms376e/spms376e.pdf
+
+.. important:: The platform is configured by theCore configurator.
+    To make sure you are familiar with it, check the :ref:`theCore_Configurator`
+    section before going any further.
+
+Minimal configuration JSON file for the TM4C MCU must contain the platform
+object with following fields:
+
+  * ``name`` - platform name (simply ``tm4c``)
+  * ``device`` - desired device ID. Depends on MCU.
+
+.. important:: Currently, only ``TM4C123GH6PM`` device is supported.
+
+For example, the basic configuration can look like that:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "platform": {
+            "name": "tm4c",
+            "device": "TM4C123GH6PM"
+        }
+    }
+
+To import all generated definitions into the application code, simply add following
+line to your source:
+
+.. code-block:: cpp
+
+    #include <aux/generated.hpp>
+
+For more JSON configuration examples for TM4C platform, refer to the
+:ref:`theCore_Examples` page.
+
+Periphery overview
+~~~~~~~~~~~~~~~~~~
+
+TM4C MCU peripheries can be configured within the same JSON file.
+Layout of the platform configuration object is described by JSON schema,
+placed under ``platform/tm4c/schemas/tm4c.schema.json``:
+
+.. literalinclude:: ../../../platform/tm4c/schemas/tm4c.schema.json
+    :language: json
+    :linenos:
+
+Each periphery configuration placed under a property with a relevant name.
+The example below illustrates UART periphery being added to JSON config:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "platform": {
+            "name": "tm4c",
+            "device": "TM4C123GH6PM",
+            "uart": [
+                {
+                    "id": "UART0",
+                    "comment": "UART-over-USB output",
+                    "alias": "my_uart"
+                }
+            ]
+        }
+    }
+
+Note that to use any of periphery, corresponding pins must be configured too.
+**Do not forget to include pin multiplexing configuration for each desired periphery.**
+Proceed to the `TM4C Multiplexing`_ section for more details.
+
+System timer
+~~~~~~~~~~~~
+
+:Driver sources:    ``platform/tm4c/export/aux/execution.hpp``
+                    ``platform/tm4c/export/aux/execution.hpp``
+
+JSON schema
++++++++++++
+
+.. literalinclude:: ../../../platform/tm4c/schemas/systmr.schema.json
+    :language: json
+    :linenos:
+
+Example configuration
++++++++++++++++++++++
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "platform": {
+            "name": "tm4c",
+            "systmr_cfg": {
+                "source": "systick",
+                "freq_hz": 50,
+                "owner": "user"
+            }
+        }
+    }
+
+Properties:
+.. note:: This section is under construction
+
+Usage
++++++
+
+.. note:: This section is under construction
+
+UART
+~~~~
+
+:Driver sources:    ``platform/tm4c/export/aux/uart_bus.hpp``
+:Template file:     ``platform/tm4c/templates/uart_cfg.in.hpp``
+
+JSON schema
++++++++++++
+
+.. literalinclude:: ../../../platform/tm4c/schemas/uart.schema.json
+    :language: json
+    :linenos:
+
+Example configuration
++++++++++++++++++++++
+
+.. literalinclude:: platform/tm4c/uart_example.json
+    :language: json
+    :linenos:
+
+Example output
+++++++++++++++
+
+.. literalinclude:: _static/generated/tm4c/uart_example.hpp
+    :language: cpp
+    :linenos:
+    :lines: 16-31
+
+`Full TM4C UART example header <_static/generated/tm4c/uart_example.hpp>`_
+
+Console
++++++++
+
+To enable console in theCore, set ``console`` field to desired UART instance
+and enable that instance, all via JSON:
+
+.. code-block:: json
+    :linenos:
+
+    {
+        "platform": {
+            "name": "tm4c",
+            "console": "UART0",
+            "uart": [
+                {
+                    "id": "UART0",
+                    "comment": "UART-over-USB console output"
+                }
+            ]
+        }
+    }
+
+Check the :ref:`theCore_Console` section for more details about theCore console
+library.
+
+Usage
++++++
+
+.. note:: This section is under construction
+
+.. _TM4C Multiplexing:
+
+Pin multiplexing
+~~~~~~~~~~~~~~~~
+
+:Driver sources:    ``platform/tm4c/export/platform/pin_cfg.hpp``
+:Template file:     ``platform/tm4c/templates/pin_mux.in.hpp``
+
+JSON schema
++++++++++++
+
+.. literalinclude:: ../../../platform/tm4c/schemas/pinmux.schema.json
+    :language: json
+    :linenos:
+
+Example configuration
++++++++++++++++++++++
+
+.. literalinclude:: platform/tm4c/pin_mux_example.json
+    :language: json
+    :linenos:
+
+Example output
+++++++++++++++
+
+.. literalinclude:: _static/generated/tm4c/pin_mux_example.cpp
+    :language: cpp
+    :linenos:
+    :lines: 13-54
+
+`Full TM4C GPIO pin multiplexing source file <_static/generated/tm4c/pin_mux_example.cpp>`_
+
+Usage
++++++
+
+.. note:: This section is under construction
+
+GPIO aliases
+~~~~~~~~~~~~
+
+:Driver sources:    ``platform/tm4c/export/platform/gpio_device.hpp``
+:Template file:     ``platform/tm4c/templates/gpio_cfg.in.hpp``
+
+JSON schema
++++++++++++
+
+.. literalinclude:: ../../../platform/tm4c/schemas/gpio_alias.schema.json
+    :language: json
+    :linenos:
+
+Example configuration
++++++++++++++++++++++
+
+.. literalinclude:: platform/tm4c/gpio_alias_example.json
+    :language: json
+    :linenos:
+
+Example output
+++++++++++++++
+
+.. literalinclude:: _static/generated/tm4c/gpio_alias_example.hpp
+    :language: cpp
+    :linenos:
+    :lines: 14-26
+
+`Full TM4C GPIO alias example header <_static/generated/tm4c/gpio_alias_example.hpp>`_
+
+Usage
++++++
+
+.. note:: This section is under construction
+
+External interrupts
+~~~~~~~~~~~~~~~~~~~
+
+.. note:: This section is under construction
 
 Host
 ----
@@ -616,7 +905,7 @@ Example configuration:
 .. code-block:: json
    :linenos:
 
-   {
+    {
         "platform": {
             "name": "host",
             "console": true
