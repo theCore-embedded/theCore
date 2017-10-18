@@ -1,0 +1,62 @@
+{
+    "platform": {
+        "name": "tm4c",
+        "device": "TM4C123GH6PM",
+        "systmr_cfg": {
+            "source": "systick",
+            "freq_hz": 100,
+            "owner": "thecore"
+        },
+        "console": "UART0",
+        "uart": [
+            {
+                "id": "UART0",
+                "alias": "test_uart",
+                "comment": "UART-over-USB console output"
+            }
+        ],
+        "pinmux": [
+            {
+                "ids": [ "PF1", "PF2", "PF3" ],
+                "dir": "out",
+                "pin_type": "std",
+                "strength": "2mA",
+                "comment": "LED pins"
+            },
+            {
+                "ids": [ "PF4" ],
+                "dir": "in",
+                "pin_type": "push",
+                "comment": "Push button"
+            },
+            {
+                "ids": [ "PA0", "PA1" ],
+                "dir": "hw",
+                "hws": { "PA0": "UART0_RX", "PA1": "UART0_TX" },
+                "comment": "UART0 console pins"
+            }
+        ],
+        "gpio_alias": [
+            {
+                "id": "PF1",
+                "alias": "red_led",
+                "comment": "Red LED"
+            },
+            {
+                "id": "PF2",
+                "alias": "blue_led",
+                "comment": "Blue LED"
+            },
+            {
+                "id": "PF3",
+                "alias": "green_led",
+                "comment": "Green LED"
+            },
+            {
+                "id": "PF4",
+                "alias": "push_button",
+                "comment": "Push button - required for EXTI manager test"
+            }
+        ]
+    }
+}

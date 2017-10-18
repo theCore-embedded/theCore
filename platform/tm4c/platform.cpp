@@ -49,10 +49,11 @@ extern "C" void platform_init()
 }
 
 
+
+#if THECORE_ENABLE_SYSTMR_API
+
 namespace ecl
 {
-
-#if USE_SYSTMR
 
 namespace systmr
 {
@@ -66,11 +67,9 @@ uint32_t events()
 
 } // namespace systmr
 
-#endif // USE_SYSTMR
-
 } // namespace ecl
 
-#if USE_SYSTMR
+#if !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
 
 // User can override systimer handler to receive events on its side.
 extern "C" void systmr_handler(void) __attribute__((weak));
@@ -79,10 +78,14 @@ extern "C" void systmr_handler(void)
 {
 }
 
+#endif // !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
+
 extern "C" void SysTick_Handler(void)
 {
     ecl::systmr::event_cnt++;
+#if !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
     systmr_handler();
+#endif // !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
 }
 
-#endif // USE_SYSTMR
+#endif // THECORE_ENABLE_SYSTMR_API

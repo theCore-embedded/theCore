@@ -20,11 +20,23 @@ cfg = cfg['platform']
 if 'console' in cfg and cfg['console']:
     cog.outl('#define THECORE_CONFIG_USE_CONSOLE 1')
 
+# Check timer ownership
+
+systmr_freq_hz = 20
+
+if 'systmr_cfg' in cfg:
+    systmr_cfg = cfg['systmr_cfg']
+
+    if systmr_cfg['freq_hz']:
+        systmr_freq_hz = systmr_cfg['freq_hz']
+
+    if systmr_cfg['owner'] and systmr_cfg['owner'] == 'thecore':
+        cog.outl('#define THECORE_OWNS_SYSTMR 1')
+
+cog.outl('#define THECORE_SYSTMR_FREQ %d' % systmr_freq_hz)
+
 ]]]*/
 
 //[[[end]]]
-
-// Particle Electron timers is always avaliable for theCore.
-#define USE_SYSTMR 1
 
 #endif // PARTICLE_PLATFORM_DEFINES_

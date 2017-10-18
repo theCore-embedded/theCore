@@ -1,18 +1,17 @@
 {
-  "$schema": "http://json-schema.org/schema#",
-  "type": "array",
+    "$schema": "http://json-schema.org/schema#",
+    "type": "array",
 
-  "items": {
-    "type": "object",
+    "items": {
+        "type": "object",
 
-    "properties": {
-      "id":      { "type": "string", "pattern": "^US?ART\\d$" },
-      "baud":    { "type": "integer" },
-      "alias":   { "type": "string" },
-      "comment": { "type": "string" }
-    },
+        "properties": {
+            "id":      { "type": "string", "pattern": "^US?ART\\d$" },
+            "baud":    { "type": "integer" },
+            "alias":   { "type": "string" },
+            "comment": { "type": "string" }
+        },
 
-    "required": [ "id" ]
-  }
+        "required": [ "id" ]
+    }
 }
-

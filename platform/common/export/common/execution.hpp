@@ -38,7 +38,7 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
         return pred();
     }
 
-#ifdef USE_SYSTMR
+#ifdef THECORE_OWNS_SYSTMR
     // Current events count
     auto start = ecl::systmr::events();
 
@@ -88,7 +88,7 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
             ms = ms > delay_quant ? ms - delay_quant : 0;
         }
     }
-#endif // USE_SYSTMR
+#endif // THECORE_OWNS_SYSTMR
 
     return false;
 }

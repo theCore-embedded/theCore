@@ -46,7 +46,7 @@ function(add_suite suite_name)
             set(SUITE_SUFFIX ".clang")
         else()
             # Must be filled if assertion hit.
-            msg_fatal(FATAL_ERROR "Toolchain: ${TEST_TOOLCHAIN_NAME} not recognized")
+            msg_fatal("Toolchain: ${TEST_TOOLCHAIN_NAME} not recognized")
         endif()
     endif()
 
@@ -74,7 +74,7 @@ function(add_suite suite_name)
     endforeach()
 
     if(GENTEST_RESULT)
-        msg_fatal(FATAL_ERROR "Unable to generate test runners: ${GENSUITE_RESULT}")
+        msg_fatal("Unable to generate test runners: ${GENSUITE_RESULT}")
     endif()
 
     # Arguments for the test project

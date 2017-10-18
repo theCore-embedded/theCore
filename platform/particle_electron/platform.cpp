@@ -5,6 +5,8 @@
 #include "application.h"
 #include "stdarg.h"
 
+#include "aux/platform_defines.hpp"
+
 //------------------------------------------------------------------------------
 // System timer
 
@@ -31,7 +33,7 @@ static struct tmr_cb
 } cb_obj;
 
 //! Timer speed in hertz.
-static constexpr auto tmr_speed_hz = 20;
+static constexpr auto tmr_speed_hz = THECORE_SYSTMR_FREQ;
 
 //! Particle timer object, used as system timer.
 static Timer particle_tmr{1000 / tmr_speed_hz, &tmr_cb::on_timeout, cb_obj};

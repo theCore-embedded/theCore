@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+
+    "type": "array",
+    "items": {
+        "type": "object",
+
+        "properties": {
+            "dir":          { "enum": [ "in", "out", "hw" ] },
+            "pin_type":     { "enum": [ "std", "push", "pull", "od", "analog", "wake_high", "wake_low" ] },
+            "strength":     { "enum": [ "2mA", "4mA", "6mA", "8mA", "8mA_sc", "10mA", "12mA" ] },
+            "comment":      { "type": "string" },
+
+            "ids": {
+                "type": "array",
+                "items": { "type": "string", "pattern": "^P\\w\\d{1,2}$" }
+            },
+
+            "hws": {
+                "type": "object",
+                "patternProperties": {
+                    "^P\\w\\d{1,2}$": { "type": "string" }
+                }
+            }
+        },
+
+        "required": [ "ids" ]
+    }
+}

@@ -101,7 +101,7 @@
                 "comment": "CS43L22 RST"
             }
         ],
-        "export_gpio": [
+        "gpio_alias": [
             {
                 "id": "PD4",
                 "alias": "rst_gpio"

@@ -32,12 +32,12 @@ cfg = cfg['platform']
 # GPIO driver template
 template_gpio = '\nusing %s = gpio<gpio_port::%s, gpio_num::pin%d>;'
 
-export_gpio = {}
+gpio_alias = {}
 
-if 'export_gpio' in cfg:
-    export_gpio = cfg['export_gpio']
+if 'gpio_alias' in cfg:
+    gpio_alias = cfg['gpio_alias']
 
-for gpio in export_gpio:
+for gpio in gpio_alias:
     desc = re.findall('(\w)(\d+)', gpio['id'])
     pin_port = desc[-1][0].lower()
     pin_num = int(desc[-1][1])
