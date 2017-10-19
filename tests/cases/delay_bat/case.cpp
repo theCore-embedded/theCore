@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Delay test case
 
@@ -33,7 +37,7 @@ TEST(delay_bat, platform_spin_wait)
 
 TEST(delay_bat, common_wait_for)
 {
-    ("Wait for 100 ms");
+    UnityPrintWithEOL("Wait for 100 ms");
     ecl::wait_for(100);
 
     UnityPrintWithEOL("Wait for 2500 ms");

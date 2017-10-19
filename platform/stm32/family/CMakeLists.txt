@@ -1,12 +1,26 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+set(DMA_CFG_HPP ${CMAKE_CURRENT_BINARY_DIR}/export/family_dma_cfg.hpp)
+
 if(CONFIG_PLATFORM_DEVICE MATCHES "STM32F4")
     set(STM32_FAMILY f4xx)
 elseif(CONFIG_PLATFORM_DEVICE MATCHES "STM32L1")
     set(STM32_FAMILY l1xx)
+    # TODO: implement generator for L1 family
+    unset(DMA_CFG_HPP)
 else()
     # Likely that additional implementation is required in order to add new stm32
     # family
-    message(FATAL_ERROR "Device ${CONFIG_PLATFORM_DEVICE} doesn't belong to any stm32 family")
+    msg_fatal("Device ${CONFIG_PLATFORM_DEVICE} doesn't belong to any stm32 family")
 endif()
+
+theCore_create_cog_runner(
+    IN      ${CMAKE_CURRENT_LIST_DIR}/${STM32_FAMILY}/templates/dma_cfg.in.hpp
+    OUT     ${DMA_CFG_HPP}
+    DEPENDS ${THECORE_TARGET_CONFIG_FILE}
+    ARGS    "-DJSON_CFG=${THECORE_TARGET_CONFIG_FILE}")
 
 # Prevent warnings in sources provided by ST
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-function")
@@ -14,19 +28,18 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-function")
 # Grab some MCU definitions
 include(${STM32_FAMILY}/mcu_cfg.cmake)
 
-add_library(stm32_family ${STM32_FAMILY}/system_stm32${STM32_FAMILY}.c)
+add_library(stm32_family
+    ${STM32_FAMILY}/system_stm32${STM32_FAMILY}.c
+    # Adding auto-generated header will automatically put all dependencies in
+    # place.
+    ${DMA_CFG_HPP})
 
-target_compile_definitions(stm32_family PUBLIC
-        -Dstm32${STM32_FAMILY} # Used by theCore
-        -D${ST_DEVICE} # Used by SPL
-        -DCONFIG_SPI_COUNT=${TARGET_MCU_SPI_COUNT} # Used by the stm32 platform.
-        -DCONFIG_ECL_EXTI_DIRECT_COUNT=${TARGET_MCU_EXTI_DIRECT_COUNT} # User by EXTI driver.
-        -DCONFIG_ECL_EXTI_GROUPED_COUNT=${TARGET_MCU_EXTI_GROUPED_COUNT} # User by EXTI driver.
-        -DCONFIG_ECL_ADC_COUNT=${TARGET_MCU_ADC_COUNT} # Used by ADC driver.
-        -DHSE_VALUE=${CONFIG_PLATFORM_HSE_VAL}
-        -DCONFIG_IRQ_COUNT=${TARGET_MCU_IRQ_COUNT}
+# Export family-related definitions.
+configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/templates/defines.in.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/export/family_defines.hpp
         )
 
-target_include_directories(stm32_family PUBLIC ${STM32_FAMILY}/export export)
-target_link_libraries(stm32_family PUBLIC cmsis)
-target_link_libraries(stm32_family PUBLIC stm32_spl)
+target_include_directories(stm32_family PUBLIC
+        ${STM32_FAMILY}/export export ${CMAKE_CURRENT_BINARY_DIR}/export)
+target_link_libraries(stm32_family PUBLIC cmsis stm32_spl)

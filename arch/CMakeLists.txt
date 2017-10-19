@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # `arm_cm*` not an architectures, but ARM cores.
 # Still, it is better to threat them as `architectures` of some kind since
 # the `core` term is something that peculiar to ARM and collides with
@@ -11,13 +15,13 @@ elseif(NOT TARGET_MCU_ARCH) # Empty architecture allowed in some cases
         # Architecture definitions and functionality is provided elsewhere.
         # This is often a case if the platform uses some weird kind of linker
         # scripts, custom startup code etc.
-        message(STATUS "Architecture module is disabled")
+        msg_info("Architecture module is disabled")
         return()
     endif()
 
     if(NOT PLATFORM_NAME STREQUAL "host")
-        message(FATAL_ERROR "Architecture is not set, aborting")
+        msg_fatal("Architecture is not set, aborting")
     endif()
 else()
-    message(FATAL_ERROR "Unsupported architecture: ${TARGET_MCU_ARCH}")
+    msg_fatal("Unsupported architecture: ${TARGET_MCU_ARCH}")
 endif()

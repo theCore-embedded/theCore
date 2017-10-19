@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Execution control for TM4C platform.
 #ifndef TM4C_EXECUTION_HPP_
@@ -6,9 +10,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <sysctl.h>
+#include <systick.h>
+#include <limits.h>
 #include <interrupt.h>
 
+#include <hw_nvic.h>
+#include <hw_types.h>
 #include <hw_memmap.h>
+
+#include <aux/platform_defines.hpp>
 
 // ARM-CM architecture exports execution header that includes ARM CMSIS
 // driver. This inclusion is explicitely commented to prevent any conflicts
@@ -137,21 +147,6 @@ typedef struct
 namespace ecl
 {
 
-//! \brief Gets core clock speed.
-//! \return Current clock speed.
-static inline uint32_t clk_spd()
-{
-    return SysCtlClockGet();
-}
-
-//! \brief Gets current clock count.
-//! \details Uses DWT register.
-//! \return Current clock count.
-static inline uint32_t clk()
-{
-    return DWT->CYCCNT;
-}
-
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
 static inline void abort()
@@ -178,7 +173,82 @@ static inline void wfe()
     asm volatile ("wfe");
 }
 
-} // namespace ecl
+#if THECORE_ENABLE_SYSTMR_API
 
+namespace systmr
+{
+
+//! Represents the minimum and the maximun possible values for SYSTMR frequency.
+//! This allows to guarantee the correct SYSTRM frequency regardless of SystemCoreClock.
+static const uint32_t systmr_freq_min = 20;
+static const uint32_t systmr_freq_max = 1000;
+
+static_assert((THECORE_CONFIG_SYSTMR_FREQ >= systmr_freq_min) &&
+               (THECORE_CONFIG_SYSTMR_FREQ <= systmr_freq_max),
+               "The value of the THECORE_CONFIG_SYSTMR_FREQ frequency is out of the range.");
+
+ //! Enables timer, start counting
+static inline void enable()
+{
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * SysCtlClockGet() / 1000;
+
+    SysTickPeriodSet(reload_val);
+
+    // reset SysTick counter
+    HWREG(NVIC_ST_CURRENT) = 0;
+
+    SysTickIntEnable();
+    SysTickEnable();
+}
+
+//! Disables timer, stop counting
+static inline void disable()
+{
+    SysTickDisable();
+    SysTickIntDisable();
+}
+
+//! Gets speed in which timer generate events.
+//! \details _Each event generates interrupt_, but not necessarily timer interrupt
+//! is passed to the user. In other words, each event will wake-up processor.
+//! Useful in conjunction with WFI.
+//! \retval System timer events generation speed in Hz.
+static inline auto speed()
+{
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * SysCtlClockGet() / 1000;
+
+    return SysCtlClockGet() / reload_val;
+}
+
+//! Gets amount of events occurred so far.
+//! \details Events counter may not reset after disable() call.
+//! \retval Amount of events occured so far
+uint32_t events();
+
+} // namespace systmr
+
+#endif // THECORE_ENABLE_SYSTMR_API
+
+//! \brief Performs a dummy busy wait for specified amount of milliseconds.
+//! \param ms number of milliseconds to wait.
+//!
+//! This function is useful for a short delays.
+//!
+//! \return None.
+static inline void spin_wait(uint32_t ms)
+{
+    const short SysCtlDelay_ticks = 3;
+
+    // handle overflow
+    uint64_t ticks_left = (SysCtlClockGet() / 1000L / SysCtlDelay_ticks) * ms;
+    while (UINT_MAX < ticks_left) {
+        SysCtlDelay(UINT_MAX);
+        ticks_left -= UINT_MAX;
+    }
+
+    SysCtlDelay(ticks_left);
+}
+
+} // namespace ecl
 
 #endif  // TM4C_EXECUTION_HPP_

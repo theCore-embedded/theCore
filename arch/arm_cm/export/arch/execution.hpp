@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Various routines for CM* architectures, altering execution flow.
 
@@ -16,24 +20,20 @@
 #include <core_cm3.h>
 #endif
 
+#include <limits.h>
+
+//! \brief Provides a small delay.
+//! \param loop_count is the number of delay loop iterations to perform.
+//!
+//! This function provides a means of generating a delay by executing a simple
+//! 3 instruction cycle loop a given number of times.  It is written in
+//! assembly to keep the loop instruction count consistent across tool chains.
+//!
+//! \return None.
+extern "C" void arch_delay(uint32_t loop_count);
+
 namespace ecl
 {
-
-//! \brief Gets core clock speed.
-//! \return Current clock speed.
-static inline uint32_t clk_spd()
-{
-    return SystemCoreClock;
-}
-
-//! \brief Gets current clock count.
-//! \details Uses DWT register.
-//! See http://www.carminenoviello.com/2015/09/04/precisely-measure-microseconds-stm32/
-//! \return Current clock count.
-static inline uint32_t clk()
-{
-    return DWT->CYCCNT;
-}
 
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
@@ -61,16 +61,28 @@ static inline void wfe()
     __WFE();
 }
 
-#if USE_SYSTMR
+#if THECORE_ENABLE_SYSTMR_API
 
 namespace systmr
 {
+
+//! Represents the minimum and the maximun possible values for SYSTMR frequency.
+//! This allows to guarantee the correct SYSTRM frequency regardless of SystemCoreClock.
+static const uint32_t systmr_freq_min = 20;
+static const uint32_t systmr_freq_max = 1000;
+
+static_assert((THECORE_CONFIG_SYSTMR_FREQ >= systmr_freq_min) &&
+               (THECORE_CONFIG_SYSTMR_FREQ <= systmr_freq_max),
+               "The value of the THECORE_CONFIG_SYSTMR_FREQ frequency is out of the range.");
 
  //! Enables timer, start counting
 static inline void enable()
 {
     NVIC_EnableIRQ(SysTick_IRQn);
-    SysTick_Config(SysTick_LOAD_RELOAD_Msk - 1);
+
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * SystemCoreClock / 1000;
+
+    SysTick_Config(reload_val);
 }
 
 //! Disables timer, stop counting
@@ -88,8 +100,10 @@ static inline void disable()
 static inline auto speed()
 {
     // Systick is running from system core clock and generates events
-    // once per SysTick_LOAD_RELOAD_Msk clock pulses.
-    return SystemCoreClock / SysTick_LOAD_RELOAD_Msk;
+    // with the frequency of THECORE_CONFIG_SYSTMR_FREQ.
+    uint32_t reload_val = (1000 / THECORE_CONFIG_SYSTMR_FREQ) * SystemCoreClock / 1000;
+
+    return SystemCoreClock / reload_val;
 }
 
 //! Gets amount of events occurred so far.
@@ -99,8 +113,27 @@ uint32_t events();
 
 } // namespace systmr
 
-#endif // USE_SYSTMR
+#endif // THECORE_ENABLE_SYSTMR_API
 
+//! \brief Performs a dummy busy wait for specified amount of milliseconds.
+//! \param ms number of milliseconds to wait.
+//!
+//! This function is useful for a short delays.
+//!
+//! \return None.
+static inline void arch_spin_wait(uint32_t ms)
+{
+    const short arch_delay_ticks = 3;
+
+    // handle overflow
+    uint64_t ticks_left = (SystemCoreClock / 1000L / arch_delay_ticks) * ms;
+    while (UINT_MAX < ticks_left) {
+        arch_delay(UINT_MAX);
+        ticks_left -= UINT_MAX;
+    }
+
+    arch_delay(ticks_left);
+}
 
 } // namespace ecl
 

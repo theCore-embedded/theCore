@@ -1,0 +1,7 @@
+{
+    "platform": {
+        "name":         "particle_electron",
+        "serial":       [ 0 ],
+        "console":      true
+    }
+}

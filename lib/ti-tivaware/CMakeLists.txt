@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 if(NOT CONFIG_PLATFORM MATCHES "tm4c")
     return()
 endif()
@@ -40,10 +44,10 @@ add_library(tivaware STATIC
         ti-tivaware/driverlib/watchdog.c
         )
 
-if(CONFIG_PLATFORM_DEVICE MATCHES TM4C123GH6PM)
+if(thecore_cfg.platform.device MATCHES "TM4C123GH6PM")
     target_compile_definitions(tivaware PUBLIC -DPART_TM4C123GH6PM)
 else()
-    message(FATAL_ERROR "Unknown device: ${CONFIG_PLATFORM_DEVICE}")
+    msg_fatal("Unknown device: ${thecore_cfg.platform.device}")
 endif()
 
 target_include_directories(tivaware SYSTEM PUBLIC

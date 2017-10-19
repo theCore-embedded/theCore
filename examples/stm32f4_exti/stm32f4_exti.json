@@ -1,0 +1,43 @@
+{
+    "platform": {
+        "name": "stm32",
+        "device": "STM32F407VG",
+        "console": "USART3",
+        "bypass_console": "USART3",
+        "clock": {
+            "source": "HSE",
+            "speed": 8000000
+        },
+        "uart": [
+            {
+                "id": "USART3",
+                "baud": 115200,
+                "comment": "Bypass and console UART"
+            }
+        ],
+        "pinmux": [
+            {
+                "ids": [
+                    "PD8",
+                    "PD9"
+                ],
+                "mode": "AF",
+                "function": "USART3",
+                "comment": "Console UART"
+            },
+            {
+                "ids": [
+                    "PA0"
+                ],
+                "mode": "IN",
+                "comment": "Push button"
+            }
+        ],
+        "gpio_alias": [
+            {
+                "id": "PA0",
+                "alias": "usr_btn"
+            }
+        ]
+    }
+}

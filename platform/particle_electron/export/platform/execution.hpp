@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Various routines for particle electron platform, altering execution flow.
 
@@ -10,10 +14,6 @@
 
 namespace ecl
 {
-
-//! Temporary define that notifies system that delay routine is present
-//! Will stay here before #247 will be implemented
-#define THECORE_PLATFORM_STUB_DEFINE_SPIN_WAIT
 
 //! Waits not less than given amount of milliseconds.
 static inline void spin_wait(unsigned ms)

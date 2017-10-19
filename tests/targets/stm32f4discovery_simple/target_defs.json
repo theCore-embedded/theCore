@@ -1,0 +1,104 @@
+{
+    "platform": {
+        "name": "stm32",
+        "device": "STM32F407VG",
+        "bypass_console": "USART3",
+        "clock": {
+            "source": "HSE",
+            "speed": 8000000
+        },
+        "uart": [
+            {
+                "id": "USART3",
+                "baud": 115200,
+                "comment": "Bypass console UART",
+                "alias": "test_uart"
+            }
+        ],
+        "dma": [
+            {
+                "num": 2,
+                "stream": 0,
+                "channel": 0,
+                "alias": "adc_dma"
+            }
+        ],
+        "adc": [
+            {
+                "id": "ADC1",
+                "mode": "DMA",
+                "dma_id": "adc_dma",
+                "alias": "test_adc",
+                "comment": "Test ADC device"
+            }
+        ],
+        "adc_channels": [
+            {
+                "trigger": "SW",
+                "nums": [
+                    1,
+                    16
+                ],
+                "alias": "test_channel",
+                "comment": "PA1 pin and temperature channel"
+            }
+        ],
+        "pinmux": [
+            {
+                "ids": [
+                    "PD8",
+                    "PD9"
+                ],
+                "mode": "AF",
+                "function": "USART3",
+                "comment": "Bypass console UART, PD8 - TX, PD9 - RX"
+            },
+            {
+                "ids": [
+                    "PD12",
+                    "PD13",
+                    "PD14",
+                    "PD15"
+                ],
+                "mode": "OUT",
+                "comment": "LEDs"
+            },
+            {
+                "ids": [
+                    "PA1"
+                ],
+                "mode": "AN",
+                "comment": "ADC ADC123_IN1 pin"
+            },
+            {
+                "ids": [
+                    "PA0"
+                ],
+                "mode": "IN",
+                "comment": "Push button"
+            }
+        ],
+        "gpio_alias": [
+            {
+                "id": "PD12",
+                "alias": "green_led"
+            },
+            {
+                "id": "PD13",
+                "alias": "orange_led"
+            },
+            {
+                "id": "PD14",
+                "alias": "red_led"
+            },
+            {
+                "id": "PD15",
+                "alias": "blue_led"
+            },
+            {
+                "id": "PA0",
+                "alias": "push_button"
+            }
+        ]
+    }
+}

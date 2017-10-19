@@ -1,11 +1,6 @@
-include(${MCUS_DIR}/stm32f407/mcu_defs.cmake)
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-# External oscillator has a 8 MHz out clock
-set(CONFIG_PLATFORM_HSE_VAL 8000000)
-
-# Enable console, only bypass. Streams are not used for this target.
-set(CONFIG_USE_BYPASS_CONSOLE 1)
-# UART #3 used for console output
-set(CONFIG_CONSOLE_DEVICE_NUM 3)
-# Baud rate of the console
-set(CONFIG_CONSOLE_BAUD 115200)
+# Configuration for current target
+theCore_set_target_config(${CMAKE_CURRENT_LIST_DIR}/target_defs.json)

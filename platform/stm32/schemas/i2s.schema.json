@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "array",
+
+    "items": {
+        "type": "object",
+
+        "properties": {
+            "id":          { "type": "string", "pattern": "^I2S\\d$" },
+            "dma_tx":      { "type": "string" },
+            "dma_rx":      { "type": "string" },
+            "standard":    { "enum": [ "phillips", "MSB", "LSB", "PCMShort", "PCMLong" ] },
+            "data_bits":   { "enum": [ 16, 24, 32, "16ext" ] },
+            "audio_freq":  { "enum": [ 8, 11, 16, 22, 32, 44, 48, 96, 192 ] },
+            "CPOL":        { "enum" : [ "high", "low" ] },
+            "alias":       { "type": "string" }
+        },
+
+        "required": [ "id" ]
+    }
+}

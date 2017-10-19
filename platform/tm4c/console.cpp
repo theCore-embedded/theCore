@@ -1,4 +1,8 @@
-﻿//! \file
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+//! \file
 //! \brief TM4C bypass console implementation.
 
 #include "platform/console.hpp"
@@ -10,7 +14,8 @@ namespace ecl
 
 void bypass_console_init()
 {
-    constexpr auto uart_dev = static_cast<std::underlying_type_t<uart_device>>(ECL_CONSOLE_DEVICE);
+    constexpr auto uart_dev =
+        static_cast<std::underlying_type_t<uart_device>>(ecl::bypass_console_dev);
 
     SysCtlPeripheralEnable(bypass_console::pick_sysctl());
 
@@ -21,7 +26,8 @@ void bypass_console_init()
 
 void bypass_putc(char c)
 {
-    constexpr auto uart_dev = static_cast<std::underlying_type_t<uart_device>>(ECL_CONSOLE_DEVICE);
+    constexpr auto uart_dev =
+        static_cast<std::underlying_type_t<uart_device>>(ecl::bypass_console_dev);
     UARTCharPut(uart_dev, c);
 }
 

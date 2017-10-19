@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Module aggregates routines that are control execution flow of the MCU.
 //! \details Common implementation accross multiple platforms.
@@ -34,7 +38,7 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
         return pred();
     }
 
-#ifdef USE_SYSTMR
+#ifdef THECORE_OWNS_SYSTMR
     // Current events count
     auto start = ecl::systmr::events();
 
@@ -70,7 +74,7 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
     }
 
     ecl::systmr::disable();
-#elif defined THECORE_PLATFORM_STUB_DEFINE_SPIN_WAIT // spin_wait exists. Hack till #247
+#else
     // Amount of millisecond to spin in one step.
     // Predicate will be checked once per quant.
     // No rational reasoning behind this value.
@@ -84,19 +88,7 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
             ms = ms > delay_quant ? ms - delay_quant : 0;
         }
     }
-
-#else // No system timer
-    uint32_t start = ecl::clk();
-    uint32_t to_wait = ms * (ecl::clk_spd() / 1000L);
-
-    while (1) {
-        if (pred()) { // Make sure that predicate is called at least once.
-            return true;
-        } else if (ecl::clk() - start >= to_wait) { // Handles wraparound.
-            break;
-        }
-    }
-#endif // USE_SYSTMR
+#endif // THECORE_OWNS_SYSTMR
 
     return false;
 }

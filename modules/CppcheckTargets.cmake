@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # - Run cppcheck on c++ source files as a custom target and a test
 #
 #  include(CppcheckTargets)
@@ -43,8 +47,7 @@ endif()
 
 function(add_cppcheck _name)
     if(NOT TARGET ${_name})
-        message(FATAL_ERROR
-                "add_cppcheck given a target name that does not exist: '${_name}' !")
+        msg_fatal("add_cppcheck given a target name that does not exist: '${_name}' !")
     endif()
     if(CPPCHECK_FOUND)
         set(_cppcheck_args)

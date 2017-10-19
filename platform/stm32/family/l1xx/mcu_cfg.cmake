@@ -1,11 +1,15 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # Notify whole system about which processor is used
 set(TARGET_MCU_ARCH "arm_cm3" CACHE STRING "Processor arch")
 
-message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
+msg_trace("Checking [CONFIG_PLATFORM_DEVICE]...")
 
 # Depreceated configuration value
 if(CONFIG_PLATFORM_DEVICE STREQUAL STM32L1XX_XL)
-    message(WARNING "Depreceated device config: STM32L1XX_XL"
+    msg_warn("Depreceated device config: STM32L1XX_XL"
             ", defauluting to STM32L152RE")
     set(CONFIG_PLATFORM_DEVICE STM32L152RE)
 endif()
@@ -46,4 +50,4 @@ endif()
 
 # Additional implementation will be required to cover unsupported
 # devices from stm32l1xx line.
-message(FATAL_ERROR "Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")
+msg_fatal("Not supported device specified: ${CONFIG_PLATFORM_DEVICE}")

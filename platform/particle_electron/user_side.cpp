@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief User-side code that should be compiled directly into resulting
 //! application. Moved to separate file and advertised via interface CMake
@@ -59,7 +63,7 @@ static struct dispatcher_timer
 static Timer dev_tmr(1000, &dispatcher_timer::check_xfer, dispatcher_obj);
 
 //! Notifies main loop about pending transactions.
-//! \detail Unfortunately, particle firmware does not provide access to control,
+//! \details Unfortunately, particle firmware does not provide access to control,
 //! or at least get interrupts notifications (except for some slave-side cases
 //! in I2C and SPI).
 //! It is something that differs from theCore event model,

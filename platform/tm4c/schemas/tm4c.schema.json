@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+
+    "properties": {
+        "name":           { "type": "string", "pattern": "^tm4c$" },
+        "device":         { "enum": [ "TM4C123GH6PM" ] },
+        "console":        { "type": "string", "pattern": "^UART\\d$" },
+
+        "systmr_cfg":     { "$ref": "file:systmr.schema.json" },
+        "uart":           { "$ref": "file:uart.schema.json" },
+        "pinmux":         { "$ref": "file:pinmux.schema.json" },
+        "gpio_alias":     { "$ref": "file:gpio_alias.schema.json" }
+    },
+
+    "required": [ "name", "device" ]
+}

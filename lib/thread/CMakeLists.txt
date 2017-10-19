@@ -1,16 +1,20 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # Add thread support for valid kernel
-message(STATUS "Checking [CONFIG_OS]...")
+msg_trace("Checking [CONFIG_OS]...")
 if(DEFINED CONFIG_OS)
-    message(STATUS "OS selected: ${CONFIG_OS}")
+    msg_info("OS selected: ${CONFIG_OS}")
     if(CONFIG_OS STREQUAL "freertos")
         add_subdirectory(freertos)
     elseif(CONFIG_OS STREQUAL "host")
         add_subdirectory(posix)
     else()
-        message(FATAL_ERROR "No thread support exist for given OS: ${CONFIG_OS}")
+        msg_fatal("No thread support exist for given OS: ${CONFIG_OS}")
     endif()
 else()
-    message(STATUS "Be aware: no OS was selected. Thread support will be disabled."
+    msg_info("Be aware: no OS was selected. Thread support will be disabled."
         " Stubs are provided for most synchronization primitives")
     add_subdirectory(no_os)
 endif()

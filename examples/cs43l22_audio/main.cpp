@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief CS43l22 codec usage example.
 //! \details Example shows how to use CS43L22 codec to stream PCM data.
@@ -22,7 +26,7 @@
 extern "C"
 void board_init()
 {
-    gpio_init();
+    gpio_init_generated();
 }
 
 //! 16 bits per one sample.
@@ -109,7 +113,7 @@ int main()
     // Set volumes, so audio can be heard.
 
     ecl::cs43l22_instance::set_master_volume(0x90);
-    ecl::cs43l22_instance::set_headphone_volume(0xe0);    
+    ecl::cs43l22_instance::set_headphone_volume(0xe0);
     ecl::cs43l22_instance::headphone_unmute();
 
     // Set audio properties.

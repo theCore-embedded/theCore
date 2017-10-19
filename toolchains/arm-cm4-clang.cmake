@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # this one is important
 set(CMAKE_SYSTEM_NAME Generic)
 # this one not so much
@@ -19,7 +23,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_FIND_ROOT_PATH $ENV{GCC_ARM_EMBEDDED_PATH})
 
 if(NOT CMAKE_FIND_ROOT_PATH)
-    message(FATAL_ERROR "Path to GCC ARM installation must be set in order to use its libraries with clang")
+    msg_fatal("Path to GCC ARM installation must be set in order to use its libraries with clang")
 endif()
 
 # search for programs in the build host directories

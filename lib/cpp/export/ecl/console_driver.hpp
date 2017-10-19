@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef DEFAULT_CONSOLE_DRIVER_HPP_
 #define DEFAULT_CONSOLE_DRIVER_HPP_
 
@@ -14,7 +18,7 @@ namespace ecl
 using console_bus = ecl::generic_bus<platform_console>;
 using console_driver = ecl::bus_pipe<console_bus>;
 
-}
+} // namespace ecl
 
 #else // THECORE_CONFIG_USE_CONSOLE
 
@@ -47,7 +51,7 @@ public:
     }
 };
 
-}
+} // namespace ecl
 
 #endif // THECORE_CONFIG_USE_CONSOLE
 

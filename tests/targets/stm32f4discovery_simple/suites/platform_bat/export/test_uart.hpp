@@ -1,26 +1,14 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
-//! \brief Test UART for gpio_case test
+//! \brief Test UART for uart_case test
 #ifndef STM32F4_PLATFORM_BAT_TEST_UART_HPP_
 #define STM32F4_PLATFORM_BAT_TEST_UART_HPP_
 
-#include <aux/usart_bus.hpp>
+#include <aux/generated.hpp>
 
-namespace ecl
-{
-
-using test_uart = usart_bus<usart_device::dev3>;
-
-template<>
-struct usart_cfg<usart_device::dev3>
-{
-    static auto constexpr baudrate  = 115200;
-    static auto constexpr word_len  = USART_WordLength_8b;
-    static auto constexpr stop_bit  = USART_StopBits_1;
-    static auto constexpr parity    = USART_Parity_No;
-    static auto constexpr mode      = USART_Mode_Rx | USART_Mode_Tx;
-    static auto constexpr hw_flow   = USART_HardwareFlowControl_None;
-};
-
-}
+// Test UART is defined in target_defs.json
 
 #endif // STM32F4_PLATFORM_BAT_TEST_UART_HPP_

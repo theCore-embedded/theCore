@@ -1,9 +1,14 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # Platform BAT tests for STM32F4 Discovery target.
 
 cmake_minimum_required(VERSION 3.4)
 
 project(platform_bat)
 
+include(${CORE_DIR}/build_api.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../../target_defs.cmake)
 
 add_executable(platform_bat ${AUTOGEN_DIR}/main.cpp suite_init.cpp)
@@ -20,7 +25,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/export)
 
 # Suite additional configuration
 
-# Explicitely enable systick and use it as system timer.
+# Explicitly enable systick and use it as system timer.
 set(CONFIG_USE_SYSTMR_SYSTICK 1)
 
 # Suite tests

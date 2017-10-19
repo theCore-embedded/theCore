@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 add_library(freertos_main kernel_main.c)
 target_link_libraries(freertos_main PRIVATE dbg)
 
@@ -8,12 +12,12 @@ else()
 	set(MAIN_STACK_SIZE 512)
 endif()
 
-message(STATUS "FreeRTOS main thread stack size: ${MAIN_STACK_SIZE} bytes")
+msg_info("FreeRTOS main thread stack size: ${MAIN_STACK_SIZE} bytes")
 
 target_compile_definitions(freertos_main PRIVATE -DMAIN_STACK_SIZE=${MAIN_STACK_SIZE})
 
 if(CONFIG_OS_EXTERNAL)
-	message(STATUS "Kernel is selected, but it is provdided externally")
+	msg_trace("Kernel is selected, but it is provided externally")
 	return()
 endif()
 
@@ -26,16 +30,16 @@ set(SRC_DIR freertos/FreeRTOS/Source/)
 if(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_C_COMPILER MATCHES "gcc")
 	set(PORT_DIR "GCC/")
 else()
-	message(FATAL_ERROR "Compiler is not supported by FreeRTOS build: "
+	msg_fatal("Compiler is not supported by FreeRTOS build: "
 		"${CMAKE_C_COMPILER_ID}")
 endif()
 
 # Path to FreeRTOS header must be provided
 if(NOT DEFINED CONFIG_FREERTOS_HEADERS_PATH)
-    message(FATAL_ERROR "FreeRTOS header path is not set")
+    msg_fatal("FreeRTOS header path is not set")
 else()
     if(NOT EXISTS ${CONFIG_FREERTOS_HEADERS_PATH}/FreeRTOSConfig.h)
-        message(FATAL_ERROR "Path \'${CONFIG_FREERTOS_HEADERS_PATH}\' does not contain FreeRTOSConfig.h")
+        msg_fatal("Path \'${CONFIG_FREERTOS_HEADERS_PATH}\' does not contain FreeRTOSConfig.h")
     endif()
 endif()
 
@@ -47,7 +51,7 @@ if(TARGET_MCU_ARCH MATCHES "arm_cm4")
 elseif(TARGET_MCU_ARCH MATCHES "arm_cm3")
 	set(PORT_DIR ${PORT_DIR}ARM_CM3/)
 else()
-	message(FATAL_ERROR "Processor arch is not supported by FreeRTOS build: "
+	msg_fatal("Processor arch is not supported by FreeRTOS build: "
 		"${TARGET_MCU_ARCH}")
 endif()
 

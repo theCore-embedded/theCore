@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 cmake_minimum_required(VERSION 3.2)
 
 # theCore framework directory.
@@ -6,18 +10,11 @@ set(CORE_DIR ../../)
 # Required.
 include(${CORE_DIR}/build_api.cmake)
 
-# Objvious.
+# Obvious.
 project(host_hello)
-
-# Required flags for this demo
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 # Our demo sources.
 add_executable(hello main.cpp)
-
-# Pick the host platform
-set(CONFIG_PLATFORM host)
 
 # Obvious
 set(CONFIG_RUN_CPPCHECK_DURING_BUILD true)
@@ -27,8 +24,8 @@ target_link_libraries(hello the_core)
 target_link_libraries(hello core_cpp)
 target_link_libraries(hello host)
 
-# Enable console.
-set(CONFIG_USE_CONSOLE 1)
+# Host configuration parameters
+theCore_set_target_config(${CMAKE_CURRENT_LIST_DIR}/host.json)
 
 # Include theCore into the build process
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)

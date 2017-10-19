@@ -1,0 +1,30 @@
+{
+    "platform": {
+        "name": "stm32",
+        "device": "STM32F407VG",
+        "clock": {
+            "source": "HSE",
+            "speed": 8000000
+        },
+        "uart": [
+            {
+                "id": "USART3",
+                "baud": 115200,
+                "comment": "Bypass console UART",
+                "alias": "test_uart"
+            }
+        ],
+        "bypass_console": "USART3",
+        "pinmux": [
+            {
+                "ids": [
+                    "PD8",
+                    "PD9"
+                ],
+                "mode": "AF",
+                "function": "USART3",
+                "comment": "Bypass console UART"
+            }
+        ]
+    }
+}

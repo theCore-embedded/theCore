@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief I2C event dispatcher.
 
@@ -68,8 +72,13 @@ void i2c_dispatch()
 
     /*[[[cog
     import cog
+    import os
+    import json
 
-    if 'I2C_ENABLED' in globals():
+    cfg = json.load(open(JSON_CFG))
+    cfg = cfg['platform']
+
+    if 'i2c' in cfg:
         cog.outl('dispatch<i2c_dev>();')
     ]]]*/
 

@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "array",
+
+  "items": {
+    "type": "object",
+
+    "properties": {
+      "num":          { "enum": [ 1, 2 ] },
+      "stream":       { "type": "integer", "minimum": 0, "maximum": 7 },
+      "channel":      { "type": "integer", "minimum": 0, "maximum": 7 },
+      "alias":        { "type": "string" },
+      "comment":      { "type": "string" }
+    },
+
+    "required": [ "num", "stream", "channel" ]
+  }
+}

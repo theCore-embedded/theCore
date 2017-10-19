@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief      Generic bus interface module.
 //! \copyright
@@ -248,16 +252,16 @@ private:
     //! reset - no error occurred.
     static constexpr uint8_t xfer_error     = 0x10;
 
-    static size_t       m_received; //!< Bytes received during last blocking xfer.
-    static size_t       m_sent;     //!< Bytes sent during last blocking xfer.
-    static atomic_flag  m_cleaned;  //!< Cleanup is performed after xfer and unlock are done.
-    static uint8_t      m_state;    //!< State flags.
+    static volatile size_t       m_received; //!< Bytes received during last blocking xfer.
+    static volatile size_t       m_sent;     //!< Bytes sent during last blocking xfer.
+    static volatile atomic_flag  m_cleaned;  //!< Cleanup is performed after xfer and unlock are done.
+    static volatile uint8_t      m_state;    //!< State flags.
 };
 
-template<class PBus> size_t                   generic_bus<PBus>::m_received{};
-template<class PBus> size_t                   generic_bus<PBus>::m_sent{};
-template<class PBus> std::atomic_flag         generic_bus<PBus>::m_cleaned{};
-template<class PBus> uint8_t                  generic_bus<PBus>::m_state{};
+template<class PBus> volatile size_t                   generic_bus<PBus>::m_received{};
+template<class PBus> volatile size_t                   generic_bus<PBus>::m_sent{};
+template<class PBus> volatile std::atomic_flag         generic_bus<PBus>::m_cleaned{};
+template<class PBus> volatile uint8_t                  generic_bus<PBus>::m_state{};
 
 //------------------------------------------------------------------------------
 

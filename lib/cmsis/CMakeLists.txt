@@ -1,20 +1,30 @@
-﻿add_library(cmsis INTERFACE)
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-# Patch resolving issue for clang compiler must be applied.
-# CMSIS includes must be copied and then patched.
+add_library(cmsis INTERFACE)
 
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/CMSIS/CMSIS/Include
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/
-)
+# TODO: execute patch iff it was not previously applied.
+# This will save compilation time when clang is used.
+if(CMAKE_C_COMPILER MATCHES "clang")
+    # Patch resolving issue for clang compiler must be applied.
+    # CMSIS includes must be copied and then patched.
 
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/clang-cmsis.patch
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/
-)
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/CMSIS/CMSIS/Include
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/
+    )
 
-target_include_directories(cmsis SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/Include)
-execute_process(COMMAND "patch"  "-p2"  "-i"  "clang-cmsis.patch"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    OUTPUT_VARIABLE PATCH_OUTPUT
-    ERROR_VARIABLE PATCH_OUTPUT)
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/clang-cmsis.patch
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/
+    )
 
-message("CMSIS patch: ${PATCH_OUTPUT}")
+    target_include_directories(cmsis SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/Include)
+    execute_process(COMMAND "patch"  "-p2"  "-i"  "clang-cmsis.patch"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        OUTPUT_VARIABLE PATCH_OUTPUT
+        ERROR_VARIABLE PATCH_OUTPUT)
+
+    msg_info("CMSIS patch: ${PATCH_OUTPUT}")
+else()
+    target_include_directories(cmsis SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/CMSIS/CMSIS/Include)
+endif()

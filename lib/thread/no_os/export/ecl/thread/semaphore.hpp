@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Semaphore implementation for projects without OS support.
 
@@ -13,7 +17,7 @@ namespace ecl
 {
 
 //! Naive counting semaphore, acting like spinlock of some kind.
-//! \details Suitable for targets wihtout OS included and without WFI/WFE
+//! \details Suitable for targets without OS included and without WFI/WFE
 //! enabled. Useful during bring-up of new platforms. Main requirement -
 //! atomic support.
 class semaphore
@@ -28,13 +32,13 @@ public:
     void signal();
 
     //! Waits for semaphore, decreases counter.
-    //! \details Not callable from ISR. Blocks utill signal() is called in
+    //! \details Not callable from ISR. Blocks until signal() is called in
     //! different context.
     void wait();
 
     //! Tries to wait for semaphore signal.
     //! \details Will wait for semaphore signal with provided timeout.
-    //! If no parameter given then it will immediatelly exit if there is no
+    //! If no parameter given then it will immediately exit if there is no
     //! pending signals.
     //! \param[in] ms Milliseconds to wait.
     //! \retval true Semaphore signal consumed, counter decreased.
@@ -49,7 +53,7 @@ private:
 };
 
 //! Naive binary semaphore, acting like spinlock of some kind.
-//! \details Suitable for targets wihtout OS included and without WFI/WFE
+//! \details Suitable for targets without OS included and without WFI/WFE
 //! enabled. Useful during bring-up of new platforms. Main requirement -
 //! atomic support.
 //! Can take only two values - 0 or 1.
@@ -69,7 +73,7 @@ public:
 
     //! Tries to wait for semaphore signal.
     //! \details Will wait for semaphore signal with provided timeout.
-    //! If no parameter given then it will immediatelly exit if there is no
+    //! If no parameter given then it will immediately exit if there is no
     //! pending signals.
     //! \param[in] ms Milliseconds to wait.
     //! \retval true Semaphore signal consumed, counter decreased.

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+
+  "properties": {
+    "name":       { "type": "string", "pattern": "^particle_electron$" },
+
+    "systmr_cfg":
+    {
+      "type": "object",
+      "properties": {
+        "freq_hz":  { "type": "integer" },
+        "owner":    { "enum": [ "thecore", "user" ] }
+      }
+    },
+
+    "serial":
+    {
+      "type": "array",
+      "items": { "type": "integer" }
+    },
+
+    "i2c":
+    {
+      "type": "object",
+      "properties": {
+        "speed":        { "type": "integer" },
+        "stretch_clk":  { "type": "boolean" }
+      }
+    },
+
+    "use_console": { "type": "boolean" }
+
+  },
+
+  "required": [ "name" ]
+}
