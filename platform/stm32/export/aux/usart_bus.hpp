@@ -145,10 +145,30 @@ public:
     //! \return Status of operation.
     static ecl::err do_xfer();
 
+    //! \brief Executes rx transfer, using rx buffer previously set.
+    //! When it will be done, handler will be invoked.
+    //! \return Status of operation.
+    static ecl::err do_rx();
+
+    //! \brief Executes tx transfer, using tx buffer previously set.
+    //! When it will be done, handler will be invoked.
+    //! \return Status of operation.
+    static ecl::err do_tx();
+
     //! \brief Cancels xfer.
     //! After this call no xfer will occur.
     //! \return Status of operation.
     static ecl::err cancel_xfer();
+
+    //! \brief Cancels xfer on rx.
+    //! After this call no rx transfer will occur.
+    //! \return Status of opetation.
+    static ecl::err cancel_rx();
+
+    //! \brief Cancels xfer on tx.
+    //! After this call no tx transfer will occur.
+    //! \return Status of opetation.
+    static ecl::err cancel_tx();
 
     //! \brief Enables listen mode.
     //! In listen mode, UART bus uses different semantics of the `transfer complete`
@@ -187,8 +207,10 @@ private:
     static constexpr uint8_t m_rx_done     = 0x4;
     //! Bit set if listen mode is enabled.
     static constexpr uint8_t m_listen_mode = 0x8;
-    //! Bit set if xfer was canceled.
-    static constexpr uint8_t m_canceled    = 0x10;
+    //! Bit set if rx transfer was canceled.
+    static constexpr uint8_t m_rx_canceled = 0x10;
+    //! Bit set if rx transfer was canceled.
+    static constexpr uint8_t m_tx_canceled = 0x20;
 
     // Device status methods
 
@@ -196,19 +218,22 @@ private:
     static inline bool tx_done()          { return m_status & m_tx_done; }
     static inline bool rx_done()          { return m_status & m_rx_done; }
     static inline bool listen_mode()      { return m_status & m_listen_mode; }
-    static inline bool canceled()         { return m_status & m_canceled; }
+    static inline bool rx_canceled()         { return m_status & m_rx_canceled; }
+    static inline bool tx_canceled()         { return m_status & m_tx_canceled; }
 
     static inline void set_inited()       { m_status |= m_inited; }
     static inline void set_tx_done()      { m_status |= m_tx_done; }
     static inline void set_rx_done()      { m_status |= m_rx_done; }
     static inline void set_listen_mode()  { m_status |= m_listen_mode; }
-    static inline void set_canceled()     { m_status |= m_canceled; }
+    static inline void set_rx_canceled()     { m_status |= m_rx_canceled; }
+    static inline void set_tx_canceled()     { m_status |= m_tx_canceled; }
 
     static inline void clear_inited()     { m_status &= ~(m_inited); }
     static inline void clear_tx_done()    { m_status &= ~(m_tx_done); }
     static inline void clear_rx_done()    { m_status &= ~(m_rx_done); }
     static inline void clear_listen_mode(){ m_status &= ~(m_listen_mode); }
-    static inline void clear_canceled()   { m_status &= ~(m_canceled); }
+    static inline void clear_rx_canceled()   { m_status &= ~(m_rx_canceled); }
+    static inline void clear_tx_canceled()   { m_status &= ~(m_tx_canceled); }
 
     //! Handles IRQ events from a bus.
     static void irq_handler();
@@ -379,36 +404,58 @@ void usart_bus<dev>::reset_handler()
 template<usart_device dev>
 ecl::err usart_bus<dev>::do_xfer()
 {
-    // TODO: assert if not initialized
+    do_tx();
+    do_rx();
+    
+    return ecl::err::ok;
+}
+
+template<usart_device dev>
+ecl::err usart_bus<dev>::do_rx()
+{
     ecl_assert(inited());
 
     auto irqn = pick_irqn();
     auto usart = pick_usart();
 
-    if (m_tx) {
-        m_tx_left = m_tx_size;
-        clear_tx_done();
-
-        // Bytes will be send in IRQ handler.
-        USART_ITConfig(usart, USART_IT_TXE, ENABLE);
-    } else {
-        // TX is not requested. Assuming that it is has been done some
-        // time ago.
-        set_tx_done();
-    }
-
-    if (m_rx) {
-        m_rx_left = m_rx_size;
-        clear_rx_done();
-        USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
-    } else {
-        // TX is not requested. Assuming that it is has been done some
-        // time ago.
+    if (!m_rx) {
         set_rx_done();
+        return ecl::err::ok;
     }
+
+    clear_rx_done();
+
+    // Bytes will be send in IRQ handler.
+    USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
 
     // In case if previous xfer was canceled.
-    clear_canceled();
+    clear_rx_canceled();
+
+    irq::unmask(irqn);
+
+    return ecl::err::ok;
+}
+
+template<usart_device dev>
+ecl::err usart_bus<dev>::do_tx()
+{
+    ecl_assert(inited());
+
+    auto irqn = pick_irqn();
+    auto usart = pick_usart();
+
+    if (!m_tx) {
+        set_tx_done();
+        return ecl::err::ok;
+    }
+
+    clear_tx_done();
+
+    // Bytes will be send in IRQ handler.
+    USART_ITConfig(usart, USART_IT_TXE, ENABLE);
+
+    // In case if previous xfer was canceled.
+    clear_tx_canceled();
 
     irq::unmask(irqn);
 
@@ -418,20 +465,46 @@ ecl::err usart_bus<dev>::do_xfer()
 template<usart_device dev>
 ecl::err usart_bus<dev>::cancel_xfer()
 {
+    cancel_rx();
+    cancel_tx();
+
+    return ecl::err::ok;
+}
+
+template<usart_device dev>
+ecl::err usart_bus<dev>::cancel_rx()
+{
+    ecl_assert(inited());
+
+    auto usart = pick_usart();
+    auto irqn  = pick_irqn();
+
+    USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
+
+    irq::mask(irqn);
+    irq::clear(irqn);
+
+    set_rx_done();
+    set_rx_canceled();
+
+    return ecl::err::ok;
+}
+
+template<usart_device dev>
+ecl::err usart_bus<dev>::cancel_tx()
+{
     ecl_assert(inited());
 
     auto usart = pick_usart();
     auto irqn  = pick_irqn();
 
     USART_ITConfig(usart, USART_IT_TXE, DISABLE);
-    USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
 
     irq::mask(irqn);
     irq::clear(irqn);
 
     set_tx_done();
-    set_rx_done();
-    set_canceled();
+    set_tx_canceled();
 
     return ecl::err::ok;
 }
@@ -611,7 +684,7 @@ void usart_bus<dev>::irq_handler()
     }
 
     if (tx_done() && rx_done()) {
-        if (!canceled()) {
+        if (!tx_canceled() && !rx_canceled()) {
             // Both TX and RX are finished. Notifying.
             event_handler()(channel::meta, event::tc, 0);
         }
