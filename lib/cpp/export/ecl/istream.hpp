@@ -11,7 +11,7 @@
 #include <limits.h>
 
 namespace ecl {
-template< class IO_device >
+template<class IO_device>
 class istream
 {
 public:
@@ -60,19 +60,19 @@ private:
 //------------------------------------------------------------------------------
 
 
-template< class IO_device >
+template<class IO_device>
 istream< IO_device >::istream(IO_device *device)
     :m_device{device}
 {
 }
 
-template< class IO_device >
+template<class IO_device>
 istream< IO_device >::~istream()
 {
 }
 
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(int &value)
 {
     int new_value = 0;
@@ -114,7 +114,7 @@ istream<IO_device> &istream< IO_device >::operator>>(int &value)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(unsigned int &value)
 {
     int new_value = 0;
@@ -146,7 +146,7 @@ istream<IO_device> &istream< IO_device >::operator>>(unsigned int &value)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(char &character)
 {
     char first_char;
@@ -160,7 +160,7 @@ istream<IO_device> &istream< IO_device >::operator>>(char &character)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(char *string)
 {
     size_t i = 0;
@@ -183,14 +183,14 @@ istream<IO_device> &istream< IO_device >::operator>>(char *string)
 }
 
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(
         istream& (*func)(istream< IO_device >&))
 {
     return func(*this);
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::get()
 {
     int c = 0;
@@ -201,7 +201,7 @@ int istream< IO_device >::get()
     return c;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::get(char &character)
 {
     m_device->read((uint8_t *) &character, 1);
@@ -209,7 +209,7 @@ istream<IO_device> &istream< IO_device >::get(char &character)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::skip_leading_spaces(char &next)
 {
     char c = 0;
@@ -224,7 +224,7 @@ int istream< IO_device >::skip_leading_spaces(char &next)
     return 0;
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::mul_with_overflow(int a, int b)
 {
     if (a > 0) {
@@ -252,7 +252,7 @@ int istream< IO_device >::mul_with_overflow(int a, int b)
     return a * b;
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::add_with_overflow(int a, int b)
 {
     if (b > 0 && a > (INT_MAX - b)) {

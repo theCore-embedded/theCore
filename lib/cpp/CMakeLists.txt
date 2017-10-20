@@ -39,9 +39,29 @@ add_cppcheck(core_cpp UNUSED_FUNCTIONS STYLE POSSIBLE_ERROR FORCE)
 target_link_libraries(core_cpp INTERFACE types)
 
 add_unit_host_test(NAME istream_test
-        SOURCES tests/istream_unit.cpp
-        INC_DIRS export)
+    SOURCES tests/istream_unit.cpp
+    INC_DIRS export)
 
 add_unit_host_test(NAME ostream_test
-        SOURCES tests/ostream_unit.cpp
-        INC_DIRS export)
+    SOURCES tests/ostream_unit.cpp
+    INC_DIRS export)
+
+add_unit_host_test(
+    NAME aux_internal
+    SOURCES tests/aux_unit.cpp
+    DEPENDS dbg
+    INC_DIRS export/ecl)
+
+add_unit_host_test(
+    NAME shared
+    SOURCES tests/shared_unit.cpp
+    DEPENDS dbg
+    INC_DIRS export/ecl)
+
+# TODO: The console test is rather integration test, probably it should be moved
+# to ${CORE_DIR}/tests dir.
+
+add_unit_host_test(
+    NAME console_integrity
+    SOURCES tests/console_integrity.cpp
+    DEPENDS the_core)

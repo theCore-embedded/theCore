@@ -19,7 +19,7 @@ stream& endl(stream &ios)
 }
 
 
-template< class IO_device >
+template<class IO_device>
 class ostream
 {
 public:
@@ -57,18 +57,18 @@ private:
 //------------------------------------------------------------------------------
 
 
-template< class IO_device >
+template<class IO_device>
 ostream< IO_device >::ostream(IO_device *device)
     :m_device{device}
 {
 }
 
-template< class IO_device >
+template<class IO_device>
 ostream< IO_device >::~ostream()
 {
 }
 
-template< class IO_device >
+template<class IO_device>
 ostream<IO_device> &ostream< IO_device >::operator<< (int value)
 {
     unsigned int higher_multiplicand = 1;
@@ -105,7 +105,7 @@ ostream<IO_device> &ostream< IO_device >::operator<< (int value)
 }
 
 
-template< class IO_device >
+template<class IO_device>
 ostream<IO_device> &ostream< IO_device >::operator<< (unsigned int value)
 {
     unsigned int higher_multiplicand = 1;
@@ -136,7 +136,7 @@ ostream<IO_device> &ostream< IO_device >::operator<< (unsigned int value)
 }
 
 
-template< class IO_device >
+template<class IO_device>
 ostream<IO_device> &ostream< IO_device >::operator<<(char character)
 {
     if (m_device->write((uint8_t *) &character, 1) < 0) {
@@ -147,7 +147,7 @@ ostream<IO_device> &ostream< IO_device >::operator<<(char character)
 }
 
 
-template< class IO_device >
+template<class IO_device>
 ostream<IO_device> &ostream< IO_device >::operator<<(const char *string)
 {
     // TODO: improve this function in a way it can write a string
@@ -172,14 +172,14 @@ ostream<IO_device> &ostream< IO_device >::operator<<(const char *string)
 }
 
 
-template< class IO_device >
+template<class IO_device>
 ostream<IO_device> &ostream< IO_device >::operator<<(
         ostream& (*func)(ostream< IO_device >&))
 {
     return func(*this);
 }
 
-template< class IO_device >
+template<class IO_device>
 ostream<IO_device> &ostream< IO_device >::put(char c)
 {
     m_device->write((uint8_t *)&c, 1);
