@@ -53,6 +53,7 @@ struct wo_mut
     //! \param[in] device Register address.
     //! \param[in] offset Offset of the data inside register.
     //! \param[in] mask   Mask to extract data from the register.
+    //! \param[in] value  Value to write into the register.
     static void write(volatile uint32_t *device, uint32_t offset, uint32_t mask, uint32_t value)
     {
         *device = (value << offset) & mask;
@@ -66,6 +67,7 @@ struct rw_mut : ro_mut
     //! \param[in] device Register address.
     //! \param[in] offset Offset of the data inside register.
     //! \param[in] mask   Mask to extract data from the register.
+    //! \param[in] value  Value to write into the register.
     static void write(volatile uint32_t *device, uint32_t offset, uint32_t mask, uint32_t value)
     {
         *device = (*device & ~mask) | ((value << offset) & mask);

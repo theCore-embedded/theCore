@@ -6,13 +6,13 @@
 //! \file
 //! \brief Contains implementation for CS43L22 driver.
 //! \details The CS43L22 is a highly integrated,
-//!  low power stereo DAC with headphone and ClassD speaker amplifiers
-//!  See: https://www.cirrus.com/products/cs43l22/
+//! low power stereo DAC with headphone and ClassD speaker amplifiers
+//! See: https://www.cirrus.com/products/cs43l22/
 //!
-//!  Restrictions: Current implementation supports only I2S audio format.
-//!  Sample size is fixed and equal to 16 bits. Also, DAC requires external clock (MCLK)
-//!  to operate correctly. In many implementations, I2S interface can output MCLK.
-//!  It can be used as external clock for DAC.
+//! Restrictions: Current implementation supports only I2S audio format.
+//! Sample size is fixed and equal to 16 bits. Also, DAC requires external clock (MCLK)
+//! to operate correctly. In many implementations, I2S interface can output MCLK.
+//! It can be used as external clock for DAC.
 //!
 
 #ifndef DEV_CS43L22_HPP
@@ -27,7 +27,7 @@
 namespace ecl
 {
 
-//!  The CS43L22 codec driver implementation.
+//! The CS43L22 codec driver implementation.
 //! \tparam I2c I2C generic bus driver.
 //! \tparam I2s I2S generic bus driver.
 //! \tparam Rst_gpio Reset pin represented by generic GPIO class.
@@ -113,77 +113,77 @@ public:
         continuous = 0xC0,	//! Play continuously
     };
 
-    //!  Maximum value of the master volume.
+    //! Maximum value of the master volume.
     //! \details The minimum value (0) represents the signal out the DSP: -102 dB.
-    //!  The maximum value (0xE4) represents +12 dB. Step size is 0.5 dB.
+    //! The maximum value (0xE4) represents +12 dB. Step size is 0.5 dB.
     //!
     static constexpr uint8_t max_master_volume = 0xE4;
 
-    //!  Maximum value of the headphone volume.
+    //! Maximum value of the headphone volume.
     //! \details The minimum value (0) represents the signal out the DAC: -127 dB (muted).
-    //!  The maximum value (0xFF) represents the signal out the DAC: 0 dB. Step size is 0.5 dB.
+    //! The maximum value (0xFF) represents the signal out the DAC: 0 dB. Step size is 0.5 dB.
     //!
     static constexpr uint8_t max_headphone_volume = 0xFF;
 
-    //!  Maximum value of the beep volume.
+    //! Maximum value of the beep volume.
     //! \details The minimum value (0) represents the gain: -56 dB.
-    //!  The maximum value (0x1F) represents the gain: +6 dB. Step size is 2 dB.
+    //! The maximum value (0x1F) represents the gain: +6 dB. Step size is 2 dB.
     //!
     static constexpr uint8_t max_beep_volume = 0x1F;
 
-    //!  Describes the user callback.
+    //! Describes the user callback.
     //! \details NOTE: The user callback is called in IRQ context.
     //! \param type Represents the type of event: half-transfer (HT) or transfer completed (TC).
     //!
     using user_callback = std::function< void (ecl::bus_event type) >;
 
-    //!  Codec low-level initialization routine.
+    //! Codec low-level initialization routine.
     //! \details This method performs low-level initialization of the
-    //!  codec and underlayer buses. This method must be called once
-    //!  before any operations with codec.
+    //! codec and underlayer buses. This method must be called once
+    //! before any operations with codec.
     //! \retval Status of the operation.
     //!
     static err init();
 
-    //!  Codec power up sequence. Must not be called if codec is already powered.
+    //! Codec power up sequence. Must not be called if codec is already powered.
     //! \details This method performs power up sequence of the
-    //!  codec which is recommended by CS43L22 Reference Manual (RM).
-    //!  To use this method, the init() method must be called previously.
+    //! codec which is recommended by CS43L22 Reference Manual (RM).
+    //! To use this method, the init() method must be called previously.
     //! \retval Status of the operation.
     //!
     static err power_up();
 
-    //!  Codec power down sequence. Must not be called if codec is not powered.
+    //! Codec power down sequence. Must not be called if codec is not powered.
     //! \details This method performs power down sequence of the
-    //!  codec which is recommended by CS43L22 Reference Manual (RM).
-    //!  To use this method, the init() method must be called previously.
+    //! codec which is recommended by CS43L22 Reference Manual (RM).
+    //! To use this method, the init() method must be called previously.
     //! \retval Status of the operation.
     //!
     static err power_down();
 
-    //!  Send PCM buffer to the codec.
+    //! Send PCM buffer to the codec.
     //! \details This method blocks until all data is transferred.
-    //!  The PCM data contains audio samples. Sample size is constant and equal to 16 bit.
-    //!  Sampling frequency can be changed with cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency() method.
-    //!  The buffer format is next: LRLR.... Where L - left channel and R - right channel.
+    //! The PCM data contains audio samples. Sample size is constant and equal to 16 bit.
+    //! Sampling frequency can be changed with cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency() method.
+    //! The buffer format is next: LRLR.... Where L - left channel and R - right channel.
     //! \param buffer The buffer which contains PCM data. Must not be null.
     //! \param count Number of samples in PCM buffer. Must not be null.
     //! \retval Status of the operation.
     //!
     static err send_pcm_buffer(const uint16_t *buffer, size_t count);
 
-    //!  Starts stream of the PCM buffer to the codec.
+    //! Starts stream of the PCM buffer to the codec.
     //! \details When stream is started, the user callback is called on two events:
-    //!  Halt Transfer (HT) and Transfer Completed (TC). When half of samples are
-    //!  transferred, the HT is generated and user can write the data into fist
-    //!  half of the buffer. After all sample are transferred, the TC is generated.
-    //!  After this the codec is continuing streaming from the start of the buffer
-    //!  until it is stopped by cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_stop().
-    //!  NOTE: The HT and TC events are generated in IRQ context. The user callback
-    //!  should not perform blocking operations, busy wait etc.
-    //!  The PCM data contains audio samples. Sample size is constant and equal to 16 bit.
-    //!  Sampling frequency can be changed with cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency() method.
-    //!  The buffer format is next: LRLR.... Where L - left channel and R - right channel.
+    //! Halt Transfer (HT) and Transfer Completed (TC). When half of samples are
+    //! transferred, the HT is generated and user can write the data into fist
+    //! half of the buffer. After all sample are transferred, the TC is generated.
+    //! After this the codec is continuing streaming from the start of the buffer
+    //! until it is stopped by cs43l22< I2c, I2s, Rst_gpio >::pcm_stream_stop().
+    //! NOTE: The HT and TC events are generated in IRQ context. The user callback
+    //! should not perform blocking operations, busy wait etc.
+    //! The PCM data contains audio samples. Sample size is constant and equal to 16 bit.
+    //! Sampling frequency can be changed with cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency() method.
+    //! The buffer format is next: LRLR.... Where L - left channel and R - right channel.
     //! \param buffer The buffer which contains PCM data. Must not be null.
     //! \param count Number of samples in PCM buffer. Must not be null. Must be multiple of 2 and less of equal to 0xFFFF.
     //! \param callback User callback is called on HT and TC events.
@@ -191,77 +191,77 @@ public:
     //!
     static err pcm_stream_start(const uint16_t *buffer, size_t count, user_callback callback);
 
-    //!  Stop active stream. Must not be called if stream is not active.
+    //! Stop active stream. Must not be called if stream is not active.
     //! \details This method stops active PCM stream. It is recommended to call this method
-    //!  during processing of the HT or TC event. In case this method is called during
-    //!  processing of the TC event the steam will be stopped immediately. Otherwise, it
-    //!  will be stopped after next TC event.
+    //! during processing of the HT or TC event. In case this method is called during
+    //! processing of the TC event the steam will be stopped immediately. Otherwise, it
+    //! will be stopped after next TC event.
     //! \retval Status of the operation.
     //!
     static err pcm_stream_stop();
 
-    //!  Set master volume for specific channel.
+    //! Set master volume for specific channel.
     //! \param ch Audio channel.
     //! \param volume The volume value. Must be in range [0, cs43l22< I2c, I2s, Rst_gpio >::max_master_volume]
     //! \retval Status of the operation.
     //!
     static err set_master_volume(uint8_t volume, channel ch = channel::all);
 
-    //!  Set headphone volume for specific channel.
+    //! Set headphone volume for specific channel.
     //! \param ch Audio channel.
     //! \param volume The volume value. Must be in range [0, cs43l22< I2c, I2s, Rst_gpio >::max_headphone_volume]
     //! \retval Status of the operation.
     //!
     static err set_headphone_volume(uint8_t volume, channel ch = channel::all);
 
-    //!  Mute headphone channel.
+    //! Mute headphone channel.
     //! \param ch Audio channel.
     //! \retval Status of the operation.
     //!
     static err headphone_mute(channel ch = channel::all);
 
-    //!  Unmute headphone channel.
+    //! Unmute headphone channel.
     //! \param ch Audio channel.
     //! \retval Status of the operation.
     //!
     static err headphone_unmute(channel ch = channel::all);
 
-    //!  Set beep on time. Must not be called if beep is enabled. See RM for details.
+    //! Set beep on time. Must not be called if beep is enabled. See RM for details.
     //! \param value The value of beep on time.
     //! \retval Status of the operation.
     //!
     static err set_beep_on_time(beep_on_time value);
 
-    //!  Set beep off time. Must not be called if beep is enabled. See RM for details.
+    //! Set beep off time. Must not be called if beep is enabled. See RM for details.
     //! \param value The value of beep off time.
     //! \retval Status of the operation.
     //!
     static err set_beep_off_time(beep_off_time value);
 
-    //!  Set beep frequency. Must not be called if beep is enabled. See RM for details.
+    //! Set beep frequency. Must not be called if beep is enabled. See RM for details.
     //! \param value The value of beep frequency.
     //! \retval Status of the operation.
     //!
     static err set_beep_frequency(beep_frequency value);
 
-    //!  Set beep Volume. Must not be called if beep is enabled. See RM for details.
-    //! \param value The value of beep volume. Must be in range [0, cs43l22< I2c, I2s, Rst_gpio >::max_beep_volume]
+    //! Set beep Volume. Must not be called if beep is enabled. See RM for details.
+    //! \param volume The value of beep volume. Must be in range [0, cs43l22< I2c, I2s, Rst_gpio >::max_beep_volume]
     //! \retval Status of the operation.
     //!
     static err set_beep_volume(uint8_t volume);
 
-    //!  Enable beep generator.
+    //! Enable beep generator.
     //! \param mode The operation mode for beep generator.
     //! \retval Status of the operation.
     //!
     static err beep_enable(beep_mode mode = beep_mode::multiple);
 
-    //!  Disable beep generator.
+    //! Disable beep generator.
     //! \retval Status of the operation.
     //!
     static err beep_disable();
 
-    //!  Set sampling frequency for PCM audio data.
+    //! Set sampling frequency for PCM audio data.
     //! \tparam frequency Audio frequency.
     //! \retval Status of the operation.
     //!

@@ -45,18 +45,18 @@ enum class usart_device
 //! - uint32_t **baudrate** - Configures the USART communication baud rate
 //! - uint16_t **word_len** - Specifies the number of data bits transmitted
 //!                           or received. This member can be a value of
-//!                           \ref USART_Word_Length (see STM32 SPL).
+//!                           USART_Word_Length (see STM32 SPL).
 //! - uint16_t **stop_bit** - Specifies the number of stop bits transmitted.
 //!                           This member can be a value of
-//!                           \ref USART_Stop_Bits (see STM32 SPL).
+//!                           USART_Stop_Bits (see STM32 SPL).
 //! - uint16_t **parity**   - Specifies the parity mode. This member can be
-//!                           a value of \ref USART_Parity (see STM32 SPL).
+//!                           a value of USART_Parity (see STM32 SPL).
 //! - uint16_t **mode**     - Specifies wether the Receive or Transmit mode is
 //!                           enabled or disabled. This member can be a value
-//!                           of \ref USART_Modes (see STM32 SPL).
+//!                           of USART_Modes (see STM32 SPL).
 //! - uint16_t **hw_flow**  - Specifies wether the hardware flow control mode
 //!                           is enabled or disabled. This member can be a value
-//!                           of \ref USART_Hardware_Flow_Control (see STM32 SPL).
+//!                           of USART_Hardware_Flow_Control (see STM32 SPL).
 //!
 //! \par USART configuration example.
 //! In order to use this configuration class one must create configuration class

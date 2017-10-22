@@ -96,7 +96,3 @@ add_subdirectory(lib)
 add_subdirectory(dev)
 add_subdirectory(kernel)
 add_dependencies(all_cppcheck ${PROJECT_NAME})
-
-# Doc must have access to all ignore doxygen dirs, defined elsewhere.
-# Thus it is included after all the others.
-add_subdirectory(doc)
