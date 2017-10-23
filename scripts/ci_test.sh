@@ -38,4 +38,5 @@ mkdir -p docs
 cd docs
 cmake ../../doc
 make core_doc
+make core_sphinx
 cd ..

@@ -28,9 +28,9 @@ void yield();
 
 //!
 //! \brief Put task at sleep for given amount of milliseconds.
-//! \param[in] msesc Milliseconds to sleep.
+//! \param[in] ms Milliseconds to sleep.
 //!
-void sleep_for(uint32_t msesc);
+void sleep_for(uint32_t ms);
 
 //!
 //! \brief Gets a thread handle of currently running thread.

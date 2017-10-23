@@ -29,7 +29,7 @@ there is no need to invoke Sphinx manually. Instead, proceed as follows:
      # From theCore directory
      mkdir doc_build
      cd doc_build
-     cmake ..
+     cmake ../doc
      make core_sphinx
 
 #. Open generated docs by any preferable browser:

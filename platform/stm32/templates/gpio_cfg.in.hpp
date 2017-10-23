@@ -4,7 +4,7 @@
 
 //! \file
 //! \brief Header provides template of GPIO driver configuration.
-//! \detials Pin assignment is configured in pinmux.in.cpp.
+//! \details Pin assignment is configured in pinmux.in.cpp.
 #ifndef STM32XX_GPIO_CFGS_HPP_
 #define STM32XX_GPIO_CFGS_HPP_
 

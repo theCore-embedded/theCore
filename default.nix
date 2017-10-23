@@ -5,6 +5,7 @@
 let
   xxd = pkgs.callPackage ./nix/xxd {};
   fulltoc = pkgs.callPackage ./nix/sphinx-fulltoc {};
+  cmake-doxygen = pkgs.callPackage ./nix/cmake-doxygen {};
 
 in with pkgs; {
   coreEnv = stdenv.mkDerivation {
@@ -26,7 +27,7 @@ in with pkgs; {
       cpputest gcc-arm-embedded-5 dfu-util
       doxygen  llvmPackages.clang-unwrapped openocd
       perlPackages.ArchiveZip xxd
-      fulltoc ];
+      fulltoc cmake-doxygen plantuml graphviz ];
 
     shellHook = ''
         export GCC_ARM_EMBEDDED_PATH=${gcc-arm-embedded-5}

@@ -28,14 +28,6 @@ static inline void bypass_putc(char c)
 //! executed during ISR.
 void bypass_putc(char c);
 
-// //! Console device descriptor.
-// #define ECL_MACRO_CONSOLE_CONCAT(prefix, num) (prefix ## num)
-// #define ECL_MACRO_CONSOLE_EVAL(prefix, num) ECL_MACRO_CONSOLE_CONCAT(prefix, num)
-// #define ECL_CONSOLE_DEVICE ECL_MACRO_CONSOLE_EVAL(uart_device::dev, CORE_CONFIG_CONSOLE_DEVICE_NUM)
-
-// //! The same console driver will be used for whole theCore.
-// using platform_console = bypass_console;
-// -using bypass_console = uart_bus<ECL_CONSOLE_DEVICE>;
 #endif // CORE_CONFIG_USE_BYPASS_CONSOLE
 
 } // namespace ecl

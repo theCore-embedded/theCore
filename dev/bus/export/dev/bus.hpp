@@ -135,7 +135,7 @@ public:
     //! \retval    err::busy    Device is still executing async xfer.
     static err set_buffers(size_t size, uint8_t fill_byte = 0xff);
 
-    //! Performs xfer in blocking mode using buffers set previously.
+    //! Performs xfer in blocking mode using buffers set previously with optional timeout.
     //! \details If underlying bus works in half-duplex mode then first
     //! tx transaction will occur and then rx. Any deferred xfer will be
     //! canceled in result of this call and simple, blocking xfer will proceed.
@@ -146,11 +146,13 @@ public:
     //! consider using xfer(const handler_fn &handler) overload.
     //! \pre        Bus is locked and buffers are set.
     //! \post       Bus remains in the same state.
-    //! \param[out] sent        Optional. Bytes sent during this xfer.
-    //! \param[out] received    Optional. Bytes received during this xfer.
-    //! \retval     err::ok     Data is sent successfully.
-    //! \retval     err::busy   Device is still executing async xfer.
-    //! \retval     err::io     Transaction started but failed.
+    //! \param[out] sent          Optional. Bytes sent during this xfer.
+    //! \param[out] received      Optional. Bytes received during this xfer.
+    //! \param[in]  timeout       Optional. Timeout to wait for operation to complete.
+    //! \retval     err::ok       Data is sent successfully.
+    //! \retval     err::busy     Device is still executing async xfer.
+    //! \retval     err::io       Transaction started but failed.
+    //! \retval     err::timedout Operation was not completed before timeout hit.
     //! \retval     err         Any other error that can occur in platform bus
     static err xfer(size_t *sent = nullptr, size_t *received = nullptr,
                     std::chrono::milliseconds timeout = std::chrono::milliseconds::max());

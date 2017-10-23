@@ -69,7 +69,7 @@ public:
     //! \return Status of operation.
     //! \retval err::timedout   Buffer was not filled completely before timeout hit.
     //!                         It is still possible that some data was transferred.
-    //!                         Check \ref sz to understand how many bytes are there.
+    //!                         Check \param sz to understand how many bytes are there.
     //! \retval err::ok         Whole buffer was populated before timeout reached.
     static err recv(uint8_t *buf, size_t &sz,
                     std::chrono::milliseconds ms = std::chrono::milliseconds::max());

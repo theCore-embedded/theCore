@@ -86,7 +86,7 @@ public:
     //! unmask() call.
     //! \pre Initialized EXTI manager.
     //! \pre Unused handler.
-    //! \warn If handler was already subscribed to EXTI events then
+    //! \warning If handler was already subscribed to EXTI events then
     //! behaviour is undefined.
     //! \post Handler subscribed for events, but events are masked.
     //! \sa unsubscribe()
@@ -99,7 +99,7 @@ public:
     //! Unsubscribes handler from any event.
     //! \pre Initialized EXTI manager.
     //! \pre Previously subscribed handler.
-    //! \port Unsubscribed handler.
+    //! \post Unsubscribed handler.
     //! \details It is possible to use the same handler for subscribe() call
     //! if it was successfully unsubscribed().
     //! \param[in] h Handler, must be previously subscribed.

@@ -118,7 +118,6 @@ public:
     //! \tparam     Mode    Mode of operation.
     //! \param[in]  periph  The valid peripheral address.
     //! \param[in]  size    Size of the memory buffer buffer in bytes.
-    //! \param[in]  dst     The destination buffer.
     template<dma_data_sz Size = dma_data_sz::byte, dma_mode Mode = dma_mode::normal>
     static void
     periph_to_mem(volatile uint16_t *periph, size_t size);
