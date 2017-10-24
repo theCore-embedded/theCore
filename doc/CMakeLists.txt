@@ -48,7 +48,7 @@ if(DOXYGEN_FOUND)
 
     set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-    doxygen(TARGET "core_doc"
+    doxygen(TARGET "core_doxygen"
         OUTPUT_DIRECTORY
             "${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen"
         SOURCES
