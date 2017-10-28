@@ -25,7 +25,6 @@ template<class PBus, size_t buf_size = 128>
 class serial
 {
 public:
-
     static constexpr auto buffer_size = buf_size;
     using platform_handle = PBus;
 
@@ -44,23 +43,33 @@ public:
     //! \return Operation status.
     static err deinit();
 
+    //! Sets or clears non-block mode of operation.
+    //! \pre Driver is initialized.
+    //! \details Setting nonblock mode will prevent recv and send functions
+    //! from blocking. Special error code will be returned to notify user about
+    //! possible blocking.
+    //! \param[in] state 'true' to enable non-blocking mode.
+    //! \retval err::ok If state set without error.
+    static err nonblock(bool state = true);
+
     //! Obtains a byte from serial device.
     //! \pre Driver is initialized.
-    //! \details Call will block if there is no data to return.
+    //! \details If there is no data to return call with block in blocking mode,
+    //! and return immediately in non-blocking mode.
     //! Otherwise data will be stored in the given argument and
     //! method will return.
     //! \param[out] byte Place for incoming byte. Will remain
     //!                  unchanged if error occurs.
     //! \return Operation status.
-    //! \retval err::nobufs Some data will be lost after the call completes.
-    //!
+    //! \retval err::wouldblock Non-blocking mode is set and read would block
+    //!                         otherwise.
     static err recv_byte(uint8_t &byte);
 
     //! Gets buffer from serial device.
     //! \pre Driver is initialized.
-    //! \details Call will block if there is no data to return.
-    //! Otherwise, buffer will be populated with avaliable data
-    //! and method will return.
+    //! \details Call will block if there is no data to return in blocking mode.
+    //! In non-blocking mode special code is returned. Otherwise, buffer will be
+    //! populated with avaliable data and method will return.
     //! \param[out]     buf Buffer to fill with data.
     //! \param[in,out]  sz  Size of buffer. Will be updated with
     //!                     amount of bytes written to the buffer.
@@ -68,23 +77,28 @@ public:
     //!                     with bytes successfully stored in the buffer
     //!                     before error occurred.
     //! \return Operation status.
-    //! \retval err::nobufs Some data will be lost after the call completes.
+    //! \retval err::wouldblock Non-blocking mode is set and read would block
+    //!                         otherwise.
     static err recv_buf(uint8_t *buf, size_t &sz);
 
     //! Sends byte to a serial device.
     //! \pre Driver is initialized.
     //! \details It may not block if internal buffering is applied.
     //! It may also block if platform device is not yet ready to
-    //! send data.
+    //! send data. In non-blocking mode special code is returned instead of
+    //! blocking.
     //! \param[in] byte Byte to send.
     //! \return Operation status.
+    //! \retval err::wouldblock Non-blocking mode is set and send would block
+    //!                         otherwise.
     static err send_byte(uint8_t byte);
 
     //! Sends buffer to a serial stream.
     //! \pre Driver is initialized.
     //! \details It may not block if internal buffering is applied.
     //! It may also block if platform device is not yet ready to
-    //! send data.
+    //! send data. In non-blocking mode special code is returned instead of
+    //! blocking.
     //! \param[in]      buf Buffer to send.
     //! \param[in,out]  sz  Size of buffer. Will be updated with
     //!                     amount of bytes sent In case of error,
@@ -92,75 +106,206 @@ public:
     //!                     successfully sent before error occur.
     //! \return Operation status.
     //! \retval err:again The buffer was not consumed entirely.
+    //! \retval err::wouldblock Non-blocking mode is set and send would block
+    //!                         otherwise.
     static err send_buf(const uint8_t *buf, size_t &sz);
 
 private:
+    //! Bus event handler
     static void bus_handler(bus_channel ch, bus_event type, size_t total);
 
+    //! Set if serial is initialized.
     static bool m_is_inited;
-    static std::atomic_bool m_new_xfer_allowed;
 
-    static uint8_t m_rx_buffer[buf_size];
-    static std::atomic_size_t m_rx_write_iter; //!< Used for accepting data from the bus
-    static std::atomic_size_t m_rx_read_iter; //!< Used for returning data to the user
-    static safe_storage<binary_semaphore> m_rx_is_data_available; //!< Signals if rx buffer is available for reading
+    //! Set if serial is in non-blocking mode.
+    static bool m_nonblock;
 
-    static uint8_t m_tx_buffer[buf_size];
-    static std::atomic_size_t m_tx_write_iter; //!< Used for accepting data from the user
-    static std::atomic_size_t m_tx_read_iter; //!< Used for writing data on the bus
-    static safe_storage<binary_semaphore> m_tx_is_buffer_available; //!< Signals if tx buffer has at least one available byte
+    //! Helper struct, represents xfer chunk (part of the buffer) for RX
+    //! communications.
+    //! \details When accessing buffers and metadata, it is convinient to
+    //! think about two contexes - user (performed in regular thread) and
+    //! xfer (performed in the bus_handler(), interrupt).
+    //! We are pretty safe if both contexes does not write into the same object..
+    struct chunk
+    {
+        // Convenient aliases.
+        using bsem = safe_storage<binary_semaphore>;
+        using asize_t = std::atomic_size_t;
+
+        //! Buffer size. Each chunk is a half of a requested buffer size.
+        static constexpr auto xfer_size = buffer_size / 2;
+        //! Helper function to return size.
+        static constexpr auto size() { return xfer_size; }
+
+        //! Buffer itself. Written by platform (xfer context). Read by user.
+        uint8_t   data[xfer_size];
+
+        //! Start marker, written from user context, read by xfer and user contexes.
+        //! Changes when user reads data from the buffer.
+        asize_t   start {0};
+
+        //! End marker, written by xfer, read by xfer and user contexes.
+        //! Changes when xfer writes data to the buffer.
+        asize_t   end {0};
+
+        //! Pending xfer flag. Set when xfer is failed to start
+        //! because there is still some data. User _must_ read that data,
+        //! before starting new xfer.
+        bool      xfer_pend = false;
+
+        //! Raised by xfer when empty buffer is filled with a new data.
+        bsem      data_flag = {};
+
+        //! Initializes chunk
+        chunk() { data_flag.init(); }
+
+        //! Resters state of the chunk. Called by user when buffer is
+        //! finally depleted.
+        void restore() { start = end = 0; }
+
+        //! Sets pending xfer flag. Called by xfer, if current buffer still
+        //! read by the user.
+        void set_pend() { xfer_pend = true; }
+
+        //! Checks pending xfer flag. Called by user after moving to the next buffer.
+        //! Thus, user can start new xfer with current chunk.
+        bool pend() { return xfer_pend; }
+
+        //! Checks if buffer is ready to start xfer. Called by xfer before
+        //! starting new xfer. Returns true, if restore() call was made earlier
+        //! and no other changes were done.
+        bool fresh() { return !start && !end; }
+
+        //! Starts new xfer. Called by user or xfer (depending on xfer_pend
+        //! flag, when new xfer must be started.
+        //! Pre: previous xfer must be fully completed and buffer is fresh.
+        ecl::err start_xfer()
+        {
+            PBus::set_rx(data, size());
+
+            auto rc = PBus::enable_listen_mode();
+            if (is_error(rc)) {
+                PBus::set_rx(nullptr, 0);
+                return rc;
+            }
+
+            rc = PBus::do_rx();
+            if (is_error(rc)) {
+                PBus::set_rx(nullptr, 0);
+                return rc;
+            }
+
+            // Convinient move - pending xfer satisfied.
+            xfer_pend = false;
+            return rc;
+        }
+
+        //! Checks how much data inside the buffer. Called by user.
+        size_t fill() { ecl_assert(end >= start); return end - start; }
+
+        //! Checks if there is new data to read.
+        //! Called by user and xfer.
+        bool no_data() { return !fill(); }
+
+        //! Checks if no more data can be read _and_ written to the buffer.
+        //! Called by user.
+        bool depleted() { return start == size(); }
+
+        //! Checks if no more data can be written to the buffer.
+        //! Callled by xfer.
+        bool no_space() { return end == size(); }
+
+        //! Waits for new data inside buffer.
+        //! _Must_ be called by user and _must_ be called if no_data() returned
+        //! true before.
+        bool wait_data() { data_flag.get().wait(); return true; } // TODO
+
+        //! Signals new data arrival. _Must_ be called by xfer when empty
+        //! buffer receives some data.
+        void signal_data() { data_flag.get().signal(); }
+
+        //! Increments write data counters when new data arrives.
+        //! Called by xfer.
+        void new_bytes(size_t cnt) { end += cnt; ecl_assert(end <= size()); }
+
+        //! Copies data from buffer to user, increments read counters.
+        //! Called by user.
+        size_t copy(uint8_t *dst, size_t sz)
+        {
+            // This method operates ISR-owned `end` marker.
+            // End marker is read atomically as a part of fill() call.
+            // Serial buffer opeartions designed to prevent xfer from
+            // overwriting unread user data and user markers.
+
+            auto occupied = fill();
+
+            auto to_copy = std::min(sz, occupied);
+            ecl_assert(to_copy); // There must be some data.
+
+            std::copy(data + start, data + start + to_copy, dst);
+            start += to_copy;
+            ecl_assert(start <= end);
+            return to_copy;
+        }
+    };
+
+    //! Helper aggregate with two chunks organized together.
+    //! \details Chunk can be assigned to user, to xfer, or to both user and xfer.
+    //! When chunk is assigned to user (regardless of chunk assignment for xfer),
+    //! it means that user can read from that chunk.
+    //! When chunk is assigned to xfer, it means that xfer either ongoing
+    //! in the xfer chunk, or about to happen.
+    struct serial_chunks
+    {
+        chunk chunks[2] = {};   //!< Chunks themselves
+        int user_idx = 0;       //!< Current chunk, owned by user.
+        int xfer_idx = 0;       //!< Current chunk, owned by xfer.
+
+        //! Returns buffer for user to operate on.
+        chunk &user() { return chunks[user_idx]; }
+        //! Returns buffer for xfer to operate on.
+        chunk &xfer() { return chunks[xfer_idx]; }
+
+        //! Returns next user buffer.
+        chunk &user_next() { user_idx ^= 1; return user(); }
+        //! Returns next xfer buffer.
+        chunk &xfer_next() { xfer_idx ^= 1; return xfer(); }
+    };
+
+    static safe_storage<serial_chunks>      m_chunks;           //! Chunks for RX.
+    static safe_storage<binary_semaphore>   m_tx_rdy;           //!< Signalled if tx channel is ready
+    static uint8_t                          m_tx_buf[buf_size]; //!< TX buffer.
 };
 
 template <class PBus, size_t buf_size>
 bool serial<PBus, buf_size>::m_is_inited;
 
 template <class PBus, size_t buf_size>
-std::atomic_bool serial<PBus, buf_size>::m_new_xfer_allowed;
+bool serial<PBus, buf_size>::m_nonblock;
 
 template <class PBus, size_t buf_size>
-uint8_t serial<PBus, buf_size>::m_rx_buffer[buf_size];
+safe_storage<typename serial<PBus, buf_size>::serial_chunks> serial<PBus, buf_size>::m_chunks;
 
 template <class PBus, size_t buf_size>
-std::atomic_size_t serial<PBus, buf_size>::m_rx_write_iter;
+safe_storage<binary_semaphore> serial<PBus, buf_size>::m_tx_rdy;
 
 template <class PBus, size_t buf_size>
-std::atomic_size_t serial<PBus, buf_size>::m_rx_read_iter;
-
-template <class PBus, size_t buf_size>
-safe_storage<binary_semaphore> serial<PBus, buf_size>::m_rx_is_data_available;
-
-template <class PBus, size_t buf_size>
-uint8_t serial<PBus, buf_size>::m_tx_buffer[buf_size];
-
-template <class PBus, size_t buf_size>
-std::atomic_size_t serial<PBus, buf_size>::m_tx_write_iter;
-
-template <class PBus, size_t buf_size>
-std::atomic_size_t serial<PBus, buf_size>::m_tx_read_iter;
-
-template <class PBus, size_t buf_size>
-safe_storage<binary_semaphore> serial<PBus, buf_size>::m_tx_is_buffer_available;
+uint8_t serial<PBus, buf_size>::m_tx_buf[buf_size];
 
 template <class PBus, size_t buf_size>
 err serial<PBus, buf_size>::init()
 {
+    m_chunks.init();
     ecl_assert(!m_is_inited);
-    m_tx_is_buffer_available.init();
-    m_rx_is_data_available.init();
+
     auto result = PBus::init();
     if (is_error(result)) {
         return result;
     }
     PBus::set_handler(bus_handler);
-    result = PBus::enable_listen_mode();
-    if (is_error(result)) {
-        return result;
-    }
-    m_new_xfer_allowed = true;
-    PBus::set_rx(m_rx_buffer, buffer_size);
-    PBus::set_tx(m_tx_buffer, buffer_size);
-    m_tx_is_buffer_available.get().signal();
-    result = PBus::do_rx();
+
+    m_tx_rdy.get().signal();
+    result = m_chunks.get().xfer().start_xfer();
     if (is_ok(result)) {
         m_is_inited = true;
     }
@@ -173,13 +318,8 @@ err serial<PBus, buf_size>::deinit()
     ecl_assert(m_is_inited);
     PBus::cancel_xfer();
     PBus::reset_buffers();
-    m_rx_read_iter = 0;
-    m_rx_write_iter = 0;
-    m_tx_read_iter = 0;
-    m_tx_write_iter = 0;
     m_is_inited = false;
-    m_rx_is_data_available.deinit();
-    m_tx_is_buffer_available.deinit();
+    m_tx_rdy.deinit();
     return err::ok;
 }
 
@@ -187,44 +327,48 @@ template <class PBus, size_t buf_size>
 void serial<PBus, buf_size>::bus_handler(bus_channel ch, bus_event type, size_t total)
 {
     if (ch == bus_channel::rx) {
-        ecl_assert(type == bus_event::tc && m_rx_write_iter + 1 == total);
+        if (type == bus_event::tc) {
+            auto &xfer_buf = m_chunks.get().xfer();
 
-        // It is possible that the buffer was empty before the current byte arrived
-        // We then need to signal the semaphore to indicate that the data is available
-        if (m_rx_read_iter == m_rx_write_iter) {
-            m_rx_is_data_available.get().signal();
-        }
-        m_rx_write_iter++;
+            // TODO: correct assert to consume more than 1 byte at time.
+            ecl_assert(xfer_buf.end + 1 == total);
 
-        // The buffer has been overflowed.
-        // Move read iterator to point to the most relevant data
-        //
-        // The expression m_rx_read_iter == m_rx_write_iter means
-        // here that the buffer is full.
-        // That's bacause the current context implies that the
-        // read iterator is "approached" by write iterator from behind
-        // and we properly adjust the position of read iterator to be
-        // always ahead of the write iterator.
-        if (m_rx_read_iter == m_rx_write_iter) {
-            m_rx_read_iter++;
-            if (m_rx_read_iter == buffer_size) {
-                m_rx_read_iter = 0;
+            // Notify user if new data arrives
+            if (xfer_buf.no_data()) {
+                xfer_buf.signal_data();
             }
-        }
 
-        // Start new xfer if needed and allowed
-        if (m_new_xfer_allowed) {
-            if (m_rx_write_iter == buffer_size) {
-                m_rx_write_iter = 0;
-                PBus::do_rx();
+            xfer_buf.new_bytes(1);
+
+            if (xfer_buf.no_space()) {
+                // If there is no place to write, we must move to the next buffer.
+                auto &new_xfer_buf = m_chunks.get().xfer_next();
+
+                // If chunk is fresh it means that all data was succesfully
+                // read by user and it is safe to start new xfer.
+                if (new_xfer_buf.fresh()) {
+                    new_xfer_buf.start_xfer();
+                } else {
+                    // User operates over a chunk. New xfer must not be started.
+                    // Now, it is user responsibility to start it after all data
+                    // will be read.
+                    new_xfer_buf.set_pend();
+                }
             }
         }
     } else if (ch == bus_channel::tx) {
-        ecl_assert(type == bus_event::tc && buffer_size == total);
-
-        m_tx_read_iter = 0;
-        m_tx_is_buffer_available.get().signal();
+        if (type == bus_event::tc) {
+            m_tx_rdy.get().signal();
+        } // else error - ignore. TC event _must_ be supplied
+          // after possible error.
     }
+}
+
+template <class PBus, size_t buf_size>
+err serial<PBus, buf_size>::nonblock(bool state)
+{
+    m_nonblock = state;
+    return err::ok;
 }
 
 template <class PBus, size_t buf_size>
@@ -240,44 +384,65 @@ err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
     ecl_assert(m_is_inited);
     err result = err::ok;
 
-    // Disallow starting new xfer from bus_handler()
-    m_new_xfer_allowed = false;
+    auto &user_buf = m_chunks.get().user();
 
-    // Wait until data is available on the read end
-    if (m_rx_read_iter == m_rx_write_iter) {
-        m_rx_is_data_available.get().wait();
+    // no_data() can return true, even if there is some data, due to
+    // expected race with ISR. However, it does not lead to any data corruption,
+    // only user should repeat reading again.
+    if (m_nonblock && user_buf.no_data()) {
+        sz = 0;
+        return err::wouldblock;
     }
 
-    // Save atomic variables on the stack
-    size_t write_pos = m_rx_write_iter;
-    size_t read_pos = m_rx_read_iter;
-
-    // Take into account relative positions of read and write iterators
-    sz = std::min(sz, write_pos > read_pos ? write_pos - read_pos
-            : buffer_size - read_pos);
-    std::copy(m_rx_buffer + read_pos, m_rx_buffer + read_pos + sz, buf);
-
-    // The read iterator might have been changed by the bus_handler during copying.
-    // If it wasn't, it's safe to advance iterator by the number of bytes copied above
-    if (!m_rx_read_iter.compare_exchange_weak(read_pos, read_pos + sz)) {
-        // If the read iterator has been advanced, notify caller that the data
-        // is corrupted (part of the buffer was overwritten by bus_handler)
-        result = err::nobufs;
+    // It is possible that semaphore is rised, even if there is no data.
+    // For example, consider case:
+    // - xfer places 1 byte into the buffer
+    // - user does not block, reads 1 byte, 0 bytes left
+    // - xfer see 0 byte data, writes 1 more again, rises semaphore
+    // - user does not block, reads 1 byte, 0 bytes left
+    // - user tries to read 1 byte again, but there are no data
+    //   -> and semaphore is still rised <-
+    // So checking semaphore once is not enough. That's why loop is here.
+    // Also, no_data() can return true, even if there is some data, due to
+    // expected race with ISR. However, it does not lead to any data corruption.
+    // Semaphore guarantees reliability.
+    while (user_buf.no_data()) {
+        user_buf.wait_data(); // All ok: semaphore
     }
 
-    // Wrap rx read iterator
-    if (m_rx_read_iter == buffer_size) {
-        m_rx_read_iter = 0;
+    // Read data. ISR running in the same time will not cause data overwrite
+    // by design of this serial class.
+    size_t read = user_buf.copy(buf, sz);
+    sz = read;
+
+    if (user_buf.depleted()) {  // All ok: user-owned variable
+        // No data inside the buffer. As a consequence, no more place to write
+        // a new data. Next buffer should be processed.
+
+        // In this moment, ISR can occur and switch to current user buf.
+        // It will see that buffer is not fresh, and sent pending flag.
+        // This flag will force user to start new xfer below.
+
+        // Restore modifies xfer-owned variable. However, since depleted()
+        // returned 'true', that variable is no longer modified by xfer.
+        // Restore isn't atomic, thus if ISR will be called during execution
+        // of restore(), same logic will apply as described in previous comment.
+        user_buf.restore();
+
+        // ISR can occur here as well.
+        // Since restore() call is completed, buffer will be in the fresh
+        // state. xfer will be started from ISR context. Pending flag
+        // will be unset.
+
+        // New buffer will be used in the next call of recv_buf();
+        m_chunks.get().user_next();
+
+        if (user_buf.pend()) {
+            // Start pending xfer, if ISR failed to do it.
+            user_buf.start_xfer();
+        }
     }
 
-    // Start new xfer if required
-    if (m_rx_write_iter == buffer_size) {
-        m_rx_write_iter = 0;
-        PBus::do_rx();
-    }
-
-    // Allow starting new xfer from bus_handler()
-    m_new_xfer_allowed = true;
     return result;
 }
 
@@ -291,42 +456,33 @@ err serial<PBus, buf_size>::send_byte(uint8_t byte)
 template <class PBus, size_t buf_size>
 err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
 {
-    static_cast<void>(buf);
-    static_cast<void>(size);
-
-    err ret = err::ok;
-
-    // Wait until at least one byte of free space becomes available
-    m_tx_is_buffer_available.get().wait();
-
-    // Save atomic variables on stack
-    size_t read_pos = m_tx_read_iter;
-    size_t write_pos = m_tx_write_iter;
-
-    size_t new_size = std::min(size, write_pos < read_pos ?
-            read_pos - write_pos : buffer_size - write_pos);
-    std::copy(buf, buf + size, m_tx_buffer + write_pos);
-
-    if (new_size < size) {
-        ret = err::again;
+    // Wait until TX will be ready
+    if (m_nonblock) {
+        if (!m_tx_rdy.get().try_wait()) {
+            size = 0;
+            return err::wouldblock;
+        }
+    } else {
+        m_tx_rdy.get().wait();
     }
 
-    size = new_size;
+    auto to_copy = std::min(size, buf_size);
+    std::copy(buf, buf + to_copy, m_tx_buf);
+    PBus::set_tx(m_tx_buf, to_copy);
+    auto rc = PBus::do_tx();
 
-    m_tx_write_iter += new_size;
-
-    // Signal buffer_available semaphore if buffer is not full
-    if (m_tx_read_iter != m_tx_write_iter) {
-        m_tx_is_buffer_available.get().signal();
+    if (is_error(rc)) {
+        return rc;
     }
 
-    auto tmp = buffer_size;
-    // We issue new tx transfer only when the tx_buffer is full
-    if (m_tx_write_iter.compare_exchange_weak(tmp, 0)) {
-        PBus::do_tx();
+    // Only part of the buffer was consumed
+    if (to_copy < size) {
+        rc = err::again;
     }
 
-    return ret;
+    size = to_copy;
+
+    return rc;
 }
 
 } // namespace ecl

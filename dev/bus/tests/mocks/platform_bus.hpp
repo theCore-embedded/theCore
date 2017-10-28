@@ -43,30 +43,39 @@ public:
 
     static void set_tx(const uint8_t *tx, size_t size)
     {
-        mock("platform_bus")
+        if (!m_ignore_buffer_setters) {
+            mock("platform_bus")
                 .actualCall("set_tx")
                 .withParameter("tx_buf", tx)
                 .withParameter("size", size);
+        }
+
         m_tx = tx;
         m_tx_size = size;
     }
 
     static void set_rx(uint8_t *rx, size_t size)
     {
-        mock("platform_bus")
+        if (!m_ignore_buffer_setters) {
+            mock("platform_bus")
                 .actualCall("set_rx")
                 .withParameter("rx_buf", rx)
                 .withParameter("size", size);
+        }
+
         m_rx = rx;
         m_rx_size = size;
     }
 
     static void set_tx(size_t size, uint8_t fill_byte)
     {
-        mock("platform_bus")
-                .actualCall("set_tx")
-                .withParameter("tx_size", size)
-                .withParameter("fill_byte", fill_byte);
+        if (!m_ignore_buffer_setters) {
+            mock("platform_bus")
+                    .actualCall("set_tx")
+                    .withParameter("tx_size", size)
+                    .withParameter("fill_byte", fill_byte);
+        }
+
         m_tx = nullptr;
         m_tx_size = size;
     }
@@ -139,12 +148,20 @@ public:
                 (mock("platform_bus").returnIntValueOrDefault(0));
     }
 
-//------------------------------------------------------------------------------
-// Internally used by the test
+    //--------------------------------------------------------------------------
+    // Internally used by the test
 
     static void invoke(channel ch, event e, size_t total)
     {
         m_handler(ch, e, total);
+    }
+
+    // Copies data to the buffer with offset and some additional checks.
+    static void copy_to_rx(const uint8_t *buf, size_t sz, off_t offt = 0)
+    {
+        CHECK(m_rx);
+        CHECK(offt + sz <= m_rx_size);
+        std::copy(buf, buf + sz, m_rx + offt);
     }
 
     static const uint8_t *m_tx;
@@ -152,6 +169,8 @@ public:
     static size_t m_tx_size;
     static size_t m_rx_size;
 
+    // Mock-specific switch
+    static bool m_ignore_buffer_setters;
 private:
     static handler_fn m_handler;
 };
@@ -162,5 +181,6 @@ const uint8_t *platform_mock::m_tx;
 uint8_t *platform_mock::m_rx;
 size_t platform_mock::m_tx_size;
 size_t platform_mock::m_rx_size;
+bool platform_mock::m_ignore_buffer_setters;
 
 #endif

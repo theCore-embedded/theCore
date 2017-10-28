@@ -334,11 +334,13 @@ ecl::err usart_bus<dev>::init()
     };
 
     irq::subscribe(irqn, lambda);
+    irq::unmask(irqn);
+
+    set_inited();
 
     // Enable UART
     USART_Cmd(usart, ENABLE);
 
-    set_inited();
     return ecl::err::ok;
 }
 
@@ -355,7 +357,7 @@ template<usart_device dev>
 void usart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
 {
     // TODO: implement
-    ecl_assert_msg(0, "Not implemeted!");
+    ecl_assert_msg(0, "Not implemented!");
 
     (void) size;
     (void) fill_byte;
@@ -404,8 +406,9 @@ void usart_bus<dev>::reset_handler()
 template<usart_device dev>
 ecl::err usart_bus<dev>::do_xfer()
 {
-    do_tx();
+    // Order matters
     do_rx();
+    do_tx();
     
     return ecl::err::ok;
 }
@@ -415,7 +418,6 @@ ecl::err usart_bus<dev>::do_rx()
 {
     ecl_assert(inited());
 
-    auto irqn = pick_irqn();
     auto usart = pick_usart();
 
     if (!m_rx) {
@@ -423,15 +425,15 @@ ecl::err usart_bus<dev>::do_rx()
         return ecl::err::ok;
     }
 
-    clear_rx_done();
+    m_rx_left = m_rx_size;
 
-    // Bytes will be send in IRQ handler.
-    USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
+    clear_rx_done();
 
     // In case if previous xfer was canceled.
     clear_rx_canceled();
 
-    irq::unmask(irqn);
+    // Bytes will be send in IRQ handler.
+    USART_ITConfig(usart, USART_IT_RXNE, ENABLE);
 
     return ecl::err::ok;
 }
@@ -441,23 +443,25 @@ ecl::err usart_bus<dev>::do_tx()
 {
     ecl_assert(inited());
 
-    auto irqn = pick_irqn();
     auto usart = pick_usart();
+    //auto irqn  = pick_irqn();
 
     if (!m_tx) {
         set_tx_done();
         return ecl::err::ok;
     }
 
+    m_tx_left = m_tx_size;
+    
     clear_tx_done();
-
-    // Bytes will be send in IRQ handler.
-    USART_ITConfig(usart, USART_IT_TXE, ENABLE);
 
     // In case if previous xfer was canceled.
     clear_tx_canceled();
 
-    irq::unmask(irqn);
+    // Bytes will be send in IRQ handler.
+    USART_ITConfig(usart, USART_IT_TXE, ENABLE);
+
+    //irq::unmask(irqn);
 
     return ecl::err::ok;
 }
@@ -481,7 +485,7 @@ ecl::err usart_bus<dev>::cancel_rx()
 
     USART_ITConfig(usart, USART_IT_RXNE, DISABLE);
 
-    irq::mask(irqn);
+    //irq::mask(irqn);
     irq::clear(irqn);
 
     set_rx_done();
@@ -500,7 +504,7 @@ ecl::err usart_bus<dev>::cancel_tx()
 
     USART_ITConfig(usart, USART_IT_TXE, DISABLE);
 
-    irq::mask(irqn);
+    //irq::mask(irqn);
     irq::clear(irqn);
 
     set_tx_done();
@@ -684,14 +688,15 @@ void usart_bus<dev>::irq_handler()
     }
 
     if (tx_done() && rx_done()) {
+        // TODO: clear 'done' flags here too instead doing it in do_rx()/do_tx() ?
         if (!tx_canceled() && !rx_canceled()) {
             // Both TX and RX are finished. Notifying.
             event_handler()(channel::meta, event::tc, 0);
         }
-    } else {
-        // Not yet finished - keep interrupts on.
-        irq::unmask(irqn);
-    }
+    } 
+
+    // Keep interrupts always on
+    irq::unmask(irqn);
 }
 
 } // namespace ecl
