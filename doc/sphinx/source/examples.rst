@@ -221,9 +221,9 @@ Wiring
 #. Attach any preferable UART-to-USB converter `such as this`_ module according to following pinout:
 
    +-------------------+-----------------+
-   | PD5 (USART2 TX)   | module's RX     |
+   | PD8 (USART3 TX)   | module's RX     |
    +-------------------+-----------------+
-   | PD6 (USART2 RX)   | module's TX     |
+   | PD9 (USART3 RX)   | module's TX     |
    +-------------------+-----------------+
    | GND               | module's GND    |
    +-------------------+-----------------+
