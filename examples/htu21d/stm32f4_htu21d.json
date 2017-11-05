@@ -37,7 +37,7 @@
                 "ids": [ "PD8", "PD9"],
                 "mode": "AF",
                 "function": "USART3",
-                "comment": "Console UART, PD8 - RX, PD9 - TX"
+                "comment": "Console UART: PD8 - RX, PD9 - TX"
             },
             {
                 "ids": [ "PB6", "PB9" ],
@@ -45,7 +45,7 @@
                 "function": "I2C1",
                 "otype": "OD",
                 "pull": "no",
-                "comment": "HTU21D I2C pins"
+                "comment": "HTU21D I2C pins: PB6 - SCL, PB9 - SDA"
             }
         ]
     }

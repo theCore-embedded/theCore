@@ -222,7 +222,7 @@ err htu21d<i2c_dev>::try_xfer(uint8_t cmd, uint8_t *data, size_t data_size)
     i2c_dev::lock();
     err rc;
 
-    if (!CMD_NONE) {
+    if (cmd == CMD_NONE) {
         rc = i2c_dev::set_buffers(nullptr, data, data_size);
     } else {
         rc = i2c_dev::set_buffers(&cmd, data, data_size);
