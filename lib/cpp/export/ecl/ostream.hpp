@@ -7,16 +7,17 @@
 
 #include <stdio.h>
 #include <ecl/assert.h>
+#include <cmath>
 
-namespace ecl 
-{  
-   
+namespace ecl
+{
+
    template< typename stream >
    stream& endl(stream &ios)
    {
        ios.put('\n');
        ios.put('\r');
-   
+
        // TODO: flush stream when appropriate functionality
        // will be ready
        return ios;
@@ -74,14 +75,20 @@ ostream< IO_device >::~ostream()
 template< class IO_device >
 ostream<IO_device> &ostream< IO_device >::operator<< (int value)
 {
-    char buff[32];
-    
-    int n =  snprintf(buff, sizeof(buff), "%d", value);
-    
-    ecl_assert(n > 0 && n < static_cast<int>(sizeof(buff)));
-    
-    m_device->write(reinterpret_cast<uint8_t*>(buff), n);
-    
+    // Maximum numbers of characters, required to hold specific int value
+    // in base 10 can be calculated in compile time (at least in gcc/g++)
+    // using logarithm.
+    // Three additional chars are required for sign char, for compensating
+    // the result of floor when converting from double to int, for '\0' char.
+    constexpr int chars_needed = std::log10(INT_MAX) + 3;
+    char buf[chars_needed];
+
+    int n =  snprintf(buf, sizeof(buf), "%d", value);
+
+    ecl_assert(n > 0 && n < static_cast<int>(sizeof(buf)));
+
+    m_device->write(reinterpret_cast<uint8_t*>(buf), n);
+
     return *this;
 }
 
@@ -89,16 +96,21 @@ ostream<IO_device> &ostream< IO_device >::operator<< (int value)
 template< class IO_device >
 ostream<IO_device> &ostream< IO_device >::operator<< (unsigned int value)
 {
-    
-   char buff[32];
-   
-   int n = snprintf(buff, sizeof(buff), "%u", value);
-   
-   ecl_assert(n > 0 && n < static_cast<int>(sizeof(buff)));
+    // Maximum numbers of characters, required to hold specific int value
+    // in base 10 can be calculated in compile time (at least in gcc/g++)
+    // using logarithm.
+    // Two additional chars are required for compensating the result of floor
+    // when converting from double to int and for '\0' char.
+    constexpr int chars_needed = std::log10(UINT_MAX) + 2;
+    char buf[chars_needed];
 
-   m_device->write(reinterpret_cast<uint8_t*>(buff), n);
-       
-   return *this;
+    int n = snprintf(buf, sizeof(buf), "%u", value);
+
+    ecl_assert(n > 0 && n < static_cast<int>(sizeof(buf)));
+
+    m_device->write(reinterpret_cast<uint8_t*>(buf), n);
+
+    return *this;
 }
 
 
@@ -106,7 +118,7 @@ template< class IO_device >
 ostream<IO_device> &ostream< IO_device >::operator<<(char character)
 {
     this->put(character);
-    
+
     return *this;
 }
 
@@ -120,8 +132,8 @@ ostream<IO_device> &ostream< IO_device >::operator<<(const char *string)
 
     size_t i = 0;
     while (string[i] != '\0') {
-        
-       if (string[i] == '\n') {
+
+        if (string[i] == '\n') {
             uint8_t carret_ret = '\r';
             m_device->write(&carret_ret, 1);
         }
@@ -145,13 +157,12 @@ ostream<IO_device> &ostream< IO_device >::operator<<(
 
 template< class IO_device >
 ostream<IO_device> &ostream< IO_device >::put(char c)
-{ 
-
+{
     m_device->write((uint8_t*)&c, 1);
-    
+
     return *this;
 }
 
-}
+} // namespace ecl
 
 #endif // ECL_OSTREAM_HPP
