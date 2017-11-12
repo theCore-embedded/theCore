@@ -44,6 +44,7 @@ add_unit_host_test(NAME istream_test
 
 add_unit_host_test(NAME ostream_test
     SOURCES tests/ostream_unit.cpp
+    DEPENDS dbg
     INC_DIRS export)
 
 add_unit_host_test(

@@ -17,8 +17,10 @@ Nix option.
 Following sections will provide you with insights about docs structure and build
 procedure.
 
-Building documentation
-----------------------
+.. _theCore_building_Sphinx:
+
+Building Sphinx documentation
+-----------------------------
 
 theCore build system provides a separate target for building documentation, so
 there is no need to invoke Sphinx manually. Instead, proceed as follows:
@@ -29,13 +31,27 @@ there is no need to invoke Sphinx manually. Instead, proceed as follows:
      # From theCore directory
      mkdir doc_build
      cd doc_build
-     cmake ..
+     cmake ../doc
      make core_sphinx
 
 #. Open generated docs by any preferable browser:
 
-   - ``doc_build/doc/sphinx/theCore/index.html`` - main page of multi-page version.
-   - ``doc_build/doc/sphinx/theCore/singlehtml/index.html`` - main page of single-paged version.
+   - ``doc_build/sphinx/theCore/index.html`` - main page of multi-page version.
+   - ``doc_build/sphinx/theCore/singlehtml/index.html`` - main page of single-paged version.
+
+Building Doxygen documentation
+------------------------------
+
+theCore also contains Doxygen and it is possible to generate Doxygen pages
+locally using CMake target:
+
+#. Launch command in the ``doc_build`` directory
+   :ref:`created on previous step <theCore_building_Sphinx>`::
+
+     make core_doxygen
+
+#. Open index page of generated Doxygen by any preferable browser:
+   ``doc_build/doc/doxygen/html/index.html``
 
 What all these sections are about?
 ----------------------------------
@@ -55,7 +71,7 @@ Contributing to the documentation consist of creating a PR against `theCore repo
 
 After the PR is opened, the new documentation is processed by the author manually in following fashion:
 
-#. New docs are build and tested locally, as described in `Building documentation`_ section.
+#. New docs are build and tested locally, as described in `Building Sphinx documentation`_ section.
 #. Generated static files are copied to the github pages clone::
 
      cp doc_build/doc/sphinx/* /path/to/the/gh_pages/ -rv

@@ -27,11 +27,11 @@ public:
     ~list_node();
 
     //! Adds a node after this node.
-    //! \param[in] Node to add in the list
+    //! \param[in] node Node to add in the list
     void add_after(list_node &node);
 
     //! Adds a node before this node.
-    //! \param[in] Node to add in the list
+    //! \param[in] node Node to add in the list
     void add_before(list_node &node);
 
     //! Unlinks this node from a list.

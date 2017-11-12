@@ -77,7 +77,7 @@ public:
     //! or error will occur.
     //! \pre Bus is initialized and buffer is valid.
     //! \param[out] buffer     Data buffer to read to. Must not be null.
-    //! \param[in]  count      Size of a buffer. Can be zero.
+    //! \param[in]  size      Size of a buffer. Can be zero.
     //! \return     Value indicating an error if negative or bytes stored
     //!             to a buffer if positive.
     //!

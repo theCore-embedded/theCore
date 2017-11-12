@@ -89,7 +89,7 @@ public:
     //! handler object unsubscription will be executed by itself.
     //! \pre Initialized EXTI manager.
     //! \pre Unused handler.
-    //! \warn If handler was already subscribed to EXTI events then
+    //! \warning If handler was already subscribed to EXTI events then
     //! behaviour is undefined.
     //! \sa unsubscribe()
     //! \param[out] h Unsubscribed handler of a GPIO event.

@@ -39,7 +39,7 @@ static inline void unmask(irq_num irqn)
 }
 
 //! Gets current IRQ number.
-//! \warn Results are unspecified if called not within IRQ context.
+//! \warning Results are unspecified if called not within IRQ context.
 //! \return Current IRQ number
 static inline irq_num get_current_irqn()
 {
