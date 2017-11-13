@@ -184,14 +184,12 @@ err bus_pipe< GBus >::last_error() const
 
 //------------------------------------------------------------------------------
 
-
 template< class GBus >
 bool bus_pipe< GBus >::err_on_start() const
 {
     return is_error(m_last) && !(m_last == err::io);
 }
 
-
-}
+} // namespace ecl
 
 #endif // DEV_BUS_DEV_BUS_PIPE_HPP_

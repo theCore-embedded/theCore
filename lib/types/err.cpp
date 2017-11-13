@@ -19,6 +19,8 @@ const char* ecl::err_to_str(err error)
         return "Operation not permitted";
     case err::srch:
         return "No such process";
+    case err::wouldblock:
+        return "Operation would block";
     case err::generic:  // -79
         return "Generic error occur";
     default:
