@@ -1,0 +1,10 @@
+#if @PROJECT_GIT_DIRTY@
+#define DIRTY "-dirty"
+#else
+#define DIRTY ""
+#endif
+
+const char *ver_str = "@PROJECT_NAME@ v@PROJECT_VERSION@ " "@PROJECT_GIT_SHORT@" DIRTY;
+const char *ver_commit = "@PROJECT_GIT_COMMIT@";
+const char *ver_branch = "@PROJECT_GIT_BRANCH@";
+const char *ver_url = "@PROJECT_GIT_URL@";
