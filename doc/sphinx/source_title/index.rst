@@ -13,6 +13,8 @@ Here a couple of references that you might be interest in:
 * `GitHub repository`_, where all the development occur.
 * `Main documentation page <theCore/index.html>`_.
 * `Mailing list`_. For large discussions and announcements.
+* `theCore Telegram group`_. For discussions.
+* `theCore Telegram channel`_. For announcements.
 * `OpenHub page`_. Pretty good and explanatory.
 * `theCore Twitter`_. You can check some announcements there too.
 * `Table of contents <theCore/contents.html>`_.
@@ -22,3 +24,5 @@ Here a couple of references that you might be interest in:
 .. _OpenHub page: https://www.openhub.net/p/theCoreEmbedded
 .. _theCore Twitter: https://twitter.com/theCoreEmbedded
 .. _Mailing list: https://mailmanlists.eu/mailman/listinfo/thecore
+.. _theCore Telegram group: https://t.me/joinchat/HQF-SEgtMQXoNOq_D71pSg
+.. _theCore Telegram channel: https://t.me/theCoreEmbedded
