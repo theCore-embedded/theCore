@@ -1,7 +1,10 @@
 theCore: C++ Embedded Framework
 ===============================
 
-|Build Status| |Join the chat at https://gitter.im/forGGe/theCore|
+|Build Status|
+|Join the chat at https://t.me/joinchat/HQF-SEgtMQXoNOq_D71pSg|
+|Follow us at https://t.me/theCoreEmbedded|
+|Join the chat at https://gitter.im/forGGe/theCore|
 
 Description
 -----------
@@ -57,6 +60,17 @@ Supported platforms
 Supported platform list along with information about each platform is located
 in |Platforms| section.
 
+Project links
+-------------
+
+Here a couple of additional references that you might be interest in:
+
+* `Mailing list`_. For large discussions and announcements.
+* `theCore Telegram group`_. For discussions.
+* `theCore Telegram channel`_. For announcements.
+* `theCore Twitter`_. You can check some announcements there too.
+* `OpenHub page`_. Pretty good and explanatory.
+
 License
 -------
 
@@ -96,8 +110,8 @@ Contribution & Using
 The project is on its very beginning, so any help is more than welcome
 and highly appreciated. If you’d like to take a part in the project
 growth and (or) have any questions – take a look at |DeveloperDocs| section,
-leave message at gitter_, contact me directly at forgge@gmail.com,
-or simply check out `a list of theCore issues`_.
+leave message at `theCore Telegram group`_, `mailing list`_ gitter_, contact me
+directly at forgge@gmail.com, or simply check out `a list of theCore issues`_.
 
 If you have any suggestions on theCore improvement or just
 like it how it is, don’t keep silence! I’ll be happy to read your
@@ -114,6 +128,11 @@ open some issues and we will do our best to handle this ASAP. Good luck!
 .. _multi-page HTML: https://forgge.github.io/theCore/
 .. _single-page HTML: https://forgge.github.io/theCore/singlehtml/contents.html
 .. _the standalone blinky example project: https://github.com/forGGe/theCore-blinky
+.. _OpenHub page: https://www.openhub.net/p/theCoreEmbedded
+.. _theCore Twitter: https://twitter.com/theCoreEmbedded
+.. _Mailing list: https://mailmanlists.eu/mailman/listinfo/thecore
+.. _theCore Telegram group: https://t.me/joinchat/HQF-SEgtMQXoNOq_D71pSg
+.. _theCore Telegram channel: https://t.me/theCoreEmbedded
 .. _MPL v2.0 License: https://www.mozilla.org/en-US/MPL/
 .. _MPL 2.0 FAQ: https://www.mozilla.org/en-US/MPL/2.0/FAQ/
 .. _cog: https://nedbatchelder.com/code/cog/
@@ -131,6 +150,10 @@ open some issues and we will do our best to handle this ASAP. Good luck!
    :target: https://travis-ci.org/forGGe/theCore
 .. |Join the chat at https://gitter.im/forGGe/theCore| image:: https://badges.gitter.im/forGGe/theCore.svg
    :target: https://gitter.im/forGGe/theCore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+.. |Join the chat at https://t.me/joinchat/HQF-SEgtMQXoNOq_D71pSg| image:: https://img.shields.io/badge/chat-telegram-blue.svg
+   :target: https://t.me/joinchat/HQF-SEgtMQXoNOq_D71pSg
+.. |Follow us at https://t.me/theCoreEmbedded| image:: https://img.shields.io/badge/follow-telegram-blue.svg
+   :target: https://t.me/theCoreEmbedded
 
 .. LINKS TO BE AUTOMATICALLY SUBSTITUTED BY SPHINX.
 .. DO NOT MOVE THIS LABEL.
