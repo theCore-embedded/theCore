@@ -102,25 +102,33 @@ static void event_handler(ecl::bus_event type)
 
 int main()
 {
+    ecl::err rc;
 
     ecl::cout << "Starting audio play..." << ecl::endl;
 
     // Usual init sequence.
 
-    ecl::cs43l22_instance::init();
-    ecl::cs43l22_instance::power_up();
+    rc = ecl::cs43l22_instance::init();
+    ecl_assert(ecl::is_ok(rc));
+    rc = ecl::cs43l22_instance::power_up();
+    ecl_assert(ecl::is_ok(rc));
 
     // Set volumes, so audio can be heard.
 
-    ecl::cs43l22_instance::set_master_volume(0x90);
-    ecl::cs43l22_instance::set_headphone_volume(0xe0);
-    ecl::cs43l22_instance::headphone_unmute();
+    rc = ecl::cs43l22_instance::set_master_volume(0x90);
+    ecl_assert(ecl::is_ok(rc));
+    rc = ecl::cs43l22_instance::set_headphone_volume(0xe0);
+    ecl_assert(ecl::is_ok(rc));
+    rc = ecl::cs43l22_instance::headphone_unmute();
+    ecl_assert(ecl::is_ok(rc));
 
     // Set audio properties.
-    ecl::cs43l22_instance::set_sampling_frequency<ecl::i2s::audio_frequency::k8>();
+    rc = ecl::cs43l22_instance::set_sampling_frequency<ecl::i2s::audio_frequency::k8>();
+    ecl_assert(ecl::is_ok(rc));
 
     // Start audio streaming. Events from codec will be handled in event_handler() routine.
-    ecl::cs43l22_instance::pcm_stream_start(samples, sizeof(samples) / (bps / 8), event_handler);
+    rc = ecl::cs43l22_instance::pcm_stream_start(samples, sizeof(samples) / (bps / 8), event_handler);
+    ecl_assert(ecl::is_ok(rc));
 
     for(;;);
     return 0;

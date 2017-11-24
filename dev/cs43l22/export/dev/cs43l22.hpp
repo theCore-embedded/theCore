@@ -494,7 +494,6 @@ err cs43l22< I2c, I2s, Rst_gpio >::register_write(codec_register reg, uint8_t va
     uint8_t buffer[] = {static_cast< uint8_t >(reg), value};
 
     I2c::lock();
-
 	I2c::platform_handle::set_slave_addr(i2c_address);
     I2c::set_buffers(buffer, 0, sizeof(buffer));
     err rc = I2c::xfer();
