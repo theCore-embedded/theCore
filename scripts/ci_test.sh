@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Builds and executes tests.
+# Builds and executes tests, examples, docs
 
 set -e # Stop on error
 set -v # Be verbose
