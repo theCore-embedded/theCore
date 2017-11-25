@@ -19,6 +19,8 @@
 #include <sys/types.h>
 #include <ecl/assert.h>
 
+#include <common/console.hpp>
+
 namespace ecl
 {
 
@@ -501,7 +503,7 @@ void spi_i2s_bus<dev>::prepare_tx()
         config::dma_tx::template mem_to_periph<data_sz>(m_tx.byte, m_tx_size,
                                                         &spi->DR);
     } else {
-        if (m_status & mode_circular) {
+        if (is_circular_mode()) {
             config::dma_tx::template mem_to_periph<data_sz, dma_mode::circular>(
                     m_tx.buf, m_tx_size, &spi->DR);
         } else {
@@ -644,7 +646,7 @@ void spi_i2s_bus<dev>::irq_handler()
         // All transfers completed
         get_handler()(channel::meta, event::tc, m_tx_size);
 
-        if (!(m_status & mode_circular)) {
+        if (!is_circular_mode()) {
             config::dma_rx::disable();
             config::dma_tx::disable();
 
