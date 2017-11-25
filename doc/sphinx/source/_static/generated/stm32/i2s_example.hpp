@@ -27,7 +27,7 @@ struct spi_i2s_cfg<spi_device::bus3>
     static constexpr auto bus_type = spi_bus_type::i2s;
 
     using dma_tx = i2s3_tx_dma;
-    using dma_rx = i2s3_tx_dma;
+    using dma_rx = i2s3_rx_dma;
 
     static constexpr I2S_InitTypeDef init_obj = {
         I2S_Mode_MasterTx,
