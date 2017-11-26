@@ -12,16 +12,16 @@
 namespace ecl
 {
 
-   template< typename stream >
-   stream& endl(stream &ios)
-   {
-       ios.put('\n');
-       ios.put('\r');
+template<typename stream>
+stream& endl(stream &ios)
+{
+    ios.put('\n');
+    ios.put('\r');
 
-       // TODO: flush stream when appropriate functionality
-       // will be ready
-       return ios;
-   }
+    // TODO: flush stream when appropriate functionality
+    // will be ready
+    return ios;
+}
 
 template<class IO_device>
 class ostream
