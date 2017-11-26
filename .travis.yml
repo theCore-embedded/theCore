@@ -16,8 +16,6 @@ install:
 
 script: nix-shell --pure --run ./scripts/ci_test.sh
 
-deploy:
-    provider: script
-    script: scripts/docs_deploy.sh
-    on:
-        branch: develop
+after_success:
+    - echo "Launching documentation deploy"
+    - sh scripts/doc_deploy.sh
