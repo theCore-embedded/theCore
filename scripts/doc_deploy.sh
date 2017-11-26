@@ -2,22 +2,23 @@
 # Pushes documentation to the gh pages
 
 set -e # Stop on error
+set -v
 
 BRANCH_NAME="travis-${TRAVIS_BUILD_NUMBER}-${TRAVIS_COMMIT}"
 
 cd build
-mkdir gh_pages
+mkdir -p gh_pages
 cd gh_pages
-git clone https://${GH_TOKEN}@github.com/forGGe/forGGe.github.io.git . > /dev/null 2>&1
+git clone https://${GH_TOKEN}@github.com/forGGe/forGGe.github.io.git .
 
 git config --local user.email "travis@travis-ci.org"
 git config --local user.name "Travis CI"
 
 # Delete all pages before adding new. Handles case when page should be deleted.
-rm -rv ../gh_pages/*
+rm -rv ../gh_pages/theCore/*
 cp -rv ../docs/sphinx/* .
 
-if [ -z $(git status --porcelain) ]; then
+if [ -z "$(git status --porcelain)" ]; then
     echo "No documentation changes present. Skipping doc deploy"
     return
 fi
