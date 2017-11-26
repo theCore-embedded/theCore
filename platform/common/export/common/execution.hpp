@@ -11,6 +11,7 @@
 
 #include <platform/execution.hpp>
 #include <ecl/assert.h>
+#include <chrono>
 
 namespace ecl
 {
@@ -99,6 +100,17 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
 static inline void wait_for(uint32_t ms)
 {
     wait_for(ms, []{ return false; /* Wait till timeout */} );
+}
+
+//! \brief Waits in loop for given amount of time, expressed using
+//! std::chrono library.
+//! \param[in] ms Time to wait
+//! \todo Use RTC instead of relying on clock. See #213 also.
+template<class Rep, class Period>
+static inline void wait_for(const std::chrono::duration<Rep, Period>& wait_duration)
+{
+    wait_for(std::chrono::milliseconds(wait_duration).count(),
+        []{ return false; /* Wait till timeout */} );
 }
 
 } // namespace ecl
