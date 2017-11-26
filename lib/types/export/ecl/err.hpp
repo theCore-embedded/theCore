@@ -105,7 +105,7 @@ static inline bool is_ok(err error)
 
 const char* err_to_str(err error);
 
-}
+} // namespace ecl
 
 #ifdef CORE_TESTS_ENABLED
 #include <CppUTest/SimpleString.h>

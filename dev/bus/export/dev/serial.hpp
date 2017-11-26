@@ -382,6 +382,8 @@ template <class PBus, size_t buf_size>
 err serial<PBus, buf_size>::recv_buf(uint8_t *buf, size_t &sz)
 {
     ecl_assert(m_is_inited);
+    ecl_assert(sz);
+
     err result = err::ok;
 
     auto &user_buf = m_chunks.get().user();
@@ -454,19 +456,22 @@ err serial<PBus, buf_size>::send_byte(uint8_t byte)
 }
 
 template <class PBus, size_t buf_size>
-err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
+err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &sz)
 {
+    ecl_assert(m_is_inited);
+    ecl_assert(sz);
+
     // Wait until TX will be ready
     if (m_nonblock) {
         if (!m_tx_rdy.get().try_wait()) {
-            size = 0;
+            sz = 0;
             return err::wouldblock;
         }
     } else {
         m_tx_rdy.get().wait();
     }
 
-    auto to_copy = std::min(size, buf_size);
+    auto to_copy = std::min(sz, buf_size);
     std::copy(buf, buf + to_copy, m_tx_buf);
     PBus::set_tx(m_tx_buf, to_copy);
     auto rc = PBus::do_tx();
@@ -476,11 +481,11 @@ err serial<PBus, buf_size>::send_buf(const uint8_t *buf, size_t &size)
     }
 
     // Only part of the buffer was consumed
-    if (to_copy < size) {
+    if (to_copy < sz) {
         rc = err::again;
     }
 
-    size = to_copy;
+    sz = to_copy;
 
     return rc;
 }
