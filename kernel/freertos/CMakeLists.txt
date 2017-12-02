@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# V8.2.3~1
+theCore_get_thirdparty(freertos https://github.com/cjlano/freertos.git f0c01fc0)
+
 add_library(freertos_main kernel_main.c)
 target_link_libraries(freertos_main PRIVATE dbg)
 
@@ -21,7 +24,7 @@ if(CONFIG_OS_EXTERNAL)
 	return()
 endif()
 
-set(SRC_DIR freertos/FreeRTOS/Source/)
+set(SRC_DIR ${THECORE_BUILD_THIRDPARTY_DIR}/freertos/FreeRTOS/Source/)
 
 # Compiler-dependent paths.
 # If you hit error here, make sure you check compiler support

@@ -18,6 +18,30 @@ include(Findcppcheck)
 include(CppcheckTargets)
 include(JSONParser)
 
+if(NOT DEFINED THECORE_THIRDPARTY_DIR)
+    if(DEFINED ENV{THECORE_THIRDPARTY_DIR})
+        set(THECORE_THIRDPARTY_DIR "$ENV{THECORE_THIRDPARTY_DIR}")
+        msg_trace("Using THECORE_THIRDPARTY_DIR environment variable")
+    else()
+        set(THECORE_THIRDPARTY_DIR "${CORE_DIR}/.thirdparty")
+        msg_trace("Using default thirdparty dir")
+    endif()
+endif()
+
+if(NOT DEFINED THECORE_BUILD_THIRDPARTY_DIR)
+    if(DEFINED ENV{THECORE_BUILD_THIRDPARTY_DIR})
+        set(THECORE_BUILD_THIRDPARTY_DIR "$ENV{THECORE_BUILD_THIRDPARTY_DIR}")
+        msg_trace("Using THECORE_BUILD_THIRDPARTY_DIR environment variable")
+    else()
+        set(THECORE_BUILD_THIRDPARTY_DIR "${CMAKE_CURRENT_BINARY_DIR}/thirdparty_worktrees")
+        msg_trace("Using default thirdparty build dir")
+    endif()
+endif()
+
+msg_info("Thirdparty directory: ${THECORE_THIRDPARTY_DIR}")
+msg_info("Thirdparty worktree (build) directory: ${THECORE_BUILD_THIRDPARTY_DIR}")
+
+
 # Check if theCore should be placed in the test mode.
 # Benefit here is supporting of CMake invocation without
 # THECORE_TARGET_CONFIG_FILE. It will reduce hassle when running unit tests,
