@@ -32,11 +32,7 @@ if(DOXYGEN_FOUND)
     # 3rd-parties that should be omitted.
     # Inspired by Oleh Kravchenko.
 
-    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/kernel/freertos/freertos/.*")
-    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/lib/stm32-spl/.*")
-    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/lib/cmsis/.*")
-    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/lib/particle_firmware/.*")
-    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/lib/ti-tivaware/ti-tivaware/.*")
+    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/.thirdparty/.*")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/lib/unity/Unity/.*")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/f4xx/export/system_stm32f4xx.h")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/f4xx/export/stm32f4xx.h")
@@ -44,7 +40,6 @@ if(DOXYGEN_FOUND)
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/l1xx/export/system_stm32l1xx.h")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/l1xx/export/stm32l1xx.h")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/l1xx/system_stm32l1xx.c")
-    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/lib/fs/fat/pff/.*")
 
     set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
