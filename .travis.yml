@@ -8,6 +8,10 @@ branches:
         - master
         - release
 
+env:
+    - THECORE_THIRDPARTY_DIR=~/theCore_thirdparty
+    - THECORE_BUILD_THIRDPARTY_DIR=~/theCore_thirdparty_worktrees
+
 install:
     - travis_retry curl https://nixos.org/nix/install -o nix_install.sh
     - sh nix_install.sh
@@ -15,3 +19,7 @@ install:
     - travis_retry nix-shell --pure --run true -j 2 --cores 2 -Q
 
 script: nix-shell --pure --run ./scripts/ci_test.sh
+
+after_success:
+    - echo "Launching documentation deploy"
+    - sh scripts/doc_deploy.sh

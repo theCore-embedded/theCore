@@ -2,6 +2,12 @@ if(NOT PLATFORM_NAME STREQUAL "particle_electron")
     return()
 endif()
 
+add_library(particle_firmware INTERFACE)
+
+# v0.5.1-rc.1-769-ged6f6640
+theCore_get_thirdparty_cmd(particle_3rdparty
+        https://github.com/forGGe/firmware.git ed6f66405af)
+
 include(ExternalProject)
 
 set(USER_FIRMWARE_IMAGE_LOCATION 0x8080000)
@@ -49,9 +55,9 @@ set(COMMON_DEFS
     -D_GNU_SOURCE
 )
 
-set(PARTICLE_FIRMWARE_DIR ${CMAKE_CURRENT_LIST_DIR}/firmware)
-
+set(PARTICLE_FIRMWARE_DIR ${THECORE_BUILD_THIRDPARTY_DIR}/particle_3rdparty)
 ExternalProject_Add(particle_build
+    DOWNLOAD_COMMAND "${particle_3rdparty_get_cmd}"
     SOURCE_DIR "${PARTICLE_FIRMWARE_DIR}"
     BUILD_COMMAND PLATFORM=electron v=1 make main
     CONFIGURE_COMMAND ""
@@ -59,8 +65,6 @@ ExternalProject_Add(particle_build
     BUILD_IN_SOURCE 1
     BUILD_ALWAYS 1
 )
-
-add_library(particle_firmware INTERFACE)
 
 add_dependencies(particle_firmware particle_build)
 

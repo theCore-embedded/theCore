@@ -249,3 +249,55 @@ macro(theCore_create_json_validator_runner)
     unset(VALIDATOR_SCRIPT)
 
 endmacro()
+
+# Constructs command to download thirdparty from git, place it under thirdparty
+# directory and make copy of it into the builddir.
+# Command constructed in returned in a ${target_name}_get_cmd variable.
+#
+# theCore_get_thirdparty(target_name git_remote git_commit)
+#   - name         - name for 3rdparty directory that will reside under
+#                    ${THECORE_THIRDPARTY_DIR}/ and will contain 3rdparty sources.
+#                    Also, name of resuling worktree dir during build, that will
+#                    be placed in ${THECORE_BUILD_THIRDPARTY_DIR}
+#   - git_remote   - git remote URL to fetch 3rdparty from
+#   - git_commit   - valid git commit to fetch
+function(theCore_get_thirdparty_cmd NAME GIT_REMOTE GIT_COMMIT)
+    if(NOT DEFINED NAME
+        OR NOT DEFINED GIT_REMOTE
+        OR NOT DEFINED GIT_COMMIT)
+        msg_fatal("Incorrect arguments passed to theCore_get_thirdparty")
+    endif()
+
+    msg_trace("Requested thirdparty: ${NAME} from: ${GIT_REMOTE} commit: ${GIT_COMMIT}")
+
+    if(NOT THECORE_THIRDPARTY_DIR)
+        msg_fatal("THECORE_THIRDPARTY_DIR must be specified in order to persist thirdparty packages")
+    endif()
+
+    if(NOT THECORE_BUILD_THIRDPARTY_DIR)
+        msg_fatal("THECORE_BUILD_THIRDPARTY_DIR must be specified in order to persist thirdparty packages")
+    endif()
+
+    set(${NAME}_get_cmd
+        "${CORE_DIR}/scripts/git_thirdparty.sh"
+        "${THECORE_THIRDPARTY_DIR}/${NAME}"
+        "${THECORE_BUILD_THIRDPARTY_DIR}/${NAME}"
+        "${GIT_REMOTE}"
+        "${GIT_COMMIT}" PARENT_SCOPE)
+endfunction()
+
+# Downloads thirdparty from GIT, places it under thirdparty directory and
+# makes copy of it into the builddir
+function(theCore_get_thirdparty NAME GIT_REMOTE GIT_COMMIT)
+    if(NOT DEFINED NAME
+        OR NOT DEFINED GIT_REMOTE
+        OR NOT DEFINED GIT_COMMIT)
+        msg_fatal("Incorrect arguments passed to theCore_add_thirdparty")
+    endif()
+
+    theCore_get_thirdparty_cmd(${NAME} ${GIT_REMOTE} ${GIT_COMMIT})
+
+    execute_process(COMMAND ${${NAME}_get_cmd}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+endfunction()

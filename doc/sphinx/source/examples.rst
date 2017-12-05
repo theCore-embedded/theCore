@@ -398,7 +398,7 @@ Firmware will be flashed via ``openocd`` and ``gdb``.
    launch ``gdb``::
 
      # From the build directory
-     arm-none-eabi-gdb htu21d_example
+     arm-none-eabi-gdb exti
 
 #. Under GDB shell, connect to ``openocd`` and flash firmware::
 
