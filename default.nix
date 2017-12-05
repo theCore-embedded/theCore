@@ -23,7 +23,7 @@ in with pkgs; {
         ];
       })
 
-      which cmake gcc6 gdb cppcheck
+      which cmake gcc6 gdb cppcheck git
       cpputest gcc-arm-embedded-5 dfu-util
       doxygen  llvmPackages.clang-unwrapped openocd
       perlPackages.ArchiveZip xxd
