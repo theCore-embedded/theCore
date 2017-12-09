@@ -1,8 +1,3 @@
-.. _theCore_Guides:
-
-Guides
-======
-
 .. _theCore_GettingStarted:
 
 Getting started
@@ -55,22 +50,6 @@ More info about Nix
 If you want to get yourself more familiar with Nix, check out `the Domenkozar's blog`_
 or read the `official documentation`_.
 
-Creating your first Hello World application
--------------------------------------------
-
-.. note:: This section is under construction.
-
-Multi-platform application
---------------------------
-
-.. note:: This section is under construction.
-
-.. _theCore_NoNixInstall:
-
-Getting required development packages without Nix
--------------------------------------------------
-
-.. note:: This section is under construction.
 
 .. _Nix: https://nixos.org/nix/
 .. _`the Domenkozar's blog`: https://www.domenkozar.com/2014/01/02/getting-started-with-nix-package-manager/
