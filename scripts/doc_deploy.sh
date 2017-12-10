@@ -4,11 +4,13 @@
 set -e # Stop on error
 set -v
 
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
 echo "Travis PR flag: $TRAVIS_PULL_REQUEST"
 echo "Travis branch: $TRAVIS_BRANCH"
 echo "Travis commit: $TRAVIS_COMMIT"
 echo "Travis build number: $TRAVIS_BUILD_NUMBER"
-
+echo "Script path: $SCRIPTPATH "
 
 if [ "${TRAVIS_PULL_REQUEST}" != "false" -o "${TRAVIS_BRANCH}" != "develop" ]; then
     echo "Skipping doc deploy. Only develop branch should be deployed"
@@ -28,6 +30,10 @@ git config --local user.name "Travis CI"
 # Delete all pages before adding new. Handles case when page should be deleted.
 rm -rv ../gh_pages/theCore/*
 cp -rv ../docs/sphinx/* .
+cp -rv ../docs/doxygen/html/* ./theCore/doxygen/
+
+# Generate sitemap
+${SCRIPTPATH}/sitemap.sh
 
 if [ -z "$(git status --porcelain)" ]; then
     echo "No documentation changes present. Skipping doc deploy"
