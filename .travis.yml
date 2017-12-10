@@ -9,8 +9,7 @@ branches:
         - release
 
 env:
-    - THECORE_THIRDPARTY_DIR=~/theCore_thirdparty
-    - THECORE_BUILD_THIRDPARTY_DIR=~/theCore_thirdparty_worktrees
+    - THECORE_THIRDPARTY_DIR=~/theCore_thirdparty THECORE_BUILD_THIRDPARTY_DIR=~/theCore_thirdparty_worktrees
 
 install:
     - travis_retry curl https://nixos.org/nix/install -o nix_install.sh
