@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_library(host console.cpp)
-#add_library(startup INTERFACE)
 
 theCore_create_json_validator_runner(
     NAME host_validate
