@@ -2,6 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_other Other modules
+//! @{
+
+//! \file
+//! \brief STM32 platform main file
+
 #include "common/execution.hpp"
 #include "platform/exti_manager.hpp"
 #include "common/irq.hpp"
@@ -62,3 +74,8 @@ extern "C" void platform_init()
 #endif // THECORE_CONFIG_USE_BYPASS_CONSOLE
 }
 
+//! @}
+
+//! @}
+
+//! @}

@@ -2,8 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_pins Pin configuration helpers
+//! @{
+
 //! \file
-//! \brief Pin configuraiton helpers.
+//! \brief Pin configuration helpers.
 
 #ifndef PLATFORM_AUX_TM4C_PIN_CFG_HPP_
 #define PLATFORM_AUX_TM4C_PIN_CFG_HPP_
@@ -214,3 +223,9 @@ static constexpr inline auto get_pin_intflag(num n)
 } // namespace ecl
 
 #endif // PLATFORM_AUX_TM4C_PIN_CFG_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

@@ -2,11 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//!
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_spi_i2s I2S and SPI driver
+//! @{
+
 //! \file
 //! \brief Contains platform driver implementation for SPI and I2S buses.
 //! \details In STM32F4 series SPI and I2S are implemented within the same controller.
-//!
 #ifndef PLATFORM_SPI_BUS_HPP_
 #define PLATFORM_SPI_BUS_HPP_
 
@@ -969,3 +976,9 @@ bool spi_i2s_bus<dev>::is_circular_mode()
 } // namespace ecl
 
 #endif // PLATFORM_SPI_BUS_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

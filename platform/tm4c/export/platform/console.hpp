@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_console Console
+//! @{
+
 //! \file
 //! \brief TM4C bypass console driver
 #ifndef TM4C_CONSOLE_DRIVER_HPP_
@@ -33,3 +42,9 @@ void bypass_putc(char c);
 } // namespace ecl
 
 #endif // TM4C_CONSOLE_DRIVER_STUB_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

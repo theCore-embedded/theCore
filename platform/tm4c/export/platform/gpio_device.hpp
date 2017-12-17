@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_gpio GPIO control
+//! @{
+
 //! \file
 //! \brief TM4C GPIO device.
 #ifndef TM4C_GPIO_DEVICE_HPP_
@@ -85,3 +94,9 @@ bool gpio<Port, Pin>::get()
 } // namespace ecl
 
 #endif // TM4C_GPIO_DEVICE_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

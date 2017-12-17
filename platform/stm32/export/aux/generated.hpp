@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_templates Auto-generated code, Python COG and CMake templates
+//! @{
+
 //! \file
 //! \brief Enlists all generated headers by stm32 platform. Further used
 //! by theCore or the user.
@@ -22,3 +31,9 @@
 extern "C" void gpio_init_generated();
 
 #endif // PLATFORM_GENERATED_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

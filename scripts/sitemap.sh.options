@@ -2,6 +2,7 @@
 ! -iname robots.txt
 ! -iname sitemap.\*
 ! -iname \*.js
+! -iname \*.doctree
 ! -iname \*.css
 ! -iname \*.png
 ! -iname \*.md5

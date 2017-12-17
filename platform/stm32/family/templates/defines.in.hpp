@@ -2,6 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
 //! \file
 //! \brief Family-related defintions that should be exported.
 #ifndef STM32_FAMILY_DEFINES_
@@ -25,3 +31,7 @@
 #define CONFIG_IRQ_COUNT ${TARGET_MCU_IRQ_COUNT}
 
 #endif // STM32_FAMILY_DEFINES_
+
+//! @}
+
+//! @}
