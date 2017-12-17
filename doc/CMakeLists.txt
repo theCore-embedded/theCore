@@ -55,6 +55,7 @@ if(DOXYGEN_FOUND)
             VERBATIM_HEADERS
             FULL_PATH_NAMES
         YES
+            QUIET
             CALL_GRAPH
             EXTRACT_ALL
             EXTRACT_STATIC
