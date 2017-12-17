@@ -1,0 +1,139 @@
+/*! \mainpage theCore embedded framework - A Brief Description.
+
+theCore: C++ Embedded Framework
+===============================
+
+theCore is the C++ embedded framework for various microcontroller
+applications, with or without RTOS (bare-metal).
+
+theCore tries to provide all that is necessary to create portable
+application code:
+
+-   Startup, initialization and periphery code for each supported
+    platform.
+-   Build system support for different platform and target
+    configurations.
+-   Platform-independent device drivers, like temperature sensors or
+    displays.
+-   Optional OS-related abstractions: semaphores, mutexes and threads.
+-   Easy-to-deploy development environment.
+-   Different libraries and utilities.
+
+Documentation
+-------------
+
+theCore documentation hosted on GitHub pages and available in two
+formats: [multi-page HTML](https://forgge.github.io/theCore/) for ease
+of navigation and [single-page
+HTML](https://forgge.github.io/theCore/singlehtml/contents.html) for
+ease of manual searching.
+
+Doxygen documentation is available here (trough it is not complete).
+
+Where to get theCore
+--------------------
+
+theCore is now available only from source and hosted solely on
+[GitHub](https://github.com/forGGe/theCore/). There are different
+branches for development and stable versions. Check [Branching](https://forgge.github.io/theCore/community.html#brancing-model)
+section for information about branches purpose.
+
+Getting started
+---------------
+
+You can start using theCore by completing guides and tutorials in the
+[Guides](https://forgge.github.io/theCore/guides.html) section or check the source code of [the standalone blinky
+example project](https://github.com/forGGe/theCore-blinky).
+
+It is also worth to look at examples that are placed in examples dir and
+read the [Examples](https://forgge.github.io/theCore/examples.html) section to understand how to build and launch
+them.
+
+Supported platforms
+-------------------
+
+Supported platform list along with information about each platform is
+located in [Platforms](https://forgge.github.io/theCore/platforms.html) section.
+
+Project links
+-------------
+
+Here a couple of additional references that you might be interest in:
+
+-   [Mailing list](https://mailmanlists.eu/mailman/listinfo/thecore).
+    For large discussions and announcements.
+-   [theCore Telegram
+    group](https://t.me/joinchat/HQF-SEgtMQXoNOq_D71pSg). For
+    discussions.
+-   [theCore Telegram channel](https://t.me/theCoreEmbedded). For
+    announcements.
+-   [theCore Twitter](https://twitter.com/theCoreEmbedded). You can
+    check some announcements there too.
+-   [OpenHub page](https://www.openhub.net/p/theCoreEmbedded). Pretty
+    good and explanatory.
+
+License
+-------
+
+The source code is distributed under [MPL v2.0
+License](https://www.mozilla.org/en-US/MPL/) (Mozilla Public License
+Version 2.0).
+
+MPL is like LGPL, but with static linking exception.
+
+For many practical cases it means that **you can use theCore in your
+proprietary embedded applications without disclosing the application
+source code**.
+
+Keep it private, if needed. MPL allows you to do that.
+
+Pay note though, that MPL is still a copy-left license. So you are
+obligated to distribute any changes of theCore itself if there were any.
+
+It is strongly recommended to read [MPL 2.0
+FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/) to get more familiar
+with it.
+
+Technologies and projects used
+------------------------------
+
+Most notable are:
+
+-   C++11 and C++14 - as a main programming language standards.
+-   Python 3 and [cog](https://nedbatchelder.com/code/cog/) - code
+    generation.
+-   [Doxygen](http://www.stack.nl/~dimitri/doxygen/) and
+    [Sphinx](http://www.sphinx-doc.org/) - in-source and project-wide
+    documentation.
+-   [CMake](https://cmake.org/) - build-system.
+-   [Nix](https://nixos.org/nix/) - development environment management.
+-   [CppUTest](http://cpputest.github.io/) and
+    [Unity](http://www.throwtheswitch.org/unity/) - unit and on-device
+    testing.
+-   [Travis](https://travis-ci.org/forGGe/theCore/) - continuos
+    integration.
+
+Check the [Credits](https://forgge.github.io/theCore/credits.html) section for more.
+
+Contribution & Using
+--------------------
+
+The project is on its very beginning, so any help is more than welcome
+and highly appreciated. If you'd like to take a part in the project
+growth and (or) have any questions -- take a look at [DeveloperDocs](https://forgge.github.io/theCore/community.html)
+section, leave message at [theCore Telegram
+group](https://t.me/joinchat/HQF-SEgtMQXoNOq_D71pSg), [mailing
+list](https://mailmanlists.eu/mailman/listinfo/thecore)
+[gitter](https://gitter.im/forGGe/theCore), contact me directly at
+<forgge@gmail.com>, or simply check out [a list of theCore
+issues](https://github.com/forGGe/theCore/issues).
+
+If you have any suggestions on theCore improvement or just like it how
+it is, don't keep silence! I'll be happy to read your reviews.
+
+You are welcome to use theCore in your own projects. If there is
+something that it's not enough for this, please let me know via email or
+open some issues and we will do our best to handle this ASAP. Good luck!
+
+
+*/

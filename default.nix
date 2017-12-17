@@ -7,21 +7,22 @@ let
   fulltoc = pkgs.callPackage ./nix/sphinx-fulltoc {};
   cmake-doxygen = pkgs.callPackage ./nix/cmake-doxygen {};
 
-in with pkgs; {
+in with pkgs; with python35Packages; {
   coreEnv = stdenv.mkDerivation {
     name = "thecore";
     hardeningDisable = [ "all" ];
     buildInputs = [
-      # With Python configuration requiring a special wrapper
-      (python35.buildEnv.override {
-        ignoreCollisions = true;
-        extraLibs = with python35Packages; [
+      # With Python configuration requires a special wrapper
+#      (python35.buildEnv.override {
+#        ignoreCollisions = true;
+#        extraLibs = with python35Packages; [
           cogapp
           jsonschema
           sphinx
           sphinx_rtd_theme
-        ];
-      })
+          recommonmark
+#        ];
+#      })
 
       which cmake gcc6 gdb cppcheck git
       cpputest gcc-arm-embedded-5 dfu-util

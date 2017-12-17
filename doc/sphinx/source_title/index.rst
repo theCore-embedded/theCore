@@ -3,8 +3,8 @@ Welcome to theCore!
 
 You are on the author's title page of `theCore embedded C++ framework project <theCore/index.html>`_.
 
-theCore is the open source, highly configurable and straightforward C++ embedded
-framework. With a help of theCore you can reduce your efforts of creating
+theCore is the C++ embedded framework for various microcontroller applications.
+With a help of theCore you can reduce your efforts of creating
 low-level, bare metal and embedded applications for 32-bit (and less)
 microcontrollers. Such as ARM Cortex M4, M3, M0 from different vendors.
 

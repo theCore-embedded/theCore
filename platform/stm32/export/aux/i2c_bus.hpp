@@ -2,7 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform_stm32 STM32 platform definitions and drivers.
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_i2c I2C driver
 //! @{
 
 //! \file
@@ -767,6 +773,10 @@ void i2c_bus<i2c_config>::set_slave_addr(uint16_t addr)
 
 } // namespace ecl
 
+#endif /* PLATFORM_I2C_BUS_HPP_ */
+
 //! @}
 
-#endif /* PLATFORM_I2C_BUS_HPP_ */
+//! @}
+
+//! @}

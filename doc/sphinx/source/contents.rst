@@ -43,6 +43,7 @@ theCore: C++ Embedded Framework
   docs
   testing
   credits
+  changelog
 
 Indices and tables
 ==================

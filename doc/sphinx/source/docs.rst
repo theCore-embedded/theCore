@@ -17,13 +17,28 @@ Nix option.
 Following sections will provide you with insights about docs structure and build
 procedure.
 
+Building Doxygen documentation
+------------------------------
+
+theCore contains Doxygen and it is possible to generate Doxygen pages
+locally using CMake target:
+
+#. Launch command in the ``doc_build`` directory
+   :ref:`created on previous step <theCore_building_Sphinx>`::
+
+     make core_doxygen
+
+#. Open index page of generated Doxygen by any preferable browser:
+   ``doc_build/doc/doxygen/html/index.html``
+
 .. _theCore_building_Sphinx:
 
 Building Sphinx documentation
 -----------------------------
 
 theCore build system provides a separate target for building documentation, so
-there is no need to invoke Sphinx manually. Instead, proceed as follows:
+there is no need to invoke Sphinx manually. Doxygen will be built automatically
+before Sphinx. Proceed as follows:
 
 #. Finish :ref:`theCore_GettingStarted` to get Sphinx and additional extensions.
 #. Launch documentation build::
@@ -38,20 +53,6 @@ there is no need to invoke Sphinx manually. Instead, proceed as follows:
 
    - ``doc_build/sphinx/theCore/index.html`` - main page of multi-page version.
    - ``doc_build/sphinx/theCore/singlehtml/index.html`` - main page of single-paged version.
-
-Building Doxygen documentation
-------------------------------
-
-theCore also contains Doxygen and it is possible to generate Doxygen pages
-locally using CMake target:
-
-#. Launch command in the ``doc_build`` directory
-   :ref:`created on previous step <theCore_building_Sphinx>`::
-
-     make core_doxygen
-
-#. Open index page of generated Doxygen by any preferable browser:
-   ``doc_build/doc/doxygen/html/index.html``
 
 What all these sections are about?
 ----------------------------------
@@ -69,18 +70,8 @@ See also `the GitHub pages docs`_ for more information.
 
 Contributing to the documentation consist of creating a PR against `theCore repository`_.
 
-After the PR is opened, the new documentation is processed by the author manually in following fashion:
-
-#. New docs are build and tested locally, as described in `Building Sphinx documentation`_ section.
-#. Generated static files are copied to the github pages clone::
-
-     cp doc_build/doc/sphinx/* /path/to/the/gh_pages/ -rv
-
-#. Changes are committed and pushed to the remote::
-
-     git add -u
-     git commit
-     git push origin master
+After the PR is merged, the new documentation is deployed using ``scripts/doc_deploy.sh``
+script.
 
 .. _Sphinx: http://www.sphinx-doc.org/en/stable/
 .. _Read The Docs theme: http://docs.readthedocs.io/en/latest/theme.html

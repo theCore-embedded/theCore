@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_uart UART driver
+//! @{
+
 //!
 //! \file
 //! \brief STM32 USART driver
@@ -409,7 +418,7 @@ ecl::err usart_bus<dev>::do_xfer()
     // Order matters
     do_rx();
     do_tx();
-    
+
     return ecl::err::ok;
 }
 
@@ -452,7 +461,7 @@ ecl::err usart_bus<dev>::do_tx()
     }
 
     m_tx_left = m_tx_size;
-    
+
     clear_tx_done();
 
     // In case if previous xfer was canceled.
@@ -693,7 +702,7 @@ void usart_bus<dev>::irq_handler()
             // Both TX and RX are finished. Notifying.
             event_handler()(channel::meta, event::tc, 0);
         }
-    } 
+    }
 
     // Keep interrupts always on
     irq::unmask(irqn);
@@ -701,5 +710,10 @@ void usart_bus<dev>::irq_handler()
 
 } // namespace ecl
 
-
 #endif // PLATFORM_USART_BUS_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

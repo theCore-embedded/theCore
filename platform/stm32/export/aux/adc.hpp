@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_adc ADC driver
+//! @{
+
 //! \file
 //! \brief STM32 ADC driver.
 //! \details Some app notes can be found at:
@@ -775,5 +784,10 @@ err adc<dev>::single(const adc_evh &evh)
 
 } // namespace ecl
 
-
 #endif // PLATFORM_ADC_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

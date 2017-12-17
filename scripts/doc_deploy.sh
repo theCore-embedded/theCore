@@ -31,7 +31,6 @@ git config --local user.name "Travis CI"
 rm -rv ../gh_pages/theCore/*
 cp -rv ../docs/sphinx/* .
 mkdir -p ../gh_pages/theCore/doxygen/
-cp -rv ../docs/doxygen/html/* ./theCore/doxygen/
 
 # Generate sitemap
 ${SCRIPTPATH}/sitemap.sh

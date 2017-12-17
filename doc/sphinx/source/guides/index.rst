@@ -16,3 +16,4 @@ programming skills with theCore.
   hello-world
   multiplatform
   without-nix
+  thirdparty-cache

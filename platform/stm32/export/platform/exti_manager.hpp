@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_exti External interrupt manager
+//! @{
+
 //! \file
 //! \brief External interrupt manager for STM32 platform.
 
@@ -339,7 +348,12 @@ exti_manager::is_grouped_exti<Gpio> exti_manager::save_handler(handler &h)
     return true;
 }
 
-
 } // namespace ecl
 
 #endif // STM32_EXTI_MANAGER_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

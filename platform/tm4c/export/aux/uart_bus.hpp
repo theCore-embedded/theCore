@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_uart UART driver
+//! @{
+
 //! \file
 //! \brief UART implementation for TI TM4C MCU
 
@@ -465,3 +474,9 @@ err uart_bus<dev>::cancel_xfer()
 } // namespace ecl
 
 #endif // PLATFORM_TM4C_UART_BUS_HPP_
+
+//! @}
+
+//! @}
+
+//! @}

@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_templates Auto-generated code, Python COG and CMake templates
+//! @{
+
 //! \file
 //! \brief Header provides template of I2C driver configuration.
 #ifndef STM32XX_I2C_CFGS_HPP_
@@ -120,5 +129,10 @@ for config in i2c:
 
 } // namespace ecl
 
-
 #endif // STM32XX_I2C_CFGS_HPP_
+
+//! @}
+
+//! @}
+
+//! @}
