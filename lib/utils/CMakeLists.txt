@@ -4,7 +4,7 @@
 
 find_package(cmake-version4git)
 
-add_library(utils INTERFACE)
+add_library(utils STATIC ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 target_include_directories(utils INTERFACE export)
 
 add_unit_host_test(
@@ -15,9 +15,9 @@ add_unit_host_test(
 
 if(cmake-version4git_FOUND)
 	PROJECT_VERSION_FROM_GIT()
-
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.cpp.in"
-			"${CMAKE_CURRENT_BINARY_DIR}/version.cpp" @ONLY)
-	target_sources(utils INTERFACE
-			"${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
+	# Better shortcut
+	set(THECORE_VER4GIT_FOUND 1)
 endif()
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.in.cpp"
+	"${CMAKE_CURRENT_BINARY_DIR}/version.cpp" @ONLY)
