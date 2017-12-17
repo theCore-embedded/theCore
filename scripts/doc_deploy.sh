@@ -40,7 +40,7 @@ if [ -z "$(git status --porcelain)" ]; then
     exit 0
 fi
 
-git checkout -b ${BRANCH_NAME}
+git checkout -q -b ${BRANCH_NAME}
 git add .
 git commit -m "Travis update from ${TRAVIS_BUILD_NUMBER}"
 git push --quiet origin ${BRANCH_NAME}
