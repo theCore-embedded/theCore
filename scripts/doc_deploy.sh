@@ -4,6 +4,11 @@
 set -e # Stop on error
 set -v
 
+echo "Launching documentation deploy"
+
+# NOTE: script don't check branch here. It validates local deploy procedure,
+# but not pushing anywhere if not in develop branch.
+
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 echo "Travis PR flag: $TRAVIS_PULL_REQUEST"
@@ -11,11 +16,6 @@ echo "Travis branch: $TRAVIS_BRANCH"
 echo "Travis commit: $TRAVIS_COMMIT"
 echo "Travis build number: $TRAVIS_BUILD_NUMBER"
 echo "Script path: $SCRIPTPATH "
-
-if [ "${TRAVIS_PULL_REQUEST}" != "false" -o "${TRAVIS_BRANCH}" != "develop" ]; then
-    echo "Skipping doc deploy. Only develop branch should be deployed"
-    exit 0
-fi
 
 BRANCH_NAME="travis-${TRAVIS_BUILD_NUMBER}-${TRAVIS_COMMIT}"
 
@@ -43,4 +43,10 @@ fi
 git checkout -q -b ${BRANCH_NAME}
 git add .
 git commit -q -m "Travis update from ${TRAVIS_BUILD_NUMBER}"
+
+if [ "${TRAVIS_PULL_REQUEST}" != "false" -o "${TRAVIS_BRANCH}" != "develop" ]; then
+    echo "Skipping doc push. Only develop branch should be deployed"
+    exit 0
+fi
+
 git push --quiet origin ${BRANCH_NAME}
