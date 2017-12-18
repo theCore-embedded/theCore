@@ -1,5 +1,8 @@
 language: cpp
 sudo: required
+services:
+  - docker
+
 dist: trusty
 branches:
     only:
@@ -11,14 +14,17 @@ branches:
 env:
     - THECORE_THIRDPARTY_DIR=~/theCore_thirdparty THECORE_BUILD_THIRDPARTY_DIR=~/theCore_thirdparty_worktrees
 
+before_install:
+    - docker pull thecoreembedded/thecore
+
 install:
-    - travis_retry curl https://nixos.org/nix/install -o nix_install.sh
-    - sh nix_install.sh
-    - . $HOME/.nix-profile/etc/profile.d/nix.sh
-    - travis_retry nix-shell --pure --run true -j 2 --cores 2 -Q
+    - docker run -v $(pwd):/root/thecore -w /root/thecore --name "thecore_container" -t -d thecoreembedded/thecore
+    - docker ps -a
 
-script: nix-shell --pure --run ./scripts/ci_test.sh
+script:
+    - docker exec -e THECORE_THIRDPARTY_DIR="$THECORE_THIRDPARTY_DIR" -e THECORE_BUILD_THIRDPARTY_DIR="$THECORE_BUILD_THIRDPARTY_DIR" -it thecore_container nix-shell --run ./scripts/ci_test.sh
 
-after_success:
-    - echo "Launching documentation deploy"
-    - sh scripts/doc_deploy.sh
+after_script:
+    - docker exec -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" -e TRAVIS_BRANCH="$TRAVIS_BRANCH" -e TRAVIS_COMMIT="$TRAVIS_COMMIT" -e TRAVIS_BUILD_NUMBER="$TRAVIS_BUILD_NUMBER" -e GH_TOKEN="$GH_TOKEN" -it thecore_container nix-shell --run ./scripts/doc_deploy.sh
+    - docker kill thecore_container
+    - docker rm thecore_container
