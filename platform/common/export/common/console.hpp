@@ -9,6 +9,7 @@
 #define PLATFORM_COMMON_CONSOLE_HPP_
 
 #include <platform/console.hpp>
+#include <ecl/version.hpp>
 
 namespace ecl
 {
@@ -23,6 +24,14 @@ static inline void bypass_puts(const char *str)
         }
         bypass_putc(ch);
     }
+}
+
+//! Puts a greeting to a theCore console
+static inline void bypass_greeting()
+{
+    bypass_puts("\r\nWelcome to theCore\r\n");
+    bypass_puts(version());
+    bypass_puts("\r\n");
 }
 
 } // namespace ecl

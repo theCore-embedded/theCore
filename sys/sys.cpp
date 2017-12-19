@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 #include <common/irq.hpp>
-#include <platform/console.hpp>
+#include <common/console.hpp>
 #include <common/execution.hpp>
 
 // TODO: move it somewhere
@@ -110,7 +110,7 @@ extern "C" void core_main()
 extern "C" void early_main()
 {
     // Platform console subsystem is ready at this stage
-    for (auto c : "\r\nWelcome to theCore\r\n") { ecl::bypass_putc(c); }
+    ecl::bypass_greeting();
 
     extern uint32_t __init_array_start;
     extern uint32_t __init_array_end;
