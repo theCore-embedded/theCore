@@ -12,19 +12,30 @@ branches:
         - release
 
 env:
-    - THECORE_THIRDPARTY_DIR=~/theCore_thirdparty THECORE_BUILD_THIRDPARTY_DIR=~/theCore_thirdparty_worktrees
+  - THECORE_THIRDPARTY_DIR=~/theCore_thirdparty THECORE_BUILD_THIRDPARTY_DIR=~/theCore_thirdparty_worktrees
 
 before_install:
-    - docker pull thecoreembedded/thecore
+  - |
+    mkdir -p docker/expr
+    cp -v default.nix docker/expr/
+    cp -rv nix/ docker/expr/
+    cd docker
+    docker build -t thecore_image --target update .
+    docker tag thecore_image thecoreembedded/thecore
+    if [ "$TRAVIS_BRANCH" == "develop" -a "$TRAVIS_EVENT_TYPE" == "cron" ]; then
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      docker push thecoreembedded/thecore
+    fi
+    cd -
 
 install:
-    - docker run -v $(pwd):/root/thecore -w /root/thecore --name "thecore_container" -t -d thecoreembedded/thecore
-    - docker ps -a
+  - docker run -v $(pwd):/root/thecore -w /root/thecore --name "thecore_container" --rm -t -d thecoreembedded/thecore
 
 script:
-    - docker exec -e THECORE_THIRDPARTY_DIR="$THECORE_THIRDPARTY_DIR" -e THECORE_BUILD_THIRDPARTY_DIR="$THECORE_BUILD_THIRDPARTY_DIR" -it thecore_container nix-shell --run ./scripts/ci_test.sh
+  - docker exec -e THECORE_THIRDPARTY_DIR="$THECORE_THIRDPARTY_DIR" -e THECORE_BUILD_THIRDPARTY_DIR="$THECORE_BUILD_THIRDPARTY_DIR" -it thecore_container nix-shell --run ./scripts/ci_test.sh
+
+after_success:
+  - docker exec -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" -e TRAVIS_BRANCH="$TRAVIS_BRANCH" -e TRAVIS_COMMIT="$TRAVIS_COMMIT" -e TRAVIS_BUILD_NUMBER="$TRAVIS_BUILD_NUMBER" -e GH_TOKEN="$GH_TOKEN" -it thecore_container nix-shell --run ./scripts/doc_deploy.sh
 
 after_script:
-    - docker exec -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" -e TRAVIS_BRANCH="$TRAVIS_BRANCH" -e TRAVIS_COMMIT="$TRAVIS_COMMIT" -e TRAVIS_BUILD_NUMBER="$TRAVIS_BUILD_NUMBER" -e GH_TOKEN="$GH_TOKEN" -it thecore_container nix-shell --run ./scripts/doc_deploy.sh
-    - docker kill thecore_container
-    - docker rm thecore_container
+  - docker kill thecore_container
