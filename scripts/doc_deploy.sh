@@ -29,7 +29,7 @@ git config --local user.name "Travis CI"
 
 # Delete all pages before adding new. Handles case when page should be deleted.
 rm -r ../gh_pages/theCore/*
-cp -r ../docs/sphinx/* .
+cp -Lr ../docs/sphinx/* .
 mkdir -p ../gh_pages/theCore/doxygen/
 
 # Generate sitemap
