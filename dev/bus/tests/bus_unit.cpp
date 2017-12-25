@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "dev/bus.hpp"
+#include "mocks/platform_bus.hpp"
+
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
 #include <CppUTestExt/MockSupport.h>
-
-#include "dev/bus.hpp"
-#include "mocks/platform_bus.hpp"
 
 // Our resident
 using bus_t = ecl::generic_bus< platform_mock >;

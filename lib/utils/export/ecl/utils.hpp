@@ -102,6 +102,49 @@ constexpr auto extract_value(Enum val)
     return static_cast<std::underlying_type_t<Enum>>(val);
 }
 
+//------------------------------------------------------------------------------
+
+//! Exploded string produces unique type for every unique string
+template<char... c>
+struct exploded_string
+{
+    //! Exploded string static array
+    static const char fl[sizeof ...(c)];
+};
+
+template<char ...c>
+const char exploded_string<c...>::fl[sizeof ...(c)] = { c... };
+
+//! Explodes substring into `exploded_string` type.
+//! \tparam S String advertiser with str() method that will return valid
+//!           constexpr string.
+//! \tparam B Index of begin of substring to be exploded.
+//! \tparam L Length of substring to be exploded.
+template <typename S, size_t B, size_t L, char... c>
+struct explode_chunk_impl
+{
+    using result =
+    typename explode_chunk_impl<S, B, L - 1, S::str()[B + L - 1], c...>::result;
+};
+
+//! Explodes part of the string into `exploded_string` type.
+//! \tparam S String advertiser with str() method that will return valid
+//!           constexpr string.
+//! \tparam B Index of begin of substring to be exploded.
+template <typename S, size_t B, char... c >
+struct explode_chunk_impl<S, B, 0, c...>
+{
+    using result = exploded_string<c...>;
+};
+
+//! Syntactical sugar for exploding substring.
+//! \tparam S String advertiser with str() method that will return valid
+//!           constexpr string.
+//! \tparam B Index of begin of substring to be exploded.
+//! \tparam L Length of substring to be exploded.
+template <typename S, size_t B, size_t L>
+using explode_chunk = typename explode_chunk_impl<S, B, L>::result;
+
 } // namespace ecl
 
 #endif // LIB_ECL_UTILS_HPP_
