@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.2)
 # The Core framework directory.
 set(CORE_DIR ../../)
 
+# Obvious.
+project(exti_to_uart)
+
 # Required.
 include(${CORE_DIR}/build_api.cmake)
-
-# Objvious.
-project(exti_to_uart)
 
 # Required flags for this demo
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")

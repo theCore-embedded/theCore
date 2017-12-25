@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.2)
 # The Core framework directory.
 set(CORE_DIR ../../)
 
+# Obvious.
+project(cs43l22_audio)
+
 # Required.
 include(${CORE_DIR}/build_api.cmake)
-
-# Objvious.
-project(cs43l22_audio)
 
 # Our demo sources.
 add_executable(audio main.cpp target.cpp)
