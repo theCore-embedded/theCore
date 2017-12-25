@@ -2,9 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#cmakedefine THECORE_VER4GIT_FOUND @THECORE_VER4GIT_FOUND@
+
 namespace ecl
 {
-#if @THECORE_VER4GIT_FOUND@
+#ifdef THECORE_VER4GIT_FOUND
 
 #if @PROJECT_GIT_DIRTY@
 #define DIRTY "-dirty"

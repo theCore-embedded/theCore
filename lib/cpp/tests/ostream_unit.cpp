@@ -2,14 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <CppUTest/TestHarness.h>
-#include <CppUTest/CommandLineTestRunner.h>
-#include <CppUTestExt/MockSupport.h>
 #include <limits.h>
 #include <sstream>
 
 #include "ecl/ostream.hpp"
 #include "mock_device.hpp"
+
+#include <CppUTest/TestHarness.h>
+#include <CppUTest/CommandLineTestRunner.h>
+#include <CppUTestExt/MockSupport.h>
 
 using ostream_unit = ecl::ostream< mock_device >;
 
