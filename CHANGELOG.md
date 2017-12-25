@@ -1,6 +1,14 @@
 # Change Log
 
-## [v0.3.0](https://github.com/forGGe/theCore/tree/v0.3.0) (2016-12-11)
+## [v0.3.1](https://github.com/forGGe/theCore/tree/v0.3.1) (2017-12-25)
+[Full Changelog](https://github.com/forGGe/theCore/compare/v0.3.0...v0.3.1)
+
+**Merged pull requests:**
+
+- Fix clang wrapper issue on Nix [\#337](https://github.com/forGGe/theCore/pull/337) ([forGGe](https://github.com/forGGe))
+- Fix readme file links and build instructions [\#223](https://github.com/forGGe/theCore/pull/223) ([forGGe](https://github.com/forGGe))
+
+## [v0.3.0](https://github.com/forGGe/theCore/tree/v0.3.0) (2016-12-10)
 [Full Changelog](https://github.com/forGGe/theCore/compare/v0.2.1...v0.3.0)
 
 **Closed issues:**
@@ -30,26 +38,7 @@
 
 **Merged pull requests:**
 
-- v0.3.0 Release fixes [\#193](https://github.com/forGGe/theCore/pull/193) ([forGGe](https://github.com/forGGe))
-- theCore: code style guide and formatting script [\#188](https://github.com/forGGe/theCore/pull/188) ([forGGe](https://github.com/forGGe))
-- utils: new tuple iteration algorithm and test [\#187](https://github.com/forGGe/theCore/pull/187) ([forGGe](https://github.com/forGGe))
-- stm32: fix incorrect size calculation in L1 DMA wrap [\#185](https://github.com/forGGe/theCore/pull/185) ([forGGe](https://github.com/forGGe))
-- Readme updates: tests and examples [\#182](https://github.com/forGGe/theCore/pull/182) ([forGGe](https://github.com/forGGe))
-- Petite FAT moved to submodule [\#181](https://github.com/forGGe/theCore/pull/181) ([forGGe](https://github.com/forGGe))
-- EXTI test for stm32 and console fixes [\#180](https://github.com/forGGe/theCore/pull/180) ([forGGe](https://github.com/forGGe))
-- TM4C EXTI driver, tests and improvements [\#178](https://github.com/forGGe/theCore/pull/178) ([forGGe](https://github.com/forGGe))
-- TM4C platform: enabled console subsystem support [\#174](https://github.com/forGGe/theCore/pull/174) ([forGGe](https://github.com/forGGe))
-- Clang support for M4 processor [\#173](https://github.com/forGGe/theCore/pull/173) ([forGGe](https://github.com/forGGe))
-- theCore: abort build if cross-compiler is not set [\#171](https://github.com/forGGe/theCore/pull/171) ([forGGe](https://github.com/forGGe))
-- theCore: fix platform selection based on cross-compilation facts [\#170](https://github.com/forGGe/theCore/pull/170) ([forGGe](https://github.com/forGGe))
-- cs43l22 complete example, cmake FORCE\_COMPILER removal and interface library approach [\#169](https://github.com/forGGe/theCore/pull/169) ([forGGe](https://github.com/forGGe))
-- Bunch of improvements [\#166](https://github.com/forGGe/theCore/pull/166) ([forGGe](https://github.com/forGGe))
-- Static platform buses [\#161](https://github.com/forGGe/theCore/pull/161) ([forGGe](https://github.com/forGGe))
-- tm4c UART fill and RX mode [\#159](https://github.com/forGGe/theCore/pull/159) ([forGGe](https://github.com/forGGe))
-- TM4C Draft UART driver [\#158](https://github.com/forGGe/theCore/pull/158) ([forGGe](https://github.com/forGGe))
-- Interactive flashing of theCore tests [\#157](https://github.com/forGGe/theCore/pull/157) ([forGGe](https://github.com/forGGe))
-- Tm4c bypass console [\#156](https://github.com/forGGe/theCore/pull/156) ([forGGe](https://github.com/forGGe))
-- Test generator and integration [\#155](https://github.com/forGGe/theCore/pull/155) ([forGGe](https://github.com/forGGe))
+- 0.3.0 release [\#194](https://github.com/forGGe/theCore/pull/194) ([forGGe](https://github.com/forGGe))
 
 ## [v0.2.1](https://github.com/forGGe/theCore/tree/v0.2.1) (2016-10-12)
 [Full Changelog](https://github.com/forGGe/theCore/compare/v0.2.0...v0.2.1)
@@ -64,22 +53,7 @@
 
 **Merged pull requests:**
 
-- stm32: platform BAT suite and missing pinconfigs [\#153](https://github.com/forGGe/theCore/pull/153) ([forGGe](https://github.com/forGGe))
-- Workaround corrupted greeting when using bypass console [\#152](https://github.com/forGGe/theCore/pull/152) ([forGGe](https://github.com/forGGe))
-- stm32: missing EXTI initiliaztion [\#150](https://github.com/forGGe/theCore/pull/150) ([forGGe](https://github.com/forGGe))
-- TI TM4C GPIO control, TivaWare and  BAT tests [\#148](https://github.com/forGGe/theCore/pull/148) ([forGGe](https://github.com/forGGe))
-- \[\#135\] changed semaphore try\_wait\(\) API [\#147](https://github.com/forGGe/theCore/pull/147) ([velichechka](https://github.com/velichechka))
-- Test suites instead of just tests [\#143](https://github.com/forGGe/theCore/pull/143) ([forGGe](https://github.com/forGGe))
-- Unity integration [\#142](https://github.com/forGGe/theCore/pull/142) ([forGGe](https://github.com/forGGe))
-- TI TM4C platform stub and tests [\#140](https://github.com/forGGe/theCore/pull/140) ([forGGe](https://github.com/forGGe))
-- Basic tests cases implementation and skeleton [\#137](https://github.com/forGGe/theCore/pull/137) ([forGGe](https://github.com/forGGe))
-- Memory mapped I/O abstractions and tests [\#131](https://github.com/forGGe/theCore/pull/131) ([forGGe](https://github.com/forGGe))
-- stm32f4xx: platform dropped in favor of the new stm32 platform [\#129](https://github.com/forGGe/theCore/pull/129) ([forGGe](https://github.com/forGGe))
-- stm32: update stm32 system file for F4 family [\#127](https://github.com/forGGe/theCore/pull/127) ([forGGe](https://github.com/forGGe))
-- STM32 L1 support for FreeRTOS [\#126](https://github.com/forGGe/theCore/pull/126) ([forGGe](https://github.com/forGGe))
-- stm32 platform: EXTI driver for F4/L1 platforms and generalization of the EXTI definitions [\#123](https://github.com/forGGe/theCore/pull/123) ([forGGe](https://github.com/forGGe))
-- STM32 L1 and F4 platforms merge [\#117](https://github.com/forGGe/theCore/pull/117) ([forGGe](https://github.com/forGGe))
-- \[WIP\] 0.3.0 to develop test PR [\#116](https://github.com/forGGe/theCore/pull/116) ([forGGe](https://github.com/forGGe))
+- \[\#144\] Use proper Nix compiler package [\#154](https://github.com/forGGe/theCore/pull/154) ([forGGe](https://github.com/forGGe))
 
 ## [v0.2.0](https://github.com/forGGe/theCore/tree/v0.2.0) (2016-07-14)
 [Full Changelog](https://github.com/forGGe/theCore/compare/v0.1.1...v0.2.0)
@@ -107,46 +81,25 @@
 
 **Merged pull requests:**
 
-- Added driver for cs43l22 audio DAC [\#111](https://github.com/forGGe/theCore/pull/111) ([vadimol](https://github.com/vadimol))
-- Added circular mode is spi\_i2s\_bus [\#101](https://github.com/forGGe/theCore/pull/101) ([vadimol](https://github.com/vadimol))
-- Move CMSIS and SPL into the submodules [\#92](https://github.com/forGGe/theCore/pull/92) ([forGGe](https://github.com/forGGe))
-- Clarified platform definitions [\#89](https://github.com/forGGe/theCore/pull/89) ([forGGe](https://github.com/forGGe))
-- TheCore Examples: EXTI and host hello world  [\#88](https://github.com/forGGe/theCore/pull/88) ([forGGe](https://github.com/forGGe))
-- Semaphore implemented for FreeRTOS thread library [\#86](https://github.com/forGGe/theCore/pull/86) ([forGGe](https://github.com/forGGe))
-- Fix usart\_config implementation. [\#85](https://github.com/forGGe/theCore/pull/85) ([GamovCoder](https://github.com/GamovCoder))
-- Console subsystem redesigned [\#81](https://github.com/forGGe/theCore/pull/81) ([forGGe](https://github.com/forGGe))
-- The Bus: continuation mode test and few fixes [\#80](https://github.com/forGGe/theCore/pull/80) ([forGGe](https://github.com/forGGe))
-- fixed incorrect last\_event handling in gbus [\#79](https://github.com/forGGe/theCore/pull/79) ([vadimol](https://github.com/vadimol))
-- stm32f4xx: USART compile-time configuration capabilities [\#78](https://github.com/forGGe/theCore/pull/78) ([forGGe](https://github.com/forGGe))
-- Disabled asserts for no-debug builds [\#77](https://github.com/forGGe/theCore/pull/77) ([forGGe](https://github.com/forGGe))
-- Build protect from missing CppUTest library [\#76](https://github.com/forGGe/theCore/pull/76) ([forGGe](https://github.com/forGGe))
-- Non-OS implementation of sleep\_for\(\) routine along with stm32f4xx counterpart  [\#73](https://github.com/forGGe/theCore/pull/73) ([forGGe](https://github.com/forGGe))
-- Use travis\_retry for network commands [\#71](https://github.com/forGGe/theCore/pull/71) ([rasendubi](https://github.com/rasendubi))
-- Implemented driver for BH1750 light sensor [\#68](https://github.com/forGGe/theCore/pull/68) ([vadimol](https://github.com/vadimol))
-- stm32f4xx: standart library included to support long integer arithmetic [\#66](https://github.com/forGGe/theCore/pull/66) ([forGGe](https://github.com/forGGe))
-- The bus: \#36 Basic support of running xfer\(\) during IRQ [\#64](https://github.com/forGGe/theCore/pull/64) ([forGGe](https://github.com/forGGe))
-- Improves offset\_of\(\) function. [\#62](https://github.com/forGGe/theCore/pull/62) ([GamovCoder](https://github.com/GamovCoder))
-- Thread lib: \#44 Missing binary semaphore in the common library [\#61](https://github.com/forGGe/theCore/pull/61) ([forGGe](https://github.com/forGGe))
-- Bumped GCC host version to GCC 6 and fixed couple of typos [\#58](https://github.com/forGGe/theCore/pull/58) ([forGGe](https://github.com/forGGe))
-- EXTI manager for stm32f4xx platform [\#56](https://github.com/forGGe/theCore/pull/56) ([forGGe](https://github.com/forGGe))
-- I2S bus support [\#48](https://github.com/forGGe/theCore/pull/48) ([vadimol](https://github.com/vadimol))
-- Added initialisation of the static objects in the bus init method [\#47](https://github.com/forGGe/theCore/pull/47) ([vadimol](https://github.com/vadimol))
-- Split cpp and utils library to granulate dependencies [\#42](https://github.com/forGGe/theCore/pull/42) ([forGGe](https://github.com/forGGe))
-- Intrusive list implementation and tests [\#40](https://github.com/forGGe/theCore/pull/40) ([forGGe](https://github.com/forGGe))
-- Minor refactor [\#33](https://github.com/forGGe/theCore/pull/33) ([forGGe](https://github.com/forGGe))
-- Right dependenices and library types [\#30](https://github.com/forGGe/theCore/pull/30) ([forGGe](https://github.com/forGGe))
-- Nifty counter implementation for ecl streams [\#28](https://github.com/forGGe/theCore/pull/28) ([forGGe](https://github.com/forGGe))
-- The HTU21 sensor bring up [\#23](https://github.com/forGGe/theCore/pull/23) ([vadimol](https://github.com/vadimol))
-- I2C bus implementation [\#18](https://github.com/forGGe/theCore/pull/18) ([vadimol](https://github.com/vadimol))
-- stm32f4 IRQ manager correct static members initialization [\#17](https://github.com/forGGe/theCore/pull/17) ([forGGe](https://github.com/forGGe))
-- gbus updates [\#15](https://github.com/forGGe/theCore/pull/15) ([vadimol](https://github.com/vadimol))
-- Improvements to provide correct order of static initialization inside the Bus module [\#12](https://github.com/forGGe/theCore/pull/12) ([forGGe](https://github.com/forGGe))
-- Naive implementation of static guards [\#8](https://github.com/forGGe/theCore/pull/8) ([forGGe](https://github.com/forGGe))
+- 0.2.0 release [\#115](https://github.com/forGGe/theCore/pull/115) ([forGGe](https://github.com/forGGe))
+- Fix Nix shell command [\#69](https://github.com/forGGe/theCore/pull/69) ([rasendubi](https://github.com/rasendubi))
+- Main Page Update [\#21](https://github.com/forGGe/theCore/pull/21) ([InnusiG](https://github.com/InnusiG))
+- Add a Gitter chat badge to README.md [\#10](https://github.com/forGGe/theCore/pull/10) ([gitter-badger](https://github.com/gitter-badger))
 
 ## [v0.1.1](https://github.com/forGGe/theCore/tree/v0.1.1) (2016-04-14)
 [Full Changelog](https://github.com/forGGe/theCore/compare/v0.1.0...v0.1.1)
 
+**Merged pull requests:**
+
+- Patch-fix PR [\#5](https://github.com/forGGe/theCore/pull/5) ([forGGe](https://github.com/forGGe))
+
 ## [v0.1.0](https://github.com/forGGe/theCore/tree/v0.1.0) (2016-04-12)
+**Merged pull requests:**
+
+- Filter out branches from Travis CI [\#3](https://github.com/forGGe/theCore/pull/3) ([forGGe](https://github.com/forGGe))
+- Travis integration [\#2](https://github.com/forGGe/theCore/pull/2) ([forGGe](https://github.com/forGGe))
+- Add more ports to smt32f4xx platform [\#1](https://github.com/forGGe/theCore/pull/1) ([RostakaGmfun](https://github.com/RostakaGmfun))
+
 
 
 \* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
