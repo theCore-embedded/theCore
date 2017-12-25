@@ -41,7 +41,7 @@ Expected output
 
   Hello, Host World!
   This is an assert demonstration. Application will abort.
-  hello: /home/user/projects/thecore/examples/host_hello/main.cpp:7: int main(): Assertion `1 == 0' failed.
+  hello: main.cpp:7: int main(): Assertion `1 == 0' failed.
   Aborted (core dumped)
 
 Target JSON for Hello World example
