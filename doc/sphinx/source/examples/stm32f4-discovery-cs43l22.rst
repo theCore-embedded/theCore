@@ -9,6 +9,12 @@ STM32F4 discovery audio example with CS43L22 audio DAC
 :Toolchain:         GNU arm-none-eabi v.5.2 or newer
 :Additional SW:     openocd, minicom
 
+Wiring
+~~~~~~
+
+.. image:: ../_images/cs43l22_audio.jpg
+   :alt: CS43L22 stm32f4discovery wiring
+
 #. Attach any preferable UART-to-USB converter `such as this`_ module according to following pinout:
 
    +-------------------+-----------------+
@@ -18,10 +24,6 @@ STM32F4 discovery audio example with CS43L22 audio DAC
    +-------------------+-----------------+
    | GND               | module's GND    |
    +-------------------+-----------------+
-
-Below is the example wiring.
-
-.. image:: ../_images/cs43l22_audio.jpg
 
 Building
 ~~~~~~~~

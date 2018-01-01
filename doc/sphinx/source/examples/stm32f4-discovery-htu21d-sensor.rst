@@ -10,6 +10,9 @@ STM32F4 discovery and HTU21D temperature and humidity sensor
 Wiring
 ~~~~~~
 
+.. image:: ../_images/htu21d.jpg
+   :alt: UART and HTU21D example wiring for stm32f4discovery board
+
 #. Connect HTU21D_ to I2C1 on the Discovery board using following pins:
 
    +-------------------+-----------------+
@@ -31,10 +34,6 @@ Wiring
    +-------------------+-----------------+
    | GND               | module's GND    |
    +-------------------+-----------------+
-
-Below is the example wiring.
-
-.. image:: ../_images/htu21d.jpg
 
 Building
 ~~~~~~~~

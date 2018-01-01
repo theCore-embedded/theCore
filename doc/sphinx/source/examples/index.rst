@@ -12,6 +12,7 @@ Examples
   stm32f4-discovery-cs43l22
   stm32f4-discovery-exti
   stm32f4-discovery-blink
+  stm32f4-discovery-bluetooth-hm10
   ti-tm4c123g-launchpad-blink
 
 theCore examples are organized in a form of separate projects that can be

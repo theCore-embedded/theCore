@@ -6,80 +6,8 @@
 
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
-#include <CppUTestExt/MockSupport.h>
 
-//------------------------------------------------------------------------------
-// HM10 block mode mocks
-
-struct hm10_serial_mock
-{
-    static bool generate_wouldblock;
-
-    static ecl::err init()
-    {
-        mock("serial_mock").actualCall("init");
-        return (ecl::err) mock("serial_mock").returnIntValueOrDefault((int)ecl::err::ok);
-    }
-
-    static void nonblock(bool state)
-    {
-        (void)state;
-        mock("serial_mock").actualCall("nonblock");
-    }
-
-
-    static ecl::err send_buf(const uint8_t *buf, size_t &sz)
-    {
-        static char inter_buf[1024];
-
-        // This check is intentionally placed here.
-        // Buffer must hold all data that hm10 driver sends.
-        CHECK_TRUE(sz < sizeof(inter_buf) - 1);
-
-        memcpy(inter_buf, buf, sz);
-        inter_buf[sz] = 0;
-
-        mock("serial_mock").actualCall("send_buf")
-                .withStringParameter("tx", inter_buf);
-
-        return (ecl::err) mock("serial_mock").returnIntValueOrDefault((int)ecl::err::ok);
-    }
-
-    static ecl::err recv_buf(uint8_t *buf, size_t &sz)
-    {
-        if (generate_wouldblock) {
-            sz = 0;
-            return ecl::err::wouldblock;
-        }
-
-        size_t recv_sz = 0;
-
-        static char inter_buf[1024];
-        memset(inter_buf, 0, sizeof(inter_buf));
-
-        auto &mk = mock("serial_mock").actualCall("recv_buf")
-                .withOutputParameter("rx_sz", &recv_sz);
-
-        // This check is intentionally placed here.
-        // Tests must not supply more data than buffer can hold.
-        // It reality, serial driver would not write more data than incoming
-        // buf can hold.
-        CHECK_TRUE(recv_sz < sizeof(inter_buf) - 1);
-
-        // Write data into the intermediate buffer.
-        mk.withOutputParameter("rx", inter_buf);
-
-        // Copy data from the intermediate buffer into the output parameter
-        sz = std::min(recv_sz, sz);
-        strncpy((char*)buf, inter_buf, sz);
-
-        return (ecl::err) mock("serial_mock").returnIntValueOrDefault((int)ecl::err::ok);
-    }
-};
-
-bool hm10_serial_mock::generate_wouldblock;
-
-//------------------------------------------------------------------------------
+using serial_mock_inst = ecl::serial<int>;
 
 TEST_GROUP(hm10_sync_mode)
 {
@@ -90,7 +18,7 @@ TEST_GROUP(hm10_sync_mode)
 
     void teardown()
     {
-        hm10_serial_mock::generate_wouldblock = false;
+        serial_mock_inst::generate_wouldblock = false;
         mock().clear();
     }
 };
@@ -98,7 +26,7 @@ TEST_GROUP(hm10_sync_mode)
 //------------------------------------------------------------------------------
 // HM-10 common mode tests
 
-using hm10_sync = ecl::hm10_sync<hm10_serial_mock>;
+using hm10_sync = ecl::hm10_sync<int>;
 
 // Reused in couple of different test groups
 static void do_valid_init()
@@ -189,7 +117,7 @@ TEST(hm10_sync_mode, init_no_resp)
 {
     // Case when no responce from module.
     mock("serial_mock").disable();
-    hm10_serial_mock::generate_wouldblock = true;
+    serial_mock_inst::generate_wouldblock = true;
 
     // Query module
 
@@ -212,7 +140,7 @@ TEST_GROUP(hm10_sync_mode_cmd)
 
     void teardown()
     {
-        hm10_serial_mock::generate_wouldblock = false;
+        serial_mock_inst::generate_wouldblock = false;
         mock().clear();
     }
 };
@@ -309,94 +237,6 @@ TEST(hm10_sync_mode_cmd, disconnect_inval)
     auto r = []() { return hm10_sync::disconnect(); };
     hm10_check_command(r, ecl::err::inval, "AT", "FOO");
 }
-
-
-#if 0
-
-//------------------------------------------------------------------------------
-
-TEST_GROUP(hm10_sync_mode_inited)
-{
-    void setup()
-    {
-        // Just repeat valid init procedure here.
-
-        mock().disable();
-
-        const char valid_resp[] = "OK";
-
-        mock("serial_mock").expectOneCall("init");
-        mock("serial_mock").expectOneCall("lock");
-
-        // Responses are not null-terminated (TODO: double check this)
-        size_t valid_sz = sizeof(valid_resp) - 1;
-
-        // Query module
-        mock("serial_mock").expectOneCall("set_buffers");
-        mock("serial_mock").expectOneCall("xfer")
-                .withOutputParameterReturning("rx", valid_resp, sizeof(valid_resp) - 1)
-                .withOutputParameterReturning("rx_sz", &valid_sz, sizeof(valid_sz))
-                .withStringParameter("tx", "AT");
-
-        auto rc = hm10_sync::init();
-
-        CHECK_EQUAL(ecl::err::ok, rc);
-
-        mock().enable();
-    }
-
-    void teardown()
-    {
-        hm10_serial_mock::cleanup();
-        mock().clear();
-    }
-};
-
-TEST(hm10_sync_mode_inited, send)
-{
-    const char send_buf[] = "HelloBtWorld";
-
-    // No response is required
-    size_t resp_sz = 0;
-    size_t send_sz = sizeof(send_buf);
-
-    mock("serial_mock").expectOneCall("set_buffers");
-    mock("serial_mock").expectOneCall("xfer")
-            .withStringParameter("tx", send_buf)
-            .withOutputParameterReturning("rx", "", 0)
-            .withOutputParameterReturning("rx_sz", &resp_sz, sizeof(resp_sz));
-
-    auto rc = hm10_sync::send((const uint8_t *)send_buf, send_sz);
-
-    CHECK_EQUAL(ecl::err::ok, rc);
-    CHECK_EQUAL(sizeof(send_buf), send_sz);
-
-    mock().checkExpectations();
-}
-
-TEST(hm10_sync_mode_inited, recv)
-{
-    const char ref_buf[] = "1234567890";
-    const size_t ref_sz = sizeof(ref_buf);
-
-    char recv_buf[ref_sz + 20] = {0};
-    size_t recv_sz = sizeof(recv_buf);
-
-    mock("serial_mock").expectOneCall("set_buffers");
-    mock("serial_mock").expectOneCall("xfer")
-            .withOutputParameterReturning("rx", ref_buf, sizeof(ref_buf))
-            .withOutputParameterReturning("rx_sz", &ref_sz, sizeof(ref_sz))
-            .withStringParameter("tx", ""); // No TX in this case
-
-    auto rc = hm10_sync::recv((uint8_t *)recv_buf, recv_sz);
-
-    CHECK_EQUAL(ecl::err::ok, rc);
-    CHECK_EQUAL(ref_sz, recv_sz);
-    CHECK_EQUAL(std::string(ref_buf), std::string(recv_buf));
-
-    mock().checkExpectations();
-}
-#endif
 
 int main(int argc, char *argv[])
 {

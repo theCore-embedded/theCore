@@ -10,11 +10,10 @@ TI TM4C123G LaunchPad blinky
 Wiring
 ~~~~~~
 
-No special wiring is required. Just connect the board to the powered USB port.
-
-Below is the board image showing simple USB connection.
-
 .. image:: ../_images/tm4c_led.jpg
+   :alt: TI TM4C123G USB connection
+
+No special wiring is required. Just connect the board to the powered USB port.
 
 Building
 ~~~~~~~~

@@ -104,7 +104,7 @@ static inline void wait_for(uint32_t ms)
 
 //! \brief Waits in loop for given amount of time, expressed using
 //! std::chrono library.
-//! \param[in] ms Time to wait
+//! \param[in] wait_duration Time to wait.
 //! \todo Use RTC instead of relying on clock. See #213 also.
 template<class Rep, class Period>
 static inline void wait_for(const std::chrono::duration<Rep, Period>& wait_duration)

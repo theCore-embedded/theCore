@@ -24,6 +24,9 @@ pressed), interrupt is generated.
 Wiring
 ~~~~~~
 
+.. image:: ../_images/stm32f4_exti.jpg
+   :alt: UART wiring for stm32f4discovery EXTI example
+
 #. Attach any preferable UART-to-USB converter `such as this`_ module according to following pinout:
 
    +-------------------+-----------------+
@@ -36,7 +39,6 @@ Wiring
 
 Below is the example wiring.
 
-.. image:: ../_images/stm32f4_exti.jpg
 
 Building
 ~~~~~~~~
