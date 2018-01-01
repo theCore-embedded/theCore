@@ -31,11 +31,11 @@ theCore: C++ Embedded Framework
   :includehidden:
 
   index
-  guides
-  examples
+  guides/index
+  examples/index
   project_structure
   arch
-  platforms
+  platform/index
   drivers
   utilities
   os_layer
@@ -43,6 +43,7 @@ theCore: C++ Embedded Framework
   docs
   testing
   credits
+  changelog
 
 Indices and tables
 ==================

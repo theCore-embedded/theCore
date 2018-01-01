@@ -6,12 +6,8 @@ theCore: C++ Embedded Framework
 |Follow us at https://t.me/theCoreEmbedded|
 |Join the chat at https://gitter.im/forGGe/theCore|
 
-Description
------------
-
-theCore is the open source, highly configurable and straightforward C++ embedded
-framework aimed to reduce development, testing and hardware migration
-efforts for a wide range of bare-metal embedded applications.
+theCore is the C++ embedded framework for various microcontroller applications,
+with or without RTOS (bare-metal).
 
 theCore tries to provide all that is necessary to create portable application code:
 
@@ -22,21 +18,14 @@ theCore tries to provide all that is necessary to create portable application co
 * Easy-to-deploy development environment.
 * Different libraries and utilities.
 
-theCore uses powerful type system based on modern C++ and code generation that
-greatly reduces error rate and debugging time. Shifting different sanity checks
-to compile time rather than runtime not only makes code more performant, but
-also secure and easier to extend.
-
-The project is at the initial stage. You can check |Roadmap| section
-in the documentation or `github issues`_ to get insights on what happens
-right now and where project is moving.
-
 Documentation
 -------------
 
 theCore documentation hosted on GitHub pages and available in two formats:
 `multi-page HTML`_ for ease of navigation and `single-page HTML`_ for ease
 of manual searching.
+
+|Doxygen documentation| is also available (trough it is not complete).
 
 Where to get theCore
 --------------------
@@ -158,6 +147,7 @@ open some issues and we will do our best to handle this ASAP. Good luck!
 .. LINKS TO BE AUTOMATICALLY SUBSTITUTED BY SPHINX.
 .. DO NOT MOVE THIS LABEL.
 
+.. |Doxygen documentation| replace:: `Doxygen documentation`_
 .. |Roadmap| replace:: Roadmap_
 .. |Branching| replace:: Branching_
 .. |Guides| replace:: Guides_
@@ -166,6 +156,7 @@ open some issues and we will do our best to handle this ASAP. Good luck!
 .. |Credits| replace:: Credits_
 .. |DeveloperDocs| replace:: DeveloperDocs_
 
+.. _Doxygen documentation: https://forgge.github.io/theCore/doxygen/
 .. _Roadmap: https://forgge.github.io/theCore/community.html#roadmap
 .. _Branching: https://forgge.github.io/theCore/community.html#brancing-model
 .. _Guides: https://forgge.github.io/theCore/guides.html

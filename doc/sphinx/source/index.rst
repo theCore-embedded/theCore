@@ -9,6 +9,7 @@
 .. include:: ../../../README.rst
    :end-before: LINKS TO BE AUTOMATICALLY SUBSTITUTED BY SPHINX
 
+.. |Doxygen documentation| replace:: `Doxygen documentation`_
 .. |Roadmap| replace:: :ref:`theCore_Roadmap`
 .. |Branching| replace:: :ref:`theCore_Branching`
 .. |Guides| replace:: :ref:`theCore_Guides`
@@ -16,3 +17,7 @@
 .. |Platforms| replace:: :ref:`theCore_Platforms`
 .. |Credits| replace:: :ref:`theCore_Credits`
 .. |DeveloperDocs| replace:: :ref:`theCore_DeveloperDocs`
+
+.. This one is relative, but cannot be reached via sphinx's :ref: tag
+
+.. _Doxygen documentation: ./doxygen/index.html

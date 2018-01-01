@@ -10,6 +10,8 @@
 #include "application.h"
 #include "stdarg.h"
 
+#include <common/console.hpp>
+
 // TODO: make it configurable
 SYSTEM_MODE(MANUAL);
 
@@ -98,6 +100,7 @@ void setup()
     main_thread = Thread{"main_thread", main_thread_fn};
 
     board_init();
+    ecl::bypass_greeting();
 }
 
 //! Loop with delay small enough to

@@ -1,0 +1,21 @@
+-prune
+! -iname robots.txt
+! -iname sitemap.\*
+! -iname \*.js
+! -iname \*.doctree
+! -iname \*.css
+! -iname \*.png
+! -iname \*.md5
+! -iname \*.map
+! -iname \*.sh
+! -iname \*.gif
+! -iname \*.jpg
+! -iname .\*
+! -path ./css/\*
+! -path ./js/\*
+! -path ./img/\*
+! -path ./tmp/\*
+! -path ./fonts/\*
+! -path ./stats/\*
+! -path ./.git/\*
+! -path \*fonts/\*
