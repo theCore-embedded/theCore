@@ -60,7 +60,7 @@ public:
 
 private:
     // Return types.
-    // Enums ommited, since it should be replaced
+    // Enums omitted, since it should be replaced
     // with system-wide error flags
     static constexpr int sd_expired  = -3;  // Event expired
     static constexpr int sd_spi_err  = -2;  // SPI returns error
