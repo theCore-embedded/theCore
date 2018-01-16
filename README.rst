@@ -99,7 +99,7 @@ Contribution & Using
 The project is on its very beginning, so any help is more than welcome
 and highly appreciated. If you’d like to take a part in the project
 growth and (or) have any questions – take a look at |DeveloperDocs| section,
-leave message at `theCore Telegram group`_, `mailing list`_ gitter_, contact me
+leave message at `theCore Telegram group`_, `mailing list`_, gitter_, contact me
 directly at forgge@gmail.com, or simply check out `a list of theCore issues`_.
 
 If you have any suggestions on theCore improvement or just
@@ -154,13 +154,13 @@ open some issues and we will do our best to handle this ASAP. Good luck!
 .. |Examples| replace:: Examples_
 .. |Platforms| replace:: Platforms_
 .. |Credits| replace:: Credits_
-.. |DeveloperDocs| replace:: DeveloperDocs_
+.. |DeveloperDocs| replace:: `Community guidelines`_
 
 .. _Doxygen documentation: https://forgge.github.io/theCore/doxygen/
 .. _Roadmap: https://forgge.github.io/theCore/community.html#roadmap
 .. _Branching: https://forgge.github.io/theCore/community.html#brancing-model
-.. _Guides: https://forgge.github.io/theCore/guides.html
-.. _Examples: https://forgge.github.io/theCore/examples.html
-.. _Platforms: https://forgge.github.io/theCore/platforms.html
+.. _Guides: https://forgge.github.io/theCore/guides/index.html
+.. _Examples: https://forgge.github.io/theCore/examples/index.html
+.. _Platforms: https://forgge.github.io/theCore/platform/index.html
 .. _Credits: https://forgge.github.io/theCore/credits.html
-.. _DeveloperDocs: https://forgge.github.io/theCore/community.html
+.. _Community guidelines: https://forgge.github.io/theCore/community.html
