@@ -36,7 +36,7 @@ Wiring
 
 Below is the example wiring.
 
-.. image:: ../_images/stm32f4_exti.jpg
+.. image:: https://i.imgur.com/dRVRHV2.jpg
 
 Building
 ~~~~~~~~
