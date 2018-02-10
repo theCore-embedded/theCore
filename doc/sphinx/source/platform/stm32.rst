@@ -162,7 +162,7 @@ User-defined aliases are highlighted.
 .. literalinclude:: ../_static/generated/stm32/uart_example.hpp
     :language: cpp
     :linenos:
-    :lines: 14-53,61
+    :lines: 23-65,70
     :emphasize-lines: 22,39
 
 `Full STM32 UART example header <../_static/generated/stm32/uart_example.hpp>`_
@@ -246,7 +246,7 @@ Example output for STM32F4 family
 .. literalinclude:: ../_static/generated/stm32/adc_example.hpp
     :language: cpp
     :linenos:
-    :lines: 13-41
+    :lines: 22-50
 
 `Full STM32 ADC example header <../_static/generated/stm32/adc_example.hpp>`_
 
@@ -308,7 +308,7 @@ Example output:
 .. literalinclude:: ../_static/generated/stm32/i2c_example.hpp
     :language: cpp
     :linenos:
-    :lines: 13-34
+    :lines: 22-43
 
 `Full STM32 I2C example header <../_static/generated/stm32/i2c_example.hpp>`_
 
@@ -375,7 +375,7 @@ Example output (**DMA configuration header is omitted for clarity**):
 .. literalinclude:: ../_static/generated/stm32/i2s_example.hpp
     :language: cpp
     :linenos:
-    :lines: 20-46
+    :lines: 22-55
 
 `Full STM32 I2S example header <../_static/generated/stm32/i2s_example.hpp>`_
 
