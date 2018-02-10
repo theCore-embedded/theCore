@@ -34,7 +34,7 @@ Wiring
 
 Below is the example wiring.
 
-.. image:: ../_images/htu21d.jpg
+.. image:: https://i.imgur.com/vX2uOb5.jpg
 
 Building
 ~~~~~~~~

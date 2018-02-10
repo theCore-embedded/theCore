@@ -21,7 +21,7 @@ STM32F4 discovery audio example with CS43L22 audio DAC
 
 Below is the example wiring.
 
-.. image:: ../_images/cs43l22_audio.jpg
+.. image:: https://i.imgur.com/fhWxQ4Z.jpg
 
 Building
 ~~~~~~~~

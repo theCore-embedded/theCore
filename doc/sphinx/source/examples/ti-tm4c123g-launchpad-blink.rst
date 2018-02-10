@@ -14,7 +14,7 @@ No special wiring is required. Just connect the board to the powered USB port.
 
 Below is the board image showing simple USB connection.
 
-.. image:: ../_images/tm4c_led.jpg
+.. image:: https://i.imgur.com/Msv5xoR.jpg
 
 Building
 ~~~~~~~~
