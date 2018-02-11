@@ -36,7 +36,7 @@ theCore: C++ Embedded Framework
   project_structure
   arch
   platform/index
-  drivers
+  devices/index
   utilities
   os_layer
   community
