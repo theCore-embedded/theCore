@@ -12,7 +12,7 @@ STM32F4 discovery audio example with CS43L22 audio DAC
 Wiring
 ~~~~~~
 
-.. image:: ../_images/cs43l22_audio.jpg
+.. image:: https://i.imgur.com/fhWxQ4Z.jpg
    :alt: CS43L22 stm32f4discovery wiring
 
 #. Attach any preferable UART-to-USB converter `such as this`_ module according to following pinout:
