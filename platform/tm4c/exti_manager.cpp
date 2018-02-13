@@ -21,23 +21,19 @@ void exti_manager::init()
     // Prepare user handlers list.
     m_storage.init();
 
-    // IRQ handler type
-    using irq_fn = void (*)();
-
     // List of GPIO interrupts and their handlers
-    static constexpr std::pair<irq_num, irq_fn> port_irq_list[] = {
-        { gpio_hw::get_irqn(gpio_hw::port::a), &irq_port_handler<gpio_hw::port::a> },
-        { gpio_hw::get_irqn(gpio_hw::port::b), &irq_port_handler<gpio_hw::port::b> },
-        { gpio_hw::get_irqn(gpio_hw::port::c), &irq_port_handler<gpio_hw::port::c> },
-        { gpio_hw::get_irqn(gpio_hw::port::d), &irq_port_handler<gpio_hw::port::d> },
-        { gpio_hw::get_irqn(gpio_hw::port::e), &irq_port_handler<gpio_hw::port::e> },
-        { gpio_hw::get_irqn(gpio_hw::port::f), &irq_port_handler<gpio_hw::port::f> },
+    static constexpr int port_irqs[] = {
+        gpio_hw::get_irqn(gpio_hw::port::a),
+        gpio_hw::get_irqn(gpio_hw::port::b),
+        gpio_hw::get_irqn(gpio_hw::port::c),
+        gpio_hw::get_irqn(gpio_hw::port::d),
+        gpio_hw::get_irqn(gpio_hw::port::e),
+        gpio_hw::get_irqn(gpio_hw::port::f),
     };
 
     // Configure IRQ controller.
-    for (const auto &port_irq : port_irq_list) {
-        irq::subscribe(port_irq.first, port_irq.second);
-        irq::unmask(port_irq.first);
+    for (const auto &port_irq : port_irqs) {
+        irq::unmask(port_irq);
     }
 }
 
@@ -67,7 +63,6 @@ void exti_manager::mask(handler &h)
     // Way to determine if handler was already subscribed.
     ecl_assert(h.m_node.linked());
 
-
     auto port = extract_value(h.m_port);
     auto intflag = gpio_hw::get_pin_intflag(h.m_pin);
 
@@ -96,24 +91,6 @@ void exti_manager::unmask(handler &h)
 exti_manager::handlers_list &exti_manager::get_handlers()
 {
     return m_storage.get();
-}
-
-template<gpio_hw::port Port>
-void exti_manager::irq_port_handler()
-{
-    constexpr auto port = extract_value(Port);
-    constexpr auto irqn = gpio_hw::get_irqn(Port);
-
-    // Get pins that provoked the interrupt.
-    auto pins = GPIOIntStatus(port, true);
-
-    // Mask GPIO lines to prevent spurious events
-    GPIOIntDisable(port, pins);
-
-    irq_handler(Port, pins);
-
-    irq::clear(irqn);
-    irq::unmask(irqn);
 }
 
 void exti_manager::irq_handler(gpio_hw::port port, uint32_t hw_pins)
