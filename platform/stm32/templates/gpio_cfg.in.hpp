@@ -2,18 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup stm32 STM32 multi-platform
-//! @{
-
-//! \defgroup stm32_templates Auto-generated code, Python COG and CMake templates
-//! @{
-
 //! \file
 //! \brief Header provides template of GPIO driver configuration.
 //! \details Pin assignment is configured in pinmux.in.cpp.
+//! \ingroup stm32_templates
 #ifndef STM32XX_GPIO_CFGS_HPP_
 #define STM32XX_GPIO_CFGS_HPP_
 
@@ -22,6 +14,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_templates Auto-generated code, Python COG and CMake templates
+//! @{
 
 /*[[[cog
 import cog
@@ -66,10 +67,10 @@ for gpio in gpio_alias:
 
 } // namespace ecl
 
+//! @}
+
+//! @}
+
+//! @}
+
 #endif // STM32XX_GPIO_CFGS_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

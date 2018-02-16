@@ -2,15 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup stm32 STM32 multi-platform
-//! @{
-
-//! \defgroup stm32_templates Auto-generated code, Python COG and CMake templates
-//! @{
-
 //! \file
 //! \brief Enlists all generated headers by stm32 platform. Further used
 //! by theCore or the user.
@@ -26,14 +17,23 @@
 #include "aux/i2c_cfg.hpp"
 #include "aux/spi_i2s_cfg.hpp"
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_templates Auto-generated code, Python COG and CMake templates
+//! @{
+
 //! Init all GPIOs using generated code based on incoming JSON.
 //! \details Defined in pin_mux.in.cpp
 extern "C" void gpio_init_generated();
 
+//! @}
+
+//! @}
+
+//! @}
+
 #endif // PLATFORM_GENERATED_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

@@ -2,15 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
-//! @{
-
-//! \defgroup tm4c_execution Execution control module
-//! @{
-
 //! \file
 //! \brief Execution control for TM4C platform.
 #ifndef TM4C_EXECUTION_HPP_
@@ -156,6 +147,15 @@ typedef struct
 namespace ecl
 {
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_execution Execution control module
+//! @{
+
 //! \brief Aborts execution of currently running code. Never return.
 __attribute__((noreturn))
 static inline void abort()
@@ -182,10 +182,19 @@ static inline void wfe()
     asm volatile ("wfe");
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 #if THECORE_ENABLE_SYSTMR_API
 
 namespace systmr
 {
+
+//! \addtogroup tm4c_execution
+//! @{
 
 //! Represents the minimum and the maximun possible values for SYSTMR frequency.
 //! This allows to guarantee the correct SYSTRM frequency regardless of SystemCoreClock.
@@ -234,9 +243,14 @@ static inline auto speed()
 //! \retval Amount of events occured so far
 uint32_t events();
 
+//! @}
+
 } // namespace systmr
 
 #endif // THECORE_ENABLE_SYSTMR_API
+
+//! \addtogroup tm4c_execution
+//! @{
 
 //! \brief Performs a dummy busy wait for specified amount of milliseconds.
 //! \param ms number of milliseconds to wait.
@@ -258,12 +272,8 @@ static inline void spin_wait(uint32_t ms)
     SysCtlDelay(ticks_left);
 }
 
+//! @}
+
 } // namespace ecl
 
 #endif  // TM4C_EXECUTION_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

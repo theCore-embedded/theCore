@@ -2,17 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup stm32 STM32 multi-platform
-//! @{
-
-//! \defgroup stm32_other Other modules
-//! @{
-
 //! \file
 //! \brief STM32 platform main file
+//! \ingroup stm32_other
 
 #include "common/execution.hpp"
 #include "platform/exti_manager.hpp"
@@ -23,6 +15,16 @@
 // Header from stm32 miscellaneous firmware library functions
 // (add-on to CMSIS functions). See SPL.
 #include <misc.h>
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_other Other modules
+//! @{
+
 
 #if THECORE_CONFIG_USE_BYPASS_CONSOLE
 extern void bypass_console_init();
@@ -72,10 +74,11 @@ extern "C" void platform_init()
 #if THECORE_CONFIG_USE_BYPASS_CONSOLE
     bypass_console_init();
 #endif // THECORE_CONFIG_USE_BYPASS_CONSOLE
+
+//! @}
+
+//! @}
+
+//! @}
+
 }
-
-//! @}
-
-//! @}
-
-//! @}

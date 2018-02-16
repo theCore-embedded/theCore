@@ -2,15 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
-//! @{
-
-//! \defgroup tm4c_irq IRQ control
-//! @{
-
 //! \file
 //! \brief TM4C IRQ interface.
 //!
@@ -29,10 +20,20 @@
 namespace ecl
 {
 
+//! \ingroup tm4c_irq
 using irq_num = int;
 
 namespace irq
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_irq IRQ control
+//! @{
 
 //! Masks or disables the given IRQ.
 //! \param[in] irqn Valid IRQ number.
@@ -93,14 +94,14 @@ static inline void clear(irq_num irqn)
     IntPendClear(irqn);
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace irq
 
 } // namespace ecl
 
 #endif // PLATFORM_IRQ_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

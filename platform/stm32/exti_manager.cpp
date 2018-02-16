@@ -2,6 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \file
+//! \brief EXTI manager implementation for STM32 platform
+//! \ingroup stm32_exti
+#include <platform/exti_manager.hpp>
+#include <common/irq.hpp>
+#include <utility>
+
+namespace ecl
+{
+
 //! \addtogroup platform Platform defintions and drivers
 //! @{
 
@@ -10,16 +20,6 @@
 
 //! \defgroup stm32_exti External interrupt manager
 //! @{
-
-//! \file
-//! \brief EXTI manager implementation for STM32 platform
-
-#include <platform/exti_manager.hpp>
-#include <common/irq.hpp>
-#include <utility>
-
-namespace ecl
-{
 
 exti_manager::mapping_storage exti_manager::m_storage;
 
@@ -177,10 +177,10 @@ void exti_manager::handler::operator ()()
     }
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
-
-//! @}
-
-//! @}
-
-//! @}

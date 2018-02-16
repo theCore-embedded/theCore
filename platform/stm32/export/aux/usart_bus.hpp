@@ -2,19 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup stm32 STM32 multi-platform
-//! @{
-
-//! \defgroup stm32_uart UART driver
-//! @{
-
-//!
 //! \file
 //! \brief STM32 USART driver
-//!
 
 #ifndef PLATFORM_USART_BUS_HPP_
 #define PLATFORM_USART_BUS_HPP_
@@ -34,6 +23,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_uart UART driver
+//! @{
 
 //! Represents distinct peripheral devices
 enum class usart_device
@@ -720,12 +718,12 @@ void usart_bus<dev>::irq_handler()
     irq::unmask(irqn);
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
 
 #endif // PLATFORM_USART_BUS_HPP_
-
-//! @}
-
-//! @}
-
-//! @}
