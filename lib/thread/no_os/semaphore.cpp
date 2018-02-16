@@ -19,7 +19,7 @@ void ecl::semaphore::wait()
 
     if ((cnt = m_counter.fetch_sub(1)) <= 0) {
         while (m_counter.load() < cnt) {
-#ifdef USE_WFI_WFE
+#ifdef THECORE_USE_WFI_WFE
             ecl::wfe();
 #endif
         }
@@ -55,7 +55,7 @@ void ecl::binary_semaphore::signal()
 void ecl::binary_semaphore::wait()
 {
     while (!m_flag) {
-#ifdef USE_WFI_WFE
+#ifdef THECORE_USE_WFI_WFE
         ecl::wfe();
 #endif
     }

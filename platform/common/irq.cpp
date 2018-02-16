@@ -7,6 +7,9 @@
 
 #include "common/irq.hpp"
 
+#if !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0
+
+
 #include <ecl/assert.h>
 #include <platform/irq.hpp>
 #include <common/execution.hpp>
@@ -90,3 +93,5 @@ void unsubscribe(irq_num irqn)
 } // namespace irq
 
 } // namespace ecl
+
+#endif // !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0

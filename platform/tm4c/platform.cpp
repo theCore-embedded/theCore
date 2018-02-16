@@ -5,8 +5,6 @@
 #include <cstdint>
 #include <sysctl.h>
 
-#include <common/irq.hpp>
-
 #include "platform/exti_manager.hpp"
 
 #ifdef CORE_CONFIG_USE_BYPASS_CONSOLE
@@ -37,9 +35,6 @@ extern "C" void platform_init()
 {
     // TODO: implement
 
-    // IRQ must be ready before anything else will start work
-    ecl::irq::init_storage();
-
     // EXTI manager must be ready after IRQ, but before user code start working with it
     ecl::exti_manager::init();
 
@@ -47,8 +42,6 @@ extern "C" void platform_init()
     ecl::bypass_console_init();
 #endif
 }
-
-
 
 #if THECORE_ENABLE_SYSTMR_API
 

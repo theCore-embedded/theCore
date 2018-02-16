@@ -42,13 +42,13 @@ if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
             -DPLATFORM_CMSIS_COMPLIANT
             -DTHECORE_ENABLE_SYSTMR_API # Timer API is enabled in any case, even if not used by theCore.
             -DTHECORE_CONFIG_SYSTMR_FREQ=${THECORE_CONFIG_SYSTMR_FREQ}
-            -DUSE_WFI_WFE=1  # Architecture provides CMSIS-based WFI/WFE routines
+            -DTHECORE_USE_WFI_WFE=1  # Architecture provides CMSIS-based WFI/WFE routines
         )
     endif()
 
     target_compile_definitions(arch PUBLIC
             -DPLATFORM_CMSIS_COMPLIANT
-            -DUSE_WFI_WFE=1  # Architecture provides CMSIS-based WFI/WFE routines
+            -DTHECORE_USE_WFI_WFE=1  # Architecture provides CMSIS-based WFI/WFE routines
     )
 
     target_sources(arch PUBLIC ${CMAKE_CURRENT_LIST_DIR}/execution.cpp)

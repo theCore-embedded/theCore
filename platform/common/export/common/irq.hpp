@@ -20,6 +20,8 @@ namespace ecl
 namespace irq
 {
 
+#if !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0
+
 using handler_type = std::function<void()>;
 
 //! Initializes storage for callbacks and setups default handler for every IRQ.
@@ -36,6 +38,8 @@ void subscribe(irq_num irqn, const irq::handler_type &handler);
 //! \param[in] irqn Valid IRQ number.
 //!
 void unsubscribe(irq_num irqn);
+
+#endif // !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0
 
 } // namespace ecl
 

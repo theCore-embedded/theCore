@@ -68,9 +68,9 @@ static inline bool wait_for(uint32_t ms, Predicate pred)
             break;
         }
 
-#ifdef USE_WFI_WFE
+#ifdef THECORE_USE_WFI_WFE
         ecl::wfe();
-#endif // USE_WFI_WFE
+#endif // THECORE_USE_WFI_WFE
     }
 
     ecl::systmr::disable();
