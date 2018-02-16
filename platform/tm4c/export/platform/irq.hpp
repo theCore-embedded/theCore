@@ -9,7 +9,7 @@
 #define PLATFORM_IRQ_HPP_
 
 #include <platform/execution.hpp>
-
+#include <aux/platform_defines.hpp>
 #include <ecl/err.hpp>
 
 #include <functional>

@@ -51,8 +51,10 @@ if 'console' in cfg:
     //[[[end]]]
 #endif
 
-// WFI/WFE routines presense ---------------------------------------------------
-#define USE_WFI_WFE 1
+// WFI/WFE routines presense
+#define THECORE_USE_WFI_WFE 1
+// IRQ manager is not needed, interrupts are registered in compile-time
+#define THECORE_NO_IRQ_MANAGER 1
 
 
 #endif // TM4C_PLATFORM_DEFINES_

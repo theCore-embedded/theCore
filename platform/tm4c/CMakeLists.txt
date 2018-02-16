@@ -6,7 +6,9 @@
 set(GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/)
 file(MAKE_DIRECTORY ${GEN_DIR}/export/aux)
 
-add_library(tm4c platform.cpp exti_manager.cpp ${GEN_DIR}/pin_mux.cpp)
+add_library(tm4c platform.cpp exti_manager.cpp
+    ${GEN_DIR}/pin_mux.cpp
+    ${GEN_DIR}/irq.cpp)
 
 include(mcu_cfg.cmake)
 
@@ -59,6 +61,9 @@ generate_source(gpio_cfg.in.hpp gpio_cfg.hpp)
 
 # Generate pins definitions
 generate_source(pin_mux.in.cpp pin_mux.cpp)
+
+# Generate IRQ handlers
+generate_source(irq.in.cpp irq.cpp)
 
 #-------------------------------------------------------------------------------
 

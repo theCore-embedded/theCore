@@ -126,6 +126,13 @@ public:
     //! \param[in] h Previously subscribed handler.
     static void unmask(handler &h);
 
+protected:
+    //! Handles event from given port.
+    //! \details Called internally by theCore when interrupt happens.
+    //! \tparam Port Port where interrupt has occur.
+    template<gpio_hw::port Port>
+    static void irq_port_handler();
+
 private:
     //! EXTI interrupt handlers list type.
     using handlers_list = list<handler, &handler::m_node>;
@@ -136,16 +143,31 @@ private:
     //! Gets handler list storage.
     static handlers_list &get_handlers();
 
-    //! Handles event from given port.
-    //! \tparam Port Port where interrupt has occur.
-    template<gpio_hw::port Port>
-    static void irq_port_handler();
-
     //! Handles GPIO IRQ provoked by pins in the given port.
     //! \param[in] port    GPIO port where interrupt occur.
     //! \param[in] hw_pins Bitstring representing what pins provoked interrupt.
     static void irq_handler(gpio_hw::port port, uint32_t hw_pins);
 };
+
+//------------------------------------------------------------------------------
+
+template<gpio_hw::port Port>
+void exti_manager::irq_port_handler()
+{
+    constexpr auto port = extract_value(Port);
+    constexpr auto irqn = gpio_hw::get_irqn(Port);
+
+    // Get pins that provoked the interrupt.
+    auto pins = GPIOIntStatus(port, true);
+
+    // Mask GPIO lines to prevent spurious events
+    GPIOIntDisable(port, pins);
+
+    irq_handler(Port, pins);
+
+    irq::clear(irqn);
+    irq::unmask(irqn);
+}
 
 //------------------------------------------------------------------------------
 

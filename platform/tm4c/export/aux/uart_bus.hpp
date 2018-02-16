@@ -103,6 +103,11 @@ public:
     uart_bus(const uart_bus&) = delete;
     uart_bus &operator=(uart_bus&) = delete;
 
+protected:
+    //! UART interrupt handler.
+    //! \details Receives interrupt from IRQ subsystem.
+    static void irq_bus_handler();
+
 private:
     //! Gets SYSCTL associated with given UART.
     static constexpr auto pick_sysctl();
@@ -113,8 +118,6 @@ private:
     //! Gets UART bus context.
     static constexpr auto &get_ctx();
 
-    //! UART interrupt handler.
-    static void irq_bus_handler();
 
     //! Stub handler, called in case if no one listens for bus events.
     static void stub_handler(bus_channel, bus_event, size_t)
@@ -323,7 +326,6 @@ err uart_bus<dev>::init()
                         UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                         UART_CONFIG_PAR_NONE);
 
-    irq::subscribe(pick_it(), irq_bus_handler);
     UARTFIFODisable(periph);
 
     bus_ctx.status |= (ctx::inited | ctx::rx_done | ctx::tx_done);
