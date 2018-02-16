@@ -1,3 +1,5 @@
+.. _theCore_STM32F4_HM-10_example:
+
 STM32F4 discovery and HM-10 Bluetooth LE (4.0) wireless module
 --------------------------------------------------------------
 
@@ -11,7 +13,7 @@ Wiring
 ~~~~~~
 
 .. image:: https://i.imgur.com/ZlNgnD5.jpg
-   :alt: UART, HM-10 and stm32f4discovery board wiring
+  :alt: UART, HM-10 and stm32f4discovery board wiring
 
 #. Connect USART2 and power to HM-10_  on the Discovery board using following pins:
 
@@ -39,7 +41,7 @@ Installing additional software on Android smartphone
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. image:: https://i.imgur.com/ag4DVY3.jpg
-   :alt: BLE Terminal download app
+  :alt: BLE Terminal download app
 
 To be able to communicate with HM-10 module via Android smartphone, a special
 application must be installed.
@@ -124,7 +126,7 @@ Firmware will be flashed via ``openocd`` and ``gdb``.
 #. Open `BLE Terminal`_ on your smartphone. You must be able to see nearby BT devices:
 
    .. image:: https://i.imgur.com/YT1Ggju.png
-      :alt: BLE Terminal app main window
+    :alt: BLE Terminal app main window
 
 #. Select HM-10 device.
 
@@ -133,7 +135,7 @@ Firmware will be flashed via ``openocd`` and ``gdb``.
 #. Now, type something to the terminal prompt in BLE Terminal app and tap "Send ASCII" button:
 
    .. image:: https://i.imgur.com/68eWX1n.png
-      :alt: BLE Terminal and HM-10 output window
+    :alt: BLE Terminal and HM-10 output window
 
 #. Check ``minicom`` terminal again::
 

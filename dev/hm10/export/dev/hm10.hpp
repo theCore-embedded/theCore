@@ -8,6 +8,7 @@
 //! asynchronous versions of the driver.
 //! At this moment, only synchronous version is implemented.
 
+
 #ifndef DEV_BT_HM10_HPP_
 #define DEV_BT_HM10_HPP_
 
@@ -26,6 +27,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup dev External device drivers
+//! @{
+
+//! \addtogroup connectivity Connectivity and IoT drivers
+//! @{
+
+//! \defgroup hm10 HM-10 module driver
+//! @{
 
 //! HM10 synchronous BT driver.
 //! \details This HM10 driver is simple and low-functional API to send and receive
@@ -466,6 +476,12 @@ err hm10_sync<Uart, Serial>::xfer(const uint8_t *tx, uint8_t *rx, size_t &tx_sz,
 
     return rc;
 }
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
 
