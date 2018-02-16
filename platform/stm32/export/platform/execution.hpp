@@ -2,18 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup stm32 STM32 multi-platform
-//! @{
-
-//! \defgroup stm32_execution Execution control module
-//! @{
-
 //! \file
 //! \brief Module aggregates routines that are control execution flow of the MCU.
-//!
+//! \ingroup stm32_execution
 #ifndef THE_CORE_EXECUTION_HPP_
 #define THE_CORE_EXECUTION_HPP_
 
@@ -23,6 +14,16 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_execution Execution control module
+//! @{
+
 //! \brief Performs a dummy busy wait for specified amount of milliseconds.
 //! \param ms number of milliseconds to wait.
 //!
@@ -34,14 +35,14 @@ static inline void spin_wait(uint32_t ms)
     ecl::arch_spin_wait(ms);
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } //namespace ecl
 
 // TODO #213 add RTC support
 
 #endif // THE_CORE_EXECUTION_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

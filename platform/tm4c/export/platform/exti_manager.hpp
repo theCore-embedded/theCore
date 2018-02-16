@@ -2,15 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
-//! @{
-
-//! \defgroup tm4c_exti External interrupt manager
-//! @{
-
 //! \file
 //! \brief External interrupt manager for TM4C platform.
 #ifndef TM4C_EXTI_MANAGER_HPP_
@@ -26,6 +17,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_exti External interrupt manager
+//! @{
 
 //! External interrupt manager class.
 //! \note Only GPIO interrupts are supported.
@@ -182,12 +182,12 @@ void exti_manager::subscribe(exti_manager::handler &h, exti_manager::trigger t)
     irq::enable();
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
 
 #endif // TM4C_EXTI_MANAGER_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

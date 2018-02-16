@@ -2,6 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \file
+//! \brief TM4C bypass console driver
+//! \ingroup tm4c_console
+#ifndef TM4C_CONSOLE_DRIVER_HPP_
+#define TM4C_CONSOLE_DRIVER_HPP_
+
+// All console definitions are generated in the USART config header
+#include <aux/uart_cfg.hpp>
+
+namespace ecl
+{
+
 //! \addtogroup platform Platform defintions and drivers
 //! @{
 
@@ -11,16 +23,6 @@
 //! \defgroup tm4c_console Console
 //! @{
 
-//! \file
-//! \brief TM4C bypass console driver
-#ifndef TM4C_CONSOLE_DRIVER_HPP_
-#define TM4C_CONSOLE_DRIVER_HPP_
-
-// All console definitions are generated in the USART config header
-#include <aux/uart_cfg.hpp>
-
-namespace ecl
-{
 
 #if !CORE_CONFIG_USE_BYPASS_CONSOLE
 
@@ -39,12 +41,12 @@ void bypass_putc(char c);
 
 #endif // CORE_CONFIG_USE_BYPASS_CONSOLE
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
 
 #endif // TM4C_CONSOLE_DRIVER_STUB_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

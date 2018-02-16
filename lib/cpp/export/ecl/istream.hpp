@@ -10,7 +10,27 @@
 #include <ctype.h>
 #include <limits.h>
 
-namespace ecl {
+namespace ecl
+{
+
+template<typename stream>
+stream& noskipws(stream &ios)
+{
+    // TODO: flush stream when appropriate functionality
+    // will be ready
+    ios.skipws(false);
+    return ios;
+}
+
+template<typename stream>
+stream& skipws(stream &ios)
+{
+    // TODO: flush stream when appropriate functionality
+    // will be ready
+    ios.skipws(true);
+    return ios;
+}
+
 template<class IO_device>
 class istream
 {
@@ -36,6 +56,9 @@ public:
     int get();
     istream &get(char &c);
 
+    // Set whitespace skipping status.
+    void skipws(bool state = true);
+
     // Disabled for now.
     istream &operator=(istream &) = delete;
     istream(const istream &) = delete;
@@ -43,6 +66,8 @@ public:
 private:
     // Simply, a device driver object
     IO_device *m_device;
+    // Skip whitespaces flag
+    bool      m_skipws = true;
 
     /**
      * Removes all leading space characters from the stream. Returns first
@@ -218,7 +243,7 @@ int istream< IO_device >::skip_leading_spaces(char &next)
         if (m_device->read((uint8_t *) &c, 1) <= 0) {
             return -1;
         }
-    } while (isspace(c));
+    } while (isspace(c) && m_skipws);
 
     next = c;
     return 0;
@@ -263,6 +288,13 @@ int istream< IO_device >::add_with_overflow(int a, int b)
     return a + b;
 }
 
+template<class IO_device>
+void istream< IO_device >::skipws(bool state)
+{
+    m_skipws = state;
 }
+
+
+} // namespace ecl
 
 #endif // ECL_istream_HPP

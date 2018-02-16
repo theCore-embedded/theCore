@@ -10,7 +10,7 @@
 #include <CppUTestExt/MockSupport.h>
 
 // Our resident
-using bus_t = ecl::generic_bus< platform_mock >;
+using bus_t = ecl::generic_bus<platform_mock>;
 
 TEST_GROUP(bus)
 {

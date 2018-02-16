@@ -2,6 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \file
+//! \brief GPIO device interface for STM32 platform
+//! \todo Detailed explanation.
+//! \ingroup stm32_gpio
+#ifndef PLATFORM_GPIO_DEVICE_HPP
+#define PLATFORM_GPIO_DEVICE_HPP
+
+#include <stm32_device.hpp>
+
+namespace ecl
+{
+
 //! \addtogroup platform Platform defintions and drivers
 //! @{
 
@@ -10,17 +22,6 @@
 
 //! \defgroup stm32_gpio GPIO control
 //! @{
-
-//! \file
-//! \brief GPIO device interface for STM32 platform
-//! \todo Detailed explanation.
-#ifndef PLATFORM_GPIO_DEVICE_HPP
-#define PLATFORM_GPIO_DEVICE_HPP
-
-#include <stm32_device.hpp>
-
-namespace ecl
-{
 
 //! GPIO numbers
 enum class gpio_num
@@ -210,12 +211,12 @@ auto gpio< Port, Pin >::pick_pin()
     }
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
 
 #endif // PLATFORM_GPIO_DEVICE_HPP
-
-//! @}
-
-//! @}
-
-//! @}

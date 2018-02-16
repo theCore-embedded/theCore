@@ -2,19 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! \addtogroup platform Platform defintions and drivers
-//! @{
-
-//! \addtogroup stm32 STM32 multi-platform
-//! @{
-
-//! \defgroup stm32_uart UART driver
-//! @{
-
-//!
 //! \file
 //! \brief STM32 USART driver
-//!
 
 #ifndef PLATFORM_USART_BUS_HPP_
 #define PLATFORM_USART_BUS_HPP_
@@ -34,6 +23,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_uart UART driver
+//! @{
 
 //! Represents distinct peripheral devices
 enum class usart_device
@@ -655,10 +653,15 @@ void usart_bus<dev>::irq_handler()
 
     irq::clear(irqn);
 
+    // Set if error interrupt raised
+    bool error = true;
+
     // TODO: comment about flags clear sequence
 
     if (!tx_done()) {
         if (USART_GetITStatus(usart, USART_IT_TXE) == SET && m_tx) {
+            error = false;
+
             if (m_tx_left) {
                 USART_SendData(usart, m_tx[m_tx_size - m_tx_left--]);
             } else {
@@ -676,6 +679,8 @@ void usart_bus<dev>::irq_handler()
     // Otherwise (regular mode) - wait till TX is done.
     if (listen_mode() || (tx_done() && !rx_done())) {
         if (USART_GetITStatus(usart, USART_IT_RXNE) == SET && m_rx) {
+            error = false;
+
             auto data = USART_ReceiveData(usart);
 
             m_rx[m_rx_size - m_rx_left--] = static_cast<uint8_t>(data);
@@ -696,6 +701,11 @@ void usart_bus<dev>::irq_handler()
         }
     }
 
+    if (error) {
+        uint32_t dummy = usart->SR; dummy = usart->DR;
+        (void)dummy;
+    }
+
     if (tx_done() && rx_done()) {
         // TODO: clear 'done' flags here too instead doing it in do_rx()/do_tx() ?
         if (!tx_canceled() && !rx_canceled()) {
@@ -708,12 +718,12 @@ void usart_bus<dev>::irq_handler()
     irq::unmask(irqn);
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
 
 #endif // PLATFORM_USART_BUS_HPP_
-
-//! @}
-
-//! @}
-
-//! @}

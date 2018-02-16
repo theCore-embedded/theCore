@@ -2,6 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+
+//! \file
+//! \brief Platform definitions template
+//! \ingroup stm32_templates
+#ifndef PLATFORM_PLATFORM_DEFINES_
+#define PLATFORM_PLATFORM_DEFINES_
+
+// Some defintions are family-specific
+#include <family_defines.hpp>
+
 //! \addtogroup platform Platform defintions and drivers
 //! @{
 
@@ -10,14 +20,6 @@
 
 //! \defgroup stm32_templates Auto-generated code, Python COG and CMake templates
 //! @{
-
-//! \file
-//! \brief Platform definitions template
-#ifndef PLATFORM_PLATFORM_DEFINES_
-#define PLATFORM_PLATFORM_DEFINES_
-
-// Some defintions are family-specific
-#include <family_defines.hpp>
 
 /*[[[cog
 import cog
@@ -40,10 +42,10 @@ if 'bypass_console' in cfg:
 ]]]*/
 //[[[end]]]
 
+//! @}
+
+//! @}
+
+//! @}
+
 #endif // PLATFORM_PLATFORM_DEFINES_
-
-//! @}
-
-//! @}
-
-//! @}
