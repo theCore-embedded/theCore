@@ -20,6 +20,7 @@
 #include "aux/platform_defines.hpp"
 #include "aux/gpio_cfg.hpp"
 #include "aux/uart_cfg.hpp"
+#include "aux/spi_cfg.hpp"
 
 #endif // TM4C_PLATFORM_GENERATED_HPP_
 
