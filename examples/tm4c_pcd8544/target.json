@@ -1,0 +1,46 @@
+{
+    "platform": {
+        "name": "tm4c",
+        "device": "TM4C123GH6PM",
+        "console": "UART0",
+        "uart": [
+            {
+                "id": "UART0",
+                "comment": "UART-over-USB console output"
+            }
+        ],
+        "spi": [
+            {
+                "id": 3,
+                "cpol": "high",
+                "cpha": "high",
+                "type": "master"
+            }
+        ],
+        "pinmux": [
+            {
+                "ids": [ "PA0", "PA1" ],
+                "dir": "hw",
+                "hws": { "PA0": "UART0_RX", "PA1": "UART0_TX" },
+                "comment": "UART0 console pins"
+            }
+        ],
+        "gpio_alias": [
+            {
+                "id": "PF1",
+                "alias": "led_red",
+                "comment": "Red LED"
+            },
+            {
+                "id": "PF2",
+                "alias": "led_blue",
+                "comment": "Blue LED"
+            },
+            {
+                "id": "PF3",
+                "alias": "led_green",
+                "comment": "Green LED"
+            }
+        ]
+    }
+}
