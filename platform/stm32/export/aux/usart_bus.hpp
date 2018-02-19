@@ -216,7 +216,7 @@ private:
     static constexpr uint8_t m_listen_mode = 0x8;
     //! Bit set if rx transfer was canceled.
     static constexpr uint8_t m_rx_canceled = 0x10;
-    //! Bit set if rx transfer was canceled.
+    //! Bit set if tx transfer was canceled.
     static constexpr uint8_t m_tx_canceled = 0x20;
 
     // Device status methods

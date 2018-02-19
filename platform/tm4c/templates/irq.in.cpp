@@ -27,7 +27,17 @@ irqs = {
         },
         'header': 'aux/uart_cfg.hpp',
         'isr_builder': (lambda id: 'ecl::uart_irq_proxy<ecl::uart_device::dev%s>::deliver_irq();' % id[-1])
-    }
+    },
+    'spi': {
+        'ids': {
+            0: def_isr,
+            1: def_isr,
+            2: def_isr,
+            3: def_isr,
+        },
+        'header': 'aux/spi_cfg.hpp',
+        'isr_builder': (lambda id: 'ecl::spi_irq_proxy<ecl::spi_channel::ch%d>::deliver_irq();' % id)
+    },
 }
 
 # Extract exact periphery for which IRQs must be generated
@@ -38,6 +48,13 @@ if 'uart' in cfg:
         id = uart['id']
         if id in irqs['uart']['ids']:
             irqs['uart']['ids'][id] = irqs['uart']['isr_builder'](id)
+
+if 'spi' in cfg:
+    cog.outl('#include "{}"'.format(irqs['spi']['header']))
+    for spi in cfg['spi']:
+        id = int(spi['id'][-1])
+        if id in irqs['spi']['ids']:
+            irqs['spi']['ids'][id] = irqs['spi']['isr_builder'](id)
 
 ]]]*/
 //[[[end]]]
@@ -62,6 +79,16 @@ struct uart_irq_proxy : uart_bus<dev>
     static void deliver_irq()
     {
         uart_bus<dev>::irq_bus_handler();
+    }
+};
+
+//! SPI interrupt proxy.
+template<spi_channel ch>
+struct spi_irq_proxy : spi<ch>
+{
+    static void deliver_irq()
+    {
+        spi<ch>::irq_handler();
     }
 };
 
@@ -130,7 +157,12 @@ void UART1_Handler()
 extern "C"
 void SSI0_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['spi']['ids'][0])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 24 I2C0 */
@@ -298,7 +330,12 @@ void UART2_Handler()
 extern "C"
 void SSI1_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['spi']['ids'][1])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 51 16/32-Bit Timer 3A */
@@ -410,14 +447,24 @@ void ADC1SS3_Handler()
 extern "C"
 void SSI2_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['spi']['ids'][2])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 74 SSI3 */
 extern "C"
 void SSI3_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['spi']['ids'][3])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 75 UART3 */

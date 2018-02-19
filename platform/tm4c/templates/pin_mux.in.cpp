@@ -70,6 +70,7 @@ def extract_strength(pincfg):
 def extract_hw(pin, hw):
     periph_map = {
         'UART':     'U',
+        'SPI':      'SSI',
     }
 
     m = re.search('(\w+)(\d)_(\w+)', hw)
@@ -118,6 +119,8 @@ extern "C" void gpio_init_generated()
         dir = extract_dir(pincfg)
         pin_type = extract_pintype(pincfg)
         strength = extract_strength(pincfg)
+
+        cog.outl('')
 
         if 'comment' in pincfg:
             cog.outl('/' + '* ' + pincfg['comment'] + ' *' + '/')
