@@ -30,6 +30,7 @@ enum class spi_channel
 {
     ch1,
     ch2,
+    ch3,
 };
 
 //! SPI master/slave selection.
@@ -91,7 +92,7 @@ template<spi_channel ch>
 struct spi_cfg
 {
     // Always assert
-    static_assert(std::is_integral<decltype(dev)>::value,
+    static_assert(std::is_integral<decltype(ch)>::value,
                   "The instance of this generic class should never be "
                           "instantiated. Please write your own template specialization "
                           "of this class. See documentation.");
@@ -221,25 +222,25 @@ private:
 };
 
 template<spi_channel ch>
-size_t spi<dev>::m_tx_size;
+size_t spi<ch>::m_tx_size;
 
 template<spi_channel ch>
-size_t spi<dev>::m_rx_size;
+size_t spi<ch>::m_rx_size;
 
 template<spi_channel ch>
-typename spi<dev>::tx_data spi<dev>::m_tx;
+typename spi<ch>::tx_data spi<ch>::m_tx;
 
 template<spi_channel ch>
-uint8_t *spi<dev>::m_rx;
+uint8_t *spi<ch>::m_rx;
 
 template<spi_channel ch>
-uint8_t spi<dev>::m_status = spi<dev>::tx_complete | spi<dev>::rx_complete;
+uint8_t spi<ch>::m_status = spi<ch>::tx_complete | spi<ch>::rx_complete;
 
 template<spi_channel ch>
-safe_storage<handler_fn> spi<dev>::m_handler_storage;
+safe_storage<typename spi<ch>::handler_fn> spi<ch>::m_handler_storage;
 
 template<spi_channel ch>
-ecl::err spi<dev>::init()
+ecl::err spi<ch>::init()
 {
     if (m_status & inited) {
         return ecl::err::ok;
@@ -255,7 +256,7 @@ ecl::err spi<dev>::init()
 }
 
 template<spi_channel ch>
-void spi<dev>::set_rx(uint8_t *rx, size_t size)
+void spi<ch>::set_rx(uint8_t *rx, size_t size)
 {
     ecl_assert(m_status & inited);
 
@@ -274,7 +275,7 @@ void spi<dev>::set_rx(uint8_t *rx, size_t size)
 }
 
 template<spi_channel ch>
-void spi<dev>::set_tx(size_t size, uint8_t fill_byte)
+void spi<ch>::set_tx(size_t size, uint8_t fill_byte)
 {
     ecl_assert(m_status & inited);
 
@@ -285,7 +286,7 @@ void spi<dev>::set_tx(size_t size, uint8_t fill_byte)
 }
 
 template<spi_channel ch>
-void spi<dev>::set_tx(const uint8_t *tx, size_t size)
+void spi<ch>::set_tx(const uint8_t *tx, size_t size)
 {
     ecl_assert(m_status & inited);
 
@@ -307,13 +308,13 @@ void spi<dev>::set_tx(const uint8_t *tx, size_t size)
 
 
 template<spi_channel ch>
-void spi<dev>::set_handler(const handler_fn &handler)
+void spi<ch>::set_handler(const handler_fn &handler)
 {
     get_handler() = handler;
 }
 
 template<spi_channel ch>
-void spi<dev>::reset_buffers()
+void spi<ch>::reset_buffers()
 {
     m_status &= ~(mode_fill);
     m_tx.buf = nullptr;
@@ -323,13 +324,13 @@ void spi<dev>::reset_buffers()
 }
 
 template<spi_channel ch>
-void spi<dev>::reset_handler()
+void spi<ch>::reset_handler()
 {
     get_handler() = handler_fn{};
 }
 
 template<spi_channel ch>
-ecl::err spi<dev>::do_xfer()
+ecl::err spi<ch>::do_xfer()
 {
     ecl_assert(m_status & inited);
     ecl_assert(valid_sizes());
@@ -339,8 +340,8 @@ ecl::err spi<dev>::do_xfer()
     return ecl::err::ok;
 }
 
-template<spi_device dev>
-void spi_i2s_bus<dev>::enable_circular_mode()
+template<spi_channel ch>
+void spi<ch>::enable_circular_mode()
 {
     // Cannot enable circular mode if transfer is ongoing
     ecl_assert((m_status & tx_complete) && (m_status & rx_complete));
@@ -348,14 +349,14 @@ void spi_i2s_bus<dev>::enable_circular_mode()
     m_status |= mode_circular;
 }
 
-template<spi_device dev>
-void spi_i2s_bus<dev>::disable_circular_mode()
+template<spi_channel ch>
+void spi<ch>::disable_circular_mode()
 {
     m_status &= ~mode_circular;
 }
 
-template<spi_device dev>
-bool spi_i2s_bus<dev>::is_circular_mode()
+template<spi_channel ch>
+bool spi<ch>::is_circular_mode()
 {
     return m_status & mode_circular;
 }
@@ -363,7 +364,7 @@ bool spi_i2s_bus<dev>::is_circular_mode()
 //------------------------------------------------------------------------------
 
 template<spi_channel ch>
-bool spi<dev>::valid_sizes()
+bool spi<ch>::valid_sizes()
 {
     // Bus is in full-duplex mode. Different sizes are not permitted.
     if (m_tx_size && m_rx_size) {
@@ -376,7 +377,7 @@ bool spi<dev>::valid_sizes()
 }
 
 template<spi_channel ch>
-void spi<dev>::irq_handler()
+void spi<ch>::irq_handler()
 {
     /* TODO: fill this when implementing real driver */
 }

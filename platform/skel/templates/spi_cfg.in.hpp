@@ -109,4 +109,4 @@ for spi in spi_cfgs:
 
 } // namespace ecl
 
-#endif // STM32XX_SPI_spi_CFGS_HPP_
+#endif // PLATFORM_SPI_CFGS_HPP_
