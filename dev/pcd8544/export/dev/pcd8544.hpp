@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef DEV_PCD8544_HPP
-#define DEV_PCD8544_HPP
+#ifndef DEV_PCD8544_HPP_
+#define DEV_PCD8544_HPP_
 
 #include <ecl/thread/semaphore.hpp>
 #include <ecl/thread/utils.hpp>
@@ -139,14 +139,12 @@ private:
     err internal_flush();
 
     uint8_t                 m_array[84][6];    // TODO: magic numbers
-    ecl::binary_semaphore   m_sem;             // Handle bus events
 };
 
 
 template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
 pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::pcd8544()
     :m_array{0}
-    ,m_sem{}
 {
 
     Cs_gpio::set();
@@ -163,14 +161,13 @@ pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::~pcd8544()
 template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
 err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::init()
 {
-    Spi::lock();
 
     auto rc = Spi::init();
     if (is_error(rc)) {
-        Spi::unlock();
         return rc;
     }
 
+    Spi::lock();
     // RESET
     Cs_gpio::set();
     Rst_gpio::reset();
@@ -193,13 +190,10 @@ err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::open()
     send(FS_prefix | FS_H_on, DC_state::command);
 
     // Setup VOP
-    send(VOP_prefix | (VOP_mask & 0x40), DC_state::command);
-
-    // Setup temperature control
-    send(TC_prefix | 0x2, DC_state::command);
+    send(VOP_prefix | (VOP_mask & 0x1b), DC_state::command);
 
     //  Set bias voltage
-    send(BS_prefix | (BS_mask & 0x3), DC_state::command);
+    send(BS_prefix | (BS_mask & 0x13), DC_state::command);
 
     // Vertical addressing on, back to the basic instruction set
     send(FS_prefix | FS_V_on, DC_state::command);
@@ -251,7 +245,7 @@ err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::clear_point(const point& coord
     int y = coord.get_y();
 
     if (x < 0 || y < 0 || x > 83 || y > 47)
-        return -1;
+        return err::inval;
 
     // Calculate a byte offcet
     int y_byte = y >> 3;
@@ -262,7 +256,7 @@ err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::clear_point(const point& coord
     // Clear appropriate bit
     m_array[x][y_byte] &= ~(1 << y_bit);
 
-    return 0;
+    return err::ok;
 }
 
 template< class Spi, class Cs_gpio, class Mode_gpio, class Rst_gpio >
@@ -333,4 +327,4 @@ err pcd8544< Spi, Cs_gpio, Mode_gpio, Rst_gpio >::internal_flush()
 
 } // namespace ecl
 
-#endif
+#endif // DEV_PCD8544_HPP_

@@ -1,0 +1,57 @@
+{
+    "platform": {
+        "name": "tm4c",
+        "device": "TM4C123GH6PM",
+        "console": "UART0",
+        "uart": [
+            {
+                "id": "UART0",
+                "comment": "UART-over-USB console output"
+            }
+        ],
+        "spi": [
+            {
+                "id": "SPI3",
+                "cpol": "low",
+                "cpha": "low",
+                "type": "master"
+            }
+        ],
+        "pinmux": [
+            {
+                "ids": [ "PA0", "PA1" ],
+                "dir": "hw",
+                "hws": { "PA0": "UART0_RX", "PA1": "UART0_TX" },
+                "comment": "UART0 console pins"
+            },
+            {
+                "ids": [ "PD0", "PD2", "PD3" ],
+                "dir": "hw",
+                "hws": { "PD0": "SPI3_CLK", "PD2": "SPI3_RX", "PD3": "SPI3_TX" },
+                "comment": "SPI3 (SSI3) pins"
+            },
+            {
+                "ids": [ "PD1", "PE1", "PE2" ],
+                "dir": "out",
+                "comment": "PCD additional GPIOs: slave select, mode, reset"
+            }
+        ],
+        "gpio_alias": [
+            {
+                "id": "PD1",
+                "alias": "pcd_ss",
+                "comment": "PCD SPI3 slave select"
+            },
+            {
+                "id": "PE1",
+                "alias": "pcd_mode",
+                "comment": "PCD Mode selection GPIO"
+            },
+            {
+                "id": "PE2",
+                "alias": "pcd_rst",
+                "comment": "PCD reset GPIO"
+            }
+        ]
+    }
+}
