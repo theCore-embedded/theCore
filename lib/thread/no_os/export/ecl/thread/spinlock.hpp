@@ -16,7 +16,9 @@ namespace ecl
 class spinlock
 {
 public:
-    constexpr spinlock();
+    constexpr spinlock()
+        :m_flag ATOMIC_FLAG_INIT // Braces '{}' are included in macro body of ATOMIC_FLAG_INIT
+    { }
 
     void lock();
     void unlock();

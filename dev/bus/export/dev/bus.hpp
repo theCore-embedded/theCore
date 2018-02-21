@@ -13,6 +13,7 @@
 #include <ecl/err.hpp>
 #include <ecl/thread/mutex.hpp>
 #include <ecl/thread/semaphore.hpp>
+#include <ecl/thread/spinlock.hpp>
 #include <ecl/assert.h>
 
 #include <common/bus.hpp>
@@ -270,7 +271,14 @@ template<class PBus> volatile uint8_t                  generic_bus<PBus>::m_stat
 template<class PBus>
 err generic_bus<PBus>::init()
 {
+    // Exists only to protect init call when multiple threads accessing it,
+    // since global lock is not yet initialized.
+    static ecl::spinlock local_lock;
+
+    local_lock.lock();
+
     if (m_state & bus_inited) {
+        local_lock.unlock(); // TODO: use lock guard
         return err::ok;
     }
 
@@ -287,6 +295,8 @@ err generic_bus<PBus>::init()
     mut();
     cb();
     sem();
+
+    local_lock.unlock();
 
     return rc;
 }
