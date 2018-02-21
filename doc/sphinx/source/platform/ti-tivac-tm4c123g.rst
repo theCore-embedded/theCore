@@ -9,9 +9,7 @@ Tiva C TM4C123G is a Cortex-M4 based microcontroller from Texas Instruments.
 :Supported devices:
     TM4C123GH6PM
 :Data sheets/Reference manuals:
-    `TM4C123GH6PM <TM4C123GH6PM datasheet>`_
-
-.. _`TM4C123GH6PM datasheet`: http://www.ti.com/lit/ds/spms376e/spms376e.pdf
+    `TM4C123GH6PM datasheet`_
 
 .. important:: The platform is configured by theCore configurator.
     To make sure you are familiar with it, check the :ref:`theCore_Configurator`
@@ -257,3 +255,5 @@ External interrupts
 ~~~~~~~~~~~~~~~~~~~
 
 .. note:: This section is under construction
+
+.. _`TM4C123GH6PM datasheet`: http://www.ti.com/lit/ds/spms376e/spms376e.pdf

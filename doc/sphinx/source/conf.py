@@ -59,14 +59,19 @@ if 'SPHINX_ROOT_URL' in os.environ:
 else:
     raise Exception('env variable SPHINX_ROOT_URL must be set to proceed')
 
+doxy_url = root_url + 'doxygen/'
+
 # Make sure root URL is advertised when used with links.
-extlinks = {'sphinx_root_url':
-    ('{}%s'.format(root_url), 'sphinx_root_url ')}
+extlinks = {
+    'sphinx_root_url': ('{}%s'.format(root_url), 'sphinx_root_url '),
+    'doxy_url': ('{}%s'.format(doxy_url), 'doxy_url' )
+    }
 
 # Make sure root URL is advertised as substitution.
 rst_epilog = '''
 .. |sphinx_root_url| replace:: {}
-'''.format(root_url)
+.. |doxy_url| replace:: {}
+'''.format(root_url, doxy_url)
 
 source_parsers = {
    '.md': 'recommonmark.parser.CommonMarkParser',
