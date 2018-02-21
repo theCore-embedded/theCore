@@ -23,7 +23,7 @@ theCore root.
 Driver documentation
 ~~~~~~~~~~~~~~~~~~~~
 
-`Click here to open HM-10 Doxygen docs`_.
+:doxy_url:`Click here to open HM-10 Doxygen docs<group__hm10.html>`.
 
 HM-10 usage example
 ~~~~~~~~~~~~~~~~~~~
@@ -43,7 +43,6 @@ References
 * `Instructable's "HOW TO USE BLUETOOTH 4.0 HM10"`_
 
 .. _fab.cba.mit.edu website: http://fab.cba.mit.edu/classes/863.15/doc/tutorials/programming/bluetooth/bluetooth40_en.pdf
-.. _`Click here to open HM-10 Doxygen docs`: ../doxygen/group__hm10.html
 .. _`"Implement HM-10 master mode" GitHub issue`: https://github.com/forGGe/theCore/issues/354
 .. _`Martyn Currey's "HM-10 Bluetooth 4 BLE Modules" guide`: http://www.martyncurrey.com/hm-10-bluetooth-4ble-modules/
 .. _`Instructable's "HOW TO USE BLUETOOTH 4.0 HM10"`: http://www.instructables.com/id/How-to-Use-Bluetooth-40-HM10/
