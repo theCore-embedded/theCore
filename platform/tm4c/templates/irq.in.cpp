@@ -8,6 +8,9 @@
 #include <platform/exti_manager.hpp>
 #include <platform/execution.hpp>
 
+#include "aux/uart_cfg.hpp"
+#include "aux/spi_cfg.hpp"
+
 /*[[[cog
 
 import cog
@@ -25,8 +28,7 @@ irqs = {
             'UART0': def_isr,
             'UART1': def_isr,
         },
-        'header': 'aux/uart_cfg.hpp',
-        'isr_builder': (lambda id: 'ecl::uart_irq_proxy<ecl::uart_device::dev%s>::deliver_irq();' % id[-1])
+        'isr_builder': (lambda id: 'ecl::uart_irq_proxy<ecl::uart_channel::ch%s>::deliver_irq();' % id[-1])
     },
     'spi': {
         'ids': {
@@ -35,7 +37,6 @@ irqs = {
             2: def_isr,
             3: def_isr,
         },
-        'header': 'aux/spi_cfg.hpp',
         'isr_builder': (lambda id: 'ecl::spi_irq_proxy<ecl::spi_channel::ch%d>::deliver_irq();' % id)
     },
 }
@@ -43,14 +44,12 @@ irqs = {
 # Extract exact periphery for which IRQs must be generated
 
 if 'uart' in cfg:
-    cog.outl('#include "{}"'.format(irqs['uart']['header']))
     for uart in cfg['uart']:
         id = uart['id']
         if id in irqs['uart']['ids']:
             irqs['uart']['ids'][id] = irqs['uart']['isr_builder'](id)
 
 if 'spi' in cfg:
-    cog.outl('#include "{}"'.format(irqs['spi']['header']))
     for spi in cfg['spi']:
         id = int(spi['id'][-1])
         if id in irqs['spi']['ids']:
@@ -73,12 +72,12 @@ struct exti_irq_proxy : public exti_manager
 };
 
 //! UART interrupt proxy.
-template<uart_device dev>
-struct uart_irq_proxy : uart_bus<dev>
+template<uart_channel ch>
+struct uart_irq_proxy : uart<ch>
 {
     static void deliver_irq()
     {
-        uart_bus<dev>::irq_bus_handler();
+        uart<ch>::irq_bus_handler();
     }
 };
 

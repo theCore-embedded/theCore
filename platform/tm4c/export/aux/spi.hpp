@@ -21,10 +21,10 @@ namespace ecl
 //! \addtogroup platform Platform defintions and drivers
 //! @{
 
-//! \addtogroup skel Platform skeleton
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
 //! @{
 
-//! \defgroup skel_spi Skeleton of SPI driver
+//! \defgroup tm4c_spi SPI driver
 //! @{
 
 //! List of avaliable SPI channels.
@@ -423,9 +423,9 @@ ecl::err spi<ch>::cancel_xfer()
     ecl_assert(m_status & inited);
     m_status |= xfer_canceled;
 
-    /* TODO: fill this when implementing real driver */
+    // TODO: Implement cancellation
 
-    return ecl::err::ok;
+    return ecl::err::notsup;
 }
 
 template<spi_channel ch>
