@@ -15,6 +15,7 @@ extern "C" void gpio_init_generated()
     ecl::gpio_hw::enable_periph<ecl::gpio_hw::port::a>();
     ecl::gpio_hw::enable_periph<ecl::gpio_hw::port::f>();
 
+
     /* LED pins */
 
     ecl::gpio_hw::apply_cfg<ecl::gpio_hw::port::f, ecl::gpio_hw::num::pin1>(
@@ -36,6 +37,7 @@ extern "C" void gpio_init_generated()
             ecl::gpio_hw::pad_type::push_pull,
             ecl::gpio_hw::strength::i2ma
         );
+
 
     /* UART0 console pins */
 

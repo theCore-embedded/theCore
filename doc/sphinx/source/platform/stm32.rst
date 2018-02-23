@@ -246,7 +246,7 @@ Example output for STM32F4 family
 .. literalinclude:: ../_static/generated/stm32/adc_example.hpp
     :language: cpp
     :linenos:
-    :lines: 22-50
+    :lines: 14-57
 
 `Full STM32 ADC example header <../_static/generated/stm32/adc_example.hpp>`_
 
@@ -297,18 +297,20 @@ Properties
 * ``comment`` - user-defined string, describes a driver purpose. Must be valid
   string, suitable for C/C++ comments.
 
-Example configuration:
+Example configuration
++++++++++++++++++++++
 
 .. literalinclude:: stm32/i2c_example.json
     :language: json
     :linenos:
 
-Example output:
+Example output
++++++++++++++++++++++
 
 .. literalinclude:: ../_static/generated/stm32/i2c_example.hpp
     :language: cpp
     :linenos:
-    :lines: 22-43
+    :lines: 14-50
 
 `Full STM32 I2C example header <../_static/generated/stm32/i2c_example.hpp>`_
 

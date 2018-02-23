@@ -128,12 +128,12 @@ for config in i2c:
 ]]]*/
 //[[[end]]]
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
-
-//! @}
-
-//! @}
-
-//! @}
 
 #endif // STM32XX_I2C_CFGS_HPP_
