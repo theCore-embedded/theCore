@@ -3,6 +3,8 @@
 ! -iname sitemap.\*
 ! -iname \*.js
 ! -iname \*.doctree
+! -iname \*.pickle
+! -iname \*.inv
 ! -iname \*.css
 ! -iname \*.png
 ! -iname \*.md5

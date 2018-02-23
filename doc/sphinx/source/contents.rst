@@ -44,9 +44,3 @@ theCore: C++ Embedded Framework
   testing
   credits
   changelog
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
