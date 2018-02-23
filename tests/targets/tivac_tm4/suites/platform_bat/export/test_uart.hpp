@@ -13,7 +13,7 @@
 namespace ecl
 {
 
-using test_uart = uart<uart_device::dev0>;
+using test_uart = uart<uart_channel::ch0>;
 
 }
 

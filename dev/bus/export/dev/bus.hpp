@@ -13,7 +13,7 @@
 #include <ecl/err.hpp>
 #include <ecl/thread/mutex.hpp>
 #include <ecl/thread/semaphore.hpp>
-#include <ecl/thread/spinlock.hpp>
+#include <ecl/thread/mutex.hpp>
 #include <ecl/assert.h>
 
 #include <common/bus.hpp>
@@ -273,7 +273,7 @@ err generic_bus<PBus>::init()
 {
     // Exists only to protect init call when multiple threads accessing it,
     // since global lock is not yet initialized.
-    static ecl::spinlock local_lock;
+    static ecl::mutex local_lock;
 
     local_lock.lock();
 
