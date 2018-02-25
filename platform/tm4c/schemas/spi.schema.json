@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "array",
+
+    "items": {
+        "type": "object",
+
+        "properties": {
+            "id":      { "type": "string", "pattern": "^SPI\\d$" },
+            "alias":   { "type": "string"  },
+            "comment": { "type": "string"  },
+
+            "type":    { "enum": [ "master" ] },
+            "cpol":    { "enum": [ "high", "low" ] },
+            "cpha":    { "enum": [ "high", "low" ] }
+        },
+
+        "required": [ "id", "type", "cpol", "cpha" ]
+    }
+}

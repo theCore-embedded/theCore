@@ -6,8 +6,8 @@
 //! \brief UART implementation for TI TM4C MCU
 //! \ingroup tm4c_uart
 
-#ifndef PLATFORM_TM4C_UART_BUS_HPP_
-#define PLATFORM_TM4C_UART_BUS_HPP_
+#ifndef PLATFORM_TM4C_UART_HPP_
+#define PLATFORM_TM4C_UART_HPP_
 
 #include <type_traits>
 
@@ -35,23 +35,23 @@ namespace ecl
 //! \defgroup tm4c_uart UART driver
 //! @{
 
-//! Represents distinct UART peripheral devices
-enum class uart_device
+//! Represents distinct UART peripheral devices (channels)
+enum class uart_channel
 {
-    dev0 = UART0_BASE,
-    dev1 = UART1_BASE,
-    dev2 = UART2_BASE,
-    dev3 = UART3_BASE,
-    dev4 = UART4_BASE,
-    dev5 = UART5_BASE,
-    dev6 = UART6_BASE,
-    dev7 = UART7_BASE,
+    ch0 = UART0_BASE,
+    ch1 = UART1_BASE,
+    ch2 = UART2_BASE,
+    ch3 = UART3_BASE,
+    ch4 = UART4_BASE,
+    ch5 = UART5_BASE,
+    ch6 = UART6_BASE,
+    ch7 = UART7_BASE,
 };
 
 //! UART driver.
-//! \tparam dev Peripheral device to use with this driver
-template<uart_device dev>
-class uart_bus
+//! \tparam ch Peripheral channel to use with this driver
+template<uart_channel ch>
+class uart
 {
     //! Bypass console routines, partially reuse UART driver code.
     friend void bypass_console_init();
@@ -100,8 +100,8 @@ public:
     //! \return Status of operation.
     static err cancel_xfer();
 
-    uart_bus(const uart_bus&) = delete;
-    uart_bus &operator=(uart_bus&) = delete;
+    uart(const uart&) = delete;
+    uart &operator=(uart&) = delete;
 
 protected:
     //! UART interrupt handler.
@@ -176,69 +176,69 @@ private:
     static safe_storage<ctx> m_ctx_storage;
 };
 
-template<uart_device dev>
-safe_storage<typename uart_bus<dev>::ctx> uart_bus<dev>::m_ctx_storage;
+template<uart_channel ch>
+safe_storage<typename uart<ch>::ctx> uart<ch>::m_ctx_storage;
 
 //------------------------------------------------------------------------------
 // Private members
 
-template<uart_device dev>
-constexpr auto uart_bus<dev>::pick_sysctl()
+template<uart_channel ch>
+constexpr auto uart<ch>::pick_sysctl()
 {
-    switch (dev) {
-        case uart_device::dev0:
+    switch (ch) {
+        case uart_channel::ch0:
             return SYSCTL_PERIPH_UART0;
-        case uart_device::dev1:
+        case uart_channel::ch1:
             return SYSCTL_PERIPH_UART1;
-        case uart_device::dev2:
+        case uart_channel::ch2:
             return SYSCTL_PERIPH_UART2;
-        case uart_device::dev3:
+        case uart_channel::ch3:
             return SYSCTL_PERIPH_UART3;
-        case uart_device::dev4:
+        case uart_channel::ch4:
             return SYSCTL_PERIPH_UART4;
-        case uart_device::dev5:
+        case uart_channel::ch5:
             return SYSCTL_PERIPH_UART5;
-        case uart_device::dev6:
+        case uart_channel::ch6:
             return SYSCTL_PERIPH_UART6;
-        case uart_device::dev7:
+        case uart_channel::ch7:
             return SYSCTL_PERIPH_UART7;
     }
 }
 
-template<uart_device dev>
-constexpr auto uart_bus<dev>::pick_it()
+template<uart_channel ch>
+constexpr auto uart<ch>::pick_it()
 {
-    switch (dev) {
-        case uart_device::dev0:
+    switch (ch) {
+        case uart_channel::ch0:
             return INT_UART0;
-        case uart_device::dev1:
+        case uart_channel::ch1:
             return INT_UART1;
-        case uart_device::dev2:
+        case uart_channel::ch2:
             return INT_UART2;
-        case uart_device::dev3:
+        case uart_channel::ch3:
             return INT_UART3;
-        case uart_device::dev4:
+        case uart_channel::ch4:
             return INT_UART4;
-        case uart_device::dev5:
+        case uart_channel::ch5:
             return INT_UART5;
-        case uart_device::dev6:
+        case uart_channel::ch6:
             return INT_UART6;
-        case uart_device::dev7:
+        case uart_channel::ch7:
             return INT_UART7;
     }
 }
 
-template<uart_device dev>
-constexpr auto &uart_bus<dev>::get_ctx()
+template<uart_channel ch>
+constexpr auto &uart<ch>::get_ctx()
 {
     return m_ctx_storage.get();
 }
 
-template<uart_device dev>
-void uart_bus<dev>::irq_bus_handler()
+template<uart_channel ch>
+void uart<ch>::irq_bus_handler()
 {
     auto &bus_ctx = get_ctx();
-    constexpr auto periph = static_cast<std::underlying_type_t<uart_device>>(dev);
+    constexpr auto periph = static_cast<std::underlying_type_t<uart_channel>>(ch);
     constexpr auto uart_it = pick_it();
 
     if (!(bus_ctx.status & ctx::tx_done)) {
@@ -306,8 +306,8 @@ void uart_bus<dev>::irq_bus_handler()
 
 //------------------------------------------------------------------------------
 
-template<uart_device dev>
-err uart_bus<dev>::init()
+template<uart_channel ch>
+err uart<ch>::init()
 {
     // POD-type fields of ctx will be initialized to 0, so it is valid to access
     // flags there.
@@ -315,7 +315,7 @@ err uart_bus<dev>::init()
 
     ecl_assert(!bus_ctx.status);
 
-    constexpr auto periph = static_cast<std::underlying_type_t<uart_device>>(dev);
+    constexpr auto periph = static_cast<std::underlying_type_t<uart_channel>>(ch);
     constexpr auto periph_sysctl = pick_sysctl();
 
     m_ctx_storage.init();
@@ -332,8 +332,8 @@ err uart_bus<dev>::init()
     return err::ok;
 }
 
-template<uart_device dev>
-void uart_bus<dev>::set_rx(uint8_t *rx, size_t size)
+template<uart_channel ch>
+void uart<ch>::set_rx(uint8_t *rx, size_t size)
 {
     auto &bus_ctx = get_ctx();
 
@@ -345,8 +345,8 @@ void uart_bus<dev>::set_rx(uint8_t *rx, size_t size)
     bus_ctx.rx_idx = 0;
 }
 
-template<uart_device dev>
-void uart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
+template<uart_channel ch>
+void uart<ch>::set_tx(const uint8_t *tx, size_t size)
 {
     auto &bus_ctx = get_ctx();
 
@@ -360,8 +360,8 @@ void uart_bus<dev>::set_tx(const uint8_t *tx, size_t size)
     bus_ctx.status &= ~ctx::fill;
 }
 
-template<uart_device dev>
-void uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
+template<uart_channel ch>
+void uart<ch>::set_tx(size_t size, uint8_t fill_byte)
 {
     // TODO: implement
     auto &bus_ctx = get_ctx();
@@ -375,8 +375,8 @@ void uart_bus<dev>::set_tx(size_t size, uint8_t fill_byte)
     bus_ctx.status |= ctx::fill;
 }
 
-template<uart_device dev>
-void uart_bus<dev>::set_handler(const bus_handler &handler)
+template<uart_channel ch>
+void uart<ch>::set_handler(const bus_handler &handler)
 {
     auto &bus_ctx = get_ctx();
 
@@ -386,8 +386,8 @@ void uart_bus<dev>::set_handler(const bus_handler &handler)
     bus_ctx.h = handler;
 }
 
-template<uart_device dev>
-void uart_bus<dev>::reset_buffers()
+template<uart_channel ch>
+void uart<ch>::reset_buffers()
 {
     auto &bus_ctx = get_ctx();
 
@@ -401,8 +401,8 @@ void uart_bus<dev>::reset_buffers()
     bus_ctx.rx = nullptr;
 }
 
-template<uart_device dev>
-void uart_bus<dev>::reset_handler()
+template<uart_channel ch>
+void uart<ch>::reset_handler()
 {
     auto &bus_ctx = get_ctx();
 
@@ -412,8 +412,8 @@ void uart_bus<dev>::reset_handler()
     bus_ctx.h = stub_handler;
 }
 
-template<uart_device dev>
-err uart_bus<dev>::do_xfer()
+template<uart_channel ch>
+err uart<ch>::do_xfer()
 {
     auto &bus_ctx = get_ctx();
 
@@ -423,7 +423,7 @@ err uart_bus<dev>::do_xfer()
     // At least one of direction should be enabled
     ecl_assert(bus_ctx.tx.buf || bus_ctx.rx);
 
-    constexpr auto periph = static_cast<std::underlying_type_t<uart_device>>(dev);
+    constexpr auto periph = static_cast<std::underlying_type_t<uart_channel>>(ch);
 
     uint32_t int_flags = 0;
 
@@ -456,12 +456,12 @@ err uart_bus<dev>::do_xfer()
     return err::ok;
 }
 
-template<uart_device dev>
-err uart_bus<dev>::cancel_xfer()
+template<uart_channel ch>
+err uart<ch>::cancel_xfer()
 {
     auto &bus_ctx = get_ctx();
     constexpr auto uart_it = pick_it();
-    constexpr auto periph = static_cast<std::underlying_type_t<uart_device>>(dev);
+    constexpr auto periph = static_cast<std::underlying_type_t<uart_channel>>(ch);
 
     UARTIntDisable(periph, UART_INT_TX | UART_INT_RX);
     irq::mask(uart_it);
@@ -474,7 +474,6 @@ err uart_bus<dev>::cancel_xfer()
     return err::ok;
 }
 
-
 //! @}
 
 //! @}
@@ -483,4 +482,4 @@ err uart_bus<dev>::cancel_xfer()
 
 } // namespace ecl
 
-#endif // PLATFORM_TM4C_UART_BUS_HPP_
+#endif // PLATFORM_TM4C_UART_HPP_

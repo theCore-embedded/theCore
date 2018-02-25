@@ -59,6 +59,9 @@ generate_source(uart_cfg.in.hpp uart_cfg.hpp)
 # Generate GPIO definitions
 generate_source(gpio_cfg.in.hpp gpio_cfg.hpp)
 
+# Generate SPI definitions
+generate_source(spi_cfg.in.hpp spi_cfg.hpp)
+
 # Generate pins definitions
 generate_source(pin_mux.in.cpp pin_mux.cpp)
 

@@ -8,6 +8,7 @@
 
         "systmr_cfg":     { "$ref": "file:systmr.schema.json" },
         "uart":           { "$ref": "file:uart.schema.json" },
+        "spi":            { "$ref": "file:spi.schema.json" },
         "pinmux":         { "$ref": "file:pinmux.schema.json" },
         "gpio_alias":     { "$ref": "file:gpio_alias.schema.json" }
     },

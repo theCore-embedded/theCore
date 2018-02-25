@@ -84,7 +84,6 @@ System timer
 ~~~~~~~~~~~~
 
 :Driver sources:    ``platform/tm4c/export/aux/execution.hpp``
-                    ``platform/tm4c/export/aux/execution.hpp``
 
 JSON schema
 +++++++++++
@@ -121,7 +120,7 @@ Usage
 UART
 ~~~~
 
-:Driver sources:    ``platform/tm4c/export/aux/uart_bus.hpp``
+:Driver sources:    ``platform/tm4c/export/aux/uart.hpp``
 :Template file:     ``platform/tm4c/templates/uart_cfg.in.hpp``
 
 JSON schema
@@ -146,7 +145,7 @@ Example output
     :linenos:
     :lines: 16-31
 
-`Full TM4C UART example header <_static/generated/tm4c/uart_example.hpp>`_
+`Full TM4C UART example header <../_static/generated/tm4c/uart_example.hpp>`_
 
 Console
 +++++++
@@ -178,6 +177,47 @@ Usage
 
 .. note:: This section is under construction
 
+SSI / SPI
+~~~~~~~~~
+
+:Driver sources:    ``platform/tm4c/export/aux/spi.hpp``
+:Template file:     ``platform/tm4c/templates/spi.in.hpp``
+
+Known limitations
++++++++++++++++++
+
+* theCore SPI driver for TM4C can work only in master mode.
+  See `issue #361`_.
+* SPI clock is not yet configurable in the driver and it is set to a
+  fraction of the system clock: ``spi_clock = system_clock / 4``.
+  See `issue #360`_.
+* Only Motorola SPI modes are supported, though datasheet lists more than that.
+  See `issue #362`_.
+
+JSON schema
++++++++++++
+
+.. literalinclude:: ../../../../platform/tm4c/schemas/spi.schema.json
+    :language: json
+    :linenos:
+
+Example configuration
++++++++++++++++++++++
+
+.. literalinclude:: tm4c/spi_example.json
+    :language: json
+    :linenos:
+
+Example output
+++++++++++++++
+
+.. literalinclude:: ../_static/generated/tm4c/spi_example.hpp
+    :language: cpp
+    :linenos:
+    :lines: 13-60
+
+`Full TM4C SPI example header <../_static/generated/tm4c/spi_example.hpp>`_
+
 .. _TM4C Multiplexing:
 
 Pin multiplexing
@@ -208,7 +248,7 @@ Example output
     :linenos:
     :lines: 13-54
 
-`Full TM4C GPIO pin multiplexing source file <_static/generated/tm4c/pin_mux_example.cpp>`_
+`Full TM4C GPIO pin multiplexing source file <../_static/generated/tm4c/pin_mux_example.cpp>`_
 
 Usage
 +++++
@@ -243,7 +283,7 @@ Example output
     :linenos:
     :lines: 14-26
 
-`Full TM4C GPIO alias example header <_static/generated/tm4c/gpio_alias_example.hpp>`_
+`Full TM4C GPIO alias example header <../_static/generated/tm4c/gpio_alias_example.hpp>`_
 
 Usage
 +++++
@@ -257,3 +297,6 @@ External interrupts
 .. note:: This section is under construction
 
 .. _`TM4C123GH6PM datasheet`: http://www.ti.com/lit/ds/spms376e/spms376e.pdf
+.. _`issue #362`: https://github.com/forGGe/theCore/issues/362
+.. _`issue #361`: https://github.com/forGGe/theCore/issues/361
+.. _`issue #360`: https://github.com/forGGe/theCore/issues/360

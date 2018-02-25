@@ -41,12 +41,12 @@ using I2C1_driver_cfg = i2c_config<
 using I2C1_driver = i2c_bus<I2C1_driver_cfg>;
 using i2c1 = I2C1_driver;
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
-
-//! @}
-
-//! @}
-
-//! @}
 
 #endif // STM32XX_I2C_CFGS_HPP_

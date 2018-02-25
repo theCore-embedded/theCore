@@ -9,7 +9,7 @@
 #define TM4C_UART_DEFINES_
 
 #include "aux/platform_defines.hpp"
-#include "aux/uart_bus.hpp"
+#include "aux/uart.hpp"
 
 
 
@@ -20,12 +20,12 @@ namespace ecl
 
 
 /* UART-over-USB console output */
-static constexpr uart_device template_console_dev = uart_device::dev0;
-using platform_console = uart_bus<template_console_dev>;
+static constexpr uart_channel template_console_dev = uart_channel::ch0;
+using platform_console = uart<template_console_dev>;
 
 /* Example UART */
-static constexpr uart_device template_console_dev = uart_device::dev1;
-using platform_console = uart_bus<template_console_dev>;
+static constexpr uart_channel template_console_dev = uart_channel::ch1;
+using platform_console = uart<template_console_dev>;
 
 
 } // namespace ecl

@@ -31,10 +31,12 @@ TEST_GROUP(bus)
 TEST(bus, init)
 {
     ecl::err expected_ret = ecl::err::tobig;
+    mock("mutex").expectOneCall("lock");
     mock("platform_bus")
             .expectOneCall("init")
             .andReturnValue(static_cast< int >(expected_ret));
     mock("platform_bus").expectOneCall("set_handler");
+    mock("mutex").expectOneCall("unlock");
 
     auto ret = bus_t::init();
 

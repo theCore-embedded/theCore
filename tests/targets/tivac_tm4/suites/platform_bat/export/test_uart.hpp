@@ -8,12 +8,12 @@
 #define TIVAC_PLATFORM_BAT_TEST_UART_HPP_
 
 
-#include <aux/uart_bus.hpp>
+#include <aux/uart.hpp>
 
 namespace ecl
 {
 
-using test_uart = uart_bus<uart_device::dev0>;
+using test_uart = uart<uart_channel::ch0>;
 
 }
 

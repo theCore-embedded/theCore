@@ -9,7 +9,7 @@
 #define TM4C_UART_DEFINES_
 
 #include "aux/platform_defines.hpp"
-#include "aux/uart_bus.hpp"
+#include "aux/uart.hpp"
 
 
 /*[[[cog
@@ -20,7 +20,7 @@ cfg = json.load(open(JSON_CFG))
 cfg = cfg['platform']
 
 # UART device alias, used internally by bypass console driver
-template_console_dev = 'static constexpr uart_device template_console_dev = uart_device::dev%d;'
+template_console_dev = 'static constexpr uart_channel template_console_dev = uart_channel::ch%d;'
 
 # Gets string representation of UART theCore enum.
 def get_uart_enum(uart_cfg):
@@ -48,7 +48,7 @@ for uart_cfg in uart_cfgs:
         cog.outl(('\n%s* ' + uart_cfg['comment'] + ' *%s') % ('/', '/'))
 
     cog.outl(template_console_dev % get_uart_enum(uart_cfg))
-    cog.outl('using platform_console = uart_bus<template_console_dev>;')
+    cog.outl('using platform_console = uart<template_console_dev>;')
 
 ]]]*/
 //[[[end]]]
