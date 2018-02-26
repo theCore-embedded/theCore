@@ -65,6 +65,7 @@ enum class spi_cpha
 //!  - SPI type: master/slave \sa ecl::spi_type
 //!  - SPI clock polarity \sa ecl::cpol
 //!  - SPI clock phase \sa ecl::cpha
+//!  - SPI sysclock divider. Must be greather than 2
 //!
 //! \par SPI configuration example.
 //! In order to use this configuration class one must create configuration class
@@ -77,9 +78,10 @@ enum class spi_cpha
 //! template<>
 //! struct spi_cfg<spi_channel::ch1>
 //! {
-//!     static constexpr auto type = spi_type::master;
-//!     static constexpr auto cpol = spi_cpol::high;
-//!     static constexpr auto cpha = spi_cpha::low;
+//!     static constexpr auto type      = spi_type::master;
+//!     static constexpr auto cpol      = spi_cpol::high;
+//!     static constexpr auto cpha      = spi_cpha::low;
+//!     static constexpr auto clk_div   = 2;
 //! };
 //!
 //! } // namespace ecl
@@ -275,6 +277,7 @@ ecl::err spi<ch>::init()
     constexpr auto periph = extract_value(ch);
     constexpr auto periph_sysctl = pick_sysctl();
     constexpr auto protocol = pick_protocol();
+    constexpr auto clk_div = config::clk_div;
 
     m_handler_storage.init();
 
@@ -283,7 +286,7 @@ ecl::err spi<ch>::init()
     // TODO:
     // Ensure that the SSE bit in the SSICR1 register is clear
     // before making any configuration changes.
-    // See datasheet, section 15.4.Initialization and Configuration
+    // See datasheet, section 15.4. Initialization and Configuration
 
     // According to the driver lib documentation (driverlib/ssi.c):
     // The ui32BitRate parameter defines the bit rate for the SSI.  This bit
@@ -296,9 +299,11 @@ ecl::err spi<ch>::init()
     // that there are frequency limits for FSSI that are described in the Bit Rate
     // Generation section of the SSI chapter in the data sheet.
 
+    static_assert(clk_div >= 2, "clock divider for SSI (SPI) must be greather than 2");
+
     SSIConfigSetExpClk(periph, SysCtlClockGet(), protocol, SSI_MODE_MASTER,
-             SysCtlClockGet() >> 2, // Specifies SPI clock. See comment above.
-             8);                    // 8 bit data transfer
+             SysCtlClockGet() / clk_div,    // Specifies SPI clock. See comment above.
+             8);                            // 8 bit data transfer
 
     /* TODO: fill this when implementing real driver */
 
@@ -399,7 +404,7 @@ ecl::err spi<ch>::do_xfer()
     if (m_rx) {
         // To be able to receive data, clock must be supplied by writing data
         // into the TX stream.
-        irq_flags |= (SSI_RXTO | SSI_RXOR | SSI_TXFF);
+        irq_flags |= (SSI_RXOR | SSI_TXFF); // TODO: handle rx timeout interrupt?
     }
 
     if (m_tx.buf || (m_status & rx_hidden) || (m_status & mode_fill)) {
@@ -525,11 +530,31 @@ void spi<ch>::irq_handler()
     // Since SPI operating in full-duplex mode, TXFF interrupt allows
     // to process both RX and TX
 
-    if (irq_status & (SSI_RXTO | SSI_RXOR) && m_rx_idx < m_rx_size) {
+    if ((irq_status & SSI_RXOR) && m_rx_idx < m_rx_size) {
         handler(bus_channel::rx, bus_event::err, m_rx_idx);
-        SSIIntClear(periph, SSI_RXTO | SSI_RXOR);
+        SSIIntClear(periph, SSI_RXOR);
         rx_done = tx_done = true; // Do not process anything. Stop here.
     } else {
+        if (status & ssisr_tnf_bit) {
+            if (m_tx_idx < m_tx_size) {
+                uint8_t tx_byte = m_status & mode_fill
+                        ? m_tx.byte : m_tx.buf[m_tx_idx];
+
+                m_tx_idx++;
+                SSIDataPut(periph, tx_byte);
+
+                if (m_tx_idx == (m_tx_size >> 1)) {
+                    handler(channel::tx, event::ht, m_tx_idx);
+                } else if (m_tx_idx == m_tx_size) {
+                    handler(channel::tx, event::tc, m_tx_idx);
+                }
+            } else if ((m_status & tx_hidden) && m_rx_idx < m_rx_size) {
+                SSIDataPut(periph, 0xff); // Dummy byte
+            } else {  // One event ago TX was completed.
+                tx_done = true;
+            }
+        }
+
         if (status & ssisr_rne_bit) {
             if (m_rx_idx < m_rx_size) {
                 ecl_assert(m_rx);
@@ -544,31 +569,11 @@ void spi<ch>::irq_handler()
                     handler(channel::rx, event::tc, m_rx_idx);
                 }
             } else if (m_status & rx_hidden) {
-                // Ignore data
+                // Ignore RX data
                 uint32_t data;
                 SSIDataGet(periph, &data);
             } else { // One event ago RX was completed.
                 rx_done = true;
-            }
-        }
-
-        if (status & ssisr_tnf_bit) {
-            if (m_tx_idx < m_tx_size) {
-                uint8_t tx_byte = m_status & mode_fill
-                        ? m_tx.byte : m_tx.buf[m_tx_idx];
-
-                m_tx_idx++;
-                SSIDataPut(periph, tx_byte);
-
-                if (m_tx_idx == (m_tx_size >> 1)) {
-                    handler(channel::tx, event::ht, m_tx_idx);
-                } else if (m_tx_idx == m_tx_size) {
-                    handler(channel::tx, event::tc, m_tx_idx);
-                }
-            } else if (m_status & tx_hidden) {
-                SSIDataPut(periph, 0xff); // Dummy byte
-            } else {  // One event ago TX was completed.
-                tx_done = true;
             }
         }
     }
@@ -578,7 +583,7 @@ void spi<ch>::irq_handler()
     // TODO: handle cancel xfer
 
     if (rx_done && tx_done) {
-        handler(bus_channel::meta, bus_event::tc, m_tx_size);
+        handler(bus_channel::meta, bus_event::tc, m_tx_size ? m_tx_size : m_rx_size);
 
         // TODO: restart or abort transaction in case of error?
         if (m_status & mode_circular) {

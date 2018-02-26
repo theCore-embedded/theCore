@@ -58,9 +58,10 @@ spi_cfg_struct = '''
 template<>
 struct spi_cfg<spi_channel::ch%(spi_ch)d>
 {
-    static constexpr auto type = %(type)s;
-    static constexpr auto cpol = %(cpol)s;
-    static constexpr auto cpha = %(cpha)s;
+    static constexpr auto type    = %(type)s;
+    static constexpr auto cpol    = %(cpol)s;
+    static constexpr auto cpha    = %(cpha)s;
+    static constexpr auto clk_div = %(clk_div)s;
 };
 
 '''
@@ -88,7 +89,9 @@ for spi in spi_cfgs:
         json_value = spi[k]
         values[k] = v[json_value]
 
-    print(values)
+    values['clk_div'] = 2
+    if 'clk_div' in spi:
+        values['clk_div'] = spi['clk_div']
 
     if 'comment' in spi:
         cog.outl('/' + '* ' + spi['comment'] + ' *' + '/')
