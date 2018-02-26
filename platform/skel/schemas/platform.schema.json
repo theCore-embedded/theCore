@@ -3,7 +3,7 @@
 
     "properties": {
         "name":           { "type": "string", "pattern": "^skel$" },
-        "spi":            { "$ref": "file:spi.schema.json" },
+        "spi":            { "$ref": "file:spi.schema.json" }
     },
 
     "required": [ "name" ]

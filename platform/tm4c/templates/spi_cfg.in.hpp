@@ -77,7 +77,7 @@ if 'spi' in cfg:
 
 for spi in spi_cfgs:
     id = int(spi['id'][-1])
-    spi_name = 'spi_' + str(id) + '_driver'
+    spi_name = 'SPI' + str(id) + '_driver'
 
     # Directly included values
     values = {
