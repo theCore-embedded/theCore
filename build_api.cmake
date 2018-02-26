@@ -215,7 +215,7 @@ endmacro()
 #   - target_name           - name for a CMake target to be created
 #   - path_to_json          - path to JSON file for validation
 #   - path_to_json_schema   - path to JSON schema
-#   - subobject_to_validate - JSON subobject to validate
+#   - subobject_to_validate - JSON subobject to validate (optional)
 #   - working_directory     - path to working directory, required to correctly
 #                             process schema references with relative paths.
 macro(theCore_create_json_validator_runner)
@@ -232,8 +232,7 @@ macro(theCore_create_json_validator_runner)
     if(NOT DEFINED JSON_VALIDATOR_NAME
         OR NOT DEFINED JSON_VALIDATOR_JSON
         OR NOT DEFINED JSON_VALIDATOR_SCHEMA
-        OR NOT DEFINED JSON_VALIDATOR_WORKDIR
-        OR NOT DEFINED JSON_VALIDATOR_SUBOBJECT)
+        OR NOT DEFINED JSON_VALIDATOR_WORKDIR)
         msg_fatal("Incorrect arguments passed to validator function: ${ARGN}")
     endif()
 
@@ -247,7 +246,7 @@ macro(theCore_create_json_validator_runner)
         WORKING_DIRECTORY ${JSON_VALIDATOR_WORKDIR}
         VERBATIM
         DEPENDS ${VALIDATOR_SCRIPT} ${JSON_VALIDATOR_JSON} ${JSON_VALIDATOR_SCHEMA}
-        COMMENT "Validating platform configuration"
+        COMMENT "Validating ${JSON_VALIDATOR_SUBOBJECT} configuration"
     )
 
     unset(VALIDATOR_SCRIPT)

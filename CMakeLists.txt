@@ -41,7 +41,6 @@ endif()
 msg_info("Thirdparty directory: ${THECORE_THIRDPARTY_DIR}")
 msg_info("Thirdparty worktree (build) directory: ${THECORE_BUILD_THIRDPARTY_DIR}")
 
-
 # Check if theCore should be placed in the test mode.
 # Benefit here is supporting of CMake invocation without
 # THECORE_TARGET_CONFIG_FILE. It will reduce hassle when running unit tests,
@@ -92,7 +91,7 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
-target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp)
+target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp thecore_dev)
 
 # Platform is added in the first place in order to expose platform definitions
 # to the rest of the system
@@ -114,9 +113,18 @@ if(CMAKE_CROSSCOMPILING)
     endif()
 endif()
 
+# Validate incoming JSON
+
+theCore_create_json_validator_runner(
+    NAME thecore_validate
+    JSON ${THECORE_TARGET_CONFIG_FILE}
+    SCHEMA ${CMAKE_CURRENT_LIST_DIR}/thecore.schema.json
+    WORKDIR ${CMAKE_CURRENT_LIST_DIR}/
+)
+
 # Rest of modules
 add_subdirectory(arch)
 add_subdirectory(lib)
 add_subdirectory(dev)
 add_subdirectory(kernel)
-add_dependencies(all_cppcheck ${PROJECT_NAME})
+add_dependencies(all_cppcheck thecore_validate ${PROJECT_NAME})
