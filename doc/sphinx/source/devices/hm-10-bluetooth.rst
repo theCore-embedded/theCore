@@ -36,8 +36,8 @@ Known limitations
 theCore HM-10 driver operates only in slave mode.
 For master mode, see `"Implement HM-10 master mode" GitHub issue`_.
 
-References
-~~~~~~~~~~
+Additional references
+~~~~~~~~~~~~~~~~~~~~~
 
 * `Martyn Currey's "HM-10 Bluetooth 4 BLE Modules" guide`_
 * `Instructable's "HOW TO USE BLUETOOTH 4.0 HM10"`_
