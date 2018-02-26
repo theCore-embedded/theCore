@@ -16,7 +16,6 @@ else()
 endif()
 
 set(CMAKE_C_LINK_FLAGS
-    "${FAMILY_CORE} -msoft-float -mfloat-abi=soft \
-    -nostartfiles -nostdlib -mthumb -Wl,--gc-sections"
+    "${FAMILY_CORE} -nostartfiles -nostdlib -mthumb -Wl,--gc-sections"
     CACHE STRING "Linker C flags")
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_C_LINK_FLAGS} CACHE STRING "Linker C++ flags")

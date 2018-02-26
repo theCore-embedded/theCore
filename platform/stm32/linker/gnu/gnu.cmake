@@ -20,8 +20,8 @@ endif()
 # TODO: alter FPU flags based on device used
 
 set(CMAKE_C_LINK_FLAGS
-    "-fuse-linker-plugin ${FAMILY_CORE} -mfpu=fpv4-sp-d16 -mfloat-abi=softfp \
-    -nostartfiles -nostdlib -mthumb -flto -Wl,--gc-sections"
+    "-fuse-linker-plugin ${FAMILY_CORE} -nostartfiles -nostdlib \
+        -mthumb -flto -Wl,--gc-sections"
 	CACHE STRING "Linker C flags")
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_C_LINK_FLAGS} CACHE STRING "Linker C++ flags")
 

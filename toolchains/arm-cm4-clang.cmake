@@ -66,7 +66,7 @@ set(CC_PLATFORM_FLAGS "-target armv7-none-eabi -mcpu=cortex-m4 -ffreestanding -m
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # TODO: move std and gdwarf flags out of toolchain into the core listfile itself
-set(C_CXX_EXTRA_FLAGS "-mfpu=fpv4-sp-d16 -mfloat-abi=softfp --sysroot ${CMAKE_FIND_ROOT_PATH} ${C_LIB_INCLUDE_PATH} ")
+set(C_CXX_EXTRA_FLAGS "--sysroot ${CMAKE_FIND_ROOT_PATH} ${C_LIB_INCLUDE_PATH} ")
 set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS} ")
 set(CXX_EXTRA_FLAGS "-std=c++1z ${C_CXX_EXTRA_FLAGS} ${CXX_LIB_INCLUDE_PATH} ")
 
