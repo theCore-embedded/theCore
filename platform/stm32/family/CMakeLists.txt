@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-set(DMA_CFG_HPP ${CMAKE_CURRENT_BINARY_DIR}/export/family_dma_cfg.hpp)
+set(DMA_CFG_HPP ${CORE_GEN_DIR}/export/family_dma_cfg.hpp)
 
 if(CONFIG_PLATFORM_DEVICE MATCHES "STM32F4")
     set(STM32_FAMILY f4xx)
@@ -37,9 +37,9 @@ add_library(stm32_family
 # Export family-related definitions.
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/templates/defines.in.hpp
-        ${CMAKE_CURRENT_BINARY_DIR}/export/family_defines.hpp
+        ${CORE_GEN_DIR}/export/family_defines.hpp
         )
 
 target_include_directories(stm32_family PUBLIC
-        ${STM32_FAMILY}/export export ${CMAKE_CURRENT_BINARY_DIR}/export)
+        ${STM32_FAMILY}/export export ${CORE_GEN_DIR}/export)
 target_link_libraries(stm32_family PUBLIC cmsis stm32_spl)

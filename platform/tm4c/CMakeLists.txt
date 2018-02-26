@@ -2,13 +2,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-# Create directories required for auto-generated files
-set(GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/)
-file(MAKE_DIRECTORY ${GEN_DIR}/export/aux)
+file(MAKE_DIRECTORY ${CORE_GEN_DIR}/export/aux)
 
 add_library(tm4c platform.cpp exti_manager.cpp
-    ${GEN_DIR}/pin_mux.cpp
-    ${GEN_DIR}/irq.cpp)
+    ${CORE_GEN_DIR}/pin_mux.cpp
+    ${CORE_GEN_DIR}/irq.cpp)
 
 include(mcu_cfg.cmake)
 
@@ -32,9 +30,9 @@ theCore_create_json_validator_runner(
 function(generate_source IN_NAME OUT_NAME)
     # Place header in separate directory
     if(OUT_NAME MATCHES "\.hpp$")
-        set(OUT_DIR ${GEN_DIR}/export/aux)
+        set(OUT_DIR ${CORE_GEN_DIR}/export/aux)
     else()
-        set(OUT_DIR ${GEN_DIR})
+        set(OUT_DIR ${CORE_GEN_DIR})
     endif()
 
     set(OUT_PATH "${OUT_DIR}/${OUT_NAME}")
@@ -93,4 +91,4 @@ endif()
 
 add_custom_target(platform_generated DEPENDS tm4c_validate ${GENERATED_FILES})
 add_dependencies(tm4c platform_generated)
-target_include_directories(tm4c PUBLIC ${GEN_DIR}/export/)
+target_include_directories(tm4c PUBLIC ${CORE_GEN_DIR}/export/)

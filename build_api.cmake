@@ -198,12 +198,18 @@ macro(theCore_create_cog_runner)
 
     set_source_files_properties(${COG_OUT} PROPERTIES GENERATED TRUE)
 
+    # Additional paths to include platform-level modules
+    set(COG_INCLUDES
+        "-I${CORE_DIR}/platform/${PLATFORM_NAME}" "-I${CORE_DIR}/platform/common/")
+
     add_custom_command(
         OUTPUT ${COG_OUT}
-        COMMAND cog.py ${COG_ARGS} -d -o ${COG_OUT} ${COG_IN}
+        COMMAND cog.py ${COG_INCLUDES} ${COG_ARGS} -d -o ${COG_OUT} ${COG_IN}
         DEPENDS ${COG_IN} ${COG_DEPENDS}
         COMMENT "Generating: ${COG_IN} -> ${COG_OUT}"
     )
+
+    unset(COG_INCLUDES)
 endmacro()
 
 # Creates custom target - JSON validation runner against provided schema.

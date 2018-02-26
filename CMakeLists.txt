@@ -18,6 +18,11 @@ include(Findcppcheck)
 include(CppcheckTargets)
 include(JSONParser)
 
+# theCore binary directory
+set(CORE_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
+# theCore directory for generated sources
+set(CORE_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+
 if(NOT DEFINED THECORE_THIRDPARTY_DIR)
     if(DEFINED ENV{THECORE_THIRDPARTY_DIR})
         set(THECORE_THIRDPARTY_DIR "$ENV{THECORE_THIRDPARTY_DIR}")
@@ -48,10 +53,10 @@ msg_info("Thirdparty worktree (build) directory: ${THECORE_BUILD_THIRDPARTY_DIR}
 if(NOT DEFINED THECORE_TARGET_CONFIG_FILE AND NOT CMAKE_CROSSCOMPILING)
     msg_info("Enabled test mode for theCore")
 
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test.json
+    file(WRITE ${CORE_GEN_DIR}/test.json
         "{\"platform\":{\"name\":\"host\",\"console\":true}}"
     )
-    set(THECORE_TARGET_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/test.json"
+    set(THECORE_TARGET_CONFIG_FILE "${CORE_GEN_DIR}/test.json"
         CACHE PATH "Test JSON file")
 endif()
 
@@ -92,6 +97,10 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
 target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp thecore_dev)
+# Advertise generated files
+target_include_directories(${PROJECT_NAME} INTERFACE ${CORE_GEN_DIR}/export)
+# And own helper headers
+target_include_directories(${PROJECT_NAME} INTERFACE export)
 
 # Platform is added in the first place in order to expose platform definitions
 # to the rest of the system
