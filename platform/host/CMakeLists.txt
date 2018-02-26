@@ -8,6 +8,7 @@ theCore_create_json_validator_runner(
     NAME host_validate
     JSON ${THECORE_TARGET_CONFIG_FILE}
     SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/host.schema.json
+    SUBOBJECT "platform"
     WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
 )
 

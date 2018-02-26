@@ -29,6 +29,7 @@ theCore_create_json_validator_runner(
     NAME stm32_validate
     JSON ${THECORE_TARGET_CONFIG_FILE}
     SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/stm32.schema.json
+    SUBOBJECT "platform"
     WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
 )
 

@@ -103,7 +103,6 @@ struct spi_cfg
                           "of this class. See documentation.");
 };
 
-
 //! \brief Driver implementation for SPI
 //! \tparam ch SPI configuration
 //!
