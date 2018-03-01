@@ -3,9 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 //! \file
-//! \brief Contains platform driver skeleton for SPI bus.
-//! \details This file can be used when creating new platform to speedup
-//! SPI driver development.
+//! \brief Contains platform driver for TM4 SPI bus.
 
 #ifndef PLATFORM_SPI_HPP_
 #define PLATFORM_SPI_HPP_
@@ -46,15 +44,15 @@ enum class spi_type
 //! SPI clock polarity
 enum class spi_cpol
 {
-    low,  //! CPOL = 0
-    high, //! CPOL = 1
+    low,  //!< CPOL = 0
+    high, //!< CPOL = 1
 };
 
 //! SPI clock phase
 enum class spi_cpha
 {
-    low,  //! CPHA = 0
-    high, //! CPHA = 1
+    low,  //!< CPHA = 0
+    high, //!< CPHA = 1
 };
 
 //! Base template class for the SPI configuration
@@ -62,9 +60,9 @@ enum class spi_cpha
 //! template specialization for required SPI device.
 //!
 //! SPI-specific fields must be present:
-//!  - SPI type: master/slave \sa ecl::spi_type
-//!  - SPI clock polarity \sa ecl::cpol
-//!  - SPI clock phase \sa ecl::cpha
+//!  - SPI type: master/slave: ecl::spi_type
+//!  - SPI clock polarity: ecl::spi_cpol
+//!  - SPI clock phase: ecl::spi_cpha
 //!  - SPI sysclock divider. Must be greather than 2
 //!
 //! \par SPI configuration example.
@@ -103,9 +101,8 @@ struct spi_cfg
                           "of this class. See documentation.");
 };
 
-//! \brief Driver implementation for SPI
-//! \tparam ch SPI configuration
-//!
+//! TM4C driver implementation for SPI
+//! \tparam ch SPI channel
 template<spi_channel ch>
 class spi
 {

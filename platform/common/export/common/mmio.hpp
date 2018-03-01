@@ -75,10 +75,11 @@ struct rw_mut : ro_mut
 };
 
 //! Memory-mapped I/O register.
-//! \tparam Mut     Mutability trait. \sa rw_mut \sa ro_mut \sa wo_mut
+//! \tparam Mut     Mutability trait.
 //! \tparam addr    Address of a memory map register.
 //! \tparam offset  Offset of the data inside register.
 //! \tparam width   Width of a data stored in the register.
+//! \sa rw_mut \sa ro_mut \sa wo_mut
 template<typename Mut, std::uintptr_t addr, uint32_t offset, uint32_t width>
 struct reg
 {

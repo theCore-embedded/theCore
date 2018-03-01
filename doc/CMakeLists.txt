@@ -23,12 +23,21 @@ get_filename_component(ABSOLUTE_CORE_DIR "${CORE_DIR}" ABSOLUTE)
 
 if(DOXYGEN_FOUND)
     # All sources
+    file(GLOB_RECURSE THECORE_INCLUDES
+       "${ABSOLUTE_CORE_DIR}/*.hpp"
+       "${ABSOLUTE_CORE_DIR}/*.h"
+    )
+
+    # Stay only with exported includes
+    LIST(FILTER THECORE_INCLUDES INCLUDE REGEX "${ABSOLUTE_CORE_DIR}/.*/(export|templates)/.*\.h")
+
     file(GLOB_RECURSE THECORE_SOURCES
-        "${ABSOLUTE_CORE_DIR}/*.cpp"
-        "${ABSOLUTE_CORE_DIR}/*.hpp"
-        "${ABSOLUTE_CORE_DIR}/*.h"
-        "${ABSOLUTE_CORE_DIR}/*.c"
-        "${ABSOLUTE_CORE_DIR}/*.dox")
+       "${ABSOLUTE_CORE_DIR}/*.cpp"
+       "${ABSOLUTE_CORE_DIR}/*.c"
+       "${ABSOLUTE_CORE_DIR}/*.dox"
+    )
+
+    list(APPEND THECORE_SOURCES ${THECORE_INCLUDES})
 
     # 3rd-parties that should be omitted.
     # Inspired by Oleh Kravchenko.
@@ -36,6 +45,7 @@ if(DOXYGEN_FOUND)
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/.thirdparty/.*")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/build/.*")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/lib/unity/Unity/.*")
+    LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/doc/spinhx.*")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/f4xx/export/system_stm32f4xx.h")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/f4xx/export/stm32f4xx.h")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/f4xx/system_stm32f4xx.c")
@@ -43,7 +53,10 @@ if(DOXYGEN_FOUND)
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/l1xx/export/stm32l1xx.h")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/l1xx/system_stm32l1xx.c")
 
+    message(" >>> ${THECORE_SOURCES}")
+
     set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+    set(PROJECT_NAME "\"theCore C++ embedded framework\"")
 
     doxygen(TARGET "core_doxygen"
         OUTPUT_DIRECTORY
@@ -54,6 +67,7 @@ if(DOXYGEN_FOUND)
             GENERATE_LATEX
             VERBATIM_HEADERS
             FULL_PATH_NAMES
+            SORT_MEMBER_DOCS
         YES
             QUIET
             CALL_GRAPH

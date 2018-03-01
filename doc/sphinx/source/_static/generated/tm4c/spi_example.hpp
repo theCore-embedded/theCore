@@ -30,26 +30,28 @@ namespace ecl
 template<>
 struct spi_cfg<spi_channel::ch1>
 {
-    static constexpr auto type = ecl::spi_type::master;
-    static constexpr auto cpol = ecl::spi_cpol::low;
-    static constexpr auto cpha = ecl::spi_cpha::low;
+    static constexpr auto type    = ecl::spi_type::master;
+    static constexpr auto cpol    = ecl::spi_cpol::low;
+    static constexpr auto cpha    = ecl::spi_cpha::low;
+    static constexpr auto clk_div = 2;
 };
 
 
-using spi_1_driver = spi<spi_channel::ch1>;
+using SPI1_driver = spi<spi_channel::ch1>;
 /* SPI3 instance */
 
 template<>
 struct spi_cfg<spi_channel::ch3>
 {
-    static constexpr auto type = ecl::spi_type::master;
-    static constexpr auto cpol = ecl::spi_cpol::low;
-    static constexpr auto cpha = ecl::spi_cpha::high;
+    static constexpr auto type    = ecl::spi_type::master;
+    static constexpr auto cpol    = ecl::spi_cpol::low;
+    static constexpr auto cpha    = ecl::spi_cpha::high;
+    static constexpr auto clk_div = 2;
 };
 
 
-using spi_3_driver = spi<spi_channel::ch3>;
-using test_spi = spi_3_driver;
+using SPI3_driver = spi<spi_channel::ch3>;
+using test_spi = SPI3_driver;
 
 //! @}
 

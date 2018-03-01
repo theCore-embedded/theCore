@@ -16,6 +16,9 @@
 namespace ecl
 {
 
+namespace skel // Skeleton namespace
+{
+
 //! \addtogroup platform Platform defintions and drivers
 //! @{
 
@@ -54,16 +57,16 @@ enum class spi_cpha
     high, //! CPHA = 1
 };
 
-//! Base template class for the SPI configuration
-//! \details In order to advertise configuration parameters user must create
+//! Base template class for the SPI configuration.
+//! In order to advertise configuration parameters user must create
 //! template specialization for required SPI device.
 //!
 //! SPI-specific fields must be present:
-//!  - SPI type: master/slave \sa ecl::spi_type
-//!  - SPI clock polarity \sa ecl::cpol
-//!  - SPI clock phase \sa ecl::cpha
+//!  - SPI type: master/slave: ecl::spi_type
+//!  - SPI clock polarity: ecl::spi_cpol
+//!  - SPI clock phase: ecl::spi_cpha
 //!
-//! \par SPI configuration example.
+//! SPI configuration example.
 //! In order to use this configuration class one must create configuration class
 //! in the `ecl` namespace before any access to SPI instance.
 //!
@@ -101,7 +104,6 @@ struct spi_cfg
 
 //! \brief Driver implementation for SPI
 //! \tparam ch SPI configuration
-//!
 template<spi_channel ch>
 class spi
 {
@@ -141,7 +143,7 @@ public:
     static void set_handler(const handler_fn &handler);
 
     //! Reset xfer buffers.
-    //! \details Buffers that were set by \sa set_tx() and \sa set_rx()
+    //! \details Buffers that were set by set_tx() and set_rx()
     //! will be no longer used after this call.
     static void reset_buffers();
 
@@ -387,6 +389,8 @@ void spi<ch>::irq_handler()
 //! @}
 
 //! @}
+
+} // namespace skel
 
 } // namespace ecl
 
