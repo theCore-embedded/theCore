@@ -24,10 +24,9 @@ namespace ecl
 
 void bypass_console_init()
 {
-    constexpr auto uart_dev =
-        static_cast<std::underlying_type_t<uart_device>>(ecl::bypass_console_dev);
+    constexpr auto uart_dev = ecl::extract_value(ecl::console_channel);
 
-    SysCtlPeripheralEnable(bypass_console::pick_sysctl());
+    SysCtlPeripheralEnable(platform_console::pick_sysctl());
 
     UARTConfigSetExpClk(uart_dev, SysCtlClockGet(), 115200,
                         UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
@@ -36,8 +35,7 @@ void bypass_console_init()
 
 void bypass_putc(char c)
 {
-    constexpr auto uart_dev =
-        static_cast<std::underlying_type_t<uart_device>>(ecl::bypass_console_dev);
+    constexpr auto uart_dev = ecl::extract_value(ecl::console_channel);
     UARTCharPut(uart_dev, c);
 }
 

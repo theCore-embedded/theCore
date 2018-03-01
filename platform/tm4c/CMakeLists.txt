@@ -76,6 +76,7 @@ if(DEFINED thecore_cfg.platform.console)
     msg_info("Console driver will be used")
     # Bypass console must be enabled automatically.
     set(THECORE_CONFIG_USE_CONSOLE 1 CACHE FORCE "Console enable flag")
+    target_sources(tm4c PUBLIC ${CMAKE_CURRENT_LIST_DIR}/console.cpp)
 endif()
 
 # Platform is not CMSIS-compliant

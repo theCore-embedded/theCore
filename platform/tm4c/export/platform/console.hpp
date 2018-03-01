@@ -24,7 +24,7 @@ namespace ecl
 //! @{
 
 
-#if !CORE_CONFIG_USE_BYPASS_CONSOLE
+#if !THECORE_CONFIG_USE_CONSOLE
 
 //! Does nothing if console is disabled.
 static inline void bypass_putc(char c)
@@ -32,14 +32,14 @@ static inline void bypass_putc(char c)
     (void) c;
 }
 
-#else // CORE_CONFIG_USE_BYPASS_CONSOLE
+#else // THECORE_CONFIG_USE_CONSOLE
 
 //! Bypasses console drivers and puts data directly to the UART.
 //! \details Required to print debug of the failed asserts including one that
 //! executed during ISR.
 void bypass_putc(char c);
 
-#endif // CORE_CONFIG_USE_BYPASS_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 //! @}
 
