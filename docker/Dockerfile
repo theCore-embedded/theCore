@@ -3,7 +3,7 @@ FROM thecoreembedded/thecore AS update
 
 RUN rm -rv /expr
 ADD expr/ /expr
-RUN nix-shell -Q --pure /expr
+RUN nix-shell --arg docs true -Q --pure /expr
 
 # Keep entrypoint the same
 
@@ -14,7 +14,7 @@ RUN nix-channel --update
 
 ADD expr/ expr/
 # Prepare shell so during docker run there will be no need to build all again
-RUN nix-shell --pure expr/
+RUN nix-shell --arg docs true --pure expr/
 
 ADD entrypoint.sh /entrypoint.sh
 # Probably will be overriden in build scripts
