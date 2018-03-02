@@ -7,6 +7,9 @@ cmake_minimum_required(VERSION 3.4)
 include(ExternalProject)
 include(CMakeParseArguments)
 
+# Avoid duplication of thirdparty worktrees
+set(THECORE_BUILD_THIRDPARTY_DIR "${CMAKE_CURRENT_BINARY_DIR}/thirdparty_worktree")
+
 # Stores suite records for use in external tooling.
 # Format:
 #   suite_name,target_name,bin_path,elf_path
@@ -91,6 +94,7 @@ function(add_suite suite_name)
     list(APPEND CMAKE_ARGS -DMCUS_DIR=${MCUS_DIR})
     list(APPEND CMAKE_ARGS -DAUTOGEN_DIR=${AUTOGEN_DIR})
     list(APPEND CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+    list(APPEND CMAKE_ARGS -DTHECORE_BUILD_THIRDPARTY_DIR=${THECORE_BUILD_THIRDPARTY_DIR})
 
     set(COMPLETE_TEST_NAME "${suite_name}_${TEST_TARGET_NAME}${SUITE_SUFFIX}")
 
