@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <sysctl.h>
+#include <fpu.h>
 
 #include "platform/exti_manager.hpp"
 
@@ -17,6 +18,9 @@ extern void bypass_console_init();
 // Required by ARM ARCH startup code
 extern "C" void SystemInit()
 {
+    FPUEnable(); // TODO: configurable FPU
+                 // TODO: check if FPU is really supported in toolchain, too
+
     auto cfg = SYSCTL_USE_OSC | // System clock is the osc clock (not PLL)
                SYSCTL_OSC_INT | // Osc clock is internal oscillator (PIOSC)
                SYSCTL_MAIN_OSC_DIS  | // Disable main oscillator

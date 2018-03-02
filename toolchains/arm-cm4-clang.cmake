@@ -47,7 +47,7 @@ get_filename_component(CXX_LIB_INCLUDE_PATH "${CXX_LIB_INCLUDE_PATH}" DIRECTORY)
 # Include directories differ based on FPU selected.
 set(CXX_LIB_INCLUDE_PATH
     "-isystem ${CXX_LIB_INCLUDE_PATH} \
-     -isystem ${CXX_LIB_INCLUDE_PATH}/arm-none-eabi/armv7e-m/softfp/fpv5-sp-d16/")
+     -isystem ${CXX_LIB_INCLUDE_PATH}/arm-none-eabi/armv7e-m/hardfp/fpv4-sp-d16/")
 
 # C language lacks some includes, too.
 set(C_LIB_INCLUDE_PATH "-isystem ${CMAKE_FIND_ROOT_PATH}/arm-none-eabi/include/")
@@ -58,7 +58,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 # Common flags for current platform.
 # Short enums required. Otherwise, errors raised by linker.
 set(CC_PLATFORM_FLAGS "-target armv7-none-eabi -mcpu=cortex-m4 -ffreestanding -mthumb -fdata-sections \
-    -ffunction-sections -fno-common -fshort-enums")
+    -ffunction-sections -fno-common -fshort-enums -mfloat-abi=hard -mfpu=fpv4-sp-d16")
 
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
 # why????

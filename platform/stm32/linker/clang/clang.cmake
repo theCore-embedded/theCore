@@ -3,10 +3,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 # Linker flags.
-# TODO: check redundancy when using -msoft-float and -mfloat-abi=soft together
 
 if(CONFIG_PLATFORM_DEVICE MATCHES "STM32F4")
-    set(FAMILY_CORE "-mcpu=cortex-m4")
+    set(FAMILY_CORE "-mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16")
 elseif(CONFIG_PLATFORM_DEVICE MATCHES "STM32L1")
     set(FAMILY_CORE "-mcpu=cortex-m3")
 else()
