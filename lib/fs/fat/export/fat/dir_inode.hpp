@@ -12,7 +12,7 @@
 
 #include "src/pff.h"
 #include "fat/types.hpp"
-#include "../../path.hpp"
+#include "fat/path.hpp"
 
 namespace fat
 {

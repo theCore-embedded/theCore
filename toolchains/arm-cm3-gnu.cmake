@@ -40,8 +40,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
 # common flags for current platform
 set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m3 -mthumb -fdata-sections \
-	-ffunction-sections -fno-common -msoft-float -mfloat-abi=soft")
-
+	-ffunction-sections -fno-common")
 
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
 # why????

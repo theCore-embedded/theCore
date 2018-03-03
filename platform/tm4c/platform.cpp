@@ -4,19 +4,23 @@
 
 #include <cstdint>
 #include <sysctl.h>
+#include <fpu.h>
 
 #include "platform/exti_manager.hpp"
 
-#ifdef CORE_CONFIG_USE_BYPASS_CONSOLE
+#ifdef THECORE_CONFIG_USE_CONSOLE
 namespace ecl
 {
 extern void bypass_console_init();
 } // namespace ecl
-#endif // CORE_CONFIG_USE_BYPASS_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 // Required by ARM ARCH startup code
 extern "C" void SystemInit()
 {
+    FPUEnable(); // TODO: configurable FPU
+                 // TODO: check if FPU is really supported in toolchain, too
+
     auto cfg = SYSCTL_USE_OSC | // System clock is the osc clock (not PLL)
                SYSCTL_OSC_INT | // Osc clock is internal oscillator (PIOSC)
                SYSCTL_MAIN_OSC_DIS  | // Disable main oscillator
@@ -38,7 +42,7 @@ extern "C" void platform_init()
     // EXTI manager must be ready after IRQ, but before user code start working with it
     ecl::exti_manager::init();
 
-#ifdef CORE_CONFIG_USE_BYPASS_CONSOLE
+#ifdef THECORE_CONFIG_USE_CONSOLE
     ecl::bypass_console_init();
 #endif
 }

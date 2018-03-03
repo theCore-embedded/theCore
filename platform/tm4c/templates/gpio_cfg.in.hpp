@@ -29,9 +29,37 @@ namespace ecl
 /*[[[cog
 
 gpio_aliases = []
+pincfgs = []
+
+# Extracts pin directions
+def extract_dir(pincfg):
+    dirs = {
+        'in':   'in',
+        'out':  'out',
+        'hw':   'hw'
+    }
+
+    if 'dir' in pincfg:
+        return dirs[pincfg['dir']]
+    else:
+        return dirs['out']
 
 if 'gpio_alias' in cfg:
     gpio_aliases = cfg['gpio_alias']
+
+if 'pinmux' in cfg:
+    pincfgs = cfg['pinmux']
+
+for pincfg in pincfgs:
+    dir = extract_dir(pincfg)
+    # Generate GPIO drivers only for GPIO pins
+    if dir in [ 'out', 'in' ]:
+        for pin in pincfg['ids']:
+            port = pin[1:-1].lower()
+            num = int(pin[-1:])
+
+            cog.outl('using %s_driver = gpio<gpio_hw::port::%s, gpio_hw::num::pin%d>;'
+                % (pin, port, num))
 
 for gpio_alias in gpio_aliases:
     if 'comment' in gpio_alias:

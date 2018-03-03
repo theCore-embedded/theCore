@@ -47,7 +47,7 @@ get_filename_component(CXX_LIB_INCLUDE_PATH "${CXX_LIB_INCLUDE_PATH}" DIRECTORY)
 # Include directories differ based on FPU selected.
 set(CXX_LIB_INCLUDE_PATH
     "-isystem ${CXX_LIB_INCLUDE_PATH} \
-     -isystem ${CXX_LIB_INCLUDE_PATH}/arm-none-eabi/armv7e-m/softfp/fpv5-sp-d16/")
+     -isystem ${CXX_LIB_INCLUDE_PATH}/arm-none-eabi/armv7e-m/hardfp/fpv4-sp-d16/")
 
 # C language lacks some includes, too.
 set(C_LIB_INCLUDE_PATH "-isystem ${CMAKE_FIND_ROOT_PATH}/arm-none-eabi/include/")
@@ -58,7 +58,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 # Common flags for current platform.
 # Short enums required. Otherwise, errors raised by linker.
 set(CC_PLATFORM_FLAGS "-target armv7-none-eabi -mcpu=cortex-m4 -ffreestanding -mthumb -fdata-sections \
-    -ffunction-sections -fno-common -fshort-enums")
+    -ffunction-sections -fno-common -fshort-enums -mfloat-abi=hard -mfpu=fpv4-sp-d16")
 
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
 # why????
@@ -66,7 +66,7 @@ set(CC_PLATFORM_FLAGS "-target armv7-none-eabi -mcpu=cortex-m4 -ffreestanding -m
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # TODO: move std and gdwarf flags out of toolchain into the core listfile itself
-set(C_CXX_EXTRA_FLAGS "-mfpu=fpv4-sp-d16 -mfloat-abi=softfp --sysroot ${CMAKE_FIND_ROOT_PATH} ${C_LIB_INCLUDE_PATH} ")
+set(C_CXX_EXTRA_FLAGS "--sysroot ${CMAKE_FIND_ROOT_PATH} ${C_LIB_INCLUDE_PATH} ")
 set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS} ")
 set(CXX_EXTRA_FLAGS "-std=c++1z ${C_CXX_EXTRA_FLAGS} ${CXX_LIB_INCLUDE_PATH} ")
 

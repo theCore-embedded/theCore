@@ -11,7 +11,7 @@
 
 #include "fat/types.hpp"
 #include "src/pff.h"
-#include "../../path.hpp"
+#include "fat/path.hpp"
 
 namespace fat
 {

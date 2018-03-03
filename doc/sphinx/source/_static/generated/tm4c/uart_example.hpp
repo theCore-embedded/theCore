@@ -20,12 +20,12 @@ namespace ecl
 
 
 /* UART-over-USB console output */
-static constexpr uart_channel template_console_dev = uart_channel::ch0;
-using platform_console = uart<template_console_dev>;
+static constexpr uart_channel console_channel = uart_channel::ch0;
+using platform_console = uart<console_channel>;
 
 /* Example UART */
-static constexpr uart_channel template_console_dev = uart_channel::ch1;
-using platform_console = uart<template_console_dev>;
+static constexpr uart_channel console_channel = uart_channel::ch1;
+using platform_console = uart<console_channel>;
 
 
 } // namespace ecl

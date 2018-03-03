@@ -71,6 +71,10 @@ extern "C" void platform_init()
     DWT->CYCCNT = 0;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
+    // TODO: configurable FPU
+    // TODO: check if FPU is really supported in toolchain, too
+    SCB->CPACR |= (0xf << 20); // Enable FPU
+
 #if THECORE_CONFIG_USE_BYPASS_CONSOLE
     bypass_console_init();
 #endif // THECORE_CONFIG_USE_BYPASS_CONSOLE

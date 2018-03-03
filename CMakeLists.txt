@@ -18,29 +18,33 @@ include(Findcppcheck)
 include(CppcheckTargets)
 include(JSONParser)
 
-if(NOT DEFINED THECORE_THIRDPARTY_DIR)
-    if(DEFINED ENV{THECORE_THIRDPARTY_DIR})
-        set(THECORE_THIRDPARTY_DIR "$ENV{THECORE_THIRDPARTY_DIR}")
-        msg_trace("Using THECORE_THIRDPARTY_DIR environment variable")
-    else()
+# theCore binary directory
+set(CORE_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
+# theCore directory for generated sources
+set(CORE_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+
+if(NOT DEFINED ENV{THECORE_THIRDPARTY_DIR})
+    if(NOT DEFINED THECORE_THIRDPARTY_DIR)
         set(THECORE_THIRDPARTY_DIR "${CORE_DIR}/.thirdparty")
         msg_trace("Using default thirdparty dir")
     endif()
+else()
+    set(THECORE_THIRDPARTY_DIR "$ENV{THECORE_THIRDPARTY_DIR}")
+    msg_trace("Using THECORE_THIRDPARTY_DIR environment variable")
 endif()
 
-if(NOT DEFINED THECORE_BUILD_THIRDPARTY_DIR)
-    if(DEFINED ENV{THECORE_BUILD_THIRDPARTY_DIR})
-        set(THECORE_BUILD_THIRDPARTY_DIR "$ENV{THECORE_BUILD_THIRDPARTY_DIR}")
-        msg_trace("Using THECORE_BUILD_THIRDPARTY_DIR environment variable")
-    else()
+if(NOT DEFINED ENV{THECORE_BUILD_THIRDPARTY_DIR})
+    if(NOT DEFINED THECORE_BUILD_THIRDPARTY_DIR)
         set(THECORE_BUILD_THIRDPARTY_DIR "${CMAKE_CURRENT_BINARY_DIR}/theCore_thirdparty_worktrees")
         msg_trace("Using default thirdparty build dir")
     endif()
+else()
+    set(THECORE_BUILD_THIRDPARTY_DIR "$ENV{THECORE_BUILD_THIRDPARTY_DIR}")
+    msg_trace("Using THECORE_BUILD_THIRDPARTY_DIR environment variable")
 endif()
 
 msg_info("Thirdparty directory: ${THECORE_THIRDPARTY_DIR}")
 msg_info("Thirdparty worktree (build) directory: ${THECORE_BUILD_THIRDPARTY_DIR}")
-
 
 # Check if theCore should be placed in the test mode.
 # Benefit here is supporting of CMake invocation without
@@ -49,10 +53,10 @@ msg_info("Thirdparty worktree (build) directory: ${THECORE_BUILD_THIRDPARTY_DIR}
 if(NOT DEFINED THECORE_TARGET_CONFIG_FILE AND NOT CMAKE_CROSSCOMPILING)
     msg_info("Enabled test mode for theCore")
 
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test.json
+    file(WRITE ${CORE_GEN_DIR}/test.json
         "{\"platform\":{\"name\":\"host\",\"console\":true}}"
     )
-    set(THECORE_TARGET_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/test.json"
+    set(THECORE_TARGET_CONFIG_FILE "${CORE_GEN_DIR}/test.json"
         CACHE PATH "Test JSON file")
 endif()
 
@@ -92,7 +96,11 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
-target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp)
+target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp thecore_dev)
+# Advertise generated files
+target_include_directories(${PROJECT_NAME} INTERFACE ${CORE_GEN_DIR}/export)
+# And own helper headers
+target_include_directories(${PROJECT_NAME} INTERFACE export)
 
 # Platform is added in the first place in order to expose platform definitions
 # to the rest of the system
@@ -114,9 +122,18 @@ if(CMAKE_CROSSCOMPILING)
     endif()
 endif()
 
+# Validate incoming JSON
+
+theCore_create_json_validator_runner(
+    NAME thecore_validate
+    JSON ${THECORE_TARGET_CONFIG_FILE}
+    SCHEMA ${CMAKE_CURRENT_LIST_DIR}/thecore.schema.json
+    WORKDIR ${CMAKE_CURRENT_LIST_DIR}/
+)
+
 # Rest of modules
 add_subdirectory(arch)
 add_subdirectory(lib)
 add_subdirectory(dev)
 add_subdirectory(kernel)
-add_dependencies(all_cppcheck ${PROJECT_NAME})
+add_dependencies(all_cppcheck thecore_validate ${PROJECT_NAME})

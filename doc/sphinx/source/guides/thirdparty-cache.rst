@@ -24,7 +24,7 @@ Using environment variables
 
    ```
    export THECORE_THIRDPARTY_DIR=~/.thecore_thirdparty
-   # Note that if you build applications concurrently, you need DTHECORE_BUILD_THIRDPARTY_DIR
+   # Note that if you build applications concurrently, you need THECORE_BUILD_THIRDPARTY_DIR
    # to be unique for every application.
    export THECORE_BUILD_THIRDPARTY_DIR=~/.thecore_thirdparty_worktree
    ```

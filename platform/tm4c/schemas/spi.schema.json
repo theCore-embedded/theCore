@@ -12,7 +12,8 @@
 
             "type":    { "enum": [ "master" ] },
             "cpol":    { "enum": [ "high", "low" ] },
-            "cpha":    { "enum": [ "high", "low" ] }
+            "cpha":    { "enum": [ "high", "low" ] },
+            "clk_div": { "type": "integer" }
         },
 
         "required": [ "id", "type", "cpol", "cpha" ]

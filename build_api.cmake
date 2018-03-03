@@ -198,29 +198,37 @@ macro(theCore_create_cog_runner)
 
     set_source_files_properties(${COG_OUT} PROPERTIES GENERATED TRUE)
 
+    # Additional paths to include platform-level modules
+    set(COG_INCLUDES
+        "-I${CORE_DIR}/platform/${PLATFORM_NAME}" "-I${CORE_DIR}/platform/common/")
+
     add_custom_command(
         OUTPUT ${COG_OUT}
-        COMMAND cog.py ${COG_ARGS} -d -o ${COG_OUT} ${COG_IN}
+        COMMAND cog.py ${COG_INCLUDES} ${COG_ARGS} -d -o ${COG_OUT} ${COG_IN}
         DEPENDS ${COG_IN} ${COG_DEPENDS}
         COMMENT "Generating: ${COG_IN} -> ${COG_OUT}"
     )
+
+    unset(COG_INCLUDES)
 endmacro()
 
 # Creates custom target - JSON validation runner against provided schema.
-# theCore_create_json_validator_runner(NAME     target_name
-#                                      JSON     path_to_json
-#                                      SCHEMA   path_to_json_schema
-#                                      WORKDIR  working_directory)
+# theCore_create_json_validator_runner(NAME      target_name
+#                                      JSON      path_to_json
+#                                      SCHEMA    path_to_json_schema
+#                                      SUBOBJECT subobject_to_validate
+#                                      WORKDIR   working_directory)
 #   - target_name           - name for a CMake target to be created
 #   - path_to_json          - path to JSON file for validation
 #   - path_to_json_schema   - path to JSON schema
+#   - subobject_to_validate - JSON subobject to validate (optional)
 #   - working_directory     - path to working directory, required to correctly
 #                             process schema references with relative paths.
 macro(theCore_create_json_validator_runner)
     cmake_parse_arguments(
         JSON_VALIDATOR
         ""
-        "NAME;JSON;SCHEMA;WORKDIR"
+        "NAME;JSON;SCHEMA;SUBOBJECT;WORKDIR"
         ""
         ${ARGN}
     )
@@ -234,16 +242,17 @@ macro(theCore_create_json_validator_runner)
         msg_fatal("Incorrect arguments passed to validator function: ${ARGN}")
     endif()
 
-    set(VALIDATOR_SCRIPT "${CORE_DIR}/scripts/validate_platform.py")
+    set(VALIDATOR_SCRIPT "${CORE_DIR}/scripts/validate.py")
 
     add_custom_target(${JSON_VALIDATOR_NAME}
         COMMAND python ${VALIDATOR_SCRIPT}
             ${JSON_VALIDATOR_JSON}
             ${JSON_VALIDATOR_SCHEMA}
+            ${JSON_VALIDATOR_SUBOBJECT}
         WORKING_DIRECTORY ${JSON_VALIDATOR_WORKDIR}
         VERBATIM
         DEPENDS ${VALIDATOR_SCRIPT} ${JSON_VALIDATOR_JSON} ${JSON_VALIDATOR_SCHEMA}
-        COMMENT "Validating platform configuration"
+        COMMENT "Validating ${JSON_VALIDATOR_SUBOBJECT} configuration"
     )
 
     unset(VALIDATOR_SCRIPT)

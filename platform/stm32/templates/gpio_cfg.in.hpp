@@ -42,10 +42,24 @@ cfg = cfg['platform']
 # GPIO driver template
 template_gpio = '\nusing %s = gpio<gpio_port::%s, gpio_num::pin%d>;'
 
-gpio_alias = {}
+pinmux = []
+gpio_alias = []
+
+if 'pinmux' in cfg:
+    pinmux = cfg['pinmux']
 
 if 'gpio_alias' in cfg:
     gpio_alias = cfg['gpio_alias']
+
+for group in pinmux:
+    if group['mode'] != 'AF':
+        for pin in group['ids']:
+            drv_name = pin + '_driver'
+            desc = re.findall('P(\w)(\d+)', pin)
+            pin_port = desc[-1][0].lower()
+            pin_num = int(desc[-1][1])
+
+            cog.outl(template_gpio % (drv_name, pin_port, pin_num))
 
 for gpio in gpio_alias:
     desc = re.findall('(\w)(\d+)', gpio['id'])

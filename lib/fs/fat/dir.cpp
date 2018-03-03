@@ -9,7 +9,8 @@
 #include <ecl/iostream.hpp>
 #include <ecl/assert.h>
 
-using namespace fat;
+namespace fat
+{
 
 dir::dir(const fs::inode_ptr &node, FATFS *fs, const allocator &alloc,
          const DIR &fat_dir, path_ptr path)
@@ -80,3 +81,5 @@ int dir::close()
 
     return -1;
 }
+
+} // namespace fat

@@ -19,16 +19,16 @@ if(thecore_cfg.platform.console)
 endif()
 
 # Create directories required for auto-generated files
-set(GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/)
-file(MAKE_DIRECTORY ${GEN_DIR}/export/aux)
+file(MAKE_DIRECTORY ${CORE_GEN_DIR}/export/aux)
 
-add_library(stm32 platform.cpp exti_manager.cpp console.cpp ${GEN_DIR}/pin_mux.cpp)
+add_library(stm32 platform.cpp exti_manager.cpp console.cpp ${CORE_GEN_DIR}/pin_mux.cpp)
 
 # Validate incoming JSON
 theCore_create_json_validator_runner(
     NAME stm32_validate
     JSON ${THECORE_TARGET_CONFIG_FILE}
     SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/stm32.schema.json
+    SUBOBJECT "platform"
     WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
 )
 
@@ -58,9 +58,9 @@ target_compile_definitions(stm32
 function(generate_source IN_NAME OUT_NAME)
     # Place header in separate directory
     if(OUT_NAME MATCHES "\.hpp$")
-        set(OUT_DIR ${GEN_DIR}/export/aux)
+        set(OUT_DIR ${CORE_GEN_DIR}/export/aux)
     else()
-        set(OUT_DIR ${GEN_DIR})
+        set(OUT_DIR ${CORE_GEN_DIR})
     endif()
 
     set(OUT_PATH "${OUT_DIR}/${OUT_NAME}")
@@ -103,4 +103,4 @@ generate_source(pin_mux.in.cpp pin_mux.cpp)
 
 add_custom_target(platform_generated DEPENDS stm32_validate ${GENERATED_FILES})
 add_dependencies(stm32 platform_generated)
-target_include_directories(stm32 PUBLIC ${GEN_DIR}/export/)
+target_include_directories(stm32 PUBLIC ${CORE_GEN_DIR}/export/)

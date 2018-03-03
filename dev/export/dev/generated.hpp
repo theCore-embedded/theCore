@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 //! \file
-//! \brief Allocator
+//! \brief theCore device generated files
 
-#include <ecl/pool.hpp>
+#ifndef THECORE_DEV_GENERATED_
+#define THECORE_DEV_GENERATED_
 
-ecl::pool_base::~pool_base()
-{
+// SDSPI driver
+#include <dev/sdspi_cfg.hpp>
 
-}
-
+#endif // THECORE_DEV_GENERATED_
