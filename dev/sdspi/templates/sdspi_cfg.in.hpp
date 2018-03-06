@@ -16,7 +16,7 @@ namespace ecl
 import cog
 import json
 import common
-import lib
+import dev
 
 bus_typedef = '''
 using bus_%s = generic_bus<%s>;
@@ -37,7 +37,7 @@ if 'device' in cfg and 'sdspi' in cfg['device']:
     sdspi_cfg = cfg['device']['sdspi']
 
 for sdspi in sdspi_cfg:
-    sdspi_name = lib.resolve_sdspi_driver(cfg, sdspi['spi'], sdspi['cs_gpio'])
+    sdspi_name = dev.resolve_sdspi_driver(cfg, sdspi['spi'], sdspi['cs_gpio'])
     cs_gpio = common.resolve_gpio_driver(cfg, sdspi['cs_gpio'])
     spi_drv = common.resolve_spi_driver(cfg, sdspi['spi'])
     cog.outl(bus_typedef % (spi_drv, spi_drv))

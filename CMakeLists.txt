@@ -96,7 +96,8 @@ include(${CORE_DIR}/platform/common/linker.cmake)
 
 # The top-level library target, essence of this project.
 add_library(${PROJECT_NAME} INTERFACE)
-target_link_libraries(${PROJECT_NAME} INTERFACE ${PLATFORM_NAME} core_cpp thecore_dev)
+target_link_libraries(${PROJECT_NAME} INTERFACE
+        ${PLATFORM_NAME} core_cpp thecore_dev thecore_libs)
 # Advertise generated files
 target_include_directories(${PROJECT_NAME} INTERFACE ${CORE_GEN_DIR}/export)
 # And own helper headers

@@ -8,7 +8,6 @@
 //! asynchronous versions of the driver.
 //! At this moment, only synchronous version is implemented.
 
-
 #ifndef DEV_BT_HM10_HPP_
 #define DEV_BT_HM10_HPP_
 
@@ -35,6 +34,9 @@ namespace ecl
 //! @{
 
 //! \defgroup hm10 HM-10 module driver
+//! Additional documentation and examples can be found at:
+//! * [theCore HM-10 BTLE module doc page](https://forgge.github.io/theCore/devices/hm-10-bluetooth.html)
+//! * [HM-10 BTLE and STM32 Discovery board example page](https://forgge.github.io/theCore/examples/stm32f4-discovery-bluetooth-hm10.html)
 //! @{
 
 //! HM10 synchronous BT driver.

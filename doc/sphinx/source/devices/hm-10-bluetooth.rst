@@ -1,3 +1,5 @@
+.. _theCore_HM-10:
+
 HM-10 Bluetooth BTLE module
 ---------------------------
 

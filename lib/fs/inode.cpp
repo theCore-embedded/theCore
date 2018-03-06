@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <fs/inode.hpp>
-#include <fs/dir_descriptor.hpp>
+#include <ecl/fs/inode.hpp>
+#include <ecl/fs/dir_descriptor.hpp>
 
-using namespace fs;
+using namespace ecl::fs;
 
 inode::inode()
     :my_ptr{}
@@ -30,11 +30,10 @@ dir_ptr inode::open_dir()
     return dir_ptr{};
 }
 
-int inode::set_weak(const fs::inode_ptr &ptr)
+void inode::set_weak(const fs::inode_ptr &ptr)
 {
     ecl_assert(my_ptr.expired());
     ecl_assert(ptr);
     my_ptr = ptr;
-    return 0;
 }
 

@@ -30,7 +30,7 @@ add_unit_host_test(
     NAME semaphore_posix
     SOURCES tests/semaphore_unit.cpp posix/semaphore.cpp
     INC_DIRS posix/export/
-    DEPENDS pthread types
+    DEPENDS pthread types utils
 )
 
 # Posix thread tests. Requires semaphores as well.
@@ -47,7 +47,7 @@ add_unit_host_test(
     NAME semaphore_no_os
     SOURCES tests/semaphore_unit.cpp no_os/semaphore.cpp
     INC_DIRS no_os/export/ tests/mocks/
-    DEPENDS pthread types
+    DEPENDS pthread types utils
     COMPILE_OPTIONS -DSEMAPHORE_TEST_MOCKED_TIME=1
 )
 
@@ -56,7 +56,7 @@ add_unit_host_test(
     NAME semaphore_freertos
     SOURCES tests/semaphore_unit.cpp freertos/semaphore.cpp
     INC_DIRS freertos/export/ tests/mocks/freertos tests/mocks/
-    DEPENDS types dbg pthread
+    DEPENDS types dbg pthread utils
 )
 
 # Cover FreeRTOS thread with unit test - #211

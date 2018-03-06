@@ -53,8 +53,6 @@ if(DOXYGEN_FOUND)
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/l1xx/export/stm32l1xx.h")
     LIST(FILTER THECORE_SOURCES EXCLUDE REGEX "${ABSOLUTE_CORE_DIR}/platform/stm32/family/l1xx/system_stm32l1xx.c")
 
-    message(" >>> ${THECORE_SOURCES}")
-
     set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
     set(PROJECT_NAME "\"theCore C++ embedded framework\"")
 
@@ -198,6 +196,26 @@ generate_source(${TM4C_DOC_DIR}/gpio_alias_example.json
 generate_source(${TM4C_DOC_DIR}/pin_mux_example.json
     ${TM4C_TEMPLATE_DIR}/pin_mux.in.cpp
     ${TM4C_OUT_DIR}/pin_mux_example.cpp
+)
+
+################################################################################
+# Filesystem examples
+################################################################################
+
+set(FS_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/utilities/fs)
+set(FS_TEMPLATE_DIR ${CORE_DIR}/lib/fs/templates)
+set(FS_OUT_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/_static/generated/fs)
+
+# FATFS configuration example
+generate_source(${FS_DOC_DIR}/fatfs_example.json
+    ${FS_TEMPLATE_DIR}/fs_cfg.in.hpp
+    ${FS_OUT_DIR}/fs_cfg_example.hpp
+)
+
+# FATFS definintions configuration example
+generate_source(${FS_DOC_DIR}/fatfs_example.json
+    ${FS_TEMPLATE_DIR}/fs_defines.in.h
+    ${FS_OUT_DIR}/fs_defines_example.h
 )
 
 if(Sphinx_FOUND)

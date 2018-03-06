@@ -9,6 +9,14 @@ STM32F4 discovery and HM-10 Bluetooth LE (4.0) wireless module
 :Toolchain:         GNU arm-none-eabi v.5.2 or newer
 :Additional SW:     openocd, minicom, `BLE Terminal`_ Android app
 
+
+This example demonstrates using of :ref:`theCore_HM-10` using theCore.
+With Bluetooth application on Android device it is possible to establish
+communication link between the smartphone and any embedded device with
+HM-10 attached.
+
+It this particular example, STM32F4 Discovery board is used.
+
 Wiring
 ~~~~~~
 

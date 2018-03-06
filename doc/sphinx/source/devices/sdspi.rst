@@ -1,3 +1,5 @@
+.. _theCore_SDSPI:
+
 SDSPI driver
 ------------
 
@@ -42,7 +44,8 @@ Verified hardware
 ~~~~~~~~~~~~~~~~~
 
 SDSPI driver is tested with `Catalex micro-SD card adapter/module`_ and
-`high-capacity, class 10 micro SD card`_.
+`high-capacity, class 10 micro SD card`_. For the sake of fair testing,
+:ref:`theCore_FAT_filesystem` were used on top of SDSPI driver.
 
 Additional references
 ~~~~~~~~~~~~~~~~~~~~~
