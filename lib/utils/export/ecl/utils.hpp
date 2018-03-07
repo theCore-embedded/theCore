@@ -44,9 +44,8 @@ inline constexpr size_t offset_of(T1 T2::*member) {
 //! Safe storage wrapper to avoid static initialization fiasco
 //! \tparam T non-POD type to protect against implicit constructor call during static initialization
 template<class T>
-class safe_storage
+struct safe_storage
 {
-public:
     //! Initializes storage.
     //! \tparam Args Types of the constructor args.
     //! \param  args T's ctor arguments.
@@ -83,10 +82,15 @@ public:
         return reinterpret_cast<T&>(m_stor);
     }
 
-private:
     //! Storage for the T object.
-    std::aligned_storage_t<sizeof(T), alignof(T)> m_stor {};
+    std::aligned_storage_t<sizeof(T), alignof(T)> m_stor;
 };
+
+// Redundant check to avoid potential bugs when changes will be applied to
+// this struct.
+// Making this type trival will make sure that it will be initialized
+static_assert(std::is_trivial<safe_storage<int>>::value,
+    "storage struct must be trivial");
 
 //------------------------------------------------------------------------------
 
