@@ -236,11 +236,42 @@ struct sdspi_card_info
     uint32_t  psn;        //!< 32 bits wide serial number.
     uint16_t  mdt_year;   //!< The manufacturing date, year.
     uint8_t   mdt_month;  //!< The manufacturing date, month.
+    uint16_t  ocr_volt;   //!< Voltage bits. ocr[15] -> ocr_volt[0] and so on.
     bool      type_hc;    //!< True if card is high capacity.
 
     template<class dev>
     friend ostream<dev> &operator<< (ostream<dev> &left, const sdspi_card_info &s)
     {
+        // Voltage mapping:
+        // ocr[15] -> ocr_volt[0] -> 2.7-2.8 V
+        // ocr[16] -> ocr_volt[1] -> 2.8-2.9 V
+        // ocr[17] -> ocr_volt[2] -> 2.9-3.0 V
+        // ocr[18] -> ocr_volt[3] -> 3.0-3.1 V
+        // ocr[19] -> ocr_volt[4] -> 3.1-3.2 V
+        // ocr[20] -> ocr_volt[5] -> 3.2-3.3 V
+        // ocr[21] -> ocr_volt[6] -> 3.3-3.4 V
+        // ocr[22] -> ocr_volt[7] -> 3.4-3.5 V
+        // ocr[23] -> ocr_volt[8] -> 3.5-3.6 V
+
+        for (uint8_t bit = 0; bit < 9; ++bit) {
+            if (s.ocr_volt & (1 << bit)) {
+                uint8_t low_v = 27 + bit;
+                uint8_t high_v = low_v + 1;
+
+                uint low_intgr = low_v / 10;
+                uint low_fract = low_v - low_intgr * 10;
+                uint high_intgr = high_v / 10;
+                uint high_fract = high_v - high_intgr * 10;
+
+                ecl::cout << "VOLTAGE: ["
+                          << low_intgr << '.' << low_fract
+                          << "-"
+                          << high_intgr << '.' << high_fract <<
+                          "]" << ecl::endl;
+            }
+        }
+
+
         left << "------------------------------------" << ecl::endl;
         left << "Manufacturer ID:       " << s.mid << ecl::endl;
         left << "OEM/Application ID:    " << s.oid << ecl::endl;
@@ -501,7 +532,7 @@ private:
     static err software_reset();
     static err check_conditions();
     static err init_process();
-    static err check_OCR(sd_type &type);
+    static err check_OCR(sd_type &type, uint16_t &voltage_profile);
     static err obtain_card_info();
     static err set_block_length();
     static err populate_block(size_t new_block);
@@ -596,9 +627,15 @@ template<class spi_dev, class gpio_cs>
 err sdspi<spi_dev, gpio_cs>::deinit()
 {
     ecl_assert(m_ctx.inited);
-    // TODO
+
+    spi_dev::lock();
+    gpio_cs::reset();
+    auto rc = software_reset();
+    gpio_cs::set();
+    spi_dev::unlock();
+
     m_ctx.inited = false;
-    return err::ok;
+    return rc;
 }
 
 template<class spi_dev, class gpio_cs>
@@ -681,6 +718,8 @@ err sdspi<spi_dev, gpio_cs>::get_info(sdspi_card_info &info)
     R1  r1;
     err rc;
     uint8_t cid[16];
+    sd_type type; // Useless in this routine, still required by check_OCR()
+    uint16_t ocr_volt;
 
     spi_dev::lock();
     gpio_cs::reset();
@@ -691,6 +730,11 @@ err sdspi<spi_dev, gpio_cs>::get_info(sdspi_card_info &info)
     }
 
     rc = receive_data(cid, sizeof(cid));
+    if (is_error(rc)) {
+        return rc;
+    }
+
+    rc = check_OCR(type, ocr_volt);
     if (is_error(rc)) {
         return rc;
     }
@@ -713,6 +757,7 @@ err sdspi<spi_dev, gpio_cs>::get_info(sdspi_card_info &info)
     info.mdt_month = cid[14] & 0xf;
 
     info.type_hc = m_ctx.hc;
+    info.ocr_volt = ocr_volt;
 
     return err::ok;
 }
@@ -1069,6 +1114,7 @@ err sdspi<spi_dev, gpio_cs>::open_card()
 {
     err rc;
     sd_type type;
+    uint16_t volts; // Useless in this routine, still required by check_OCR()
 
     rc = software_reset();
     if (is_error(rc)) {
@@ -1085,7 +1131,7 @@ err sdspi<spi_dev, gpio_cs>::open_card()
         return rc;
     }
 
-    rc = check_OCR(type);
+    rc = check_OCR(type, volts);
     if (is_error(rc)) {
         return rc;
     } else if (type == sd_type::hc) {
@@ -1144,7 +1190,6 @@ err sdspi<spi_dev, gpio_cs>::check_conditions()
         }
 
         if (!(OCR & 0x100)) {
-            // ecl::cout << "Voltage range not accepted" << ecl::endl;
             m_ctx.state.set_err_voltage_range();
             return err::generic;
         }
@@ -1183,7 +1228,7 @@ err sdspi<spi_dev, gpio_cs>::init_process()
 }
 
 template<class spi_dev, class gpio_cs>
-err sdspi<spi_dev, gpio_cs>::check_OCR(sd_type &type)
+err sdspi<spi_dev, gpio_cs>::check_OCR(sd_type &type, uint16_t &voltage_profile)
 {
     R3 r3;
     CMD58(r3);
@@ -1196,28 +1241,15 @@ err sdspi<spi_dev, gpio_cs>::check_OCR(sd_type &type)
     if (!r3.r1.response) {
         // Card sends data (as well as OCR) in BE format
         if (OCR & (1 << 31)) {
-            ecl::cout << "Card is powered-up" << ecl::endl;
             if (OCR & (1 << 30)) {
-                ecl::cout << "Card is High capacity" << ecl::endl;
                 type = sd_type::hc;
             } else {
-                ecl::cout << "Card is Standard capacity" << ecl::endl;
                 type = sd_type::sc;
             }
         }
 
-        // Whole byte 2 of OCR contains voltage profiles
-        for (uint8_t bit = 15; bit < 24; ++bit) {
-            if (OCR & (1 << bit)) {
-                uint8_t V = 27 + bit - 15;
-                uint intgr = V / 10;
-                uint fract = V - intgr * 10;
-                ecl::cout << "VOLTAGE: ["
-                          << intgr << '.' << fract
-                          << "; +0.1]" << ecl::endl;
-            }
-        }
-
+        // Bits [15:23] of OCR contains voltage profiles
+        voltage_profile = (OCR >> 15) & 0x1f;
         return rc;
     }
 
