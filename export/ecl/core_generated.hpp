@@ -12,5 +12,7 @@
 #include <aux/generated.hpp>
 // Device generated headers
 #include <dev/generated.hpp>
+// Library generated headers
+#include <lib/generated.hpp>
 
 #endif // DEV_SDSPI_CFG_HPP_
