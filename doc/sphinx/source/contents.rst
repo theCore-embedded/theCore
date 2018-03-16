@@ -37,7 +37,7 @@ theCore: C++ Embedded Framework
   arch
   platform/index
   devices/index
-  utilities
+  utilities/index
   os_layer
   community
   docs
