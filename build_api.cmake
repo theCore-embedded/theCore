@@ -200,7 +200,10 @@ macro(theCore_create_cog_runner)
 
     # Additional paths to include platform-level modules
     set(COG_INCLUDES
-        "-I${CORE_DIR}/platform/${PLATFORM_NAME}" "-I${CORE_DIR}/platform/common/")
+        "-I${CORE_DIR}/platform/${PLATFORM_NAME}"
+        "-I${CORE_DIR}/lib/"
+        "-I${CORE_DIR}/dev/"
+        "-I${CORE_DIR}/platform/common/")
 
     add_custom_command(
         OUTPUT ${COG_OUT}

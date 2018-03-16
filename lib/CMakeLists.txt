@@ -15,7 +15,6 @@ endif()
 
 add_subdirectory(cpp)
 add_subdirectory(allocators)
-add_subdirectory(fs)
 add_subdirectory(utils)
 add_subdirectory(debug)
 add_subdirectory(types)
@@ -26,3 +25,18 @@ add_subdirectory(stm32-spl)
 add_subdirectory(ti-tivaware)
 add_subdirectory(unity)
 add_subdirectory(particle_firmware)
+
+# Some platforms may not feel well with definitions in FAT headers
+# TODO: fix it.
+if(NOT DEFINED THECORE_FORCE_NO_FS_MODULE)
+    add_subdirectory(fs)
+endif()
+
+# Proxy library to aggregate theCore libraries
+# TODO: aggregate ALL libraries
+add_library(thecore_libs INTERFACE)
+target_include_directories(thecore_libs INTERFACE export)
+
+if(NOT DEFINED THECORE_FORCE_NO_FS_MODULE)
+    target_link_libraries(thecore_libs INTERFACE fat)
+endif()

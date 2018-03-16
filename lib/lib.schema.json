@@ -1,0 +1,7 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+
+    "properties": {
+        "fs":            { "$ref": "file:./fs/fs.schema.json" }
+    }
+}

@@ -1,6 +1,3 @@
-Libraries and utilities
-=======================
-
 .. _theCore_Configurator:
 
 JSON-based configurator
@@ -88,34 +85,6 @@ required schema the build error looks like this::
 In the example above, baud rate of UART was not specified correctly. This kind
 of errors the schema can easily catch. Refer to the concrete module
 documentation or the source code to understand which values are validated.
-
-
-.. _theCore_Console:
-
-Console streams
----------------
-
-.. note:: This section is under construction.
-
-Bypass console
---------------
-
-.. note:: This section is under construction.
-
-Assertions and error handling
------------------------------
-
-.. note:: This section is under construction.
-
-Filesystem
-----------
-
-.. note:: This section is under construction.
-
-Newlib stubs
-------------
-
-.. note:: This section is under construction.
 
 
 .. _JSON schema: http://json-schema.org/

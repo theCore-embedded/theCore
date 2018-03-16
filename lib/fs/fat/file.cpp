@@ -2,10 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// TODO: rename it to 'file descriptor'
-#include "fat/file.hpp"
+//! \file
+//! \brief FAT file descriptor implementation.
+//! \todo rename it to file_descriptor?
 
-using namespace fat;
+#include "ecl/fat/file.hpp"
+
+using namespace ecl::fat;
 
 file::file(const fs::inode_weak &node, FATFS *fs)
     :fs::file_descriptor{node}
@@ -18,96 +21,114 @@ file::~file()
 {
 }
 
-ssize_t file::read(uint8_t *buf, size_t size)
+ecl::err file::read(uint8_t *buf, size_t &size)
 {
     ecl_assert(buf);
-    ecl_assert(size); // TODO: for now
+    ecl_assert(m_opened);
 
-    if (m_opened) {
-        unsigned read;
-
-        FRESULT res = pf_read(m_fs, reinterpret_cast< void* >(buf), size, &read);
-
-        if (res == FR_OK)
-            return read;
+    if (!size) {
+        return err::ok;
     }
 
-    return -1;
+    unsigned read;
+
+    FRESULT res = pf_read(m_fs, reinterpret_cast<void*>(buf), size, &read);
+
+    if (res == FR_OK) {
+        size = read;
+
+        // TODO: find better way to catch EOF
+        return read ? err::ok : err::eof;
+    }
+
+    return err::io;
 }
 
-ssize_t file::write(const uint8_t *buf, size_t size)
+ecl::err file::write(const uint8_t *buf, size_t &size)
 {
     ecl_assert(buf);
-    ecl_assert(size); // TODO: for now
+    ecl_assert(m_opened);
 
 #if _USE_WRITE
-    if (m_opened) {
-        size_t written;
-
-        FRESULT res = pf_write(m_fs, reinterpret_cast< const void* >(buf), size, &written);
-
-        if (res != FR_OK)
-            return -1;
-
-        return written;
+    if (!size) {
+        return err::ok;
     }
+
+    UINT written;
+
+    FRESULT res = pf_write(m_fs, reinterpret_cast<const void*>(buf), size, &written);
+
+    if (res != FR_OK) {
+        return ecl::err::io;
+    }
+
+    return ecl::err::ok;
 #else
-    return -1;
+    (void)size;
+    (void)buf;
+    return ecl::err::notsup;
 #endif
 }
 
-int file::seek(off_t offt, fs::seekdir way)
+ecl::err file::seek(off_t offt, fs::seekdir whence)
 {
+    ecl_assert(m_opened);
+
 #if _USE_LSEEK
-    if (m_opened) {
-        FRESULT res;
+    FRESULT res;
 
-        off_t top_offt;
+    off_t top_offt;
 
-        switch (way) {
-        case seekdir::beg:
-            top_offt = offt;
-            break;
-        case seekdir::cur:
-            top_offt = m_fs->fptr + offt;
-            break;
-        case seekdir::end:
-            top_offt = m_fs->fsize + offt;
-            break;
-        default:
-            return -1;
-        }
-
-        res = pf_lseek(m_fs, top_offt);
-        if (res == FR_OK)
-            return 0;
-
+    switch (whence) {
+    case fs::seekdir::beg:
+        top_offt = offt;
+        break;
+    case fs::seekdir::cur:
+        top_offt = m_fs->fptr + offt;
+        break;
+    case fs::seekdir::end:
+        top_offt = m_fs->fsize + offt;
+        break;
+    default:
+        ecl_assert(0); // Not supported seekdir
+        break;
     }
+
+    res = pf_lseek(m_fs, top_offt);
+    if (res == FR_OK) {
+        return ecl::err::ok;
+    }
+
 #else
-    (void) offt;
-    (void) way;
+    (void)offt;
+    (void)whence;
 #endif
 
-    return -1;
+    return ecl::err::notsup;
 }
 
-off_t file::tell()
+ecl::err file::tell(off_t &offt)
 {
+    ecl_assert(m_opened);
+
 #if _USE_LSEEK
-    if (m_opened) {
-        return m_fs->fptr;
-    }
+    offt = m_fs->fptr;
+    return ecl::err::ok;
+#else
+    (void)offt;
+    return ecl::err::notsup;
 #endif
-    return -1;
 }
 
-int file::close()
+ecl::err file::close()
 {
-    if (m_opened) {
-        m_opened = false;
-        return 0;
-    }
+    ecl_assert(m_opened);
 
-    // Already closed
-    return -1;
+#if _USE_WRITE
+    // Finalize write, if any
+    pf_write(m_fs, nullptr, 0, nullptr);
+#endif
+
+    m_opened = false;
+    return err::ok;
 }

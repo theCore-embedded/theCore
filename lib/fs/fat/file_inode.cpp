@@ -2,10 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "fat/file_inode.hpp"
-#include "fat/file.hpp"
+//! \file
+//! \brief File FATFS inode implementation.
 
-using namespace fat;
+#include "ecl/fat/file_inode.hpp"
+#include "ecl/fat/file.hpp"
+
+using namespace ecl::fat;
 
 file_inode::file_inode(FATFS *fs, const allocator &alloc,
                        const char *path, const char *name)
@@ -13,7 +16,7 @@ file_inode::file_inode(FATFS *fs, const allocator &alloc,
     ,m_path{}
     ,m_alloc{alloc}
 {
-    m_path = allocate_path(path, name, m_alloc);
+    m_path = fs::allocate_path(path, name, m_alloc);
 }
 
 file_inode::~file_inode()
@@ -26,29 +29,38 @@ file_inode::type file_inode::get_type() const
     return file_inode::type::file;
 }
 
-fs::file_ptr file_inode::open()
+ecl::fs::file_ptr file_inode::open()
 {
-    // Petite FAT does not support multiple opened files,
-    // so it is unnecesary to keep any state inside file descriptor.
-    // However, the filesystem object itself works as an obscured
-    // file descriptors
+    // Handle possible OOM condition
+    if (!m_path) {
+        return nullptr;
+    }
+
+    // Petite FAT does not support multiple opened files.
+    // This can be workarounded by keeping copy of whole FATFS internal object
+    // in every file descriptor.
     FRESULT res = pf_open(&m_fs, m_path->get_path());
     if (res == FR_OK) {
-        auto ptr = ecl::allocate_shared< file, allocator >(m_alloc, my_ptr, &m_fs);
-
+        auto ptr = ecl::allocate_shared<file, allocator>(m_alloc, my_ptr, &m_fs);
         return ptr;
     }
 
     return fs::file_ptr{};
 }
 
-ssize_t file_inode::size() const
+ecl::err file_inode::size(size_t &sz) const
 {
-    return -1;
+    (void)sz;
+    return ecl::err::notsup; // TODO: implement
 }
 
-ssize_t file_inode::get_name(char *buf, size_t buf_sz) const
+ecl::err file_inode::get_name(char *buf, size_t &buf_sz) const
 {
+    // Handle possible OOM condition
+    if (!m_path) {
+        return err::nomem;
+    }
+
     ecl_assert(buf);
     ecl_assert(buf_sz);
 
@@ -58,19 +70,22 @@ ssize_t file_inode::get_name(char *buf, size_t buf_sz) const
     uint i;
     for (i = path_len; i > 0; --i) {
         if (path[i - 1] == '/') {
-            i--; // Rest of the code assumes that 'i' is an index of array2
+            i--; // Rest of the code assumes that 'i' is an index of array
             break;
         }
     }
 
+    size_t name_len = path_len - i;
+
     // Skip forward slash
     const char *start = path + i + 1;
     // Reserve place for null terminator
-    size_t to_copy = std::min(buf_sz - 1, path_len - i);
+    size_t to_copy = std::min(buf_sz - 1, name_len);
     // One-beyond-end iterator
     const char *end = start + to_copy + 1;
 
     // Algorithm check
+    // TODO: handle case when buffer is too small more gracefully
     ecl_assert(to_copy < buf_sz);
     ecl_assert(start < end);
 
@@ -78,7 +93,8 @@ ssize_t file_inode::get_name(char *buf, size_t buf_sz) const
 
     // Copy [start;end) to buf
     std::copy(start, end, buf);
+    buf_sz = name_len;
 
-    return path + path_len - start;
+    return ecl::err::ok;
 }
 

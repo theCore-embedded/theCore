@@ -19,14 +19,6 @@
 #ifdef __cplusplus
 #include <ecl/utils.hpp>
 
-template<int N>
-constexpr auto strlen_constexpr(const char (&str)[N])
-{
-    size_t len = 0;
-    while (str[len++]) { }
-    return len - 1;
-}
-
 //! Calculates offset of filename substring in given path string
 template<int N>
 constexpr auto fl_offset(const char (&path)[N])
@@ -79,7 +71,7 @@ extern "C" {
 #define ecl_assert_msg(COND, MESSAGE) \
     do { \
         if (!(COND)) { \
-            constexpr auto max_len = strlen_constexpr(__FILE__) + 1; \
+            constexpr auto max_len = ecl::strlen_constexpr(__FILE__) + 1; \
             constexpr auto offset = fl_offset(__FILE__); \
             constexpr auto copy_len = max_len - offset; \
             struct path \

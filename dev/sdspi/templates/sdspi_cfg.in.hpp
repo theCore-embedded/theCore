@@ -16,17 +16,18 @@ namespace ecl
 import cog
 import json
 import common
+import dev
 
 bus_typedef = '''
-using bus_sdspi_%s = generic_bus<%s>;
+using bus_%s = generic_bus<%s>;
 '''
 
 sdspi_typedef = '''
-using sdspi_%s = sdspi<bus_sdspi_%s, %s>;
+using %s = sdspi<bus_%s, %s>;
 '''
 
 sdspi_alias = '''
-using %s = sdspi_%s;
+using %s = %s;
 '''
 
 cfg = json.load(open(JSON_CFG))
@@ -36,11 +37,13 @@ if 'device' in cfg and 'sdspi' in cfg['device']:
     sdspi_cfg = cfg['device']['sdspi']
 
 for sdspi in sdspi_cfg:
+    sdspi_name = dev.resolve_sdspi_driver(cfg, sdspi['spi'], sdspi['cs_gpio'])
     cs_gpio = common.resolve_gpio_driver(cfg, sdspi['cs_gpio'])
     spi_drv = common.resolve_spi_driver(cfg, sdspi['spi'])
-    #alias = sdspi_cfg['alias']
     cog.outl(bus_typedef % (spi_drv, spi_drv))
-    cog.outl(sdspi_typedef % (spi_drv, spi_drv, cs_gpio))
+    cog.outl(sdspi_typedef % (sdspi_name, spi_drv, cs_gpio))
+    cog.outl(sdspi_alias % (sdspi['id'], sdspi_name))
+
 ]]]*/
 //[[[end]]]
 

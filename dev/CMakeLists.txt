@@ -13,6 +13,7 @@ add_subdirectory(hm10)
 add_subdirectory(sdspi)
 
 # Proxy library to aggregate device drivers
+# TODO: aggregate ALL devices
 add_library(thecore_dev INTERFACE)
 target_include_directories(thecore_dev INTERFACE export)
 target_link_libraries(thecore_dev INTERFACE sdspi)

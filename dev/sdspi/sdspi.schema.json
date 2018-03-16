@@ -6,10 +6,11 @@
         "type": "object",
 
         "properties": {
+            "id":        { "type": "string" },
             "spi":       { "type": "string" },
             "cs_gpio":   { "type": "string" }
         },
 
-        "required": [ "spi", "cs_gpio" ]
+        "required": [ "id", "spi", "cs_gpio" ]
     }
 }

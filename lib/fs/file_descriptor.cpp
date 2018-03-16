@@ -2,10 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <fs/file_descriptor.hpp>
-#include <fs/inode.hpp>
+//! \file
+//! \brief File descriptor implementation
 
-using namespace fs;
+#include <ecl/fs/file_descriptor.hpp>
+#include <ecl/fs/inode.hpp>
+
+using namespace ecl::fs;
 
 file_descriptor::file_descriptor(const inode_weak &node)
     :m_inode(nullptr)

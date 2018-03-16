@@ -17,16 +17,25 @@ namespace ecl
 
 // Special credit to RostakaGmfun for providing cool way to iterate tuple.
 
-template <class FuncT, class TupleT, size_t ... Is>
+template <class FuncT, class TupleT, size_t ...Is>
 void for_each_impl(TupleT &tuple, FuncT func, std::index_sequence<Is...>)
 {
     (void)std::initializer_list<int>{(func(std::get<Is>(tuple)), 0)...};
 }
 
-template<class FuncT,  class ... Tp>
+template<class FuncT, class ...Tp>
 void for_each(std::tuple<Tp...> &tuple, FuncT func)
 {
     for_each_impl(tuple, func, std::index_sequence_for<Tp...>{});
+}
+
+//! For-each for types only.
+//! \tparam Callable Type with operator() overloaded
+//! \tparam Tp Types for with Callable will be called
+template<template<typename> class Callable, class ...Tp>
+void for_each()
+{
+    [](...){}((Callable<Tp>{}(), 0) ... );
 }
 
 //------------------------------------------------------------------------------
@@ -44,9 +53,8 @@ inline constexpr size_t offset_of(T1 T2::*member) {
 //! Safe storage wrapper to avoid static initialization fiasco
 //! \tparam T non-POD type to protect against implicit constructor call during static initialization
 template<class T>
-class safe_storage
+struct safe_storage
 {
-public:
     //! Initializes storage.
     //! \tparam Args Types of the constructor args.
     //! \param  args T's ctor arguments.
@@ -83,10 +91,15 @@ public:
         return reinterpret_cast<T&>(m_stor);
     }
 
-private:
     //! Storage for the T object.
-    std::aligned_storage_t<sizeof(T), alignof(T)> m_stor {};
+    std::aligned_storage_t<sizeof(T), alignof(T)> m_stor;
 };
+
+// Redundant check to avoid potential bugs when changes will be applied to
+// this struct.
+// Making this type trival will make sure that it will be initialized
+static_assert(std::is_trivial<safe_storage<int>>::value,
+    "storage struct must be trivial");
 
 //------------------------------------------------------------------------------
 
@@ -100,6 +113,38 @@ constexpr auto extract_value(Enum val)
     static_assert(std::is_enum<Enum>::value, "Given type is not enumeration.");
 
     return static_cast<std::underlying_type_t<Enum>>(val);
+}
+
+//------------------------------------------------------------------------------
+
+//! Calculates string length in compile time, if possible.
+template<int N>
+constexpr auto strlen_constexpr(const char (&str)[N])
+{
+    size_t len = 0;
+    while (str[len++]) { }
+    return len - 1;
+}
+
+//! Calculates string length in compile time, if possible.
+//! \details Overload for consuming pointers.
+constexpr auto strlen_constexpr(const char *str)
+{
+    size_t len = 0;
+    while (str[len++]) { }
+    return len - 1;
+}
+
+//! Returns an index to the first occurrence of the character in the string.
+//! \details Usable in compile-time
+//! \return Index of a character in string where given char is located,
+//!         -1 otherwise.
+constexpr int strchri_constexpr(const char *str, char ch)
+{
+    int ret = -1;
+    int i = 0;
+    while (str[i]) { if (str[i] == ch) { ret = i; break; }; ++i; }
+    return ret;
 }
 
 //------------------------------------------------------------------------------
