@@ -1,2 +1,6 @@
 # Special directory to clone thirdparies into
 .thirdparty
+# Python junk
+__pycache__
+# Diff junk
+.orig
