@@ -73,7 +73,7 @@ Example output
 Filesystem configuration header:
 
 .. literalinclude:: ../_static/generated/fs/fs_cfg_example.hpp
-    :lines: 19-37
+    :lines: 23-41
     :language: cpp
     :linenos:
 

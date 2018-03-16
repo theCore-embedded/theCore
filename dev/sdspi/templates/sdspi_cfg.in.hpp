@@ -8,6 +8,9 @@
 #ifndef DEV_SDSPI_CFG_HPP_
 #define DEV_SDSPI_CFG_HPP_
 
+#include <dev/bus.hpp>
+#include <dev/sdspi.hpp>
+
 namespace ecl
 {
 
