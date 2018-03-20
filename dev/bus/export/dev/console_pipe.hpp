@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef DEV_BUS_DEV_BUS_PIPE_HPP_
-#define DEV_BUS_DEV_BUS_PIPE_HPP_
+#ifndef DEV_BUS_CONSOLE_PIPE_
+#define DEV_BUS_CONSOLE_PIPE_
 
 //!
 //! \file
-//! \brief      Bus pipe module.
+//! \brief      Console pipe module.
 //! \copyright
 //! \todo Description and examples
 //!
@@ -19,24 +19,25 @@ namespace ecl
 {
 
 //!
-//! \brief Bus pipe (blocking) adapter.
+//! \brief Console pipe (blocking) adapter.
 //! This adapter provides functionality of a blocking pipe
-//! built over generic bus interface.
+//! built over generic bus interface. It echoes each byte received.
+//! Temporary solution, until 'serial' driver will be supported in each platform.
 //! \tparam GBus Generic bus driver.
 //! \sa generic_bus
 //!
 template< class GBus >
-class bus_pipe
+class console_pipe
 {
 public:
     //!
     //! \brief Constructs a pipe.
     //!
-    bus_pipe();
+    console_pipe();
     //!
     //! \brief Destructs a pipe.
     //!
-    ~bus_pipe();
+    ~console_pipe();
 
     //!
     //! \brief Inits a pipe.
@@ -102,26 +103,26 @@ private:
 
 
 template< class GBus >
-bus_pipe< GBus >::bus_pipe()
+console_pipe< GBus >::console_pipe()
     :m_last{err::ok}
 {
 
 }
 
 template< class GBus >
-bus_pipe< GBus >::~bus_pipe()
+console_pipe< GBus >::~console_pipe()
 {
 
 }
 
 template< class GBus >
-ecl::err bus_pipe< GBus >::init()
+ecl::err console_pipe< GBus >::init()
 {
     return (m_last = GBus::init());
 }
 
 template< class GBus >
-ssize_t bus_pipe< GBus >::write(const uint8_t *data, size_t count)
+ssize_t console_pipe< GBus >::write(const uint8_t *data, size_t count)
 {
     ecl_assert(data);
 
@@ -149,7 +150,7 @@ ssize_t bus_pipe< GBus >::write(const uint8_t *data, size_t count)
 }
 
 template< class GBus >
-ssize_t bus_pipe< GBus >::read(uint8_t *buffer, size_t size)
+ssize_t console_pipe< GBus >::read(uint8_t *buffer, size_t size)
 {
     ecl_assert(buffer);
 
@@ -173,11 +174,14 @@ ssize_t bus_pipe< GBus >::read(uint8_t *buffer, size_t size)
         ret = -1;
     }
 
+    // Echo all symbols back
+    write(buffer, read);
+
     return ret;
 }
 
 template< class GBus >
-err bus_pipe< GBus >::last_error() const
+err console_pipe< GBus >::last_error() const
 {
     return m_last;
 }
@@ -185,11 +189,11 @@ err bus_pipe< GBus >::last_error() const
 //------------------------------------------------------------------------------
 
 template< class GBus >
-bool bus_pipe< GBus >::err_on_start() const
+bool console_pipe< GBus >::err_on_start() const
 {
     return is_error(m_last) && !(m_last == err::io);
 }
 
 } // namespace ecl
 
-#endif // DEV_BUS_DEV_BUS_PIPE_HPP_
+#endif // DEV_BUS_CONSOLE_PIPE_
