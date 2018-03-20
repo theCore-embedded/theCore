@@ -1,3 +1,4 @@
+.. _theCore_TIVAC_TM4C123G:
 
 Texas Instruments Tiva C TM4C123G
 ---------------------------------
@@ -44,6 +45,11 @@ line to your source:
 
 For more JSON configuration examples for TM4C platform, refer to the
 :ref:`theCore_Examples` page.
+
+Available examples
+~~~~~~~~~~~~~~~~~~
+
+* :ref:`theCore_TM4C_FATFS_SDSPI`
 
 Periphery overview
 ~~~~~~~~~~~~~~~~~~

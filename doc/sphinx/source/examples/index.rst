@@ -14,6 +14,7 @@ Examples
   stm32f4-discovery-blink
   stm32f4-discovery-bluetooth-hm10
   ti-tm4c123g-launchpad-blink
+  ti-tm4c123g-sdcard-fatfs-sdspi
 
 theCore examples are organized in a form of separate projects that can be
 extracted and used as a base for custom application.

@@ -18,14 +18,14 @@ inode::~inode()
 
 file_ptr inode::open()
 {
-	// Must not be called, if inode is a dir
+    // Must not be called, if inode is a dir
     ecl_assert_msg(0, "Function call not permitted");
-	return file_ptr{};
+    return file_ptr{};
 }
 
 dir_ptr inode::open_dir()
 {
-	// Must not be called, if inode is a file
+    // Must not be called, if inode is a file
     ecl_assert_msg(0, "Function call not permitted");
     return dir_ptr{};
 }
@@ -36,4 +36,3 @@ void inode::set_weak(const fs::inode_ptr &ptr)
     ecl_assert(ptr);
     my_ptr = ptr;
 }
-
