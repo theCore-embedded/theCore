@@ -38,10 +38,12 @@ public:
     //! Closes and destructs dir descriptor.
     virtual ~dir_descriptor();
 
-    //! Gets next entity inode (directory or file) from current directory.
+    //! Advances to the next item in the directory and gets **current** entity.
+    //! \details The entity could be a directory or a file from current
+    //! directory, represented by this directory descriptor.
     //! \pre Opened descriptor.
     //! \return Next item in the directory, or nullptr if no more items.
-    virtual inode_ptr next() = 0;
+    virtual inode_ptr read() = 0;
 
     //! Rewindes to the start of the directory.
     //! \pre Opened descriptor.
