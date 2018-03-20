@@ -57,10 +57,11 @@ public:
     //! \details Current read/write offset is advanced to an amount
     //!          of bytes read.
     //! \param[in]      buf  Buffer to store data into. Must not be NULL.
-    //! \param[in,out]  size Size of a buffer on entry,
-    //!                      bytes read from a file on exit.
+    //! \param[in,out]  size Size of a buffer on entry, bytes read from a file
+    //!                      on exit. In case of returned values is less than
+    //!                      provided one, it means the read pointer has
+    //!                      reached end of the file during read operation.
     //! \return Status of operation.
-    //! \retval err::eof    End-of-file is reached.
     //! \retval err::notsup Operation is not supported on a given filesystem.
     virtual err read(uint8_t *buf, size_t &size) = 0;
 

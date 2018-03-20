@@ -92,7 +92,6 @@ enum class err : int
     wouldblock       = -77,    //! Operation would block
     xdev             = -78,    //! Cross-device link
     generic          = -79,    //! Generic error
-    eof              = -255,   //! End-of-file reached
 };
 
 static inline bool is_error(err error)
