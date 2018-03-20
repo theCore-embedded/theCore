@@ -27,12 +27,13 @@ in with pkgs; with python35Packages; {
     hardeningDisable = [ "all" ];
     buildInputs = [
       cogapp jsonschema which cmake gcc6 gdb cppcheck git
-      cpputest gcc-arm-embedded-5 dfu-util
+      cpputest gcc-arm-embedded-5 dfu-util minicom
       llvmPackages.clang-unwrapped openocd
       perlPackages.ArchiveZip xxd cmake-version4git ] ++ docs_deps;
 
     shellHook = ''
         export GCC_ARM_EMBEDDED_PATH=${gcc-arm-embedded-5}
+        export TERM='linux'
     '';
   };
 }

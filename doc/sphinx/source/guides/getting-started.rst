@@ -67,7 +67,7 @@ Using Nix
 #. Run Nix shell to get all environment required::
 
      # Run from theCore directory
-     nix-shell --pure
+     nix-shell .
 
 Moving forward
 ~~~~~~~~~~~~~~

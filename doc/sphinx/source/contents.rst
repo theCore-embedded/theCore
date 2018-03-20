@@ -44,3 +44,4 @@ theCore: C++ Embedded Framework
   testing
   credits
   changelog
+  faq
