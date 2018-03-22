@@ -17,3 +17,4 @@ programming skills with theCore.
   multiplatform
   without-nix
   thirdparty-cache
+  running-openocd-without-sudo

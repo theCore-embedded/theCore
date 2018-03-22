@@ -62,14 +62,6 @@ Running
 Firmware will be flashed via ``openocd`` and ``gdb``.
 
 #. Connect stm32f4 Discovery board to USB cable and connect USB <-> UART converter to the PC.
-#. Launch ``openocd`` in the separate terminal using script provided by theCore.
-   Alternatively, you can use script from openocd installation.
-
-   ::
-
-     # From new terminal
-     cd path/to/theCore
-     openocd -f ./scripts/stm32f4discovery.cfg
 
 #. Launch ``minicom`` with device associated with USB <-> UART converter.
    (``/dev/ttyUSB0`` here used as an example)::
@@ -77,35 +69,32 @@ Firmware will be flashed via ``openocd`` and ``gdb``.
      # From new terminal
      minicom -D /dev/ttyUSB0
 
-#. Provided that your main terminal's current directory is ``build``,
-   launch ``gdb``::
+#. Determine stm32f4discovery board revision.
 
-     # From the build directory
-     arm-none-eabi-gdb exti
+   If you don't remember your board revision, check FAQ section
+   :ref:`theCore_STM32F4_Discovery_rev`.
 
-#. Under GDB shell, connect to ``openocd`` and flash firmware::
+#. Launch ``openocd`` and flash image using script from openocd installation.
 
-     (gdb) target remote :3333
-     Remote debugging using :3333
-     0x00000000 in ?? ()
+   For old STM32F407G-DISC boards, with STLINK/V2:
 
-     (gdb) monitor reset halt
-     target state: halted
-     target halted due to debug-request, current mode: Thread
-     xPSR: 0x01000000 pc: 0x08000188 msp: 0x20020000
+   ::
 
-     (gdb) load
-     Loading section .text, size 0x4724 lma 0x8000000
-     Loading section .init_array, size 0xc lma 0x8004724
-     Loading section .rodata, size 0x228 lma 0x8004730
-     Loading section .data, size 0x24 lma 0x8004958
-     Start address 0x8000188, load size 18812
-     Transfer rate: 14 KB/sec, 3762 bytes/write.
+     sudo $(which openocd) -f board/stm32f4discovery.cfg -c 'init; reset halt; flash write_image erase exti.bin 0x08000000; reset run; exit'
 
-#. Start new firmware::
+   For new STM32F407G-DISC1 boards, with STLINK/V2.1:
 
-     (gdb) continue
-     Continuing.
+   ::
+
+     sudo $(which openocd) -f board/stm32f429disc1.cfg -c 'init; reset halt; flash write_image erase exti.bin 0x08000000; reset run; exit'
+
+   See :ref:`theCore_SudoOpenOCD_Nix` section to get insight why ``which openocd``
+   is important.
+
+   .. note::
+
+     Optionally, complete the :ref:`theCore_OpenOCD_NoRoot` guide, to be able
+     run OpenOCD without superuser permissions.
 
 #. Press blue user button on the Discovery board and observe output in ``minicom``.
 
