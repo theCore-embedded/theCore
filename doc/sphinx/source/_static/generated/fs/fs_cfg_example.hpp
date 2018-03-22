@@ -13,6 +13,10 @@
 
 #include <fs/fs_defines.h>
 
+// SDSPI is only block device supported in theCore right now
+// So, to make things easier just include it right away
+#include <dev/sdspi.hpp>
+
 #include <ecl/fat/fs.hpp>
 
 

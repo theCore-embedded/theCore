@@ -9,14 +9,14 @@
 
 #include <platform/console.hpp>
 #include <dev/bus.hpp>
-#include <dev/bus_pipe.hpp>
+#include <dev/console_pipe.hpp>
 
 namespace ecl
 {
 
 // Required aliases
 using console_bus = ecl::generic_bus<platform_console>;
-using console_driver = ecl::bus_pipe<console_bus>;
+using console_driver = ecl::console_pipe<console_bus>;
 
 } // namespace ecl
 

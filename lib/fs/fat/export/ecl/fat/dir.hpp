@@ -46,8 +46,8 @@ public:
     //! \copydoc ecl::fs::dir_descriptor::~dir_descriptor()
     virtual ~dir();
 
-    //! \copydoc ecl::fs::dir_descriptor::next()
-    virtual fs::inode_ptr next() override;
+    //! \copydoc ecl::fs::dir_descriptor::read()
+    virtual fs::inode_ptr read() override;
 
     //! \copydoc ecl::fs::dir_descriptor::rewind()
     virtual ecl::err rewind() override;

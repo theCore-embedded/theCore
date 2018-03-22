@@ -204,7 +204,7 @@ auto vfs<Fs...>::name_to_inode(inode_ptr cur_dir, const char *name, size_t name_
 
     // Iterate over directory and try to find proper item
     inode_ptr next;
-    while (next = dd->next()) {
+    while (next = dd->read()) {
         size_t len = sizeof(inode_name);
         auto rc = next->get_name(inode_name, len);
 

@@ -36,9 +36,7 @@ ecl::err file::read(uint8_t *buf, size_t &size)
 
     if (res == FR_OK) {
         size = read;
-
-        // TODO: find better way to catch EOF
-        return read ? err::ok : err::eof;
+        return err::ok;
     }
 
     return err::io;

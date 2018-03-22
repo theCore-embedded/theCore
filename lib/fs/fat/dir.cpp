@@ -33,7 +33,7 @@ dir::~dir()
 {
 }
 
-fs::inode_ptr dir::next()
+fs::inode_ptr dir::read()
 {
     ecl_assert(m_opened);
 
