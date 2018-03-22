@@ -15,7 +15,7 @@ Add following lines to your ``/etc/nixos/configuration.nix``:
 
   {
     users.extraGroups.plugdev = { };
-    users.extraUsers.rasen.extraGroups = [ "plugdev" "dialout" ];
+    users.extraUsers.<username>.extraGroups = [ "plugdev" "dialout" ];
 
     services.udev.packages = [ pkgs.openocd ];
   }

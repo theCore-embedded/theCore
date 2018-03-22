@@ -1,3 +1,5 @@
+.. _theCore_TM4C_Blinky:
+
 TI TM4C123G LaunchPad blinky
 ----------------------------
 

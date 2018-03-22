@@ -98,7 +98,7 @@ Target JSON config for the TM4C FATFS example
 
 For your reference, the JSON configuration for this example is displayed below:
 
-.. literalinclude:: ../../../../examples/tm4c_led/tm4c_led.json
+.. literalinclude:: ../../../../examples/tm4c_fatfs/target.json
 
 .. _UniFlash: http://processors.wiki.ti.com/index.php/Category:CCS_UniFlash
 
