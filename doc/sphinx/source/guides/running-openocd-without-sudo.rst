@@ -4,7 +4,24 @@ Running OpenOCD without root privileges
 ---------------------------------------
 
 Accessing USB devices on Linux requires root privileges by default.
-To be able to run OpenOCD without root, execute following steps:
+To be able to run OpenOCD without root, execute following steps.
+
+NixOS Linux
+~~~~~~~~~~~
+
+Add following lines to your ``/etc/nixos/configuration.nix``:
+
+.. code-block:: nix
+
+  {
+    users.extraGroups.plugdev = { };
+    users.extraUsers.rasen.extraGroups = [ "plugdev" "dialout" ];
+
+    services.udev.packages = [ pkgs.openocd ];
+  }
+
+Other Linux distros
+~~~~~~~~~~~~~~~~~~~
 
 #. Add user to `plugdev` group::
 
@@ -137,4 +154,6 @@ To be able to run OpenOCD without root, execute following steps:
 # Restart ``udev``.
 
   * Ubuntu: ``sudo udevadm trigger``
+  * ArchLinux: ``sudo udevadm control --reload && sudo udevadm trigger``
+
 
