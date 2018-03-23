@@ -228,9 +228,6 @@ if(Sphinx_FOUND)
     # Single-page HTML output directory
     set(SPHINX_SINGLE_HTML_DIR "${BINARY_BUILD_DIR}/singlehtml")
 
-    # Title page output directory for forgge.github.io index page
-    set(SPHINX_TITLE_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
-
     add_custom_target(core_sphinx
         # create directories beforehand
         COMMAND ${CMAKE_COMMAND} -E make_directory
@@ -262,15 +259,6 @@ if(Sphinx_FOUND)
             "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/source"
             "${SPHINX_SINGLE_HTML_DIR}"
         COMMENT "Building HTML documentation with Sphinx"
-
-        COMMAND # Title HTML build
-        ${CMAKE_COMMAND} -E env SPHINX_ROOT_URL=http://forgge.github.io/theCore
-        ${SPHINX_EXECUTABLE}
-            -b singlehtml
-            -c "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/source_title"
-            "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/source_title"
-            "${SPHINX_TITLE_HTML_DIR}"
-        COMMENT "Building title page documentation with Sphinx"
     )
 
     add_dependencies(core_sphinx core_doxygen)

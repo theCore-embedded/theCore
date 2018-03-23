@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # url configuration
-URL="https://forgge.github.io/"
+URL="https://forgge.github.io/theCore/"
 
 # values: always hourly daily weekly monthly yearly never
 FREQ="daily"
