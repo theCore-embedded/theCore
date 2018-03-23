@@ -1,9 +1,9 @@
+#include "dev/bus.hpp"
+#include "mocks/platform_bus.hpp"
+
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/CommandLineTestRunner.h>
 #include <CppUTestExt/MockSupport.h>
-
-#include "dev/bus.hpp"
-#include "mocks/platform_bus.hpp"
 
 // Our resident
 using bus_t = ecl::generic_bus< platform_mock >;
