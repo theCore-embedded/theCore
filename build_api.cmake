@@ -32,6 +32,11 @@ endif()
 #					 [DEPENDS list_of_dependencies...]
 #					 [INC_DIRS list_of_include_directories...])
 function(add_unit_host_test)
+    # Check if tests are needed at all
+    if(CONFIG_NO_THECORE_UNIT_TESTS)
+        return()
+    endif()
+
     # Set general flags for C\C++ compiler and linker
     set(CC_WARN_FLAGS "-Wall -Wextra -Wpedantic -Werror")
     set(CXX_WARN_FLAGS "${CC_WARN_FLAGS} -Weffc++")

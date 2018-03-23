@@ -17,6 +17,11 @@ include(CppcheckTargets)
 
 message(STATUS "Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")
 
+if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # Not a standalone build. Meaning tests should be disabled.
+    set(CONFIG_NO_THECORE_UNIT_TESTS 1)
+endif()
+
 if(NOT CMAKE_CROSSCOMPILING)
     if(DEFINED CONFIG_PLATFORM)
         if(NOT CONFIG_PLATFORM STREQUAL "host")
