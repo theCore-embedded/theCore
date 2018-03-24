@@ -33,7 +33,9 @@ cp -Lr ../docs/sphinx/* .
 mkdir -p ../gh_pages/theCore/doxygen/
 
 # Generate sitemap
+cd theCore
 ${SCRIPTPATH}/sitemap.sh
+cd -
 
 if [ -z "$(git status --porcelain)" ]; then
     echo "No documentation changes present. Skipping doc deploy"
