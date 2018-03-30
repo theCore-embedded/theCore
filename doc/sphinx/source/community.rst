@@ -3,14 +3,62 @@
 Community and developer guidelines
 ==================================
 
-To make referencing easier, rules and guidelines (if present) are numbered inside section.
-
 .. _theCore_Roadmap:
 
 Roadmap
 -------
 
-.. note:: This section is under construction.
+theCore aims to provide a rich and consistent embedded environment for a range
+of different devices. Such complexity requires from users an advanced knowledge
+of build tools, toolchains and a board layout even in simple cases like a LED
+blinking.
+
+Thus the main milestones are directed to improve the initial user experience.
+Such goals are:
+
+* Provide all-in-one scripts for controlling a development flow, similar to
+  what ``mbed_cli`` does.
+
+  These scripts must be able to:
+
+  * Download required theCore revision.
+  * Initialize development environment, by optionally installing and running Nix.
+  * Detect and inform about missing dependencies.
+  * Bootstrap a new project based on theCore, optionally using one of
+    supported boards as a base.
+  * Launch a project build.
+  * Detect connected devices and be able to flash a project binary.
+  * Provide a ncurses-like (at least) interface to configure the project settings,
+    that otherwise will require a manual editing of a target JSON file.
+
+* Make theCore IoT-ready.
+
+  It is not a surprise that a modern embedded project must include a some
+  kind of connectivity support. Most required technologies that missing in
+  theCore are:
+
+  * lwIP integration.
+  * MQTT/COAP libraries.
+  * ESP8266 support (as external modem at least).
+  * Ethernet/WiFi drivers.
+
+* Add more multi-target examples where possible.
+
+  Much of theCore's API is portable. Examples should demonstrate an usage of
+  many development boards with the same application code.
+  Existing examples should be also converted to support many boards.
+
+* Complete support for at least one development board for each supported platform.
+
+  Support for a dev board includes:
+
+  * Drivers for each device soldered on the board.
+  * Periphery drivers (SPI, UART, I2C, etc.) that are required by the devices,
+    soldered on the board.
+  * A default JSON file that provides a base clock, periphery and external
+    devices configuration. User can change that JSON file to suit his needs.
+  * Platform and device capabiilities - similar to what ``Kconfig``
+    in Linux does.
 
 .. _theCore_Branching:
 
