@@ -6,8 +6,8 @@ stdenv.mkDerivation {
   src = fetchFromGitHub {
     owner = "Oleh-Kravchenko";
     repo = "cmake-version4git";
-    rev = "ba441ee2cecee3668d883a3d0b8f6eabafbfbb51";
-    sha256 = "184yagvjwwcjchfx6c37xs9f5fc82hdbkybjxy9cc6q73x0vax4a";
+    rev = "676cbd3ddbab695db692191a710a80ade9f443e3";
+    sha256 = "0h40pdq4sk4fwns82xmb25g4iydgq0mfx36j330mz2fwgk1awphw";
   };
 
   buildInputs = [ libtool cmake git ];
