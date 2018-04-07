@@ -285,6 +285,8 @@ function(theCore_get_thirdparty_cmd NAME GIT_REMOTE GIT_COMMIT)
     endif()
 
     msg_trace("Requested thirdparty: ${NAME} from: ${GIT_REMOTE} commit: ${GIT_COMMIT}")
+    msg_trace("Thirdparty git: ${THECORE_THIRDPARTY_DIR}/${NAME}")
+    msg_trace("Thirdparty worktree: ${THECORE_BUILD_THIRDPARTY_DIR}/${NAME}")
 
     if(NOT THECORE_THIRDPARTY_DIR)
         msg_fatal("THECORE_THIRDPARTY_DIR must be specified in order to persist thirdparty packages")
