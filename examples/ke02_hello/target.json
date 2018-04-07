@@ -1,0 +1,13 @@
+{
+    "platform":  {
+        "name": "ke02",
+        "console": "UART0",
+
+        "uart": [
+            {
+                "id": "UART0",
+                "comment": "UART-over-USB console output"
+            }
+        ]
+    }
+}
