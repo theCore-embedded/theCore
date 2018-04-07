@@ -1,0 +1,17 @@
+{
+    "platform": {
+        "name": "tm4c",
+        "uart": [
+            {
+                "id": "UART0",
+                "alias": "test_uart",
+                "comment": "UART-over-USB console output"
+            },
+            {
+                "id": "UART1",
+                "alias": "another_uart",
+                "comment": "Example UART"
+            }
+        ]
+    }
+}

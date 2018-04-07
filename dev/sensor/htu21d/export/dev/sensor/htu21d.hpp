@@ -1,13 +1,18 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //!
 //! \file
 //! \brief Driver for HTU21D digital humidity sensor with temperature output
-//!  See, http://www.meas-spec.com/downloads/HTU21D.pdf
+//!  See, https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf
 //!
 
 #ifndef __DEV_SENSOR_HTU21D_HPP__
 #define __DEV_SENSOR_HTU21D_HPP__
 
 #include <ecl/err.hpp>
+#include <common/execution.hpp>
 
 namespace ecl
 {
@@ -117,10 +122,16 @@ public:
     //!
     static err get_resolution_mode(htu21d_resolution &mode);
 
+    //! \brief Try set buffer for rx/tx and do_xfer several times if error occurred
+    //! \retval Status of the operation
+    //!
+    static err try_xfer(uint8_t cmd, uint8_t *data, size_t data_size);
+
 private:
     //! Sensor I2C commands
     enum
     {
+        CMD_NONE = 0,
         TRIGGER_TEMPERATURE_HM = 0xE3,
         TRIGGER_HUMIDITY_HM = 0xE5,
         TRIGGER_TEMPERATURE = 0xF3,
@@ -176,16 +187,11 @@ err htu21d<i2c_dev>::init()
 template <class i2c_dev>
 err htu21d<i2c_dev>::soft_reset()
 {
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
     uint8_t cmd = SOFT_RESET;
 
-    i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
-    if (rc == err::ok) {
-        rc = i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
+    err rc = try_xfer(cmd, nullptr, 1);
 
     return rc;
 }
@@ -195,16 +201,9 @@ err htu21d<i2c_dev>::read_user_register(uint8_t &value)
 {
     uint8_t cmd = READ_USER_REG;
 
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
-    i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(&cmd, &value, 1);
-    if (rc == err::ok) {
-        i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
-
-    return rc;
+    return try_xfer(cmd, &value, 1);
 }
 
 template <class i2c_dev>
@@ -212,12 +211,31 @@ err htu21d<i2c_dev>::write_user_register(uint8_t value)
 {
     uint8_t tx_buff[] = {WRITE_USER_REG, value};
 
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
+    return try_xfer(tx_buff, nullptr, sizeof(tx_buff));
+}
+
+template <class i2c_dev>
+err htu21d<i2c_dev>::try_xfer(uint8_t cmd, uint8_t *data, size_t data_size)
+{
     i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(tx_buff, nullptr, sizeof(tx_buff));
+    err rc;
+
+    if (cmd == CMD_NONE) {
+        rc = i2c_dev::set_buffers(nullptr, data, data_size);
+    } else {
+        rc = i2c_dev::set_buffers(&cmd, data, data_size);
+    }
+
     if (rc == err::ok) {
-        i2c_dev::xfer();
+        for (int i = 0; i < 4; i++) {
+            rc = i2c_dev::xfer();
+            if (rc == err::ok) {
+                break;
+            }
+            spin_wait(5);
+        }
     }
     i2c_dev::unlock();
 
@@ -229,29 +247,18 @@ err htu21d<i2c_dev>::i2c_get_sample_hold_master(uint8_t cmd, uint16_t &sample)
 {
     // MSB, LSB, CRC
     uint8_t data[3] = {};
-    uint16_t value = 0;
 
-    i2c_dev::platform_handle().set_slave_addr(i2_addr);
+    i2c_dev::platform_handle::set_slave_addr(i2_addr);
 
     // send command to start measuring
-    i2c_dev::lock();
-    err rc = i2c_dev::set_buffers(&cmd, nullptr, 1);
-    if (rc == err::ok) {
-        rc = i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
+    err rc = try_xfer(cmd, nullptr, 1);
 
     if (rc != err::ok) {
         return rc;
     }
 
     // read data, last byte is CRC
-    i2c_dev::lock();
-    rc = i2c_dev::set_buffers(nullptr, data, sizeof(data));
-    if (rc == err::ok) {
-        rc = i2c_dev::xfer();
-    }
-    i2c_dev::unlock();
+    rc = try_xfer(CMD_NONE, data, sizeof(data));
 
     sample = ((data[0] << 8) | data[1]);
 
@@ -284,7 +291,8 @@ err htu21d<i2c_dev>::get_temperature(int &value)
     // since they contain status information
     sample &= ~3;
 
-    value = -46850 + ((175000 * static_cast<uint64_t>(sample)) / (1 << 16));
+    // See datasheet, page 15
+    value = -46850 + ((175720 * static_cast<uint64_t>(sample)) >> 16);
 
     return rc;
 }
@@ -303,7 +311,8 @@ err htu21d<i2c_dev>::get_humidity(int &value)
     // since they contain status information
     sample &= ~3;
 
-    value = -6000 + ((125000 * static_cast<uint64_t>(sample)) / (1 << 16));
+    // See datasheet, page 15
+    value = -6000 + ((125000 * static_cast<uint64_t>(sample)) >> 16);
 
     return rc;
 }
@@ -399,7 +408,7 @@ bool htu21d<i2c_dev>::is_heater_enabled()
 }
 
 template <class i2c_dev>
-err htu21d<i2c_dev>:: enable_heater()
+err htu21d<i2c_dev>::enable_heater()
 {
     uint8_t user_reg = 0;
     err rc = read_user_register(user_reg);

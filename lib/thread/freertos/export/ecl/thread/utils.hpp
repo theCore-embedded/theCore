@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef LIB_THREAD_FREERTOS_OS_UTILS_
 #define LIB_THREAD_FREERTOS_OS_UTILS_
 
@@ -24,9 +28,9 @@ void yield();
 
 //!
 //! \brief Put task at sleep for given amount of milliseconds.
-//! \param[in] msesc Milliseconds to sleep.
+//! \param[in] ms Milliseconds to sleep.
 //!
-void sleep_for(uint32_t msesc);
+void sleep_for(uint32_t ms);
 
 //!
 //! \brief Gets a thread handle of currently running thread.

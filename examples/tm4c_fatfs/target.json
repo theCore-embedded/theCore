@@ -1,0 +1,80 @@
+{
+    "platform": {
+        "name": "tm4c",
+        "device": "TM4C123GH6PM",
+        "console": "UART0",
+        "uart": [
+            {
+                "id": "UART0",
+                "comment": "UART-over-USB console output"
+            }
+        ],
+        "spi": [
+            {
+                "id": "SPI3",
+                "cpol": "high",
+                "cpha": "high",
+                "type": "master",
+                "clk_div": 8
+            }
+        ],
+        "pinmux": [
+            {
+                "ids": [ "PA0", "PA1" ],
+                "dir": "hw",
+                "hws": { "PA0": "UART0_RX", "PA1": "UART0_TX" },
+                "comment": "UART0 console pins"
+            },
+            {
+                "ids": [ "PD0", "PD3" ],
+                "dir": "hw",
+                "hws": { "PD0": "SPI3_CLK", "PD3": "SPI3_TX" },
+                "comment": "SPI3 (SSI3) CLK and MOSI pins"
+            },
+            {
+                "ids": [ "PD2" ],
+                "dir": "hw",
+                "pin_type": "push",
+                "hws": { "PD2": "SPI3_RX" },
+                "comment": "SPI3 (SSI3) MISO pin, push (pull-up)"
+            },
+            {
+                "ids": [ "PD1" ],
+                "dir": "out",
+                "comment": "SPI3 CS pin"
+            }
+        ],
+        "gpio_alias": [
+            {
+                "id": "PD1",
+                "alias": "sdspi_ss",
+                "comment": "SDSPI SPI3 slave select"
+            }
+        ]
+    },
+    "device": {
+        "sdspi": [
+            {
+                "id": "fatfs_sdspi",
+                "cs_gpio": "PD1",
+                "spi": "SPI3"
+            }
+        ]
+    },
+    "lib": {
+        "fs": [
+            {
+                "type": "fat",
+                "dev": [
+                    {
+                        "id": "fatfs_sdspi",
+                        "mountpoint": "sdcard"
+                    }
+                ],
+                "readonly": false,
+                "enable_seek": true,
+                "enable_lowercase": false
+            }
+        ]
+    }
+}

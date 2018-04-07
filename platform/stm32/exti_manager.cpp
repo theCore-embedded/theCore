@@ -1,12 +1,25 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief EXTI manager implementation for STM32 platform
-
+//! \ingroup stm32_exti
 #include <platform/exti_manager.hpp>
 #include <common/irq.hpp>
 #include <utility>
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_exti External interrupt manager
+//! @{
 
 exti_manager::mapping_storage exti_manager::m_storage;
 
@@ -163,5 +176,11 @@ void exti_manager::handler::operator ()()
         m_cb(m_ctx);
     }
 }
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl

@@ -1,6 +1,10 @@
-message(STATUS "Checking [CONFIG_PLATFORM_DEVICE]...")
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-if(CONFIG_PLATFORM_DEVICE STREQUAL "TM4C123GH6PM")
+msg_trace("Checking [CONFIG_PLATFORM_DEVICE]...")
+
+if(thecore_cfg.platform.device STREQUAL "TM4C123GH6PM")
     # All members of the TivaTM C Series, including the TM4C123GH6PM
     # microcontroller, are designed around an ARM Cortex-M4 processor core.
     set(TARGET_MCU_ARCH "arm_cm4" CACHE STRING "Processor arch")

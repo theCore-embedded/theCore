@@ -1,16 +1,19 @@
-#ifndef DEV_BUS_BUS_HPP_
-#define DEV_BUS_BUS_HPP_
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//!
 //! \file
 //! \brief      Generic bus interface module.
 //! \copyright
 //! \todo       Description and examples.
 
+#ifndef DEV_BUS_BUS_HPP_
+#define DEV_BUS_BUS_HPP_
 
 #include <ecl/err.hpp>
 #include <ecl/thread/mutex.hpp>
 #include <ecl/thread/semaphore.hpp>
+#include <ecl/thread/mutex.hpp>
 #include <ecl/assert.h>
 
 #include <common/bus.hpp>
@@ -23,7 +26,7 @@ namespace ecl
 
 //! Generic bus interface.
 //! \details The generic bus is useful adapter, that allows to:
-//! - Encapsulate locking policy when multithreded environment is used.
+//! - Encapsulate locking policy when multithreaded environment is used.
 //! - Hide differences between full-duplex and half-duplex busses.
 //! - Define and simplify platform-level bus interface
 //! \tparam PBus Platform-level bus driver (I2C, SPI, etc.)
@@ -36,7 +39,7 @@ template<class PBus>
 class generic_bus
 {
 public:
-    //! Costruction is not allowed.
+    //! Construction is not allowed.
     generic_bus() = delete;
     ~generic_bus() = delete;
 
@@ -79,6 +82,7 @@ public:
     //! Sets RX and TX buffers and their sizes.
     //! \details If only TX or RX transaction required, then only one buffer must
     //! be passed. All effects from calls to set_buffers() will be discarded.
+    //! This API is convenient analog if both buffers are equal in size.
     //! \par Side effects:
     //! \li Bus will remember all buffers, until unlock() or set_buffers()
     //!     will be called.
@@ -93,6 +97,25 @@ public:
     //! \retval    err::inval   Both buffers are null.
     //! \retval    err::busy    Device is still executing async xfer.
     static err set_buffers(const uint8_t *tx, uint8_t *rx, size_t size);
+
+    //! Sets RX and TX buffers and their sizes.
+    //! \details If only TX or RX transaction required, then only one buffer must
+    //! be passed. All effects from calls to set_buffers() will be discarded.
+    //! \par Side effects:
+    //! \li Bus will remember all buffers, until unlock() or set_buffers()
+    //!     will be called.
+    //! \pre       Bus is locked.
+    //! \post      Bus is ready to execute xfer.
+    //! \param[in] tx       Data to transmit.
+    //!                     If this param is null, then rx must be set.
+    //! \param[in] rx       Buffer to receive a data. Optional.
+    //!                     If this param is null, then tx must be set.
+    //! \param[in] tx_size  Size of TX buffer. Zero is valid size.
+    //! \param[in] rx_size  Size of RX buffer. Zero is valid size.
+    //! \retval    err::ok      Buffers successfully set.
+    //! \retval    err::inval   Both buffers are null.
+    //! \retval    err::busy    Device is still executing async xfer.
+    static err set_buffers(const uint8_t *tx, uint8_t *rx, size_t tx_size, size_t rx_size);
 
     //! Sets TX buffer size and fills it with given byte.
     //! \details This will instruct a platform bus to send a byte given number
@@ -113,9 +136,9 @@ public:
     //! \retval    err::busy    Device is still executing async xfer.
     static err set_buffers(size_t size, uint8_t fill_byte = 0xff);
 
-    //! Performs xfer in blocking mode using buffers set previously.
+    //! Performs xfer in blocking mode using buffers set previously with optional timeout.
     //! \details If underlying bus works in half-duplex mode then first
-    //! tx transaction will occur and then rx. Any deffered xfer will be
+    //! tx transaction will occur and then rx. Any deferred xfer will be
     //! canceled in result of this call and simple, blocking xfer will proceed.
     //! \warning Method uses a semaphore to wait for a bus event (most likely
     //! an IRQ event). It means that in bare-metal environment,
@@ -124,11 +147,13 @@ public:
     //! consider using xfer(const handler_fn &handler) overload.
     //! \pre        Bus is locked and buffers are set.
     //! \post       Bus remains in the same state.
-    //! \param[out] sent        Optional. Bytes sent during this xfer.
-    //! \param[out] received    Optional. Bytes received during this xfer.
-    //! \retval     err::ok     Data is sent successfully.
-    //! \retval     err::busy   Device is still executing async xfer.
-    //! \retval     err::io     Transaction started but failed.
+    //! \param[out] sent          Optional. Bytes sent during this xfer.
+    //! \param[out] received      Optional. Bytes received during this xfer.
+    //! \param[in]  timeout       Optional. Timeout to wait for operation to complete.
+    //! \retval     err::ok       Data is sent successfully.
+    //! \retval     err::busy     Device is still executing async xfer.
+    //! \retval     err::io       Transaction started but failed.
+    //! \retval     err::timedout Operation was not completed before timeout hit.
     //! \retval     err         Any other error that can occur in platform bus
     static err xfer(size_t *sent = nullptr, size_t *received = nullptr,
                     std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
@@ -139,7 +164,7 @@ public:
     //! handler will be invoked with a type of an event.
     //! \details It is also possible to postpone xfer, i.e. "defer" it
     //! and then trigger at will using xfer_trigger() method. See xfer_trigger()
-    //! for more defails. Any previous defered xfer will be canceled in result
+    //! for more defails. Any previous deferred xfer will be canceled in result
     //! of this call.
     //! \warning Event handler most likely will be executed in ISR context.
     //! Pay attention to it. Do not block inside of it or do anything else that
@@ -162,18 +187,18 @@ public:
     //! \retval    err       Any other error that can occur in platform bus.
     static err xfer(const bus_handler &handler, async_type type = async_type::immediate);
 
-    //! Triggers continued or deffered xfer in async mode.
+    //! Triggers continued or deferred xfer in async mode.
     //! \details Method is capable of triggering two types of xfers:
     //!  - Continuated:
     //!    triggers a new xfer with the same buffers and handlers that were used
     //!    during last xfer.
-    //!  - Deffered:
+    //!  - Deferred:
     //!    triggers the scheduled xfer, such that was defer using xfer() call.
     //! \details This method is a kind of a important optimization trick. It is
     //! possible to call it from IRQ context. It uses buffers and handlers
     //! from previous xfers, so there is no overhead for unneeded assignments.
     //! \pre       Bus is locked, buffers are set and async xfer is either
-    //!            defered or executed.
+    //!            deferred or executed.
     //! \post      Xfer is ongoing.
     static err trigger_xfer();
 
@@ -189,7 +214,7 @@ public:
     static err cancel_xfer();
 
 private:
-    //! Convinient alias.
+    //! Convenient alias.
     using atomic_flag   = std::atomic_flag;
 
     //! Event handler dedicated to the platform bus.
@@ -230,23 +255,30 @@ private:
     //! reset - no error occurred.
     static constexpr uint8_t xfer_error     = 0x10;
 
-    static size_t       m_received; //!< Bytes received during last blocking xfer.
-    static size_t       m_sent;     //!< Bytes sent during last blocking xfer.
-    static atomic_flag  m_cleaned;  //!< Cleanup is performed after xfer and unlock are done.
-    static uint8_t      m_state;    //!< State flags.
+    static volatile size_t       m_received; //!< Bytes received during last blocking xfer.
+    static volatile size_t       m_sent;     //!< Bytes sent during last blocking xfer.
+    static volatile atomic_flag  m_cleaned;  //!< Cleanup is performed after xfer and unlock are done.
+    static volatile uint8_t      m_state;    //!< State flags.
 };
 
-template<class PBus> size_t                   generic_bus<PBus>::m_received{};
-template<class PBus> size_t                   generic_bus<PBus>::m_sent{};
-template<class PBus> std::atomic_flag         generic_bus<PBus>::m_cleaned{};
-template<class PBus> uint8_t                  generic_bus<PBus>::m_state{};
+template<class PBus> volatile size_t                   generic_bus<PBus>::m_received{};
+template<class PBus> volatile size_t                   generic_bus<PBus>::m_sent{};
+template<class PBus> volatile std::atomic_flag         generic_bus<PBus>::m_cleaned{};
+template<class PBus> volatile uint8_t                  generic_bus<PBus>::m_state{};
 
 //------------------------------------------------------------------------------
 
 template<class PBus>
 err generic_bus<PBus>::init()
 {
+    // Exists only to protect init call when multiple threads accessing it,
+    // since global lock is not yet initialized.
+    static ecl::mutex local_lock;
+
+    local_lock.lock();
+
     if (m_state & bus_inited) {
+        local_lock.unlock(); // TODO: use lock guard
         return err::ok;
     }
 
@@ -263,6 +295,8 @@ err generic_bus<PBus>::init()
     mut();
     cb();
     sem();
+
+    local_lock.unlock();
 
     return rc;
 }
@@ -335,6 +369,12 @@ void generic_bus<PBus>::unlock()
 template<class PBus>
 ecl::err generic_bus<PBus>::set_buffers(const uint8_t *tx, uint8_t *rx, size_t size)
 {
+    return set_buffers(tx, rx, size, size);
+}
+
+template<class PBus>
+ecl::err generic_bus<PBus>::set_buffers(const uint8_t *tx, uint8_t *rx, size_t tx_size, size_t rx_size)
+{
     // If bus is not locked then pre-conditions are violated
     // and it is clearly a sign of a bug
     ecl_assert(m_state & bus_locked);
@@ -348,8 +388,8 @@ ecl::err generic_bus<PBus>::set_buffers(const uint8_t *tx, uint8_t *rx, size_t s
     }
 
     PBus::reset_buffers();
-    PBus::set_tx(tx, size);
-    PBus::set_rx(rx, size);
+    PBus::set_tx(tx, tx_size);
+    PBus::set_rx(rx, rx_size);
 
     return err::ok;
 }
@@ -401,7 +441,7 @@ ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received, std::chrono::mi
 
     if (is_ok(rc)) {
         // Leveraging the fact that wait() if often simplier than try_wait()
-        // thus there is no need to call heavier implemnetation if timeout
+        // thus there is no need to call heavier implementation if timeout
         // is infinite.
         if (timeout == std::chrono::milliseconds::max()) {
             sem().wait();
@@ -413,7 +453,7 @@ ecl::err generic_bus<PBus>::xfer(size_t *sent, size_t *received, std::chrono::mi
 
                 // Check if transfer was not completed right after timeout was reached.
                 if (!(m_state & xfer_served)) {
-                    return err::timedout;
+                    rc = err::timedout;
                 } // else {
                     // Transfer completed.
                 // }
@@ -488,7 +528,7 @@ ecl::err generic_bus<PBus>::trigger_xfer()
         m_state &= ~(async_mode);
     } else {
         // Events of this particular xfer is not yet served.
-        // TODO: possible concurrent situatiion when xfer is already executed,
+        // TODO: possible concurrent situation when xfer is already executed,
         // and this line will clear essential flag that otherwise should
         // not be cleared. It should be investigated.
         m_state &= ~(xfer_served);
@@ -502,7 +542,7 @@ ecl::err generic_bus<PBus>::cancel_xfer()
 {
     ecl_assert(m_state & bus_locked);  // Violating of pre-conditions
 
-    // No check for scheduled or running xfer here to avoid needless complexety.
+    // No check for scheduled or running xfer here to avoid needless complexity.
 
     auto rc =  PBus::cancel_xfer();
 

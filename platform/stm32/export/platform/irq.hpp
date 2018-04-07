@@ -1,5 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief STM32 IRQ interface.
+//! \ingroup stm32_irq
 //!
 #ifndef PLATFORM_IRQ_HPP_
 #define PLATFORM_IRQ_HPP_
@@ -13,10 +18,20 @@
 namespace ecl
 {
 
+//! \ingroup stm32_irq
 using irq_num = IRQn_Type;
 
 namespace irq
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_irq IRQ control
+//! @{
 
 //! Masks or disables the given IRQ.
 //! \param[in] irqn Valid IRQ number.
@@ -35,7 +50,7 @@ static inline void unmask(irq_num irqn)
 }
 
 //! Gets current IRQ number.
-//! \warn Results are unspecified if called not within IRQ context.
+//! \warning Results are unspecified if called not within IRQ context.
 //! \return Current IRQ number
 static inline irq_num get_current_irqn()
 {
@@ -52,6 +67,7 @@ static inline irq_num get_current_irqn()
 }
 
 //! Checks if a processor is in handler mode of execution at this time.
+//! \ingroup stm32_irq
 //! \retval true Processor is in handler mode. I.e. servicing IRQ or exception.
 //! \retval false Processor is in thread mode.
 static inline bool in_isr()
@@ -78,6 +94,12 @@ static inline void clear(irq_num irqn)
 {
     NVIC_ClearPendingIRQ(irqn);
 }
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace irq
 

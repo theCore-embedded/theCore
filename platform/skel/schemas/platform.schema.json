@@ -1,0 +1,10 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+
+    "properties": {
+        "name":           { "type": "string", "pattern": "^skel$" },
+        "spi":            { "$ref": "file:spi.schema.json" }
+    },
+
+    "required": [ "name" ]
+}

@@ -1,22 +1,26 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef DEFAULT_CONSOLE_DRIVER_HPP_
 #define DEFAULT_CONSOLE_DRIVER_HPP_
 
-#if USE_CONSOLE
+#if THECORE_CONFIG_USE_CONSOLE
 
 #include <platform/console.hpp>
 #include <dev/bus.hpp>
-#include <dev/bus_pipe.hpp>
+#include <dev/console_pipe.hpp>
 
 namespace ecl
 {
 
 // Required aliases
-using console_bus = ecl::generic_bus< platform_console >;
-using console_driver = ecl::bus_pipe< console_bus >;
+using console_bus = ecl::generic_bus<platform_console>;
+using console_driver = ecl::console_pipe<console_bus>;
 
-}
+} // namespace ecl
 
-#else // USE_CONSOLE
+#else // THECORE_CONFIG_USE_CONSOLE
 
 #include <cstdint>
 #include <unistd.h>
@@ -26,7 +30,7 @@ namespace ecl
 {
 
 // Do nothing class. Must be used in case if console driver doesn't needed.
-// Must have the same interface as platform's console driver has
+// Must have the same interface as platform's console driver.
 class console_driver
 {
 public:
@@ -47,8 +51,8 @@ public:
     }
 };
 
-}
+} // namespace ecl
 
-#endif // USE_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 #endif // DEFAULT_CONSOLE_DRIVER_HPP_

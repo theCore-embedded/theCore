@@ -1,0 +1,31 @@
+{
+    "platform": {
+        "dma": [
+            {
+                "num": 1,
+                "stream": 5,
+                "channel": 0,
+                "alias": "i2s3_tx_dma"
+            },
+            {
+                "num": 1,
+                "stream": 0,
+                "channel": 0,
+                "alias": "i2s3_rx_dma"
+            }
+        ],
+        "i2s": [
+            {
+                "id": "I2S3",
+                "dma_tx": "i2s3_tx_dma",
+                "dma_rx": "i2s3_rx_dma",
+                "standard": "phillips",
+                "data_bits": 16,
+                "master_clk": true,
+                "audio_freq": 8,
+                "CPOL": "high",
+                "alias": "the_i2s3_alias"
+            }
+        ]
+    }
+}

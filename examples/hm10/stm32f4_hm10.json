@@ -1,0 +1,37 @@
+{
+    "platform": {
+        "name": "stm32",
+        "device": "STM32F407VG",
+        "clock": {
+            "source": "HSE",
+            "speed": 8000000
+        },
+        "uart": [
+            {
+                "id": "USART3",
+                "baud": 115200
+            },
+            {
+                "id": "USART2",
+                "alias": "hm10_uart",
+                "baud": 9600
+            }
+        ],
+        "console": "USART3",
+        "bypass_console": "USART3",
+        "pinmux": [
+            {
+                "ids": [ "PA2", "PA3" ],
+                "mode": "AF",
+                "function": "USART2",
+                "comment": "HM10 UART: PA2 - TX, PA3 - RX"
+            },
+            {
+                "ids": [ "PD8", "PD9"],
+                "mode": "AF",
+                "function": "USART3",
+                "comment": "Console UART: PD8 - TX, PD9 - RX"
+            }
+        ]
+    }
+}

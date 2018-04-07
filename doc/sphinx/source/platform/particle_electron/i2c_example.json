@@ -1,0 +1,9 @@
+{
+    "platform": {
+        "name":   "particle_electron",
+        "i2c": {
+            "speed": 20000,
+            "stretch_clk": false
+        }
+    }
+}

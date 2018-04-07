@@ -1,30 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Suite ADC definitions
 
 #ifndef STM32DISC_PLATFORM_BAT_TEST_ADC_HPP_
 #define STM32DISC_PLATFORM_BAT_TEST_ADC_HPP_
 
-#include <aux/adc.hpp>
+#include <aux/generated.hpp>
 
-namespace ecl
-{
-
-// Test ADC device.
-using test_adc = adc<ecl::adc_dev::dev1>;
-
-// ADC configuration.
-template<>
-struct adc_cfg<adc_dev::dev1>
-{
-    static constexpr adc_mgmt_mode mgtm_mode = adc_mgmt_mode::dma;
-
-    using dma = dma_wrap<dma_stream::dma2_0, dma_channel::ch0>;
-};
-
-// Test channel - PA1 pin and temperature channel.
-using test_channel = channel_group_sw_trigger<
-                adc_channel::ch1 , ecl::adc_channel::ch16>;
-
-} // namespace ecl
+// Test ADC and channels are defined in target_defs.json
 
 #endif // STM32DISC_PLATFORM_BAT_TEST_ADC_HPP_

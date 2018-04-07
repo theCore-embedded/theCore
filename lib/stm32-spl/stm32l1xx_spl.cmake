@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # override warnings, since library contains a lot of them
 set(CC_NO_EXTRA_WARNINGS "-Wno-pedantic -Wno-all -Wno-extra")
 set(CXX_NO_EXTRA_WARNINGS "-Wno-effc++")
@@ -5,7 +9,7 @@ set(CXX_NO_EXTRA_WARNINGS "-Wno-effc++")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CC_NO_EXTRA_WARNINGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CXX_NO_EXTRA_WARNINGS}")
 
-set(SPL_DIR ${CMAKE_CURRENT_LIST_DIR}/SPL/STM32L1xx_StdPeriph_Driver/)
+set(SPL_DIR ${THECORE_BUILD_THIRDPARTY_DIR}/SPL/STM32L1xx_StdPeriph_Driver/)
 
 add_library(stm32_spl STATIC
         ${SPL_DIR}src/misc.c

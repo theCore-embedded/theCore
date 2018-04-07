@@ -1,9 +1,13 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # override warnings, since library contains a lot of them
 set(CC_NO_EXTRA_WARNINGS "-Wno-pedantic -Wno-all -Wno-extra")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CC_NO_EXTRA_WARNINGS}")
 
-set(SPL_DIR ${CMAKE_CURRENT_LIST_DIR}/SPL/STM32F4xx_StdPeriph_Driver/)
+set(SPL_DIR ${THECORE_BUILD_THIRDPARTY_DIR}/SPL/STM32F4xx_StdPeriph_Driver/)
 
 # note that not all sources are inlcuded, since not all stuff supported by STM32F40xxx.
 # TODO: this should be fixed, and proper sources must be added depending which target processor is used.

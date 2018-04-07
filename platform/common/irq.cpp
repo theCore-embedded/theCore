@@ -1,11 +1,18 @@
-﻿//! \file
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+//! \file
 //! \brief Common IRQ implementation
 
 #include "common/irq.hpp"
 
+#if !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0
+
+
 #include <ecl/assert.h>
 #include <platform/irq.hpp>
-#include <common/execution.h>
+#include <common/execution.hpp>
 
 #include <new>
 
@@ -22,7 +29,7 @@ static handler_storage storage[IRQ_COUNT];
 //! Unhandled interrupt must cause the abort
 static void default_handler()
 {
-    ecl_abort();
+    ecl::abort();
 }
 
 //! Effectively casts IRQ storage
@@ -86,3 +93,5 @@ void unsubscribe(irq_num irqn)
 } // namespace irq
 
 } // namespace ecl
+
+#endif // !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0

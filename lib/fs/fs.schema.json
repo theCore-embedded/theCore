@@ -1,0 +1,38 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "array",
+
+    "items": {
+        "oneOf": [
+            {
+                "title": "FAT filesystem",
+                "type": "object",
+                "properties": {
+                    "type":                 { "enum": [ "fat" ] },
+                    "readonly":             { "type": "boolean" },
+                    "enable_seek":          { "type": "boolean" },
+                    "enable_lowercase":     { "type": "boolean" }
+                }
+            }
+        ],
+
+        "type": "object",
+
+        "properties": {
+            "dev": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id":               { "type": "string" },
+                        "mountpoint":       { "type": "string" }
+                    },
+
+                    "required": [ "id", "mountpoint" ]
+                }
+            }
+        },
+
+        "required": [ "type", "dev" ]
+    }
+}

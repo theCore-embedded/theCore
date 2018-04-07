@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include <ecl/thread/thread.hpp>
 
 #include <CppUTest/TestHarness.h>
@@ -5,14 +9,6 @@
 
 #include <cstring>
 #include <thread>
-
-// Error code helper
-// TODO: move it to 'utils' headers and protect with check of
-// current test state (enabled or disabled)
-static SimpleString StringFrom(ecl::err err)
-{
-    return SimpleString{ecl::err_to_str(err)};
-}
 
 //------------------------------------------------------------------------------
 // Native thread in not started state tests

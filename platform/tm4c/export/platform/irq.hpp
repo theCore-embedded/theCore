@@ -1,11 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief TM4C IRQ interface.
 //!
 #ifndef PLATFORM_IRQ_HPP_
 #define PLATFORM_IRQ_HPP_
 
-#include <platform/execution.h>
-
+#include <platform/execution.hpp>
+#include <aux/platform_defines.hpp>
 #include <ecl/err.hpp>
 
 #include <functional>
@@ -16,10 +20,20 @@
 namespace ecl
 {
 
+//! \ingroup tm4c_irq
 using irq_num = int;
 
 namespace irq
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_irq IRQ control
+//! @{
 
 //! Masks or disables the given IRQ.
 //! \param[in] irqn Valid IRQ number.
@@ -38,7 +52,7 @@ static inline void unmask(irq_num irqn)
 }
 
 //! Gets current IRQ number.
-//! \warn Results are unspecified if called not within IRQ context.
+//! \warning Results are unspecified if called not within IRQ context.
 //! \return Current IRQ number
 static inline irq_num get_current_irqn()
 {
@@ -79,6 +93,12 @@ static inline void clear(irq_num irqn)
 {
     IntPendClear(irqn);
 }
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace irq
 

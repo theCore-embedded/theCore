@@ -1,9 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief STM32 ADC driver.
 //! \details Some app notes can be found at:
 //! http://goo.gl/9rTqUT (AN3116 application note, STM32’s ADC modes and their applications)
 #ifndef PLATFORM_ADC_HPP_
 #define PLATFORM_ADC_HPP_
+
+#include "platform/execution.hpp"
 
 #include <stm32_device.hpp>
 
@@ -16,6 +22,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_adc ADC driver
+//! @{
 
 //! ADC management mode.
 //! \details Samples readings can occur either by software after end-of-conversion
@@ -148,7 +163,7 @@ struct channel_group_exti_trigger
 //! namespace ecl
 //! {
 //!
-//! // Provides configuraion of the adc_dev::dev1 (ADC1).
+//! // Provides configuration of the adc_dev::dev1 (ADC1).
 //! template<>
 //! struct adc_cfg<adc_dev::dev1>
 //! {
@@ -166,7 +181,7 @@ struct channel_group_exti_trigger
 //! Following fields must be present:
 //!  - Management mode constexpr field `mgtm_mode`, set to `adc_mgmt_mode::irq`
 //!
-//! // Provides configuraion of the adc_dev::dev1 (ADC1).
+//! // Provides configuration of the adc_dev::dev1 (ADC1).
 //! template<>
 //! struct adc_cfg<adc_dev::dev1>
 //! {
@@ -232,7 +247,7 @@ using adc_evh = std::function<void(adc_event)>;
 //! ADC interrupts helper.
 //! \details Accross all 3 ADC there is only 1 interrupt channel avaliable.
 //! ADC interrupt helper dispatches incoming interrupt and calls appropriate handlers.
-//! \warning Intented to be used only by \ref adc class.
+//! \warning Intended to be used only by \ref adc class.
 //! Acts like a singleton.
 class adc_irq_dispatcher
 {
@@ -240,7 +255,7 @@ public:
     //! Gets dispatcher instance.
     static inline adc_irq_dispatcher& get_instance();
 
-    //! Subscrbies for ADC events and registers given handler handler.
+    //! Subscribes for ADC events and registers given handler handler.
     //! \tparam adc ADC device for which event handler should be registered.
     //! \param[in] h ADC event handler.
     template<adc_dev dev>
@@ -344,7 +359,7 @@ void adc_irq_dispatcher::irqh()
 void adc_irq_dispatcher::default_evh(adc_event)
 {
     // Event not handled - abort execution.
-    ecl_abort();
+    ecl::abort();
 }
 
 //------------------------------------------------------------------------------
@@ -357,7 +372,7 @@ class adc;
 //! Management configurator class.
 //! \details Helps to configure ADC parameters with respect to the management
 //! mode used.
-//! \warning Intented to be used only by \ref adc class.
+//! \warning Intended to be used only by \ref adc class.
 template<adc_dev dev, adc_mgmt_mode mode = adc_cfg<dev>::mgtm_mode>
 class mgmt_configurator
 { };
@@ -457,7 +472,7 @@ void mgmt_configurator<dev, adc_mgmt_mode::irq>::irq_handler(adc_event evt)
 //------------------------------------------------------------------------------
 
 //! Configurator for ADC DMA mode.
-//! \warning Intented to be used only by \ref adc class.
+//! \warning Intended to be used only by \ref adc class.
 template<adc_dev dev>
 class mgmt_configurator<dev, adc_mgmt_mode::dma>
 {
@@ -571,7 +586,6 @@ void mgmt_configurator<dev, adc_mgmt_mode::dma>::irq_handler()
     irq::clear(dma_irqn);
     irq::unmask(dma_irqn);
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -767,8 +781,12 @@ err adc<dev>::single(const adc_evh &evh)
     return err::ok;
 }
 
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
-
 
 #endif // PLATFORM_ADC_HPP_

@@ -1,5 +1,10 @@
-﻿//! \file
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+//! \file
 //! \brief External interrupt manager for STM32 platform.
+//! \ingroup stm32_exti
 
 #ifndef STM32_EXTI_MANAGER_HPP_
 #define STM32_EXTI_MANAGER_HPP_
@@ -12,6 +17,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_exti External interrupt manager
+//! @{
 
 //! External interrupt manager class.
 //! \details Allows users to handle and manage external interrupts.
@@ -85,7 +99,7 @@ public:
     //! handler object unsubscription will be executed by itself.
     //! \pre Initialized EXTI manager.
     //! \pre Unused handler.
-    //! \warn If handler was already subscribed to EXTI events then
+    //! \warning If handler was already subscribed to EXTI events then
     //! behaviour is undefined.
     //! \sa unsubscribe()
     //! \param[out] h Unsubscribed handler of a GPIO event.
@@ -335,6 +349,11 @@ exti_manager::is_grouped_exti<Gpio> exti_manager::save_handler(handler &h)
     return true;
 }
 
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
 

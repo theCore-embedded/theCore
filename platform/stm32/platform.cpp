@@ -1,14 +1,34 @@
-#include "common/execution.h"
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+//! \file
+//! \brief STM32 platform main file
+//! \ingroup stm32_other
+
+#include "common/execution.hpp"
 #include "platform/exti_manager.hpp"
 #include "common/irq.hpp"
+
+#include <aux/platform_defines.hpp>
 
 // Header from stm32 miscellaneous firmware library functions
 // (add-on to CMSIS functions). See SPL.
 #include <misc.h>
 
-#if CONFIG_USE_BYPASS_CONSOLE
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_other Other modules
+//! @{
+
+
+#if THECORE_CONFIG_USE_BYPASS_CONSOLE
 extern void bypass_console_init();
-#endif // CONFIG_USE_BYPASS_CONSOLE
+#endif // THECORE_CONFIG_USE_BYPASS_CONSOLE
 
 
 /* Required for STM32 Peripherial library */
@@ -19,7 +39,7 @@ void assert_param(int exp)
     (void)exp;
 #else
     if (!exp) {
-        ecl_abort();
+        ecl::abort();
     }
 #endif
 }
@@ -51,8 +71,18 @@ extern "C" void platform_init()
     DWT->CYCCNT = 0;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-#if CONFIG_USE_BYPASS_CONSOLE
-    bypass_console_init();
-#endif // CONFIG_USE_BYPASS_CONSOLE
-}
+    // TODO: configurable FPU
+    // TODO: check if FPU is really supported in toolchain, too
+    SCB->CPACR |= (0xf << 20); // Enable FPU
 
+#if THECORE_CONFIG_USE_BYPASS_CONSOLE
+    bypass_console_init();
+#endif // THECORE_CONFIG_USE_BYPASS_CONSOLE
+
+//! @}
+
+//! @}
+
+//! @}
+
+}

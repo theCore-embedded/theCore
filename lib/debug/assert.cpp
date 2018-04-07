@@ -1,19 +1,14 @@
-#include "assert.h"
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <ecl/iostream.hpp>
-#include <common/execution.h>
-#include <platform/console.hpp>
+#include "ecl/assert.h"
+
+#include <common/console.hpp>
+#include <platform/execution.hpp>
 
 using ecl::bypass_putc;
-
-// TODO: find better place for this routine
-static void bypass_puts(const char *msg)
-{
-    char c;
-    while ((c = *msg++)) {
-        bypass_putc(c);
-    }
-}
+using ecl::bypass_puts;
 
 // TODO: move it to the separate module working with integer to string conversions
 static void print_line(unsigned int line)
@@ -60,5 +55,5 @@ void ecl_assert_failed(const char *assertion,
         bypass_puts("\r\n");
     }
 
-    ecl_abort();
+    ecl::abort();
 }

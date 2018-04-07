@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef ECL_IOSTREAM_HPP
 #define ECL_IOSTREAM_HPP
 
@@ -10,9 +14,10 @@
 #include <stdlib.h>
 
 // ecl == [E]mbedded [C]++ [L]ibrary
-namespace ecl {
+namespace ecl
+{
 
-template< class IO_device >
+template<class IO_device>
 class iostream
 {
 public:
@@ -30,7 +35,7 @@ public:
     iostream& operator<<(char character);
     iostream& operator<<(char *string);
     // For I\O manipulators
-    iostream& operator<<(iostream& (*func)(iostream< IO_device >&));
+    iostream& operator<<(iostream& (*func)(iostream<IO_device>&));
     // NOTE: this will be used later with different manipulators,
     // such that used for hex or octal output of integers
 
@@ -42,15 +47,15 @@ public:
     iostream& operator>>(char *string);
 
     // For I\O manipulators
-    iostream& operator>>(iostream& (*func)(iostream< IO_device >&));
+    iostream& operator>>(iostream& (*func)(iostream<IO_device>&));
     // NOTE: this will be used later with different manipulators,
     // such that used for hex or octal output of integers
 
 private:
     // No need to implement methods again,
     // if they are already present
-    istream< IO_device > m_in;
-    ostream< IO_device > m_out;
+    istream<IO_device> m_in;
+    ostream<IO_device> m_out;
 
     // NOTE: any fields that are essential
     // for this class, must be added to this class
@@ -69,113 +74,104 @@ static struct iostream_initializer
 
 // Standard streams, defined elsewhere
 // These streams rely on specific driver, which name should be
-// the same accross all targets
-extern istream< console_driver > &cin;
-extern ostream< console_driver > &cout;
-extern ostream< console_driver > &cerr;
-
+// the same across all targets
+extern istream<console_driver> &cin;
+extern ostream<console_driver> &cout;
+extern ostream<console_driver> &cerr;
 
 //------------------------------------------------------------------------------
 
-
-template< class IO_device >
-iostream< IO_device >::iostream(IO_device *device)
+template<class IO_device>
+iostream<IO_device>::iostream(IO_device *device)
     :m_in{device}
     ,m_out{device}
 {
 }
 
-template< class IO_device >
-iostream< IO_device >::~iostream()
+template<class IO_device>
+iostream<IO_device>::~iostream()
 {
 }
 
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator<< (int value)
-{
-    m_out << value;
-    return *this;
-}
-
-
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator<< (unsigned int value)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator<< (int value)
 {
     m_out << value;
     return *this;
 }
 
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator<< (unsigned int value)
+{
+    m_out << value;
+    return *this;
+}
 
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator<<(char character)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator<<(char character)
 {
     m_out << character;
     return *this;
 }
 
-
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator<<(char *string)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator<<(char *string)
 {
     m_out << string;
     return *this;
 }
 
-
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator<<(
-        iostream& (*func)(iostream< IO_device >&))
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator<<(
+        iostream& (*func)(iostream<IO_device>&))
 {
     m_out << func;
     return *this;
 }
 
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::put(char c)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::put(char c)
 {
     m_out.put(c);
     return *this;
 }
 
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator>>(int& value)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator>>(int& value)
 {
     m_in >> value;
     return *this;
 }
 
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator>>(unsigned int& value)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator>>(unsigned int& value)
 {
     m_in >> value;
     return *this;
 }
 
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator>>(char& character)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator>>(char& character)
 {
     m_in >> character;
     return *this;
 }
 
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator>>(char *string)
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator>>(char *string)
 {
     m_in >> string;
     return *this;
 }
 
-
-template< class IO_device >
-iostream<IO_device>& iostream< IO_device >::operator>>(
-        iostream& (*func)(iostream< IO_device >&))
+template<class IO_device>
+iostream<IO_device>& iostream<IO_device>::operator>>(
+        iostream& (*func)(iostream<IO_device>&))
 {
     m_in >> func;
     return *this;
 }
 
+} // namespace ecl
 
-
-
-}
 #endif // ECL_IOSTREAM_HPP

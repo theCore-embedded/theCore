@@ -1,12 +1,16 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 cmake_minimum_required(VERSION 3.2)
 
-# The Core framework directory.
+# theCore framework directory.
 set(CORE_DIR ../../)
 
 # Required.
 include(${CORE_DIR}/build_api.cmake)
 
-# Objvious.
+# Obvious.
 project(exti_to_uart)
 
 # Required flags for this demo
@@ -14,29 +18,15 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 # Our demo sources.
-add_executable(exti main.cpp target.cpp)
+add_executable(exti main.cpp)
 
 # Some dependencies
-target_link_libraries(exti the_core)
-target_link_libraries(exti core_cpp)
+target_link_libraries(exti the_core core_cpp thread)
 
-# Configuraion parameters
+# STM32F4 discovery target configuration parameters.
+theCore_set_target_config(${CMAKE_CURRENT_LIST_DIR}/stm32f4_exti.json)
 
-# Target processor platform and its configuration
-set(CONFIG_PLATFORM stm32)
-# STM32 discovery is running with STM32F407VG processor
-set(CONFIG_PLATFORM_DEVICE STM32F407VG)
-# External oscillator has a 8 MHz out clock
-set(CONFIG_PLATFORM_HSE_VAL 8000000)
-
-# Enable console
-set(CONFIG_USE_CONSOLE 1)
-# UART #3 used for console output
-set(CONFIG_CONSOLE_DEVICE_NUM 3)
-# Baud rate of the console
-set(CONFIG_CONSOLE_BAUD 115200)
-
-# Include The Core into the build process
+# Include theCore into the build process
 add_subdirectory(${CORE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/core)
 
 # Produce complete binary, suitable for flashing to the target

@@ -1,11 +1,17 @@
-#include <unity.h>
-#include <unity_fixture.h>
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <ecl/utils.hpp>
 
-#include <common/execution.h>
+#include <common/execution.hpp>
 
 #include "test_gpio.hpp"
+
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
+#include <unity.h>
+#include <unity_fixture.h>
 
 //! Test executor.
 //! \tparam Ts List of GPIOs to execute test.
@@ -39,21 +45,21 @@ private:
     static void set_reset()
     {
         Gpio::set();
-        ecl_spin_wait(1000);
+        ecl::wait_for(1000);
 
         Gpio::reset();
-        ecl_spin_wait(1000);
+        ecl::wait_for(1000);
     }
 
     template<typename Gpio>
     static void toggle()
     {
         Gpio::toggle();
-        ecl_spin_wait(1000);
+        ecl::wait_for(1000);
         TEST_ASSERT_TRUE(Gpio::get());
 
         Gpio::toggle();
-        ecl_spin_wait(1000);
+        ecl::wait_for(1000);
     }
 
     template<typename Gpio>

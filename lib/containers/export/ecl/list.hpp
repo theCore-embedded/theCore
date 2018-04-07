@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief The intrusive list interface
 //! \todo Examples
@@ -23,11 +27,11 @@ public:
     ~list_node();
 
     //! Adds a node after this node.
-    //! \param[in] Node to add in the list
+    //! \param[in] node Node to add in the list
     void add_after(list_node &node);
 
     //! Adds a node before this node.
-    //! \param[in] Node to add in the list
+    //! \param[in] node Node to add in the list
     void add_before(list_node &node);
 
     //! Unlinks this node from a list.

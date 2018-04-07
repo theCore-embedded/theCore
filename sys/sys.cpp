@@ -1,31 +1,30 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //!
 //! \file
-//! \brief The Core system initialization module.
+//! \brief theCore system initialization module.
 //!
 #include <stdint.h>
 #include <stddef.h>
-#include <stdlib.h>
 
-#include <platform/irq.hpp>
-#include <platform/console.hpp>
-#include <common/execution.h>
+#include <common/irq.hpp>
+#include <common/console.hpp>
+#include <common/execution.hpp>
 
-void *operator new(unsigned int sz)
+// TODO: move it somewhere
+void operator delete(void *) noexcept
 {
-    return malloc(sz);
+    // TODO: call to abort routine
+    for(;;);
 }
 
 // TODO: move it somewhere
-void operator delete(void *chunk) noexcept
+void operator delete(void *, unsigned int) noexcept
 {
-    free(chunk);
-}
-
-// TODO: move it somewhere
-void operator delete(void *chunk, unsigned int sz) noexcept
-{
-    (void)sz;
-    free(chunk);
+    // TODO: call to abort routine
+    for(;;);
 }
 
 // TODO: move this to toolchain-dependent module
@@ -93,11 +92,11 @@ extern "C" void core_main()
     board_init();
 
 #ifdef CONFIG_USE_BYPASS_CONSOLE
-	// Dirty hack to make sure pin configuration is established before
-	// bypass console will be used.
-	// It should be fixed by configuring console GPIO directly in the platform,
+    // Dirty hack to make sure pin configuration is established before
+    // bypass console will be used.
+    // It should be fixed by configuring console GPIO directly in the platform,
     // not in the user's `board_init()` routine. See issue #151.
-    ecl_spin_wait(50);
+    ecl::wait_for(50);
 #endif // CONFIG_USE_BYPASS_CONSOLE
     kernel_main();
 }
@@ -111,7 +110,7 @@ extern "C" void core_main()
 extern "C" void early_main()
 {
     // Platform console subsystem is ready at this stage
-    for (auto c : "\r\nWelcome to theCore\r\n") { ecl::bypass_putc(c); }
+    ecl::bypass_greeting();
 
     extern uint32_t __init_array_start;
     extern uint32_t __init_array_end;

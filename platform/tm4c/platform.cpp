@@ -1,20 +1,26 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include <cstdint>
 #include <sysctl.h>
-
-#include <common/irq.hpp>
+#include <fpu.h>
 
 #include "platform/exti_manager.hpp"
 
-#ifdef CORE_CONFIG_USE_BYPASS_CONSOLE
+#ifdef THECORE_CONFIG_USE_CONSOLE
 namespace ecl
 {
 extern void bypass_console_init();
 } // namespace ecl
-#endif // CORE_CONFIG_USE_BYPASS_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 // Required by ARM ARCH startup code
 extern "C" void SystemInit()
 {
+    FPUEnable(); // TODO: configurable FPU
+                 // TODO: check if FPU is really supported in toolchain, too
+
     auto cfg = SYSCTL_USE_OSC | // System clock is the osc clock (not PLL)
                SYSCTL_OSC_INT | // Osc clock is internal oscillator (PIOSC)
                SYSCTL_MAIN_OSC_DIS  | // Disable main oscillator
@@ -33,13 +39,50 @@ extern "C" void platform_init()
 {
     // TODO: implement
 
-    // IRQ must be ready before anything else will start work
-    ecl::irq::init_storage();
-
     // EXTI manager must be ready after IRQ, but before user code start working with it
     ecl::exti_manager::init();
 
-#ifdef CORE_CONFIG_USE_BYPASS_CONSOLE
+#ifdef THECORE_CONFIG_USE_CONSOLE
     ecl::bypass_console_init();
 #endif
 }
+
+#if THECORE_ENABLE_SYSTMR_API
+
+namespace ecl
+{
+
+namespace systmr
+{
+
+static volatile uint32_t event_cnt;
+
+uint32_t events()
+{
+    return event_cnt;
+}
+
+} // namespace systmr
+
+} // namespace ecl
+
+#if !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
+
+// User can override systimer handler to receive events on its side.
+extern "C" void systmr_handler(void) __attribute__((weak));
+
+extern "C" void systmr_handler(void)
+{
+}
+
+#endif // !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
+
+extern "C" void SysTick_Handler(void)
+{
+    ecl::systmr::event_cnt++;
+#if !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
+    systmr_handler();
+#endif // !defined(THECORE_OWNS_SYSTMR) || !THECORE_OWNS_SYSTMR
+}
+
+#endif // THECORE_ENABLE_SYSTMR_API

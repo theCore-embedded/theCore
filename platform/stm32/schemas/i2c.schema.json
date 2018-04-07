@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "array",
+
+    "items": {
+        "type": "object",
+
+        "properties": {
+            "id":           { "type": "string", "pattern": "^I2C\\d$" },
+            "mode":         { "enum": [ "IRQ" ] },
+            "speed":        { "type": "integer" },
+            "duty_cycle":   { "enum": [ "2/1", "16/9" ] },
+            "ack":          { "type": "boolean" },
+            "ack_addr_bit": { "enum": [ 7, 10 ] },
+            "own_addr":     { "type": "integer" },
+            "alias":        { "type": "string" }
+        },
+
+        "required": [ "id" ]
+    }
+}

@@ -1,0 +1,111 @@
+{
+    "platform": {
+        "name": "stm32",
+        "device": "STM32F407VG",
+        "console": "USART3",
+        "bypass_console": "USART3",
+        "clock": {
+            "source": "HSE",
+            "speed": 8000000
+        },
+        "uart": [
+            {
+                "id": "USART3",
+                "baud": 115200,
+                "comment": "Bypass and console UART"
+            }
+        ],
+        "i2c": [
+            {
+                "id": "I2C1",
+                "mode": "IRQ",
+                "speed": 1000,
+                "duty_cycle": "2/1",
+                "ack": true,
+                "own_addr": 51,
+                "ack_addr_bit": 7,
+                "comment": "CS43L22 I2C",
+                "alias": "i2c1"
+            }
+        ],
+        "dma": [
+            {
+                "num": 1,
+                "stream": 5,
+                "channel": 0,
+                "alias": "i2s3_tx_dma"
+            },
+            {
+                "num": 1,
+                "stream": 0,
+                "channel": 0,
+                "alias": "i2s3_rx_dma"
+            }
+        ],
+        "i2s": [
+            {
+                "id": "I2S3",
+                "dma_tx": "i2s3_tx_dma",
+                "dma_rx": "i2s3_rx_dma",
+                "standard": "phillips",
+                "data_bits": 16,
+                "master_clk": true,
+                "audio_freq": 8,
+                "CPOL": "high",
+                "alias": "i2s3"
+            }
+        ],
+        "pinmux": [
+            {
+                "ids": [
+                    "PD8",
+                    "PD9"
+                ],
+                "mode": "AF",
+                "function": "USART3",
+                "comment": "Console UART, PD8 - TX, PD9 - RX"
+            },
+            {
+                "ids": [
+                    "PC7",
+                    "PC10",
+                    "PC12",
+                    "PA4"
+                ],
+                "mode": "AF",
+                "function": "SPI3",
+                "pull": "no",
+                "speed": "50MHz",
+                "comment": "CS43L22 I2S"
+            },
+            {
+                "ids": [
+                    "PB6",
+                    "PB9"
+                ],
+                "mode": "AF",
+                "function": "I2C1",
+                "otype": "OD",
+                "speed": "50MHz",
+                "pull": "no",
+                "comment": "CS43L22 I2C"
+            },
+            {
+                "ids": [
+                    "PD4"
+                ],
+                "mode": "OUT",
+                "pull": "down",
+                "otype": "PP",
+                "speed": "50MHz",
+                "comment": "CS43L22 RST"
+            }
+        ],
+        "gpio_alias": [
+            {
+                "id": "PD4",
+                "alias": "rst_gpio"
+            }
+        ]
+    }
+}

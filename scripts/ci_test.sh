@@ -1,5 +1,5 @@
-#!/bin/sh
-# Builds and executes tests.
+#!/usr/bin/env sh
+# Builds and executes tests, examples, docs
 
 set -e # Stop on error
 set -v # Be verbose
@@ -8,7 +8,10 @@ set -v # Be verbose
 
 mkdir -p build
 cd build
-cmake ..
+
+mkdir -p units
+cd units
+cmake ../..
 make
 ctest . --output-on-failure
 cd ..
@@ -17,7 +20,7 @@ cd ..
 
 mkdir -p build_examples
 cd build_examples
-cmake ../examples
+cmake ../../examples
 make
 cd ..
 
@@ -25,6 +28,15 @@ cd ..
 
 mkdir -p build_test_cases
 cd build_test_cases
-cmake ../tests
+cmake ../../tests
 make
+cd ..
+
+# Documentation build
+
+mkdir -p docs
+cd docs
+cmake ../../doc
+# Doxygen will be built automatically
+make core_sphinx
 cd ..

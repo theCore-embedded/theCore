@@ -1,8 +1,16 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 if(CMAKE_CROSSCOMPILING)
     # Usable only for bare-metal environment.
     # TODO: not all platfotms that theCore will support are bare-metals.
     # Some platforms may not need newlib. This should be checked.
-    add_subdirectory(newlib)
+    if(THECORE_FORCE_NO_NEWLIB)
+        msg_info("Newlib is disabled")
+    else()
+        add_subdirectory(newlib)
+    endif()
 endif()
 
 add_subdirectory(cpp)
@@ -15,17 +23,20 @@ add_subdirectory(containers)
 add_subdirectory(cmsis)
 add_subdirectory(stm32-spl)
 add_subdirectory(ti-tivaware)
+add_subdirectory(unity)
+add_subdirectory(particle_firmware)
 
-# Extra libraries, not enabled by default
-add_library(core_extra_libs INTERFACE)
-
-# Not enabled by default. Enabling this requires cloning of FAT submodule.
-if(CONFIG_USE_FS OR BUILD_TESTING)
+# Some platforms may not feel well with definitions in FAT headers
+# TODO: fix it.
+if(NOT DEFINED THECORE_FORCE_NO_FS_MODULE)
     add_subdirectory(fs)
 endif()
 
-# Not enabled by default. Enabling this requires cloning of Unity submodule.
-if(CONFIG_USE_UNITY OR BUILD_TESTING)
-    add_subdirectory(unity)
-    target_link_libraries(core_extra_libs INTERFACE unity)
+# Proxy library to aggregate theCore libraries
+# TODO: aggregate ALL libraries
+add_library(thecore_libs INTERFACE)
+target_include_directories(thecore_libs INTERFACE export)
+
+if(NOT DEFINED THECORE_FORCE_NO_FS_MODULE)
+    target_link_libraries(thecore_libs INTERFACE fat)
 endif()

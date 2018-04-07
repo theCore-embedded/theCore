@@ -1,6 +1,11 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief GPIO device interface for STM32 platform
 //! \todo Detailed explanation.
+//! \ingroup stm32_gpio
 #ifndef PLATFORM_GPIO_DEVICE_HPP
 #define PLATFORM_GPIO_DEVICE_HPP
 
@@ -8,6 +13,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_gpio GPIO control
+//! @{
 
 //! GPIO numbers
 enum class gpio_num
@@ -197,6 +211,12 @@ auto gpio< Port, Pin >::pick_pin()
     }
 }
 
+//! @}
+
+//! @}
+
+//! @}
+
 } // namespace ecl
 
-#endif
+#endif // PLATFORM_GPIO_DEVICE_HPP

@@ -1,8 +1,10 @@
-//!
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Contains platform driver implementation for SPI and I2S buses.
 //! \details In STM32F4 series SPI and I2S are implemented within the same controller.
-//!
 #ifndef PLATFORM_SPI_BUS_HPP_
 #define PLATFORM_SPI_BUS_HPP_
 
@@ -15,8 +17,19 @@
 #include <sys/types.h>
 #include <ecl/assert.h>
 
+#include <common/console.hpp>
+
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_spi_i2s I2S and SPI driver
+//! @{
 
 //! \brief Defines type of the bus
 //!
@@ -497,7 +510,7 @@ void spi_i2s_bus<dev>::prepare_tx()
         config::dma_tx::template mem_to_periph<data_sz>(m_tx.byte, m_tx_size,
                                                         &spi->DR);
     } else {
-        if (m_status & mode_circular) {
+        if (is_circular_mode()) {
             config::dma_tx::template mem_to_periph<data_sz, dma_mode::circular>(
                     m_tx.buf, m_tx_size, &spi->DR);
         } else {
@@ -640,7 +653,7 @@ void spi_i2s_bus<dev>::irq_handler()
         // All transfers completed
         get_handler()(channel::meta, event::tc, m_tx_size);
 
-        if (!(m_status & mode_circular)) {
+        if (!is_circular_mode()) {
             config::dma_rx::disable();
             config::dma_tx::disable();
 
@@ -959,6 +972,13 @@ bool spi_i2s_bus<dev>::is_circular_mode()
 {
     return m_status & mode_circular;
 }
+
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
 

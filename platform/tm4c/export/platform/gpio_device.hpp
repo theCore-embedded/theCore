@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief TM4C GPIO device.
 #ifndef TM4C_GPIO_DEVICE_HPP_
@@ -9,6 +13,15 @@
 
 namespace ecl
 {
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_gpio GPIO control
+//! @{
 
 //! Encapsulates pin usage.
 //! \tparam Port GPIO port on STM32 device.
@@ -65,7 +78,7 @@ void gpio<Port, Pin>::toggle()
 
     auto pin_val = GPIOPinRead(port, pin);
     pin_val ^= pin;
-    GPIOPinWrite(port, pin_val, pin_val);
+    GPIOPinWrite(port, pin, pin_val);
 }
 
 template<gpio_hw::port Port, gpio_hw::num Pin>
@@ -77,6 +90,12 @@ bool gpio<Port, Pin>::get()
     auto pin_val = GPIOPinRead(port, pin);
     return pin_val != 0;
 }
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
 

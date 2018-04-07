@@ -1,8 +1,14 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef HOST_PLATFORM_CONSOLE_HPP_
 #define HOST_PLATFORM_CONSOLE_HPP_
 
 #include <iostream>
 #include <functional>
+
+#include <aux/platform_defines.hpp>
 
 #include <common/bus.hpp>
 #include <ecl/err.hpp>

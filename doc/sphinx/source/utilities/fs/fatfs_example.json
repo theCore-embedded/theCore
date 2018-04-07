@@ -1,0 +1,22 @@
+{
+    "lib": {
+        "fs": [
+            {
+                "type": "fat",
+                "dev": [
+                    {
+                        "id": "sdspi0",
+                        "mountpoint": "main_fs"
+                    },
+                    {
+                        "id": "other_sdspi_driver",
+                        "mountpoint": "backup_fs"
+                    }
+                ],
+                "readonly": false,
+                "enable_seek": true,
+                "enable_lowercase": false
+            }
+        ]
+    }
+}

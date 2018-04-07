@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief IRQ common module.
 //!
@@ -16,6 +20,8 @@ namespace ecl
 namespace irq
 {
 
+#if !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0
+
 using handler_type = std::function<void()>;
 
 //! Initializes storage for callbacks and setups default handler for every IRQ.
@@ -32,6 +38,8 @@ void subscribe(irq_num irqn, const irq::handler_type &handler);
 //! \param[in] irqn Valid IRQ number.
 //!
 void unsubscribe(irq_num irqn);
+
+#endif // !defined THECORE_NO_IRQ_MANAGER || THECORE_NO_IRQ_MANAGER == 0
 
 } // namespace ecl
 

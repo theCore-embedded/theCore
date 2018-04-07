@@ -1,10 +1,16 @@
-#include <unity.h>
-#include <unity_fixture.h>
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <ecl/unity_helpers.hpp>
-#include <common/execution.h>
+#include <common/execution.hpp>
 
 #include <test_adc.hpp>
+
+// Headers are included in the last place to avoid some
+// overrides of stdlib functions (like calloc/malloc/etc.)
+#include <unity.h>
+#include <unity_fixture.h>
 
 TEST_GROUP(adc_bat);
 
@@ -39,6 +45,6 @@ TEST(adc_bat, single_run)
             UNITY_PRINT_EOL();
         }
 
-        ecl_spin_wait(1000);
+        ecl::wait_for(1000);
     }
 }

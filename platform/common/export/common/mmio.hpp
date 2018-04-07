@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //!
 //! \file
 //! \brief Memory mapped I/O abstractions.
@@ -49,6 +53,7 @@ struct wo_mut
     //! \param[in] device Register address.
     //! \param[in] offset Offset of the data inside register.
     //! \param[in] mask   Mask to extract data from the register.
+    //! \param[in] value  Value to write into the register.
     static void write(volatile uint32_t *device, uint32_t offset, uint32_t mask, uint32_t value)
     {
         *device = (value << offset) & mask;
@@ -62,6 +67,7 @@ struct rw_mut : ro_mut
     //! \param[in] device Register address.
     //! \param[in] offset Offset of the data inside register.
     //! \param[in] mask   Mask to extract data from the register.
+    //! \param[in] value  Value to write into the register.
     static void write(volatile uint32_t *device, uint32_t offset, uint32_t mask, uint32_t value)
     {
         *device = (*device & ~mask) | ((value << offset) & mask);
@@ -69,10 +75,11 @@ struct rw_mut : ro_mut
 };
 
 //! Memory-mapped I/O register.
-//! \tparam Mut     Mutability trait. \sa rw_mut \sa ro_mut \sa wo_mut
+//! \tparam Mut     Mutability trait.
 //! \tparam addr    Address of a memory map register.
 //! \tparam offset  Offset of the data inside register.
 //! \tparam width   Width of a data stored in the register.
+//! \sa rw_mut \sa ro_mut \sa wo_mut
 template<typename Mut, std::uintptr_t addr, uint32_t offset, uint32_t width>
 struct reg
 {

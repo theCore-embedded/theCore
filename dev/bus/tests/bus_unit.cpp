@@ -1,20 +1,16 @@
-#include <CppUTest/TestHarness.h>
-#include <CppUTest/CommandLineTestRunner.h>
-#include <CppUTestExt/MockSupport.h>
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "dev/bus.hpp"
 #include "mocks/platform_bus.hpp"
 
-// Our resident
-using bus_t = ecl::generic_bus< platform_mock >;
+#include <CppUTest/TestHarness.h>
+#include <CppUTest/CommandLineTestRunner.h>
+#include <CppUTestExt/MockSupport.h>
 
-// Error code helper
-// TODO: move it to 'utils' headers and protect with check of
-// current test state (enabled or disabled)
-static SimpleString StringFrom(ecl::err err)
-{
-    return SimpleString{ecl::err_to_str(err)};
-}
+// Our resident
+using bus_t = ecl::generic_bus<platform_mock>;
 
 TEST_GROUP(bus)
 {
@@ -35,10 +31,12 @@ TEST_GROUP(bus)
 TEST(bus, init)
 {
     ecl::err expected_ret = ecl::err::tobig;
+    mock("mutex").expectOneCall("lock");
     mock("platform_bus")
             .expectOneCall("init")
             .andReturnValue(static_cast< int >(expected_ret));
     mock("platform_bus").expectOneCall("set_handler");
+    mock("mutex").expectOneCall("unlock");
 
     auto ret = bus_t::init();
 
@@ -201,6 +199,28 @@ TEST(bus_is_ready, set_buffers_invalid)
 
 
 TEST(bus_is_ready, set_buffers)
+{
+    size_t tx_size = buf_size / 2;
+    size_t rx_size = buf_size / 3;
+
+    mock("platform_bus").expectOneCall("reset_buffers");
+    mock("platform_bus")
+            .expectOneCall("set_tx")
+            .withConstPointerParameter("tx_buf", tx_buf)
+            .withParameter("size", tx_size);
+    mock("platform_bus")
+            .expectOneCall("set_rx")
+            .withParameter("rx_buf", rx_buf)
+            .withParameter("size", rx_size);
+
+    auto rc = bus_t::set_buffers(tx_buf, rx_buf, tx_size, rx_size);
+    CHECK_EQUAL(ecl::err::ok, rc);
+
+    mock().checkExpectations();
+}
+
+
+TEST(bus_is_ready, set_buffers_non_equal_size)
 {
     mock("platform_bus").expectOneCall("reset_buffers");
     mock("platform_bus")

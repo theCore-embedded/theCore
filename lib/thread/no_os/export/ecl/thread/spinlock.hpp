@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief Simple spinlock. Without any OS support.
 //!
@@ -12,7 +16,9 @@ namespace ecl
 class spinlock
 {
 public:
-    constexpr spinlock();
+    constexpr spinlock()
+        :m_flag ATOMIC_FLAG_INIT // Braces '{}' are included in macro body of ATOMIC_FLAG_INIT
+    { }
 
     void lock();
     void unlock();

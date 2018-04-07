@@ -1,0 +1,8 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+
+    "properties": {
+        "lib":               { "$ref": "file:./lib/lib.schema.json" },
+        "device":            { "$ref": "file:./dev/dev.schema.json" }
+    }
+}

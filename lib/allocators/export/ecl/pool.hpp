@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //!
 //! \file
 //! \brief Memory pool and corresponding allocator facilities.
@@ -75,12 +79,12 @@ protected:
     //! \brief Allocates chunk with respect to given alingment.
     //! \param[in] n        Object count.
     //! \param[in] align    Required align.
-    //! \param[in] obj_size Size of single object.
+    //! \param[in] obj_sz Size of single object.
     //! \return  nullptr if there is no space for given type and count in the pool.
     //!          Valid pointer returned otherwise.
     //! \sa aligned_alloc()
     //!
-    virtual uint8_t* real_alloc(size_t n, size_t align, size_t obj_size) = 0;
+    virtual uint8_t* real_alloc(size_t n, size_t align, size_t obj_sz) = 0;
 
     //!
     //! \brief Deallocates chunk of given address and length.
@@ -90,11 +94,11 @@ protected:
     //!                     Previously by real_alloc().
     //! \param[in] n        Objects count. Must be the same as passed to
     //!                     real_alloc() when given chunk was allocated.
-    //! \param[in] obj_size Size of single object. Must be the same as passed to
+    //! \param[in] obj_sz   Size of single object. Must be the same as passed to
     //!                     real_alloc() when given chunk was allocated.
     //! \sa deallocate()
     //!
-    virtual void real_dealloc(uint8_t *p, size_t n, size_t obj_size) = 0;
+    virtual void real_dealloc(uint8_t *p, size_t n, size_t obj_sz) = 0;
 };
 
 //------------------------------------------------------------------------------
@@ -392,7 +396,7 @@ class pool_allocator
 public:
     //!
     //! \brief Constructs pool allocator with memory pool given.
-    //! \param[in] Memory pool to use with this allocator.
+    //! \param[in] pool Memory pool to use with this allocator.
     //!
     explicit pool_allocator(pool_base *pool);
 
@@ -402,7 +406,7 @@ public:
     //!
     //! \brief Allocates memory for given object count.
     //!
-    //! \warn This will not call object constructors.
+    //! \warning This will not call object constructors.
     //! Memory will have alingment requirements of given type.
     //! \param[in] n Objects count.
     //! \return Valid pointer to an uninitilized memory if allocation sucessed.

@@ -1,7 +1,8 @@
-# Check if separate manager is really required.
-# NVIC or similar will do it by itself.
-# Host platform is not in need of external IRQ manager as well.
-if(PLATFORM_NAME STREQUAL host OR TARGET_USE_NVIC_IRQ_NAMES)
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+if(PLATFORM_NAME STREQUAL host)
     add_library(platform_common INTERFACE)
     target_include_directories(platform_common INTERFACE export)
 else()
@@ -12,7 +13,7 @@ else()
     target_include_directories(platform_common PUBLIC export)
 
     target_link_libraries(platform_common PUBLIC ${PLATFORM_NAME} types)
-    target_link_libraries(platform_common PRIVATE dbg)
+    target_link_libraries(platform_common PRIVATE dbg utils)
 
     target_compile_definitions(platform_common PRIVATE -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 endif()

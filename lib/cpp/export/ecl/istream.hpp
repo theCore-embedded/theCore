@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef ECL_ISTREAM_HPP
 #define ECL_ISTREAM_HPP
 
@@ -6,8 +10,28 @@
 #include <ctype.h>
 #include <limits.h>
 
-namespace ecl {
-template< class IO_device >
+namespace ecl
+{
+
+template<typename stream>
+stream& noskipws(stream &ios)
+{
+    // TODO: flush stream when appropriate functionality
+    // will be ready
+    ios.skipws(false);
+    return ios;
+}
+
+template<typename stream>
+stream& skipws(stream &ios)
+{
+    // TODO: flush stream when appropriate functionality
+    // will be ready
+    ios.skipws(true);
+    return ios;
+}
+
+template<class IO_device>
 class istream
 {
 public:
@@ -32,6 +56,9 @@ public:
     int get();
     istream &get(char &c);
 
+    // Set whitespace skipping status.
+    void skipws(bool state = true);
+
     // Disabled for now.
     istream &operator=(istream &) = delete;
     istream(const istream &) = delete;
@@ -39,6 +66,8 @@ public:
 private:
     // Simply, a device driver object
     IO_device *m_device;
+    // Skip whitespaces flag
+    bool      m_skipws = true;
 
     /**
      * Removes all leading space characters from the stream. Returns first
@@ -56,19 +85,19 @@ private:
 //------------------------------------------------------------------------------
 
 
-template< class IO_device >
+template<class IO_device>
 istream< IO_device >::istream(IO_device *device)
     :m_device{device}
 {
 }
 
-template< class IO_device >
+template<class IO_device>
 istream< IO_device >::~istream()
 {
 }
 
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(int &value)
 {
     int new_value = 0;
@@ -110,7 +139,7 @@ istream<IO_device> &istream< IO_device >::operator>>(int &value)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(unsigned int &value)
 {
     int new_value = 0;
@@ -142,7 +171,7 @@ istream<IO_device> &istream< IO_device >::operator>>(unsigned int &value)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(char &character)
 {
     char first_char;
@@ -156,7 +185,7 @@ istream<IO_device> &istream< IO_device >::operator>>(char &character)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(char *string)
 {
     size_t i = 0;
@@ -179,14 +208,14 @@ istream<IO_device> &istream< IO_device >::operator>>(char *string)
 }
 
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::operator>>(
         istream& (*func)(istream< IO_device >&))
 {
     return func(*this);
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::get()
 {
     int c = 0;
@@ -197,7 +226,7 @@ int istream< IO_device >::get()
     return c;
 }
 
-template< class IO_device >
+template<class IO_device>
 istream<IO_device> &istream< IO_device >::get(char &character)
 {
     m_device->read((uint8_t *) &character, 1);
@@ -205,7 +234,7 @@ istream<IO_device> &istream< IO_device >::get(char &character)
     return *this;
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::skip_leading_spaces(char &next)
 {
     char c = 0;
@@ -214,13 +243,13 @@ int istream< IO_device >::skip_leading_spaces(char &next)
         if (m_device->read((uint8_t *) &c, 1) <= 0) {
             return -1;
         }
-    } while (isspace(c));
+    } while (isspace(c) && m_skipws);
 
     next = c;
     return 0;
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::mul_with_overflow(int a, int b)
 {
     if (a > 0) {
@@ -248,7 +277,7 @@ int istream< IO_device >::mul_with_overflow(int a, int b)
     return a * b;
 }
 
-template< class IO_device >
+template<class IO_device>
 int istream< IO_device >::add_with_overflow(int a, int b)
 {
     if (b > 0 && a > (INT_MAX - b)) {
@@ -259,6 +288,13 @@ int istream< IO_device >::add_with_overflow(int a, int b)
     return a + b;
 }
 
+template<class IO_device>
+void istream< IO_device >::skipws(bool state)
+{
+    m_skipws = state;
 }
+
+
+} // namespace ecl
 
 #endif // ECL_istream_HPP

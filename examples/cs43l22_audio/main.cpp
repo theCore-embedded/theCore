@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //! \file
 //! \brief CS43l22 codec usage example.
 //! \details Example shows how to use CS43L22 codec to stream PCM data.
@@ -22,7 +26,7 @@
 extern "C"
 void board_init()
 {
-    gpio_init();
+    gpio_init_generated();
 }
 
 //! 16 bits per one sample.
@@ -98,25 +102,33 @@ static void event_handler(ecl::bus_event type)
 
 int main()
 {
+    ecl::err rc;
 
     ecl::cout << "Starting audio play..." << ecl::endl;
 
     // Usual init sequence.
 
-    ecl::cs43l22_instance::init();
-    ecl::cs43l22_instance::power_up();
+    rc = ecl::cs43l22_instance::init();
+    ecl_assert(ecl::is_ok(rc));
+    rc = ecl::cs43l22_instance::power_up();
+    ecl_assert(ecl::is_ok(rc));
 
     // Set volumes, so audio can be heard.
 
-    ecl::cs43l22_instance::set_master_volume(0x90);
-    ecl::cs43l22_instance::set_headphone_volume(0xe0);    
-    ecl::cs43l22_instance::headphone_unmute();
+    rc = ecl::cs43l22_instance::set_master_volume(0x90);
+    ecl_assert(ecl::is_ok(rc));
+    rc = ecl::cs43l22_instance::set_headphone_volume(0xe0);
+    ecl_assert(ecl::is_ok(rc));
+    rc = ecl::cs43l22_instance::headphone_unmute();
+    ecl_assert(ecl::is_ok(rc));
 
     // Set audio properties.
-    ecl::cs43l22_instance::set_sampling_frequency<ecl::i2s::audio_frequency::k8>();
+    rc = ecl::cs43l22_instance::set_sampling_frequency<ecl::i2s::audio_frequency::k8>();
+    ecl_assert(ecl::is_ok(rc));
 
     // Start audio streaming. Events from codec will be handled in event_handler() routine.
-    ecl::cs43l22_instance::pcm_stream_start(samples, sizeof(samples) / (bps / 8), event_handler);
+    rc = ecl::cs43l22_instance::pcm_stream_start(samples, sizeof(samples) / (bps / 8), event_handler);
+    ecl_assert(ecl::is_ok(rc));
 
     for(;;);
     return 0;

@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 //!
 //! \file
 //! \brief Main iostream module.
@@ -14,9 +18,9 @@
 namespace ecl {
 
 // Useful aliases
-using cin_type  = istream< console_driver >;
-using cout_type = ostream< console_driver >;
-using cerr_type = ostream< console_driver >;
+using cin_type  = istream<console_driver>;
+using cout_type = ostream<console_driver>;
+using cerr_type = ostream<console_driver>;
 
 //! Tracks initialization and destruction.
 static int nifty_counter;
@@ -39,7 +43,7 @@ static typename std::aligned_storage< sizeof(cerr_type), alignof(cerr_type) >::t
 
 // TODO: think about extending of console devices to cover
 // a case when different drivers for cin, count and cerr streams must be used.
-typename istream< console_driver >::device_type &console_device
+typename istream<console_driver>::device_type &console_device
 = reinterpret_cast< console_driver& >(console_obj_buf);
 
 cin_type  &cin  = reinterpret_cast< cin_type& >(cin_obj_buf);

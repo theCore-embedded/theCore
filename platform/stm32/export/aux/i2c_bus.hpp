@@ -1,23 +1,51 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup stm32 STM32 multi-platform
+//! @{
+
+//! \defgroup stm32_i2c I2C driver
+//! @{
+
+//! \file
+//! \details I2C bus driver for stm32 platform.
 #ifndef PLATFORM_I2C_BUS_HPP_
 #define PLATFORM_I2C_BUS_HPP_
 
 #include <stm32_device.hpp>
 #include <common/irq.hpp>
 
+#include <common/bus.hpp>
 #include <common/i2c.hpp>
 
 #include <sys/types.h>
 #include <ecl/utils.hpp>
+#include <ecl/assert.h>
 
 namespace ecl
 {
 
+//! Mode of event handling.
 enum class i2c_mode
 {
     POLL,
     IRQ
 };
 
+//! I2C configuration struct.
+//! \tparam dev             Device for which configuration is provided.
+//! \tparam mode            Mode of event handling.
+//! \tparam clock_speed     Specifies the clock frequency in Hz.
+//! \tparam operation_mode  I2C operation mode - pure I2C or SMBus.
+//! \tparam duty_cycle      Specifies the I2C fast mode duty cycle.
+//! \tparam own_address     Specifies the first device own address. This parameter
+//!                         can be a 7-bit or 10-bit address
+//! \tparam ack             Enables or disables the acknowledgement.
+//! \tparam ack_addr        Specifies if 7-bit or 10-bit address is acknowledged
 template< i2c_device        dev,
           i2c_mode          mode,
           uint32_t          clock_speed,
@@ -25,7 +53,7 @@ template< i2c_device        dev,
           uint16_t          duty_cycle,
           uint16_t          own_address,
           uint16_t          ack,
-          uint16_t          acknowledged_address>
+          uint16_t          ack_addr>
 struct i2c_config
 {
     static constexpr I2C_InitTypeDef m_init_obj = {
@@ -34,13 +62,14 @@ struct i2c_config
         duty_cycle,
         own_address,
         ack,
-        acknowledged_address
+        ack_addr
     };
 
     static constexpr i2c_device m_dev = dev;
     static constexpr i2c_mode m_mode = mode;
 };
 
+//! I2C bus itself.
 template<class i2c_config>
 class i2c_bus
 {
@@ -179,7 +208,7 @@ private:
     static safe_storage<handler_fn> m_handler_storage;
 
     //! Gets event handler
-    static constexpr auto &get_handler() { return reinterpret_cast<handler_fn&>(m_handler_storage); }
+    static constexpr auto &get_handler() { return m_handler_storage.get(); }
 };
 
 template<class i2c_config>
@@ -322,8 +351,10 @@ ecl::err i2c_bus<i2c_config>::do_xfer()
         }
 
         constexpr auto irqn = pick_ev_irqn();
+        constexpr auto err_irqn = pick_er_irqn();
         i2c_setup_xfer_irq();
         irq::unmask(irqn);
+        irq::unmask(err_irqn);
     }
 
     return ecl::err::ok;
@@ -360,7 +391,7 @@ ecl::err i2c_bus<i2c_config>::i2c_setup_xfer_irq()
     while (I2C_GetFlagStatus(i2c, I2C_FLAG_BUSY) == SET);
 
     // TODO Add error handling and enable error irq
-    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
+    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, ENABLE);
 
     I2C_GenerateSTART(i2c, ENABLE);
 
@@ -633,7 +664,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
                 get_handler()(channel::tx, event::tc, m_tx_size);
                 // transfer is complete
                 get_handler()(channel::meta, event::tc, m_tx_size);
-                I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
+                I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
                 return;
             }
         }
@@ -687,7 +718,7 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 
             // rx always last, so transfer is complete
             get_handler()(channel::meta, event::tc, m_rx_size);
-            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
+            I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
 
             return;
         }
@@ -699,7 +730,39 @@ void i2c_bus<i2c_config>::irq_ev_handler()
 template<class i2c_config>
 void i2c_bus<i2c_config>::irq_er_handler()
 {
-    // TODO add error handling
+    constexpr auto irqn  = pick_er_irqn();
+
+    irq::clear(irqn);
+    constexpr auto i2c = pick_i2c();
+
+    // I2C_GetLastEvent() is suitable when multiple flags are monitored at the same time.
+    // The return type is compatible with I2C_FLAG_* definitions.
+    // Using the function I2C_GetFlagStatus() return the status of one single flag.
+
+    uint32_t lastEvent = I2C_GetLastEvent(i2c);
+
+    auto ch = lastEvent & I2C_FLAG_TRA ? channel::tx : channel::rx;
+    get_handler()(ch, event::err, 0);
+
+    // After checking on an interrupt event you should clear it using I2C_ClearFlag()
+    // or I2C_ClearITPendingBit() and/or I2C_GenerateStop() in order to clear
+    // the error flag and source and return to correct communication status.
+    I2C_ClearFlag(i2c, lastEvent);
+
+    // Now for any error interrupts was used common plan of action:
+    // 1) clear error flags
+    // 2) generate stop
+    // This may not work for some error states
+
+    // TODO: Create error handling for every error flags
+    I2C_GenerateSTOP(i2c, ENABLE);
+
+    // According to I2C library software reset I2C_SoftwareResetCmd should help recover
+    // from error state, but when placed here it causes a hang
+
+    get_handler()(channel::meta, event::tc, 0);
+    I2C_ITConfig(i2c, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
+    irq::unmask(irqn);
 }
 
 template<class i2c_config>
@@ -708,5 +771,12 @@ void i2c_bus<i2c_config>::set_slave_addr(uint16_t addr)
     m_slave_addr = addr;
 }
 
-}
+} // namespace ecl
+
 #endif /* PLATFORM_I2C_BUS_HPP_ */
+
+//! @}
+
+//! @}
+
+//! @}
