@@ -51,6 +51,8 @@ __StackLimit:
 __StackTop:
     .size	__StackTop, . - __StackTop
 
+    .include "arch/defs.S"
+
     .section .heap
     .align	3
 #ifdef __HEAP_SIZE
@@ -237,14 +239,6 @@ Reset_Handler:
 Default_Handler:
     b	.
     .size	Default_Handler, . - Default_Handler
-
-/*    Macro to define default handlers. Default handler
- *    will be weak symbol and just dead loops. They can be
- *    overwritten by other handlers */
-    .macro	def_irq_handler	handler_name
-    .weak	\handler_name
-    .set	\handler_name, Default_Handler
-    .endm
 
     def_irq_handler	NMI_Handler
     def_irq_handler	HardFault_Handler

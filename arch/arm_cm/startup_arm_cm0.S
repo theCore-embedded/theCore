@@ -51,7 +51,7 @@ __StackLimit:
 __StackTop:
     .size	__StackTop, . - __StackTop
 
-    .include "arch_defs.S"
+    .include "arch/defs.S"
 
     .section .heap
     .align	3
