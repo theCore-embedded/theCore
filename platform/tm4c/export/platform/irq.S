@@ -2,6 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#ifndef DEVICE_IRQ_DEFS_H_
+#define DEVICE_IRQ_DEFS_H_
+
 .long GPIOA_Handler /* 16 GPIO Port A */
 .long GPIOB_Handler /* 17 GPIO Port B */
 .long GPIOC_Handler /* 18 GPIO Port C */
@@ -141,3 +144,5 @@
 .long PWM1_2_Handler /* 152 PWM1 Generator 2 */
 .long PWM1_3_Handler /* 153 PWM1 Generator 3 */
 .long PWM1_FAULT_Handler /* 154 PWM1 Fault */
+
+#endif /* DEVICE_IRQ_DEFS_H_ */
