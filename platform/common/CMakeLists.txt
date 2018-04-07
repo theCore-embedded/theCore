@@ -12,8 +12,7 @@ else()
 
     target_include_directories(platform_common PUBLIC export)
 
-    target_link_libraries(platform_common PUBLIC ${PLATFORM_NAME} types)
-    target_link_libraries(platform_common PRIVATE dbg utils)
+    target_link_libraries(platform_common PUBLIC ${PLATFORM_NAME} dbg types utils)
 
     target_compile_definitions(platform_common PRIVATE -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 endif()

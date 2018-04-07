@@ -4,4 +4,4 @@
 
 add_library(dbg STATIC ${CMAKE_CURRENT_LIST_DIR}/assert.cpp)
 target_include_directories(dbg PUBLIC export types)
-target_link_libraries(dbg PUBLIC ${PLATFORM_NAME})
+target_link_libraries(dbg PUBLIC platform_common utils ${PLATFORM_NAME})
