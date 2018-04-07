@@ -60,14 +60,6 @@ if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
     target_sources(arch PUBLIC ${CMAKE_CURRENT_LIST_DIR}/execution.cpp)
 endif()
 
-if(TARGET_USE_NVIC_IRQ_NAMES)
-    target_compile_definitions(arch PRIVATE -DTARGET_USE_NVIC_IRQ_NAMES)
-    # IRQ handlers include is provided by the platform.
-    target_link_libraries(arch PRIVATE ${PLATFORM_NAME})
-else()
-    target_compile_definitions(arch PRIVATE -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
-endif()
-
 # Custom stack size
 if(TARGET_STACK_SIZE)
     target_compile_definitions(arch PRIVATE -D__STACK_SIZE=${TARGET_STACK_SIZE})

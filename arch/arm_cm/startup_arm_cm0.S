@@ -91,15 +91,8 @@ __Vectors:
     .long	PendSV_Handler        /* PendSV Handler */
     .long	SysTick_Handler       /* SysTick Handler */
 
-    /* External interrupts */
-#ifdef TARGET_USE_NVIC_IRQ_NAMES
-    /* Rest of interrupts supplied by the platform */
-    .include "device_irq.S"
-#else
-    .rept IRQ_COUNT /* Provided by the build system */
-    .long   core_isr
-    .endr
-#endif
+    /* External interrupts, provided by the platform */
+#include "platform/irq.S"
 
     .size	__Vectors, . - __Vectors
 
