@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 if(CONFIG_PLATFORM STREQUAL "ke02")
-    theCore_get_thirdparty(kexx_drv https://github.com/forGGe/kexx_driverlib 52fcc7d44)
+    theCore_get_thirdparty(kexx_drv https://github.com/forGGe/kexx_driverlib 93eaf3f5d)
 else()
     return()
 endif()
