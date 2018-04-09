@@ -39,7 +39,7 @@ set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
 # common flags for current platform
-set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m0plus -mthumb -march=armv6s-m \
+set(CC_PLATFORM_FLAGS "-specs=nano.specs -ffreestanding -mcpu=cortex-m0plus -mthumb -march=armv6s-m \
     -fdata-sections -ffunction-sections -fno-common")
 
 # -fno-use-cxa-atexit helps resolve issue with DSO handle undefined reference
@@ -47,7 +47,7 @@ set(CC_PLATFORM_FLAGS "-ffreestanding -mcpu=cortex-m0plus -mthumb -march=armv6s-
 set(CXX_PLATFORM_FLAGS "-fno-use-cxa-atexit -fno-exceptions -fno-rtti ${CC_PLATFORM_FLAGS}")
 
 # TODO: move std and gdwarf flags out of toolchain into the core listfile itself
-set(C_CXX_EXTRA_FLAGS "-gdwarf-2 ")
+set(C_CXX_EXTRA_FLAGS "-gdwarf-2")
 set(CC_EXTRA_FLAGS "-std=c99 ${C_CXX_EXTRA_FLAGS}")
 set(CXX_EXTRA_FLAGS "-std=c++14 ${C_CXX_EXTRA_FLAGS}")
 

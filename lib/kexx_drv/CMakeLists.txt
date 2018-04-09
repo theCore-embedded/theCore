@@ -24,10 +24,12 @@ add_library(kexx_drv STATIC
         ${KEXX_DRV_DIR}/src/drivers/kbi/kbi.c
         ${KEXX_DRV_DIR}/src/cpu/sysinit.c
         ${KEXX_DRV_DIR}/src/common/assert.c
-        ${KEXX_DRV_DIR}/src/common/io.c
+        # All I/O functions are intentionally avoided,
+        # due to hard-coded output device. Instead, theCore provides its
+        # own I/O implementation.
+        # ${KEXX_DRV_DIR}/src/common/io.c
         ${KEXX_DRV_DIR}/src/common/printf.c
         ${KEXX_DRV_DIR}/src/common/alloc.c)
-#        ${KEXX_DRV_DIR}/src/common/stdlib.c)
 
 target_include_directories(kexx_drv SYSTEM PUBLIC
         ${KEXX_DRV_DIR}/src/drivers/uart/

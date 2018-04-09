@@ -18,6 +18,8 @@
 #include <core_cm4.h>
 #elif defined arm_cm3
 #include <core_cm3.h>
+#elif defined arm_cm0plus
+#include <core_cm0plus.h>
 #endif
 
 #include <limits.h>

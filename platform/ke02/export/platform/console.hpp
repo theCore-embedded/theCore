@@ -5,9 +5,7 @@
 #ifndef KE02_PLATFORM_CONSOLE_HPP_
 #define KE02_PLATFORM_CONSOLE_HPP_
 
-extern "C" {
-#include <io.h>
-}
+#include "uart.h"
 
 namespace ecl
 {
@@ -15,7 +13,21 @@ namespace ecl
 //! Bypasses console drivers and puts data directly to the UART
 static inline void bypass_putc(char c)
 {
-    out_char(c);
+    // TODO: use theCore UART driver instead of UART periphery directly
+
+    UART_PutChar(TERM_PORT, c);
+}
+
+static inline void bypass_console_init()
+{
+    // TODO: use theCore UART driver instead of UART periphery directly
+
+    UART_ConfigType sConfig;
+
+    sConfig.u32SysClkHz = BUS_CLK_HZ;
+    sConfig.u32Baudrate  = UART_PRINT_BITRATE;
+
+    UART_Init(TERM_PORT, &sConfig);
 }
 
 } // namespace ecl
