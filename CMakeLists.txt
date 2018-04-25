@@ -15,6 +15,8 @@ include(CppcheckTargets)
 
 # TODO: add same configuration mechanism for choosing right kernel
 
+message("==============TEST PR===================")
+
 message(STATUS "Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
