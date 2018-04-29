@@ -2,35 +2,54 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! \file
+//! \brief KE02 bypass console driver
+//! \ingroup ke02_console
 #ifndef KE02_PLATFORM_CONSOLE_HPP_
 #define KE02_PLATFORM_CONSOLE_HPP_
 
-#include "uart.h"
+// All console definitions are generated in the USART config header
+#include <aux/uart_cfg.hpp>
+
+#include <common.h> // Test if we need this or not.
+#include <uart.h>
 
 namespace ecl
 {
 
-//! Bypasses console drivers and puts data directly to the UART
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup ke02 Freescale FRDM-KE02Z platform
+//! @{
+
+//! \defgroup ke02_console Console
+//! @{
+
+
+#if !THECORE_CONFIG_USE_CONSOLE
+
+//! Does nothing if console is disabled.
 static inline void bypass_putc(char c)
 {
-    // TODO: use theCore UART driver instead of UART periphery directly
-
-    UART_PutChar(TERM_PORT, c);
+    (void) c;
 }
 
-static inline void bypass_console_init()
-{
-    // TODO: use theCore UART driver instead of UART periphery directly
+#else // THECORE_CONFIG_USE_CONSOLE
 
-    UART_ConfigType sConfig;
+//! Bypasses console drivers and puts data directly to the UART.
+//! \details Required to print debug of the failed asserts including one that
+//! executed during ISR.
+void bypass_putc(char c);
 
-    sConfig.u32SysClkHz = BUS_CLK_HZ;
-    sConfig.u32Baudrate  = UART_PRINT_BITRATE;
+#endif // THECORE_CONFIG_USE_CONSOLE
 
-    UART_Init(TERM_PORT, &sConfig);
-}
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
-
 
 #endif // KE02_PLATFORM_CONSOLE_HPP_

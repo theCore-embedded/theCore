@@ -13,6 +13,33 @@ extern "C" {
 #include <stdio.h>
 #include <platform/console.hpp>
 
+uint32_t SystemCoreClock = 40000000L;
+
+extern "C"
+uint8_t __atomic_exchange_1(volatile void *dest, uint8_t val, int model)
+{
+   (void)model;
+
+   __disable_irq();
+
+   uint8_t *u8_dest = (uint8_t*)dest;
+   uint8_t old_val = *u8_dest;
+   *u8_dest = val;
+
+   __enable_irq();
+
+   return old_val;
+}
+
+#ifdef THECORE_CONFIG_USE_CONSOLE
+
+namespace ecl
+{
+    extern void bypass_console_init();
+} // namespace ecl
+
+#endif // THECORE_CONFIG_USE_CONSOLE
+
 extern "C"
 void platform_init()
 {
@@ -31,10 +58,8 @@ void SystemInit()
     SIM_ConfigType  sSIMConfig;
     ICS_ConfigType  sICSConfig;
 
-#if defined(TRIM_IRC)
-    /* if not trimmed, do trim first */
-    ICS_Trim(ICS_TRIM_VALUE);
-#endif
+    ICS_Trim(ICS_TRIM_VALUE); /*!< trim IRC to 39.0625KHz and FLL output=40MHz */
+
     /*
      * Enable SWD pin, RESET pin
      */
@@ -73,29 +98,10 @@ void SystemInit()
 
     SIM_Init(&sSIMConfig);                   /* initialize SIM */
 
-#if defined(XOSC_STOP_ENABLE)
-    sICSConfig.oscConfig.bStopEnable = 1;    /*  enabled in stop mode */
-#endif
-
-#if defined(CRYST_HIGH_GAIN)
-    sICSConfig.oscConfig.bGain = 1;           /* high gain */
-#endif
-
-
-#if  (EXT_CLK_FREQ_KHZ >=4000)
-    sICSConfig.oscConfig.bRange = 1;           /* high range */
-#endif
-
-    sICSConfig.oscConfig.bEnable = 1;          /* enable OSC */
-    sICSConfig.u32ClkFreq = EXT_CLK_FREQ_KHZ;
-
-#if     defined(USE_FEE)
-    sICSConfig.u8ClkMode = ICS_CLK_MODE_FEE;
-#elif	defined(USE_FBE_OSC)
-    sICSConfig.u8ClkMode = ICS_CLK_MODE_FBE_OSC;
-#elif	defined(USE_FEE_OSC)
-    sICSConfig.u8ClkMode = ICS_CLK_MODE_FEE_OSC;
-#endif
+    sICSConfig.u8ClkMode = ICS_CLK_MODE_FEI;
+    sICSConfig.bLPEnable = 0;
+    sICSConfig.u32ClkFreq = 32;
+    sICSConfig.oscConfig.bEnable = 0; /* disable OSC */
 
     ICS_Init(&sICSConfig);   /* initialize ICS */
 
