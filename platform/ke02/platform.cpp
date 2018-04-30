@@ -13,7 +13,7 @@ extern "C" {
 #include <stdio.h>
 #include <platform/console.hpp>
 
-uint32_t SystemCoreClock = 40000000L;
+uint32_t SystemCoreClock = 20000000L;
 
 extern "C"
 uint8_t __atomic_exchange_1(volatile void *dest, uint8_t val, int model)
