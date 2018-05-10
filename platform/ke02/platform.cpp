@@ -2,33 +2,32 @@ extern "C" {
 #include <sysinit.h>
 }
 
-#include <common.h>
-#include <wdog.h>
+#include <stdio.h>
+
 #include "common.h"
 #include "sysinit.h"
 #include "sim.h"
-#include "uart.h"
 #include "ics.h"
+#include "uart.h"
+#include "wdog.h"
+#include "platform/console.hpp"
 
-#include <stdio.h>
-#include <platform/console.hpp>
-
-uint32_t SystemCoreClock = 20000000L;
+uint32_t SystemCoreClock = 20000000UL;
 
 extern "C"
 uint8_t __atomic_exchange_1(volatile void *dest, uint8_t val, int model)
 {
-   (void)model;
+    (void)model;
 
-   __disable_irq();
+    __disable_irq();
 
-   uint8_t *u8_dest = (uint8_t*)dest;
-   uint8_t old_val = *u8_dest;
-   *u8_dest = val;
+    uint8_t *u8_dest = (uint8_t*)dest;
+    uint8_t old_val = *u8_dest;
+    *u8_dest = val;
 
-   __enable_irq();
+    __enable_irq();
 
-   return old_val;
+    return old_val;
 }
 
 #ifdef THECORE_CONFIG_USE_CONSOLE
@@ -41,10 +40,7 @@ namespace ecl
 #endif // THECORE_CONFIG_USE_CONSOLE
 
 extern "C"
-void platform_init()
-{
-
-}
+void platform_init() {}
 
 extern "C"
 void out_char(char c)
@@ -58,12 +54,11 @@ void SystemInit()
     SIM_ConfigType  sSIMConfig;
     ICS_ConfigType  sICSConfig;
 
-    ICS_Trim(ICS_TRIM_VALUE); /*!< trim IRC to 39.0625KHz and FLL output=40MHz */
+    ICS_Trim(0x57); /*!< Trim IRC to 39.0625KHz and FLL output = 40MHz */
 
     /*
      * Enable SWD pin, RESET pin
-     */
-    /*
+     *
      * NOTE: please make sure other register bits are also write-once and
      * need add other bit mask here if needed.
      */
@@ -72,38 +67,31 @@ void SystemInit()
 #endif
 
 #if defined(OUTPUT_BUSCLK)
-    sSIMConfig.sBits.bEnableCLKOUT = 1;      /* output bus clock if enabled */
+    sSIMConfig.sBits.bEnableCLKOUT = 1; /* Output bus clock if enabled */
 #endif
 
 #if defined(DISABLE_NMI)
     sSIMConfig.sBits.bDisableNMI = 1;
 #endif
 
-    #if !defined(CPU_KE04)
-    /* make sure clocks to peripheral modules are enabled */
-    sSIMConfig.u32SCGC |= SIM_SCGC_SWD_MASK | SIM_SCGC_FLASH_MASK |
-                         SIM_SCGC_UART0_MASK | SIM_SCGC_UART1_MASK |
-                         SIM_SCGC_UART2_MASK
-                         ;
-    #else
-    sSIMConfig.u32SCGC |= SIM_SCGC_SWD_MASK | SIM_SCGC_FLASH_MASK |
-                         SIM_SCGC_UART0_MASK
-                         ;
-    #endif
+#if !defined(CPU_KE04)
+    /* Make sure clocks to peripheral modules are enabled */
+    sSIMConfig.u32SCGC |= (SIM_SCGC_SWD_MASK |
+                          SIM_SCGC_FLASH_MASK |
+                          SIM_SCGC_UART0_MASK |
+                          SIM_SCGC_UART1_MASK |
+                          SIM_SCGC_UART2_MASK);
+#else
+    sSIMConfig.u32SCGC |= (SIM_SCGC_SWD_MASK | SIM_SCGC_FLASH_MASK | SIM_SCGC_UART0_MASK);
+#endif
 
-    #if !defined(CPU_KE02)
-    /* bus clock divided by 2 */
-    sSIMConfig.u32CLKDIV |= SIM_CLKDIV_OUTDIV2_MASK;
-    #endif
-
-    SIM_Init(&sSIMConfig);                   /* initialize SIM */
+    SIM_Init(&sSIMConfig); /* Initialize SIM */
 
     sICSConfig.u8ClkMode = ICS_CLK_MODE_FEI;
     sICSConfig.bLPEnable = 0;
-    sICSConfig.u32ClkFreq = 32;
-    sICSConfig.oscConfig.bEnable = 0; /* disable OSC */
+    sICSConfig.oscConfig.bEnable = 0; /* Disable OSC */
 
-    ICS_Init(&sICSConfig);   /* initialize ICS */
+    ICS_Init(&sICSConfig); /* Initialise ICS */
 
     /* Disable the watchdog timer */
     WDOG_DisableWDOGEnableUpdate();
@@ -111,5 +99,6 @@ void SystemInit()
     ecl::bypass_console_init();
 
     void print_sys_log(void);
+
     print_sys_log();
 }
