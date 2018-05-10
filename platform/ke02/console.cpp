@@ -1,8 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
+#include <type_traits>
+#include <common.h> // Test if we need this or not.
+#include <uart.h>
 
+#include "platform/console.hpp"
+
+namespace ecl
+{
 //! \addtogroup platform Platform defintions and drivers
 //! @{
 
@@ -14,16 +22,6 @@
 
 //! \file
 //! \brief KE02 bypass console implementation.
-
-#include "platform/console.hpp"
-
-#include <type_traits>
-
-#include <common.h> // Test if we need this or not.
-#include <uart.h>
-
-namespace ecl
-{
 
 void bypass_console_init()
 {
@@ -40,10 +38,9 @@ void bypass_putc(char c)
     UART_PutChar(platform_console::pick_sysctl(), c);
 }
 
+//! @}
+
+//! @}
+
+//! @}
 } // namespace ecl
-
-//! @}
-
-//! @}
-
-//! @}

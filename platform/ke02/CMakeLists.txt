@@ -64,9 +64,6 @@ if(DEFINED thecore_cfg.platform.console)
     target_sources(ke02 PUBLIC ${CMAKE_CURRENT_LIST_DIR}/console.cpp)
 endif()
 
-# Platform is not CMSIS-compliant
-#set(TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT 1 CACHE BOOL "Compliance status" FORCE)
-
 if(NOT CONFIG_OS)
     target_compile_definitions(ke02 PUBLIC -DTHECORE_NO_OS=1)
 endif()
@@ -74,7 +71,6 @@ endif()
 #-------------------------------------------------------------------------------
 
 # Tie all generated code together.
-
 add_custom_target(platform_generated DEPENDS ke02_validate ${GENERATED_FILES})
 add_dependencies(ke02 platform_generated)
 target_include_directories(ke02 PUBLIC ${CORE_GEN_DIR}/export/)

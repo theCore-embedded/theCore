@@ -2,7 +2,7 @@
 #define KE02_PLATFORM_IRQ_HPP_
 
 
-// Temporary measure, while we trowing away redundant IRQ manager
+// Temporary measure, while we are throwing away redundant IRQ manager
 #define THECORE_NO_IRQ_MANAGER 1
 
 namespace ecl

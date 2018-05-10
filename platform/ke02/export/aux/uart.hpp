@@ -240,7 +240,6 @@ void uart<ch>::set_tx(const uint8_t *tx, size_t size)
 template<uart_channel ch>
 void uart<ch>::set_tx(size_t size, uint8_t fill_byte)
 {
-    // TODO: implement
     auto &bus_ctx = get_ctx();
 
     ecl_assert((bus_ctx.status & (ctx::inited | ctx::tx_done))
