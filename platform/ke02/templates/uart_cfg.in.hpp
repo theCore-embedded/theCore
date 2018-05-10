@@ -20,7 +20,9 @@ cfg = json.load(open(JSON_CFG))
 cfg = cfg['platform']
 
 # UART device alias, used internally by bypass console driver
-template_console_dev = 'static constexpr uart_channel console_channel = uart_channel::ch%d;'
+template_console_dev = '''static constexpr uart_channel UART{CHANNEL_INDEX}_channel = uart_channel::ch{CHANNEL_INDEX};
+using UART{CHANNEL_INDEX}_driver = uart<UART{CHANNEL_INDEX}_channel>;
+using platform_console = UART{CHANNEL_INDEX}_driver;'''
 
 # Gets string representation of UART theCore enum.
 def get_uart_enum(uart_cfg):
@@ -47,9 +49,11 @@ for uart_cfg in uart_cfgs:
         # Avoid using begin and end comment section tokens
         cog.outl(('\n%s* ' + uart_cfg['comment'] + ' *%s') % ('/', '/'))
 
-    cog.outl(template_console_dev % get_uart_enum(uart_cfg))
-    cog.outl('using platform_console = uart<console_channel>;')
+    cog.outl(template_console_dev.format(CHANNEL_INDEX = get_uart_enum(uart_cfg)))
 
+    if 'alias' in uart_cfg:
+        cog.outl('using {ALIAS_NAME} = UART{CHANNEL_INDEX}_driver;'.format(ALIAS_NAME = uart_cfg['alias'],
+                                                                           CHANNEL_INDEX = get_uart_enum(uart_cfg)))
 ]]]*/
 //[[[end]]]
 
