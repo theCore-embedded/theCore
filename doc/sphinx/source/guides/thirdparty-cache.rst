@@ -20,26 +20,22 @@ Variables can be passed via an environment or CMake command-line arguments.
 Using environment variables
 ---------------------------
 
-1. Set variables
+#. Set variables::
 
-   ```
-   export THECORE_THIRDPARTY_DIR=~/.thecore_thirdparty
-   # Note that if you build applications concurrently, you need THECORE_BUILD_THIRDPARTY_DIR
-   # to be unique for every application.
-   export THECORE_BUILD_THIRDPARTY_DIR=~/.thecore_thirdparty_worktree
-   ```
+        export THECORE_THIRDPARTY_DIR=~/.thecore_thirdparty
+        # Note that if you build applications concurrently, you need THECORE_BUILD_THIRDPARTY_DIR
+        # to be unique for every application.
+        export THECORE_BUILD_THIRDPARTY_DIR=~/.thecore_thirdparty_worktree
 
-1. Run CMake as usual
+#. Run CMake as usual::
 
-   ```
-   cmake /path/to/application
-   ```
+        cmake /path/to/application
 
 Using CMake command line
 ------------------------
 
-```
-# Note that if you build applications concurrently, you need THECORE_BUILD_THIRDPARTY_DIR
-# to be unique for every application.
-cmake -DTHECORE_THIRDPARTY_DIR=~/.thecore_thirdparty -DTHECORE_BUILD_THIRDPARTY_DIR=~/.thecore_thirdparty_worktree /path/to/application
-```
+::
+
+    # Note that if you build applications concurrently, you need THECORE_BUILD_THIRDPARTY_DIR
+    # to be unique for every application.
+    cmake -DTHECORE_THIRDPARTY_DIR=~/.thecore_thirdparty -DTHECORE_BUILD_THIRDPARTY_DIR=~/.thecore_thirdparty_worktree /path/to/application
