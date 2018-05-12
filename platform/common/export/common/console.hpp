@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 //! \file
-//! \brief Common bypas console implementation.
+//! \brief Common bypass console implementation.
 
 #ifndef PLATFORM_COMMON_CONSOLE_HPP_
 #define PLATFORM_COMMON_CONSOLE_HPP_
