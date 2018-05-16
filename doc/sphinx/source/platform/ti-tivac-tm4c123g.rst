@@ -50,7 +50,7 @@ Available examples
 ~~~~~~~~~~~~~~~~~~
 
 * :ref:`theCore_TM4C_FATFS_SDSPI`
-* :ref:`theCore_TM4C_Blinky`
+* :ref:`theCore_blinky`
 
 Periphery overview
 ~~~~~~~~~~~~~~~~~~

@@ -3,11 +3,17 @@
 STM32F4 discovery audio example with CS43L22 audio DAC
 ------------------------------------------------------
 
-:Location:          ``examples/cs43l22_audio``
-:Target:            STM32F4 Discovery board
+:Location:          https://github.com/theCore-embedded/example_cs43l22_audio
 :External HW:       UART-to-USB converter attached to the USART3, headphones
-:Toolchain:         GNU arm-none-eabi v.5.2 or newer
-:Additional SW:     openocd, minicom
+
+Supported targets (boards)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++---------------------+--------------------------+-----------------------------------+
+|     Target name     |    Configuration file    |            Description            |
++=====================+==========================+===================================+
+| stm32f4_disc        | stm32f4_discovery.json   | STM32F4 discovery board           |
++---------------------+--------------------------+-----------------------------------+
 
 Wiring
 ~~~~~~
@@ -83,7 +89,7 @@ Firmware will be flashed via ``openocd`` debugger and ``flash`` command.
 
    ::
 
-     tcore flash --sudo --debuger-config stlink-v2.1
+     tcore flash --sudo --debugger-config stlink-v2.1
 
    See :ref:`theCore_SudoOpenOCD_Nix` section to get insight why ``which openocd``
    is important.
@@ -105,13 +111,6 @@ In ``minicom`` you should be able to see::
   Welcome to theCore
   Playing audio sample...
 
-
 In headphones you should hear cool 8-bit sound.
-
-Target JSON config for the audio example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. literalinclude:: ../../../../examples/cs43l22_audio/stm32f4_cs43l22.json
-
 
 .. _such as this: http://www.geekfactory.mx/wp-content/uploads/2013/06/converdidor_usb_ttl_rs232_pl_2303hx_01.jpg

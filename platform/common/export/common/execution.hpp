@@ -4,7 +4,7 @@
 
 //! \file
 //! \brief Module aggregates routines that are control execution flow of the MCU.
-//! \details Common implementation accross multiple platforms.
+//! \details Common implementation across multiple platforms.
 
 #ifndef PLATFORM_COMMON_EXECUTION_HPP_
 #define PLATFORM_COMMON_EXECUTION_HPP_
