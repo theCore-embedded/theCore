@@ -51,6 +51,7 @@ Available examples
 
 * :ref:`theCore_TM4C_FATFS_SDSPI`
 * :ref:`theCore_blinky`
+* :ref:`theCore_hello_world`
 
 Periphery overview
 ~~~~~~~~~~~~~~~~~~

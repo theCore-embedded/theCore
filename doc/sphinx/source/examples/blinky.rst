@@ -24,8 +24,8 @@ Wiring
 
 No special wiring is required. Just connect the board to the powered USB port.
 
-Building
-~~~~~~~~
+Preparing
+~~~~~~~~~
 
 #. Install theCore (this may take a while)::
 
@@ -40,14 +40,14 @@ Building
 
         cd example_blinky
 
-#. Compile:
+Building
+~~~~~~~~
 
-   * For STM32 Discovery board::
+* For STM32 Discovery board::
 
-        cd example_blinky
         tcore compile --target stm32f4_disc
 
-   * For Tiva TM4C LaunchPad::
+* For Tiva TM4C LaunchPad::
 
         tcore compile --target tiva_tm4c_launchpad
 
