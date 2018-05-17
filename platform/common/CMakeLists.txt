@@ -5,6 +5,7 @@
 if(PLATFORM_NAME STREQUAL host)
     add_library(platform_common INTERFACE)
     target_include_directories(platform_common INTERFACE export)
+    target_link_libraries(platform_common INTERFACE utils)
 else()
     # IRQ management must be enabled only if cross-compiling for embedded boards
 
