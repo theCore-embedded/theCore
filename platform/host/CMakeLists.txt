@@ -24,6 +24,13 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/export/aux/platform_defines.hpp
 )
 
+# Platform-generated code
+
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/templates/generated.in.hpp
+    ${CMAKE_CURRENT_BINARY_DIR}/export/aux/generated.hpp
+)
+
 target_include_directories(host PUBLIC
     export export/platform ${CMAKE_CURRENT_BINARY_DIR}/export/)
 target_link_libraries(host PUBLIC types)

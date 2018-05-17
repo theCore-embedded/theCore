@@ -22,4 +22,4 @@ For more details on theCore console, check the :ref:`theCore_Console` section.
 Related references
 ~~~~~~~~~~~~~~~~~~
 
-* :ref:`theCore_host_hello`
+* :ref:`theCore_hello_world`

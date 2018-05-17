@@ -8,7 +8,7 @@ Examples
   :includehidden:
 
   blinky
-  hello-world-host
+  hello-world
   stm32f4-discovery-htu21d-sensor
   stm32f4-discovery-cs43l22
   stm32f4-discovery-exti
