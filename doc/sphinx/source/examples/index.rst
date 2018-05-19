@@ -9,9 +9,9 @@ Examples
 
   blinky
   hello-world
+  exti-button-interrupt
   stm32f4-discovery-htu21d-sensor
   stm32f4-discovery-cs43l22
-  stm32f4-discovery-exti
   stm32f4-discovery-bluetooth-hm10
   ti-tm4c123g-sdcard-fatfs-sdspi
 

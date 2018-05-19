@@ -7,6 +7,7 @@
 
 #include <platform/exti_manager.hpp>
 #include <platform/execution.hpp>
+#include <common/console.hpp>
 
 #include "aux/uart_cfg.hpp"
 #include "aux/spi_cfg.hpp"
@@ -315,7 +316,7 @@ void FLASH_Handler()
 extern "C"
 void GPIOF_Handler()
 {
-    ecl::abort();
+    ecl::exti_irq_proxy::deliver_irq<ecl::gpio_hw::port::f>();
 }
 
 /* 49 UART2 */

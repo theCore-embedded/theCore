@@ -237,7 +237,7 @@ void exti_manager::subscribe(handler &h, trigger t)
 
     save_handler<Gpio>(h);
 
-    // Do not let EXTI fire unless user explicitely ask for it.
+    // Do not let EXTI fire unless user explicitly ask for it.
     mask(h);
     configure_line<Gpio>(t);
 
