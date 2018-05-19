@@ -1,10 +1,24 @@
-.. _theCore_hello_world:
+External interrupts from user button
+------------------------------------
 
-Simple Hello World example
---------------------------
+:Location:          https://github.com/theCore-embedded/example_button_interrupt
+:External HW:       UART-to-USB converter
 
-:Location:          https://github.com/theCore-embedded/example_hello_world
-:External HW:       UART-to-USB converter for STM32F4Discovery board
+EXTI - the external interrupt.
+
+  An external interrupt is a computer system interrupt that happens as a result
+  of outside interference, whether that’s from the user, from peripherals,
+  from other hardware devices or through a network. These are different
+  than internal interrupts that happen automatically as the machine
+  reads through program instructions.
+
+  -- Techopedia_
+
+In this application, one particular type of external interrupt is used:
+GPIO line interrupt. When voltage level changes on the line (e.g. when button is
+pressed), interrupt is generated.
+
+.. STARTOF COMMON SECTION MARKER
 
 Supported targets (boards)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12,8 +26,6 @@ Supported targets (boards)
 +---------------------+--------------------------+-----------------------------------+
 | Target name         | Configuration file       | Description                       |
 +=====================+==========================+===================================+
-| host                | host.json                | Host target build                 |
-+---------------------+--------------------------+-----------------------------------+
 | stm32f4_disc        | stm32f4_discovery.json   | STM32F4 discovery board           |
 +---------------------+--------------------------+-----------------------------------+
 | tiva_tm4c_launchpad | tiva_tm4c_launchpad.json | TM4C123G LaunchPad Evaluation Kit |
@@ -37,6 +49,10 @@ Wiring
      | GND               | module's GND    |
      +-------------------+-----------------+
 
+     .. image:: https://i.imgur.com/dRVRHV2.jpg
+        :alt: UART wiring for stm32f4discovery EXTI example
+
+
   #. Connect your STM32 Discovery board to the PC.
 
 Preparing
@@ -49,11 +65,11 @@ Preparing
 
 #. Download the example::
 
-    tcore init --remote https://github.com/theCore-embedded/example_hello_world
+    tcore init --remote https://github.com/theCore-embedded/example_button_interrupt
 
 #. Step into the project directory::
 
-    cd example_hello_world
+    cd example_button_interrupt
 
 Building
 ~~~~~~~~
@@ -66,15 +82,10 @@ Building
 
     tcore compile --target tiva_tm4c_launchpad
 
-* For host::
-
-    tcore compile --target host
-
 Running
 ~~~~~~~
 
-#. If you wish to run the example on the embedded device, launch `minicom`
-   with device associated with USB <-> UART converter.
+#. Launch ``minicom`` with device associated with USB <-> UART converter.
    (``/dev/ttyUSB0`` here used as an example)::
 
         # From new terminal
@@ -99,29 +110,21 @@ Running
 
         tcore flash --sudo --debugger-config stlink-v2.1
 
-   * For host target, execute::
-
-        ./build/host/hello_world
-
 Expected output
 ~~~~~~~~~~~~~~~
 
-Observe console output (either in current shell if running on host, or using
-   minicom if running on the embedded device)::
+Observe console output using ``minicom`` if running on the embedded device)::
 
         Welcome to theCore
         the_core v0.3.0.307 9ff344b-dirty
-        Hello World!
+        Starting EXTI (button interrupt) demo
 
-        Starting delay demonstration...
+Every time you press a button (SW1 on TivaC board, USR_BTN on STM32F4 Discovery),
+following output will be displayed::
 
-        [--] Waiting for 2 seconds
-        [--] Done waiting 2 seconds
-
-        [----] Waiting for 4 seconds
-        [----] Done waiting 4 seconds
-
-        [--------] Waiting for 8 seconds
-        [--------] Done waiting 8 seconds
+        Button pressed!
 
 .. _such as this: http://www.geekfactory.mx/wp-content/uploads/2013/06/converdidor_usb_ttl_rs232_pl_2303hx_01.jpg
+.. _Techopedia: https://www.techopedia.com/definition/7115/external-interrupt
+
+.. ENDOF COMMON SECTION MARKER
