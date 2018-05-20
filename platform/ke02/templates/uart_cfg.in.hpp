@@ -21,8 +21,7 @@ cfg = cfg['platform']
 
 # UART device alias, used internally by bypass console driver
 template_console_dev = '''static constexpr uart_channel UART{CHANNEL_INDEX}_channel = uart_channel::ch{CHANNEL_INDEX};
-using UART{CHANNEL_INDEX}_driver = uart<UART{CHANNEL_INDEX}_channel>;
-using platform_console = UART{CHANNEL_INDEX}_driver;'''
+using UART{CHANNEL_INDEX}_driver = uart<UART{CHANNEL_INDEX}_channel>;'''
 
 # Gets string representation of UART theCore enum.
 def get_uart_enum(uart_cfg):
@@ -54,6 +53,12 @@ for uart_cfg in uart_cfgs:
     if 'alias' in uart_cfg:
         cog.outl('using {ALIAS_NAME} = UART{CHANNEL_INDEX}_driver;'.format(ALIAS_NAME = uart_cfg['alias'],
                                                                            CHANNEL_INDEX = get_uart_enum(uart_cfg)))
+
+    if 'console' in cfg and cfg['console'] == uart_cfg['id']:
+        cog.outl('\n/' + '* Console configuration *' + '/\n')
+        cog.outl('static constexpr auto console_channel = UART{CHANNEL_INDEX}_channel;'.format(CHANNEL_INDEX = get_uart_enum(uart_cfg)))
+        cog.outl('using platform_console = {DRIVER_ID}_driver;'.format(DRIVER_ID = cfg['console']))
+
 ]]]*/
 //[[[end]]]
 
