@@ -92,9 +92,9 @@ extern "C" void core_main()
     board_init();
 
 #ifdef CONFIG_USE_BYPASS_CONSOLE
-	// Dirty hack to make sure pin configuration is established before
-	// bypass console will be used.
-	// It should be fixed by configuring console GPIO directly in the platform,
+    // Dirty hack to make sure pin configuration is established before
+    // bypass console will be used.
+    // It should be fixed by configuring console GPIO directly in the platform,
     // not in the user's `board_init()` routine. See issue #151.
     ecl::wait_for(50);
 #endif // CONFIG_USE_BYPASS_CONSOLE

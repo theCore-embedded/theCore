@@ -25,6 +25,7 @@ add_subdirectory(stm32-spl)
 add_subdirectory(ti-tivaware)
 add_subdirectory(unity)
 add_subdirectory(particle_firmware)
+add_subdirectory(kexx_drv)
 
 # Some platforms may not feel well with definitions in FAT headers
 # TODO: fix it.

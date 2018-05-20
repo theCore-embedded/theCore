@@ -3,13 +3,19 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 # ARM Cortex-M architecture
-add_library(arch STATIC startup_arm_cm.S arch.cpp)
+if(TARGET_MCU_ARCH MATCHES "^arm_cm0")
+    # Slightely different architecture used there
+    add_library(arch STATIC startup_arm_cm0.S arch.cpp)
+else()
+    add_library(arch STATIC startup_arm_cm.S arch.cpp)
+endif()
 
 # By default CMake do not pass compile definitions to ASM files.
 # Probably due to the fact that it depends on assembler used and some of the
 # assemblers may not support preprocessing.
 # This command forces use of gcc instead of as. It allows to pass compile definitions
 set_source_files_properties(startup_arm_cm.S PROPERTIES LANGUAGE C)
+set_source_files_properties(startup_arm_cm0.S PROPERTIES LANGUAGE C)
 
 # ASM code requires some symbols present in outer libraries
 target_link_libraries(arch PRIVATE sys)
@@ -52,6 +58,21 @@ if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
     )
 
     target_sources(arch PUBLIC ${CMAKE_CURRENT_LIST_DIR}/execution.cpp)
+endif()
+
+# Custom stack size
+if(TARGET_STACK_SIZE)
+    target_compile_definitions(arch PRIVATE -D__STACK_SIZE=${TARGET_STACK_SIZE})
+endif()
+
+# Custom heap size
+if(TARGET_HEAP_SIZE)
+    target_compile_definitions(arch PRIVATE -D__HEAP_SIZE=${TARGET_HEAP_SIZE})
+endif()
+
+# Kinetis-specific definitions
+if(TARGET_KINETIS_FLASH_PROTECT_SECTION)
+    target_compile_definitions(arch PRIVATE -DTARGET_KINETIS_FLASH_PROTECT_SECTION=1)
 endif()
 
 # Apply memory layout

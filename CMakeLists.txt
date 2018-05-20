@@ -4,8 +4,6 @@
 
 # ASM is crucial
 enable_language(ASM-ATT)
-# Subproject may use tests
-enable_testing()
 
 # Obvious requirement
 cmake_minimum_required(VERSION 3.4)

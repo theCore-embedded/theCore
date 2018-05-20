@@ -121,6 +121,8 @@ SECTIONS
     } > FLASH
     */
 
+    . = ALIGN(4);
+
     __etext = .;
 
     .data : AT (__etext)
@@ -129,7 +131,6 @@ SECTIONS
         *(vtable)
         *(.data*)
 
-        . = ALIGN(4);
         /* preinit data */
         PROVIDE_HIDDEN (__preinit_array_start = .);
         KEEP(*(.preinit_array))

@@ -8,6 +8,7 @@
 //! Examples include forking or using memory allocations.
 
 #include <common/execution.hpp>
+#include <common/console.hpp>
 
 #include <stdlib.h>
 #include <sys/unistd.h>
@@ -31,6 +32,20 @@ int _close(int file)
     (void)file;
     errno = EBADF;
     return -1;
+}
+
+int _isatty(int file)
+{
+    switch (file)
+    {
+    case STDOUT_FILENO:
+    case STDERR_FILENO:
+    case STDIN_FILENO:
+        return 1;
+    default:
+        errno = EBADF;
+        return 0;
+    }
 }
 
 extern "C"
@@ -113,11 +128,22 @@ int _read(int file, void *ptr, size_t len)
     return -1;
 }
 
+extern uint8_t __HeapBase;
+extern uint8_t __HeapLimit;
+static uint8_t *heap_current = &__HeapBase;
+static uint8_t *heap_end = &__HeapLimit;
+
 extern "C"
 void *_sbrk(ptrdiff_t incr)
 {
-    (void)incr;
-    ecl::abort(); // Dynamic allocation is not allowed by default.
+    if (heap_current + incr > heap_end) {
+        ecl::abort(); // TODO: better handling
+        errno = ENOMEM;
+        return nullptr;
+    }
+
+    heap_current += incr;
+    return heap_current;
 }
 
 extern "C"
@@ -155,9 +181,14 @@ int _wait(int *status)
 extern "C"
 int _write(int file, const void *ptr, size_t sz)
 {
-    (void)file;
-    (void)ptr;
-    (void)sz;
-    errno = EBADF;
-    return -1;
+    if (file != STDOUT_FILENO || file != STDERR_FILENO) {
+        errno = EBADF;
+        return -1;
+    }
+
+    for (size_t i = 0; i < sz; ++i) {
+        ecl::bypass_putc(static_cast<const char*>(ptr)[i]);
+    }
+
+    return 0;
 }

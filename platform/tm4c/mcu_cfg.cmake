@@ -30,4 +30,4 @@ if(thecore_cfg.platform.device STREQUAL "TM4C123GH6PM")
     return()
 endif()
 
-msg_fatal("Device: ${CONFIG_PLATFORM_DEVICE} is not supported")
+message(FATAL_ERROR "${CONFIG_PLATFORM_DEVICE} is not supported")

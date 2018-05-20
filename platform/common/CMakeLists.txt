@@ -5,7 +5,7 @@
 if(PLATFORM_NAME STREQUAL host)
     add_library(platform_common INTERFACE)
     target_include_directories(platform_common INTERFACE export)
-    target_link_libraries(platform_common INTERFACE dbg utils)
+    target_link_libraries(platform_common INTERFACE utils)
 else()
     # IRQ management must be enabled only if cross-compiling for embedded boards
 
@@ -13,8 +13,7 @@ else()
 
     target_include_directories(platform_common PUBLIC export)
 
-    target_link_libraries(platform_common PUBLIC ${PLATFORM_NAME} types)
-    target_link_libraries(platform_common PRIVATE dbg utils)
+    target_link_libraries(platform_common PUBLIC ${PLATFORM_NAME} dbg types utils)
 
     target_compile_definitions(platform_common PRIVATE -DIRQ_COUNT=${TARGET_MCU_IRQ_COUNT})
 endif()

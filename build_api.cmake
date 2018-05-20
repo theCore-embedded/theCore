@@ -48,7 +48,7 @@ endfunction(msg_trace)
 # Add test only if not cross-compiling
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME)
     find_package(CppUTest)
-    if(NOT ${CPPUTEST_FOUND})
+    if(NOT CPPUTEST_FOUND)
         msg_warn("CppUTest library not present. Tests are disabled.")
     endif()
 endif()
@@ -63,6 +63,10 @@ endif()
 #                    [INC_DIRS list_of_include_directories...]
 #                    [COMPILE_OPTIONS list_of_compiler_options...])
 function(add_unit_host_test)
+    if(NOT BUILD_TESTING)
+        return()
+    endif()
+
     set(CC_WARN_FLAGS -Wall -Wextra -Wpedantic -Werror)
     set(CXX_WARN_FLAGS ${CC_WARN_FLAGS})
 
@@ -281,6 +285,8 @@ function(theCore_get_thirdparty_cmd NAME GIT_REMOTE GIT_COMMIT)
     endif()
 
     msg_trace("Requested thirdparty: ${NAME} from: ${GIT_REMOTE} commit: ${GIT_COMMIT}")
+    msg_trace("Thirdparty git: ${THECORE_THIRDPARTY_DIR}/${NAME}")
+    msg_trace("Thirdparty worktree: ${THECORE_BUILD_THIRDPARTY_DIR}/${NAME}")
 
     if(NOT THECORE_THIRDPARTY_DIR)
         msg_fatal("THECORE_THIRDPARTY_DIR must be specified in order to persist thirdparty packages")
