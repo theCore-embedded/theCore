@@ -53,6 +53,7 @@ msg_info("Thirdparty worktree (build) directory: ${THECORE_BUILD_THIRDPARTY_DIR}
 if(NOT DEFINED THECORE_TARGET_CONFIG_FILE AND NOT CMAKE_CROSSCOMPILING)
     msg_info("Enabled test mode for theCore")
 
+    ## TODO: change it to work with new configurator
     file(WRITE ${CORE_GEN_DIR}/test.json
         "{\"platform\":{\"name\":\"host\",\"console\":true}}"
     )
@@ -66,7 +67,7 @@ else()
     file(READ ${THECORE_TARGET_CONFIG_FILE} THECORE_JSON_BODY)
     # Lower case for better readability.
     sbeParseJson(thecore_cfg THECORE_JSON_BODY)
-    set(CONFIG_PLATFORM ${thecore_cfg.platform.name})
+    string(TOLOWER ${thecore_cfg.menu-platform.config-name} CONFIG_PLATFORM)
 endif()
 
 msg_trace("Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")

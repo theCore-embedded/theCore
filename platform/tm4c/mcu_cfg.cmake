@@ -2,9 +2,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-msg_trace("Checking [CONFIG_PLATFORM_DEVICE]...")
+msg_trace("Checking platform device...")
 
-if(thecore_cfg.platform.device STREQUAL "TM4C123GH6PM")
+set(PLATFORM_DEVICE ${thecore_cfg.menu-platform.menu-tm4c.config-device})
+
+if(PLATFORM_DEVICE STREQUAL "TM4C123GH6PM")
     # All members of the TivaTM C Series, including the TM4C123GH6PM
     # microcontroller, are designed around an ARM Cortex-M4 processor core.
     set(TARGET_MCU_ARCH "arm_cm4" CACHE STRING "Processor arch")
@@ -30,4 +32,4 @@ if(thecore_cfg.platform.device STREQUAL "TM4C123GH6PM")
     return()
 endif()
 
-msg_fatal("Device: ${CONFIG_PLATFORM_DEVICE} is not supported")
+msg_fatal("Device: ${PLATFORM_DEVICE} is not supported")

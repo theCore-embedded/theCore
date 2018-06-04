@@ -4,7 +4,7 @@
 
 add_library(sdspi INTERFACE)
 target_include_directories(sdspi INTERFACE export)
-target_link_libraries(sdspi INTERFACE utils)
+target_link_libraries(sdspi INTERFACE utils bus)
 
 theCore_create_cog_runner(
     IN      ${CMAKE_CURRENT_LIST_DIR}/templates/sdspi_cfg.in.hpp

@@ -1,0 +1,57 @@
+{
+    "menu-tm4c": {
+        "description": "TI Tiva TM4C menu",
+        "long-description": [
+            "TM4C is a cheap and",
+            "robust MCU from Texas",
+            "instruments "
+        ],
+
+        "config-device": {
+            "description": "TM4C MCU model",
+
+            "long-description": [
+                "Only TM4C123GH6PM device",
+                "is supported for now"
+            ],
+
+            "default": "TM4C123GH6PM",
+            "type": "enum",
+            "values": [ "TM4C123GH6PM" ]
+        },
+
+        "config-console": {
+            "description": "UART used for console",
+            "type": "enum",
+            "values-from": "uart-channel"
+        },
+
+        "menu-timer" : {
+            "description": "Systimer configuration",
+            "include-timer": {
+                "ref": "./schemas/timer.json"
+            }
+        },
+
+        "menu-uart": {
+            "description": "UART configuration",
+            "include-uart": {
+                "ref": "./schemas/uart.json"
+            }
+        },
+
+        "menu-spi": {
+            "description": "SSI (SPI) config",
+            "include-spi": {
+                "ref": "./schemas/spi.json"
+            }
+        },
+
+        "menu-pinconfig": {
+            "description": "I/O pin configuration",
+            "include-pinconfig": {
+                "ref": "./schemas/pinconfig.json"
+            }
+        }
+    }
+}

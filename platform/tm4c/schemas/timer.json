@@ -1,0 +1,26 @@
+{
+    "config-source": {
+        "description": "System timer source",
+        "type": "enum",
+        "default": "systick",
+        "values": [ "systick" ]
+    },
+
+    "config-freq": {
+        "description": "Systimer frequency, Hz",
+        "default": "100",
+        "type": "integer"
+    },
+
+    "config-owner": {
+        "description": "Systimer owner",
+        "type": "enum",
+        "default": "user",
+        "values": [ "user", "thecore" ]
+    },
+
+    "config-comment": {
+        "description": "C++ Comment",
+        "type": "string"
+    }
+}

@@ -12,6 +12,7 @@ theCore_get_thirdparty(ti-tivaware https://github.com/forGGe/ti-tivaware eaa4b28
 # override warnings, since library contains few of them
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error")
 set(TIVAWARE_DIR ${THECORE_BUILD_THIRDPARTY_DIR}/ti-tivaware)
+set(PLATFORM_DEVICE ${thecore_cfg.menu-platform.menu-tm4c.config-device})
 
 add_library(tivaware STATIC
         ${TIVAWARE_DIR}/driverlib/adc.c
@@ -48,10 +49,10 @@ add_library(tivaware STATIC
         ${TIVAWARE_DIR}/driverlib/watchdog.c
         )
 
-if(thecore_cfg.platform.device MATCHES "TM4C123GH6PM")
+if(PLATFORM_DEVICE MATCHES "TM4C123GH6PM")
     target_compile_definitions(tivaware PUBLIC -DPART_TM4C123GH6PM)
 else()
-    msg_fatal("Unknown device: ${thecore_cfg.platform.device}")
+    msg_fatal("Unknown device: ${PLATFORM_DEVICE}")
 endif()
 
 target_include_directories(tivaware SYSTEM PUBLIC

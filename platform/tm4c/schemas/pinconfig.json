@@ -1,0 +1,687 @@
+{
+    "table-pins": {
+        "description": "Pin configuration",
+        "key": "config-channel",
+        "items": {
+            "config-channel": {
+                "type": "enum",
+                "description": "Pin selection",
+                "values": "P[A-D][0-7]|PE[0-5]|PF[0-4]",
+                "single": false
+            },
+            "config-direction": {
+                "type": "enum",
+                "description": "Pin direction",
+                "default": "output",
+                "values": [ "input", "output", "af" ]
+            },
+            "config-type": {
+                "type": "enum",
+                "description": "Pin type",
+                "default": "standard",
+                "values": [
+                    "standard",
+                    "push",
+                    "pull",
+                    "open drain",
+                    "analog",
+                    "wake high",
+                    "wake low"
+                ]
+            },
+            "config-strength": {
+                "type": "enum",
+                "description": "Pin maximum rating",
+                "default": "6mA",
+                "values": [
+                    "2mA",
+                    "4mA",
+                    "6mA",
+                    "8mA",
+                    "8mA_sc",
+                    "10ma",
+                    "12mA"
+                ]
+            },
+            "config-comment": {
+                "type": "string",
+                "description": "Comment for pin config"
+            },
+            "config-gpio-alias": {
+                "type": "string",
+                "description": "GPIO driver alias",
+                "config-class": "gpio-driver"
+            }
+        },
+        "items-PA0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U0Rx",
+                    "CAN1Rx"
+                ]
+            }
+        },
+        "items-PA1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U0Tx",
+                    "CAN1Tx"
+                ]
+            }
+        },
+        "items-PA2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI0Clk"
+                ]
+            }
+        },
+        "items-PA3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI0Fss"
+                ]
+            }
+        },
+        "items-PA4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI0Rx"
+                ]
+            }
+        },
+        "items-PA5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI0Tx"
+                ]
+            }
+        },
+        "items-PA6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "I2C1SCL",
+                    "M1PWM2"
+                ]
+            }
+        },
+        "items-PA7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "I2C1SDA",
+                    "M1PWM3"
+                ]
+            }
+        },
+        "items-PB0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "USB0ID",
+                    "U1Rx",
+                    "T2CCP0"
+                ]
+            }
+        },
+        "items-PB1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "USB0VBUS",
+                    "U1Tx",
+                    "T2CCP1"
+                ]
+            }
+        },
+        "items-PB2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "I2C0SCL",
+                    "T3CCP0"
+                ]
+            }
+        },
+        "items-PB3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "I2C0SDA",
+                    "T3CCP1"
+                ]
+            }
+        },
+        "items-PB4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN10",
+                    "SSI2Clk",
+                    "M0PWM2",
+                    "T1CCP0",
+                    "CAN0Rx"
+                ]
+            }
+        },
+        "items-PB5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN11",
+                    "SSI2Fss",
+                    "M0PWM3",
+                    "T1CCP1",
+                    "CAN0Tx"
+                ]
+            }
+        },
+        "items-PB6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI2Rx",
+                    "M0PWM0",
+                    "T0CCP0"
+                ]
+            }
+        },
+        "items-PB7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI2Tx",
+                    "M0PWM1",
+                    "T0CCP1"
+                ]
+            }
+        },
+        "items-PC0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "TCK",
+                    "SWCLK",
+                    "T4CCP0"
+                ]
+            }
+        },
+        "items-PC1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "TMS",
+                    "SWDIO",
+                    "T4CCP1"
+                ]
+            }
+        },
+        "items-PC2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "TDI",
+                    "T5CCP0"
+                ]
+            }
+        },
+        "items-PC3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "TDO",
+                    "SWO",
+                    "T5CCP1"
+                ]
+            }
+        },
+        "items-PC4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U4Rx",
+                    "U1Rx",
+                    "M0PWM6",
+                    "IDX1",
+                    "WT0CCP0",
+                    "U1RTS"
+                ]
+            }
+        },
+        "items-PC5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "C1+",
+                    "U4Tx",
+                    "U1Tx",
+                    "M0PWM7",
+                    "PhA1",
+                    "WT0CCP1",
+                    "U1CTS"
+                ]
+            }
+        },
+        "items-PC6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "C0+",
+                    "U3Rx",
+                    "PhB1",
+                    "WT1CCP0",
+                    "USB0EPEN"
+                ]
+            }
+        },
+        "items-PC7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U3Tx",
+                    "WT1CCP1",
+                    "USB0PFLT"
+                ]
+            }
+        },
+        "items-PD0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN7",
+                    "SSI3Clk",
+                    "SSI1Clk",
+                    "I2C3SCL",
+                    "M0PWM6",
+                    "M1PWM0",
+                    "WT2CCP0"
+                ]
+            }
+        },
+        "items-PD1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN6",
+                    "SSI3Fss",
+                    "SSI1Fss",
+                    "I2C3SDA",
+                    "M0PWM7",
+                    "M1PWM1",
+                    "WT2CCP1"
+                ]
+            }
+        },
+        "items-PD2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN5",
+                    "SSI3Rx",
+                    "SSI1Rx",
+                    "M0FAULT0",
+                    "WT3CCP0",
+                    "USB0EPEN"
+                ]
+            }
+        },
+        "items-PD3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN4",
+                    "SSI3Tx",
+                    "SSI1Tx",
+                    "IDX0",
+                    "WT3CCP1",
+                    "USB0PFLT"
+                ]
+            }
+        },
+        "items-PD4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "USB0DM",
+                    "U6Rx",
+                    "WT4CCP0"
+                ]
+            }
+        },
+        "items-PD5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "USB0DP",
+                    "U6Tx",
+                    "WT4CCP1"
+                ]
+            }
+        },
+        "items-PD6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U2Rx",
+                    "M0FAULT0",
+                    "PhA0",
+                    "WT5CCP0"
+                ]
+            }
+        },
+        "items-PD7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U2Tx",
+                    "PhB0",
+                    "WT5CCP1",
+                    "NMI"
+                ]
+            }
+        },
+        "items-PE0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN3",
+                    "U7Rx"
+                ]
+            }
+        },
+        "items-PE1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN2",
+                    "U7Tx"
+                ]
+            }
+        },
+        "items-PE2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN1"
+                ]
+            }
+        },
+        "items-PE3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN0"
+                ]
+            }
+        },
+        "items-PE4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN9",
+                    "U5Rx",
+                    "I2C2SCL",
+                    "M0PWM4",
+                    "M1PWM2",
+                    "CAN0Rx"
+                ]
+            }
+        },
+        "items-PE5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "AIN8",
+                    "U5Tx",
+                    "I2C2SDA",
+                    "M0PWM5",
+                    "M1PWM3",
+                    "CAN0Tx"
+                ]
+            }
+        },
+        "items-PF0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U1RTS",
+                    "SSI1Rx",
+                    "CAN0Rx",
+                    "M1PWM4",
+                    "PhA0",
+                    "T0CCP0",
+                    "NMI",
+                    "C0o"
+                ]
+            }
+        },
+        "items-PF1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "U1CTS",
+                    "SSI1Tx",
+                    "M1PWM5",
+                    "PhB0",
+                    "T0CCP1",
+                    "C1o",
+                    "TRD1"
+                ]
+            }
+        },
+        "items-PF2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI1Clk",
+                    "M0FAULT0",
+                    "M1PWM6",
+                    "T1CCP0",
+                    "TRD0"
+                ]
+            }
+        },
+        "items-PF3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "SSI1Fss",
+                    "CAN0Tx",
+                    "M1PWM7",
+                    "T1CCP1",
+                    "TRCLK"
+                ]
+            }
+        },
+        "items-PF4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-direction == 'af'",
+                "long_description": [],
+                "values": [
+                    null,
+                    "M1FAULT0",
+                    "IDX0",
+                    "T2CCP0",
+                    "USB0EPEN"
+                ]
+            }
+        }
+    }
+}

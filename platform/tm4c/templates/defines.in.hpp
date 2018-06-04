@@ -14,7 +14,7 @@ import json
 
 f = open(JSON_CFG)
 cfg = json.load(f)
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-tm4c']
 
 ]]]*/
 //[[[end]]]
@@ -22,7 +22,7 @@ cfg = cfg['platform']
 // Console configuration -------------------------------------------------------
 /*[[[cog
 
-if 'console' in cfg:
+if 'config-console' in cfg:
     cog.outl('#define THECORE_CONFIG_USE_CONSOLE 1')
 
 ]]]*/
@@ -31,20 +31,20 @@ if 'console' in cfg:
 #if THECORE_NO_OS
     /*[[[cog
 
-    if 'systmr_cfg' in cfg:
+    if 'menu-timer' in cfg:
         # Systick as a systimer is only possibility for timer selection for this
         # platform. So for now, let's skip check for 'owner' field.
-
-        systmr_cfg = cfg['systmr_cfg']
+        systmr_cfg = cfg['menu-timer']
+        assert(systmr_cfg['config-source'] == 'systick')
 
         freq_hz = 50
-        if 'freq_hz' in systmr_cfg:
-            freq_hz = systmr_cfg['freq_hz']
+        if 'config-freq' in systmr_cfg:
+            freq_hz = systmr_cfg['config-freq']
 
         cog.outl('#define THECORE_ENABLE_SYSTMR_API 1')
         cog.outl('#define THECORE_CONFIG_SYSTMR_FREQ %d' % freq_hz)
 
-        if systmr_cfg['owner'] == 'thecore':
+        if systmr_cfg['config-owner'] == 'thecore':
             cog.outl('#define THECORE_OWNS_SYSTMR 1')
 
     ]]]*/

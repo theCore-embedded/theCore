@@ -1,0 +1,43 @@
+{
+    "menu-platform": {
+        "description": "Platform menu",
+        "long-description": [
+            "Menu allows to select",
+            "desired platform",
+            "for which application",
+            "will be compiled.",
+            "Platform in theCore",
+            "usually represents ",
+            "a MCU or family of MCUs"
+        ],
+
+        "config-name": {
+            "description": "Platform",
+            "long-description": [
+                "List of platform types",
+                "(or microcontrollers",
+                "in other words)",
+                "supported by theCore"
+            ],
+
+            "type": "enum",
+            "values": [ "Host", "STM32", "TM4C" ],
+            "config-class": "test-class"
+        },
+
+        "include-tm4c": {
+            "ref": "./platform/tm4c/platform.json",
+            "depends_on": "/menu-platform/config-name == 'TM4C'"
+        },
+
+        "include-stm32": {
+            "ref": "./platform/stm32/platform.json",
+            "depends_on": "/menu-platform/config-name == 'STM32'"
+        },
+
+        "include-host": {
+            "ref": "./platform/host/platform.json",
+            "depends_on": "/menu-platform/config-name == 'Host'"
+        }
+    }
+}
