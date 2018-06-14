@@ -167,38 +167,6 @@ generate_source(${PARTICLE_DOC_DIR}/i2c_example.json
 )
 
 ################################################################################
-# TM4C examples
-################################################################################
-
-set(TM4C_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/platform/tm4c)
-set(TM4C_TEMPLATE_DIR ${CORE_DIR}/platform/tm4c/templates)
-set(TM4C_OUT_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/_static/generated/tm4c)
-
-# UART basic example.
-generate_source(${TM4C_DOC_DIR}/uart_example.json
-    ${TM4C_TEMPLATE_DIR}/uart_cfg.in.hpp
-    ${TM4C_OUT_DIR}/uart_example.hpp
-)
-
-# SPI basic example.
-generate_source(${TM4C_DOC_DIR}/spi_example.json
-    ${TM4C_TEMPLATE_DIR}/spi_cfg.in.hpp
-    ${TM4C_OUT_DIR}/spi_example.hpp
-)
-
-# GPIO alias example.
-generate_source(${TM4C_DOC_DIR}/gpio_alias_example.json
-    ${TM4C_TEMPLATE_DIR}/gpio_cfg.in.hpp
-    ${TM4C_OUT_DIR}/gpio_alias_example.hpp
-)
-
-# Pin multiplexing example
-generate_source(${TM4C_DOC_DIR}/pin_mux_example.json
-    ${TM4C_TEMPLATE_DIR}/pin_mux.in.cpp
-    ${TM4C_OUT_DIR}/pin_mux_example.cpp
-)
-
-################################################################################
 # Filesystem examples
 ################################################################################
 

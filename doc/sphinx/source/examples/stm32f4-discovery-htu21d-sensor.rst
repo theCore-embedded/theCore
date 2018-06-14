@@ -38,7 +38,6 @@ Wiring
 Building
 ~~~~~~~~
 
-#. Complete :ref:`theCore_examples_initial_setup` section.
 #. Execute build commands.
    The CMake Toolchain file is required to build this application.
    theCore already has one suitable for this target.

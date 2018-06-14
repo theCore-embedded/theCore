@@ -28,6 +28,12 @@ irqs = {
         'ids': {
             'UART0': def_isr,
             'UART1': def_isr,
+            'UART2': def_isr,
+            'UART3': def_isr,
+            'UART4': def_isr,
+            'UART5': def_isr,
+            'UART6': def_isr,
+            'UART7': def_isr,
         },
         'isr_builder': (lambda u_id: 'ecl::uart_irq_proxy<ecl::uart_channel::ch%s>::deliver_irq();' % u_id[-1])
     },
@@ -325,7 +331,12 @@ void GPIOF_Handler()
 extern "C"
 void UART2_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART2'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 50 SSI1 */
@@ -473,35 +484,60 @@ void SSI3_Handler()
 extern "C"
 void UART3_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART3'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 76 UART4 */
 extern "C"
 void UART4_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART4'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 77 UART5 */
 extern "C"
 void UART5_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART5'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 78 UART6 */
 extern "C"
 void UART6_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART6'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 79 UART7 */
 extern "C"
 void UART7_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART7'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 84 I2C2 */

@@ -32,6 +32,7 @@ theCore: C++ Embedded Framework
 
   index
   guides/index
+  scripts/index
   examples/index
   project_structure
   arch

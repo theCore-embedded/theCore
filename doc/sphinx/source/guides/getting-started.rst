@@ -6,68 +6,56 @@ Getting started
 Downloading theCore
 ~~~~~~~~~~~~~~~~~~~
 
-First thing first you need to clone and update all modules of theCore.
+First thing first you need to download theCore and setup development environment.
+To do that, use dedicated `tcore` script, written in Python 3:
 
-#. Clone repository::
+#. Install Python 3 and dependencies, by using `DigitalOcean guide`_.
 
-     git clone https://github.com/forGGe/theCore.git
+#. Install ``tcore`` script::
 
-#. Update all submodules::
+     sudo pip3 install tcore
 
-     git submodule update --init --recursive
+#. Download theCore and development environment. Choose one option from below:
 
-Deploying development environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * With script asking root permissions (see
+     `Details of the development environment`_ section to understand why)::
 
-Now it is time to get the development environment - toolchains,
-build dependencies and some additional host utilities. Everything that
-you need during development of the embedded application.
+       tcore bootstrap
 
-You can obtain the environment using few ways:
+   * With script **not asking** any root permissions::
 
-* By `using Nix`_.
-* By `using Docker`_.
-* Install everything manually. See :ref:`theCore_NoNixInstall` section for more
-  details on that.
+       sudo mkdir /nix
+       sudo chown $(whoami) /nix
+       tcore bootstrap
 
-You can either do it manually and spend decent time on that or ask
-package manager called Nix_ to setup all the development packages for you.
+Details of the development environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you prefer to manually install dependencies, refer to :ref:`theCore_NoNixInstall`
-section for more details.
+All additional packages, like toolchains, build dependencies and some
+additional host utilities are manager trough `Nix`_. Nix helps
+to deploy everything that you need during development of the embedded application.
 
-Using Docker
-============
+The installiation process of Nix is curated by the ``tcore`` script.
+More information about it you can find in the :ref:`theCore_tcore` section.
 
-#. Install docker.
-   Installation depends on your Linux distributions, but here are some insights:
+Nix is installed under `/nix` directory. If it does not exist, Nix installation
+script will ask for permissions. That's why running bare `tcore bootstrap`
+may result in a sudo password request.
 
-   * `Docker installation on Ubuntu 16.04`_
-   * `Docker installation on ArchLinux`_
+Some examples of packages, contaned in ``/nix`` directory are:
 
-#. After Docker is installed and Docker daemon is running, you can launch
-   theCore environment image. Execute::
+* Git
+* CMake
+* toolchains: GCC, Clang
+* OpenOCD
+* GDB
 
-     # Pulls Docker image from dockerhub
-     # https://hub.docker.com/r/thecoreembedded/thecore/
-     docker pull thecoreembedded/thecore
+Check the ``default.nix`` file in the root of theCore project for full list
+of packages requested from Nix.
 
-     # Run shell in the docker with all environment deployed
-     docker run -v $(pwd):/root/thecore -w /root/thecore -it thecoreembedded/thecore
-
-Using Nix
-=========
-
-#. Install Nix.
-   On Linux and Mac OS X, the easiest way to install Nix is to run
-   the following shell command (as a user other than root)::
-
-     curl https://nixos.org/nix/install | sh
-
-#. Run Nix shell to get all environment required::
-
-     # Run from theCore directory
-     nix-shell .
+After Nix is deployed, theCore itself is downloaded into ``~/.theCore`` directory.
+``tcore`` script uses Git under Nix environment to retrieve theCore from a remote,
+so no need to install Git into the host machine.
 
 Moving forward
 ~~~~~~~~~~~~~~
@@ -82,9 +70,7 @@ More info about Nix
 If you want to get yourself more familiar with Nix, check out `the Domenkozar's blog`_
 or read the `official documentation`_.
 
-
+.. _`DigitalOcean guide`: https://www.digitalocean.com/community/tutorials/how-to-install-python-3-and-set-up-a-local-programming-environment-on-ubuntu-16-04
 .. _Nix: https://nixos.org/nix/
 .. _`the Domenkozar's blog`: https://www.domenkozar.com/2014/01/02/getting-started-with-nix-package-manager/
 .. _`official documentation`: https://nixos.org/nix/manual/
-.. _`Docker installation on Ubuntu 16.04`: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04
-.. _`Docker installation on ArchLinux`: https://wiki.archlinux.org/index.php/Docker

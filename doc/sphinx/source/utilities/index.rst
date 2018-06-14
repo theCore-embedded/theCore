@@ -7,7 +7,6 @@ The list of libraries and utilities from theCore is provided below.
   :maxdepth: 2
   :includehidden:
 
-  json-configurator
   console
   filesystem
   assert
