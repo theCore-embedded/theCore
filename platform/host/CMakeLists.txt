@@ -4,16 +4,8 @@
 
 add_library(host console.cpp)
 
-theCore_create_json_validator_runner(
-    NAME host_validate
-    JSON ${THECORE_TARGET_CONFIG_FILE}
-    SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/host.schema.json
-    SUBOBJECT "platform"
-    WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
-)
-
 # Check if console must be enabled.
-if(thecore_cfg.platform.console)
+if(thecore_cfg.menu-platform.menu-host.config-console)
     set(THECORE_CONFIG_USE_CONSOLE 1 CACHE STRING "host console" FORCE)
 endif()
 
@@ -35,5 +27,3 @@ target_include_directories(host PUBLIC
     export export/platform ${CMAKE_CURRENT_BINARY_DIR}/export/)
 target_link_libraries(host PUBLIC types)
 target_link_libraries(host PUBLIC platform_common)
-
-add_dependencies(host host_validate)

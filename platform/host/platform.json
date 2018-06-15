@@ -1,1 +1,10 @@
-{ }
+{
+    "menu-host": {
+        "description": "Host platform menu",
+        "config-console": {
+            "description": "Enable/disable console",
+            "type": "enum",
+            "values": [ 0, 1 ]
+        }
+    }
+}
