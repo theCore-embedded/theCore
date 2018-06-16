@@ -183,13 +183,13 @@ Known limitations
 * Only Motorola SPI modes are supported, though datasheet lists more than that.
   See `issue #362`_.
 
-
 .. _TM4C Multiplexing:
 
 Pin multiplexing
 ~~~~~~~~~~~~~~~~
 
 :Driver sources:    ``platform/tm4c/export/platform/pin_cfg.hpp``
+                    ``platform/tm4c/export/platform/gpio_device.hpp``
 
 Pins can be configured from the "I/O pin configuration" submenu.
 

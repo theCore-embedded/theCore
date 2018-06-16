@@ -1,0 +1,55 @@
+{
+    "table-i2c": {
+        "description": "I2C configuration table",
+        "key": "config-channel",
+        "items": {
+            "config-channel": {
+                "description": "Enabled I2C channel",
+                "type": "enum",
+                "values": "I2C[1-3]",
+                "config-class": "i2c-channel",
+                "single": false
+            },
+            "config-mode": {
+                "description": "I2C mode of operation",
+                "type": "enum",
+                "default": "IRQ",
+                "values": [ "IRQ" ]
+            },
+            "config-speed": {
+                "description": "I2C clock speed (Hz)",
+                "type": "integer"
+            },
+            "config-duty-cycle": {
+                "description": "I2C duty cycle",
+                "type": "enum",
+                "default": "2/1",
+                "values": [ "2/1", "16/9" ]
+            },
+            "config-ack": {
+                "description": "I2C ack",
+                "type": "enum",
+                "default": true,
+                "values": [ true, false ]
+            },
+            "config-ack-addr-bit": {
+                "description": "I2C ack address bits",
+                "type": "enum",
+                "default": 7,
+                "values": [ 10, 7 ]
+            },
+            "config-own-address": {
+                "description": "I2C own address",
+                "type": "string"
+            },
+            "config-alias": {
+                "description": "Driver C++ alias",
+                "type": "string"
+            },
+            "config-comment": {
+                "description": "Driver C++ comment",
+                "type": "string"
+            }
+        }
+    }
+}

@@ -1,0 +1,1905 @@
+{
+    "table-pins": {
+        "description": "Pin table",
+        "key": "config-channel",
+        "items": {
+            "config-channel": {
+                "type": "enum",
+                "description": "Pin channel selection",
+                "values": "P[A-G][0-9]|P[ABCFGH]1[0-4]|P[DE]1[0-5]|PI1[0-1]",
+                "single": false
+            },
+            "config-mode": {
+                "type": "enum",
+                "description": "Pin mode",
+                "default": "output",
+                "values": [ "input", "output", "af", "analog" ]
+            },
+            "config-pull": {
+                "type": "enum",
+                "description": "Pin push/pull",
+                "default": "no",
+                "values": [
+                    "pull up",
+                    "push down",
+                    "no"
+                ]
+            },
+            "config-type": {
+                "type": "enum",
+                "description": "Pin type",
+                "default": "push-pull",
+                "values": [
+                    "push-pull",
+                    "open drain"
+                ]
+            },
+            "config-speed": {
+                "type": "enum",
+                "description": "Pin speed, MHz",
+                "default": 25,
+                "values": [ 2, 25, 50, 100 ]
+            },
+            "config-comment": {
+                "type": "string",
+                "description": "Comment for pin config"
+            },
+            "config-gpio-alias": {
+                "type": "string",
+                "description": "GPIO driver alias",
+                "config-class": "gpio-driver"
+            }
+        },
+        "items-PA0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM2_CH1_ETR",
+                    "AF2: TIM5_CH1",
+                    "AF3: TIM8_ETR",
+                    "AF7: USART2_CTS",
+                    "AF8: UART4_TX",
+                    "AF11: ETH_MII_CRS",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM2_CH2",
+                    "AF2: TIM5_CH2",
+                    "AF7: USART2_RTS",
+                    "AF8: UART4_RX",
+                    "AF11: ETH_MII_RX_CLK/ETH_RMII__REF_CLK",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM2_CH3",
+                    "AF2: TIM5_CH3",
+                    "AF3: TIM9_CH1",
+                    "AF7: USART2_TX",
+                    "AF11: ETH_MDIO",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM2_CH4",
+                    "AF2: TIM5_CH4",
+                    "AF3: TIM9_CH2",
+                    "AF7: USART2_RX",
+                    "AF10: OTG_HS_ULPI_D0",
+                    "AF11: ETH_MII_COL",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF5: SPI1_NSS",
+                    "AF6: SPI3_NSS/I2S3_WS",
+                    "AF7: USART2_CK",
+                    "AF12: OTG_HS_SOF",
+                    "AF13: DCMI_HSYNC",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM2_CH1_ETR",
+                    "AF3: TIM8_CH1N",
+                    "AF5: SPI1_SCK",
+                    "AF10: OTG_HS_ULPI_CK",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_BKIN",
+                    "AF2: TIM3_CH1",
+                    "AF3: TIM8_BKIN",
+                    "AF5: SPI1_MISO",
+                    "AF9: TIM13_CH1",
+                    "AF13: DCMI_PIXCK",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH1N",
+                    "AF2: TIM3_CH2",
+                    "AF3: TIM8_CH1N",
+                    "AF5: SPI1_MOSI",
+                    "AF9: TIM14_CH1",
+                    "AF11: ETH_MII_RX_DV/ETH_RMII_CRS_DV",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: MCO1",
+                    "AF1: TIM1_CH1",
+                    "AF4: I2C3_SCL",
+                    "AF7: USART1_CK",
+                    "AF10: OTG_FS_SOF",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH2",
+                    "AF4: I2C3_SMBA",
+                    "AF7: USART1_TX",
+                    "AF13: DCMI_D0",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH3",
+                    "AF7: USART1_RX",
+                    "AF10: OTG_FS_ID",
+                    "AF13: DCMI_D1",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH4",
+                    "AF7: USART1_CTS",
+                    "AF9: CAN1_RX",
+                    "AF10: OTG_FS_DM",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_ETR",
+                    "AF7: USART1_RTS",
+                    "AF9: CAN1_TX",
+                    "AF10: OTG_FS_DP",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: JTMS-/SWDIO",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PA14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: JTCK-/SWCLK",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH2N",
+                    "AF2: TIM3_CH3",
+                    "AF3: TIM8_CH2N",
+                    "AF10: OTG_HS_ULPI_D1",
+                    "AF11: ETH_MII_RXD2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH3N",
+                    "AF2: TIM3_CH4",
+                    "AF3: TIM8_CH3N",
+                    "AF4: ",
+                    "AF10: OTG_HS_ULPI_D2",
+                    "AF11: ETH_MII_RXD3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: JTDO//TRACES/WO",
+                    "AF1: TIM2_CH2",
+                    "AF5: SPI1_SCK",
+                    "AF6: SPI3_SCK/I2S3_CK",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: NJTRST",
+                    "AF2: TIM3_CH1",
+                    "AF3: ",
+                    "AF5: SPI1_MISO",
+                    "AF6: SPI3_MISO",
+                    "AF7: I2S3ext_SD",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM3_CH2",
+                    "AF3: ",
+                    "AF4: I2C1_SMB/A",
+                    "AF5: SPI1_MOSI",
+                    "AF6: SPI3_MOSI/I2S3_SD",
+                    "AF7: ",
+                    "AF9: CAN2_RX",
+                    "AF10: OTG_HS_ULPI_D7",
+                    "AF11: ETH_PPS_OUT",
+                    "AF13: DCMI_D10",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH1",
+                    "AF3: ",
+                    "AF4: I2C1_SCL",
+                    "AF7: USART1_TX",
+                    "AF9: CAN2_TX",
+                    "AF13: DCMI_D5",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH2",
+                    "AF3: ",
+                    "AF4: I2C1_SDA",
+                    "AF7: USART1_RX",
+                    "AF12: FSMC_NL",
+                    "AF13: DCMI_VSYNC",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH3",
+                    "AF3: TIM10_CH1",
+                    "AF4: I2C1_SCL",
+                    "AF9: CAN1_RX",
+                    "AF11: ETH_MII_TXD3",
+                    "AF12: SDIO_D4",
+                    "AF13: DCMI_D6",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH4",
+                    "AF3: TIM11_CH1",
+                    "AF4: I2C1_SDA",
+                    "AF5: SPI2_NSS/I2S2_WS",
+                    "AF9: CAN1_TX",
+                    "AF12: SDIO_D5",
+                    "AF13: DCMI_D7",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM2_CH3",
+                    "AF4: I2C2_SCL",
+                    "AF5: SPI2_SCK/I2S2_CK",
+                    "AF7: USART3_TX",
+                    "AF10: OTG_HS_ULPI_D3",
+                    "AF11: ETH_MII_RX_ER",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM2_CH4",
+                    "AF4: I2C2_SDA",
+                    "AF7: USART3_RX",
+                    "AF10: OTG_HS_ULPI_D4",
+                    "AF11: ETH_MII_TX_EN/ETH_RMII_TX_EN",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_BKIN",
+                    "AF4: I2C2_SMBA",
+                    "AF5: SPI2_NSS/I2S2_WS",
+                    "AF7: USART3_CK",
+                    "AF9: CAN2_RX",
+                    "AF10: OTG_HS_ULPI_D5",
+                    "AF11: ETH_MII_TXD0/ETH_RMII_TXD0",
+                    "AF12: OTG_HS_ID",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH1N",
+                    "AF5: SPI2_SCK/I2S2_CK",
+                    "AF7: USART3_CTS",
+                    "AF9: CAN2_TX",
+                    "AF10: OTG_HS_ULPI_D6",
+                    "AF11: ETH_MII_TXD1/ETH_RMII_TXD1",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PB14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH2N",
+                    "AF3: TIM8_CH2N",
+                    "AF5: SPI2_MISO",
+                    "AF6: I2S2ext_SD",
+                    "AF7: USART3_RTS",
+                    "AF9: TIM12_CH1",
+                    "AF12: OTG_HS_DM",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF10: OTG_HS_ULPI_STP",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF11: ETH_MDC",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF5: SPI2_MISO",
+                    "AF6: I2S2ext_SD",
+                    "AF10: OTG_HS_ULPI_DIR",
+                    "AF11: ETH_MII_TXD2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF5: SPI2_MOSI/I2S2_SD",
+                    "AF10: OTG_HS_ULPI_NXT",
+                    "AF11: ETH_MII_TX_CLK",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF11: ETH_MII_RXD0/ETH_RMII_RXD0",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF11: ETH_MII_RXD1/ETH_RMII_RXD1",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM3_CH1",
+                    "AF3: TIM8_CH1",
+                    "AF4: ",
+                    "AF5: I2S2_MCK",
+                    "AF6: ",
+                    "AF8: USART6_TX",
+                    "AF12: SDIO_D6",
+                    "AF13: DCMI_D0",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM3_CH2",
+                    "AF3: TIM8_CH2",
+                    "AF6: I2S3_MCK",
+                    "AF8: USART6_RX",
+                    "AF12: SDIO_D7",
+                    "AF13: DCMI_D1",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM3_CH3",
+                    "AF3: TIM8_CH3",
+                    "AF8: USART6_CK",
+                    "AF12: SDIO_D0",
+                    "AF13: DCMI_D2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: MCO2",
+                    "AF2: TIM3_CH4",
+                    "AF3: TIM8_CH4",
+                    "AF4: I2C3_SDA",
+                    "AF5: I2S_CKIN",
+                    "AF12: SDIO_D1",
+                    "AF13: DCMI_D3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF6: SPI3_SCK//I2S3_CK",
+                    "AF7: USART3_TX/",
+                    "AF8: UART4_TX",
+                    "AF12: SDIO_D2",
+                    "AF13: DCMI_D8",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF5: I2S3ext_SD",
+                    "AF6: SPI3_MISO/",
+                    "AF7: USART3_RX",
+                    "AF8: UART4_RX",
+                    "AF12: SDIO_D3",
+                    "AF13: DCMI_D4",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF6: SPI3_MOSI/I2S3_SD",
+                    "AF7: USART3_CK",
+                    "AF8: UART5_TX",
+                    "AF12: SDIO_CK",
+                    "AF13: DCMI_D9",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PC14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF9: CAN1_RX",
+                    "AF12: FSMC_D2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF9: CAN1_TX",
+                    "AF12: FSMC_D3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM3_ETR",
+                    "AF8: UART5_RX",
+                    "AF12: SDIO_CMD",
+                    "AF13: DCMI_D11",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART2_CTS",
+                    "AF12: FSMC_CLK",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART2_RTS",
+                    "AF12: FSMC_NOE",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART2_TX",
+                    "AF12: FSMC_NWE",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART2_RX",
+                    "AF12: FSMC_NWAIT",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART2_CK",
+                    "AF12: FSMC_NE1//FSMC_NCE2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART3_TX",
+                    "AF12: FSMC_D13",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART3_RX",
+                    "AF12: FSMC_D14",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART3_CK",
+                    "AF12: FSMC_D15",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF7: USART3_CTS",
+                    "AF12: FSMC_A16",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH1",
+                    "AF7: USART3_RTS",
+                    "AF12: FSMC_A17",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH2",
+                    "AF12: FSMC_A18",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH3",
+                    "AF12: FSMC_D0",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PD15": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_CH4",
+                    "AF12: FSMC_D1",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM4_ETR",
+                    "AF12: FSMC_NBL0",
+                    "AF13: DCMI_D2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_NBL1",
+                    "AF13: DCMI_D3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: TRACECL/K",
+                    "AF11: ETH_MII_TXD3",
+                    "AF12: FSMC_A23",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: TRACED0",
+                    "AF12: FSMC_A19",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: TRACED1",
+                    "AF12: FSMC_A20",
+                    "AF13: DCMI_D4",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: TRACED2",
+                    "AF3: TIM9_CH1",
+                    "AF12: FSMC_A21",
+                    "AF13: DCMI_D6",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF0: TRACED3",
+                    "AF3: TIM9_CH2",
+                    "AF12: FSMC_A22",
+                    "AF13: DCMI_D7",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_ETR",
+                    "AF12: FSMC_D4",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH1N",
+                    "AF12: FSMC_D5",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH1",
+                    "AF12: FSMC_D6",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH2N",
+                    "AF12: FSMC_D7",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH2",
+                    "AF12: FSMC_D8",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH3N",
+                    "AF12: FSMC_D9",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH3",
+                    "AF12: FSMC_D10",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_CH4",
+                    "AF12: FSMC_D11",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PE15": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF1: TIM1_BKIN",
+                    "AF12: FSMC_D12",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C2_SDA",
+                    "AF12: FSMC_A0",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C2_SCL",
+                    "AF12: FSMC_A1",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C2_SMBA",
+                    "AF12: FSMC_A2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A4",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A5",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM10_CH1",
+                    "AF12: FSMC_NIORD",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM11_CH1",
+                    "AF12: FSMC_NREG",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF9: TIM13_CH1",
+                    "AF12: FSMC_NIOWR",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF9: TIM14_CH1",
+                    "AF12: FSMC_CD",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_INTR",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: ",
+                    "AF13: DCMI_D12",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A6",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A7",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PF14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A8",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A10",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A11",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A12",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A13",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A14",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_A15",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_INT2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF8: USART6_CK",
+                    "AF12: FSMC_INT3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF8: USART6_RTS",
+                    "AF11: ETH_PPS_OUT",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF8: USART6_RX",
+                    "AF12: FSMC_NE2//FSMC_NCE3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF12: FSMC_NCE4_1//FSMC_NE3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF11: ETH_MII_TX_EN/ETH_RMII_TX_EN",
+                    "AF12: FSMC_NCE4_2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF8: USART6_RTS",
+                    "AF12: FSMC_NE4",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF8: UART6_CTS",
+                    "AF11: ETH_MII_TXD0/ETH_RMII_TXD0",
+                    "AF12: FSMC_A24",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PG14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF8: USART6_TX",
+                    "AF11: ETH_MII_TXD1/ETH_RMII_TXD1",
+                    "AF12: FSMC_A25",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF11: ETH_MII_CRS",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF11: ETH_MII_COL",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C2_SCL",
+                    "AF10: OTG_HS_ULPI_NXT",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C2_SDA",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C2_SMBA",
+                    "AF9: TIM12_CH1",
+                    "AF11: ETH_MII_RXD2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C3_SCL",
+                    "AF11: ETH_MII_RXD3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C3_SDA",
+                    "AF13: DCMI_HSYNC",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF4: I2C3_SMBA",
+                    "AF9: TIM12_CH2",
+                    "AF13: DCMI_D0",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM5_CH1",
+                    "AF13: DCMI_D1",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM5_CH2",
+                    "AF13: DCMI_D2",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH12": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM5_CH3",
+                    "AF13: DCMI_D3",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH13": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_CH1N",
+                    "AF9: CAN1_TX",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PH14": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_CH2N",
+                    "AF13: DCMI_D4",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI0": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF2: TIM5_CH4",
+                    "AF5: SPI2_NSS/I2S2_WS",
+                    "AF13: DCMI_D13",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI1": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF5: SPI2_SCK/I2S2_CK",
+                    "AF13: DCMI_D8",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI2": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_CH4",
+                    "AF5: SPI2_MISO",
+                    "AF6: I2S2ext_SD",
+                    "AF13: DCMI_D9",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI3": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_ETR",
+                    "AF5: SPI2_MOSI/I2S2_SD",
+                    "AF13: DCMI_D10",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI4": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_BKIN",
+                    "AF13: DCMI_D5",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI5": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_CH1",
+                    "AF13: DCMI_VSYNC",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI6": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_CH2",
+                    "AF13: DCMI_D6",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI7": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF3: TIM8_CH3",
+                    "AF13: DCMI_D7",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI8": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI9": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF9: CAN1_RX",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI10": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF11: ETH_MII_RX_ER",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        },
+        "items-PI11": {
+            "config-afsel": {
+                "type": "enum",
+                "description": "Alternate function",
+                "depends_on": "config-mode == 'af'",
+                "long_description": [],
+                "values": [
+                    "AF10: OTG_HS_ULPI_DIR",
+                    "AF15: EVENTOUT"
+                ]
+            }
+        }
+    }
+}

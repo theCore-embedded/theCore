@@ -21,15 +21,14 @@
 import cog
 import json
 import re
+from parse import *
 
 cfg = json.load(open(JSON_CFG))
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-stm32']
 
-pinmux = {}
-if 'pinmux' in cfg:
-    pinmux = cfg['pinmux']
+pin_ids = cfg['menu-pins']['table-pins'] if 'menu-pins' in cfg else []
 
-if len(pinmux) > 0:
+if len(pin_ids) > 0:
     cog.outl('#define PINMUX_REQUIRED')
 
 # Periphery that should be enabled by RCC
@@ -37,27 +36,32 @@ rcc_ports = []
 
 # Pin JSON to SPL definitions mapping
 pin_defs_mapping = {
-    'pull' : {
-        'down'  : 'GPIO_PuPd_DOWN',
-        'up'    : 'GPIO_PuPd_UP',
-        'no'    : 'GPIO_PuPd_NOPULL',
+    'config-pull' : {
+        'push down'         : 'GPIO_PuPd_DOWN',
+        'pull up'           : 'GPIO_PuPd_UP',
+        'no'                : 'GPIO_PuPd_NOPULL',
+    },
+    'config-mode' : {
+        'af'                : 'GPIO_Mode_AF',
+        'output'            : 'GPIO_Mode_OUT',
+        'input'             : 'GPIO_Mode_IN'
+    },
+    'config-type':  {
+        'push-pull'         : 'GPIO_OType_PP',
+        'open drain'        : 'GPIO_OType_OD',
+    },
+    'config-speed': {
+        2                   : 'GPIO_Speed_2MHz',
+        25                  : 'GPIO_Speed_25MHz',
+        50                  : 'GPIO_Speed_50MHz',
+        100                 : 'GPIO_Speed_100MHz',
     }
 }
 
-# Default pin configuration.
-pin_default = {
-    'mode'  : 'IN',
-    'otype' : 'PP',
-    'speed' : '2MHz',
-    'pull'  : 'no'
-}
+# Gets property and converts a value
+def extract_and_convert(pin_cfg, property):
+    return pin_defs_mapping[property][pin_cfg[property]]
 
-# Gets property, or assigns default value
-def extact_or_default(pin_cfg, property):
-    if property in pin_cfg:
-        return pin_cfg[property]
-    else:
-        return pin_default[property]
 ]]]*/
 //[[[end]]]
 
@@ -85,32 +89,37 @@ struct pin_info
 static constexpr pin_info pins[] = {
     /*[[[cog
 
-    for pins in pinmux:
-        mode    = 'GPIO_Mode_'      + extact_or_default(pins, 'mode')
-        speed   = 'GPIO_Speed_'     + extact_or_default(pins, 'speed')
-        otype   = 'GPIO_OType_'     + extact_or_default(pins, 'otype')
-        pull    =  pin_defs_mapping['pull'][extact_or_default(pins, 'pull')]
+    for pin_id in pin_ids:
+        pin_cfg = cfg['menu-pins']['menu-' + pin_id]
 
-        af = '0'
+        mode    = extract_and_convert(pin_cfg, 'config-mode')
+        speed   = extract_and_convert(pin_cfg, 'config-speed')
+        otype   = extract_and_convert(pin_cfg, 'config-type')
+        pull    = extract_and_convert(pin_cfg, 'config-pull')
+        afsel   = pin_cfg['config-afsel'] if 'config-afsel' in pin_cfg else None
+
+        af = '0x0'
+        if mode == 'GPIO_Mode_AF' and afsel:
+            r = parse('AF{:d}:{}', afsel)
+            af = hex(r[0])
+            # Leave clarification comment
+            af += ' /' + '* ' + r[1] + ' *' + '/ '
+
+        if 'config-comment' in pin_cfg:
+            cog.outl('/' + '* ' + pin_cfg['config-comment'] + ' *' + '/')
+
+        r = parse('P{:1w}{:d}', pin_id)
+        port = 'GPIO' + r[0]
+        rcc_ports.append('RCC_AHB1Periph_GPIO' + r[0])
+        pin_num = str(r[1])
+        pin_def = 'GPIO_Pin_' + pin_num
+
+        pin_src = '0'
         if mode == 'GPIO_Mode_AF':
-            af = 'GPIO_AF_' + pins['function']
+            pin_src = 'GPIO_PinSource' + pin_num
 
-        if 'comment' in pins:
-            cog.outl('/' + '* ' + pins['comment'] + ' *' + '/')
-
-        for pin in pins['ids']:
-            r = re.findall('P(\w)(\d+)', pin)
-            port = 'GPIO' + r[0][0]
-            rcc_ports.append('RCC_AHB1Periph_GPIO' + r[0][0])
-            pin_num = int(r[0][1])
-            pin_def = 'GPIO_Pin_' + str(pin_num)
-
-            pin_src = '0'
-            if mode == 'GPIO_Mode_AF':
-                pin_src = 'GPIO_PinSource' + str(pin_num)
-
-            cog.outl('{ %s, %-12s, %-13s, %-16s, %s, %-17s, %-15s, %-16s },'
-                % (port, pin_def, mode, speed, otype, pull, af, pin_src))
+        cog.outl('{ %s, %-12s, %-13s, %-16s, %s, %-17s, %-24s, %-16s },'
+            % (port, pin_def, mode, speed, otype, pull, af, pin_src))
 
     ]]]*/
     //[[[end]]]

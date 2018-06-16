@@ -8,7 +8,7 @@
 #include <stm32_device.hpp>
 #include "platform/console.hpp"
 
-#if THECORE_CONFIG_USE_BYPASS_CONSOLE
+#if THECORE_CONFIG_USE_CONSOLE
 
 namespace ecl
 {
@@ -75,4 +75,4 @@ void ecl::bypass_putc(char c)
 
 //! @}
 
-#endif // THECORE_CONFIG_USE_BYPASS_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE

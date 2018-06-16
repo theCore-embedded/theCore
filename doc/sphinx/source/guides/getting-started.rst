@@ -15,6 +15,10 @@ To do that, use dedicated `tcore` script, written in Python 3:
 
      sudo pip3 install tcore
 
+#. Install ``curl``. For example, in Ubuntu, run::
+
+     sudo apt-get install curl
+
 #. Download theCore and development environment. Choose one option from below:
 
    * With script asking root permissions (see

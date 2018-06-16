@@ -28,7 +28,7 @@ in with pkgs; with python35Packages; {
     buildInputs = [
       cogapp jsonschema which cmake gcc6 gdb cppcheck git
       cpputest gcc-arm-embedded-5 dfu-util minicom
-      llvmPackages.clang-unwrapped openocd
+      llvmPackages.clang-unwrapped openocd parse
       perlPackages.ArchiveZip xxd cmake-version4git ] ++ docs_deps;
 
     shellHook = ''

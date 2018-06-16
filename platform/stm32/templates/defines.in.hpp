@@ -31,13 +31,10 @@ import json
 
 f = open(JSON_CFG)
 cfg = json.load(f)
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-stm32']
 
-if 'console' in cfg:
+if 'config-console' in cfg:
     cog.outl('#define THECORE_CONFIG_USE_CONSOLE 1')
-
-if 'bypass_console' in cfg:
-    cog.outl('#define THECORE_CONFIG_USE_BYPASS_CONSOLE 1')
 
 ]]]*/
 //[[[end]]]

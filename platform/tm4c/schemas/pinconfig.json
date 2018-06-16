@@ -5,7 +5,7 @@
         "items": {
             "config-channel": {
                 "type": "enum",
-                "description": "Pin selection",
+                "description": "Pin channel selection",
                 "values": "P[A-D][0-7]|PE[0-5]|PF[0-4]",
                 "single": false
             },

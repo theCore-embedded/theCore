@@ -30,7 +30,7 @@ set(THECORE_DEFAULT_SYSTMR_FREQ 50)
 # must implement that functions on its side.
 if(NOT TARGET_PLATFORM_IS_NOT_CMSIS_COMPLIANT)
     if(NOT CONFIG_OS)
-        if(CONFIG_USE_SYSTMR_SYSTICK)
+        if(THECORE_CONFIG_USE_SYSTMR_SYSTICK)
             target_compile_definitions(arch PUBLIC -DTHECORE_OWNS_SYSTMR=1)
         endif()
 

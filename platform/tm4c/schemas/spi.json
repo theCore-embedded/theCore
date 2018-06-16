@@ -5,7 +5,7 @@
         "items": {
             "config-channel": {
                 "type": "enum",
-                "description": "Enabled SPI periphery",
+                "description": "Enabled SPI channel",
                 "values": [ "SSI0", "SSI1", "SSI2", "SSI3" ],
                 "config-class": "spi-channel",
                 "single": false

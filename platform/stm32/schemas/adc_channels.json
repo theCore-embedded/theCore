@@ -1,0 +1,33 @@
+{
+    "table-adc-channels": {
+        "description": "ADC channels table",
+        "key": "config-channel",
+        "items": {
+            "config-channel": {
+                "description": "ADC channel groups",
+                "long-description": [
+                    "Grouped channels to be used with ADCs.",
+                    "See RM to see mapping between ADC channels and ADC modules.",
+                    "Group name will be used as a C++ identifier."
+                ],
+                "type": "array"
+            },
+            "config-channels": {
+                "description": "Channels in group",
+                "type": "enum",
+                "values": "Channel0[0-9]|Channel1[0-5]",
+                "single": false
+            },
+            "config-trigger": {
+                "description": "ADC conversion trigger",
+                "type": "enum",
+                "default": "software",
+                "values": [ "software" ]
+            },
+            "config-comment": {
+                "description": "C++ comment",
+                "type": "string"
+            }
+        }
+    }
+}

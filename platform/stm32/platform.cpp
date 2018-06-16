@@ -26,9 +26,9 @@
 //! @{
 
 
-#if THECORE_CONFIG_USE_BYPASS_CONSOLE
+#if THECORE_CONFIG_USE_CONSOLE
 extern void bypass_console_init();
-#endif // THECORE_CONFIG_USE_BYPASS_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 
 /* Required for STM32 Peripherial library */
@@ -75,9 +75,9 @@ extern "C" void platform_init()
     // TODO: check if FPU is really supported in toolchain, too
     SCB->CPACR |= (0xf << 20); // Enable FPU
 
-#if THECORE_CONFIG_USE_BYPASS_CONSOLE
+#if THECORE_CONFIG_USE_CONSOLE
     bypass_console_init();
-#endif // THECORE_CONFIG_USE_BYPASS_CONSOLE
+#endif // THECORE_CONFIG_USE_CONSOLE
 
 //! @}
 

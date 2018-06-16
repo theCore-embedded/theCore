@@ -5,8 +5,8 @@
 //! \file
 //! \brief Contains platform driver implementation for SPI and I2S buses.
 //! \details In STM32F4 series SPI and I2S are implemented within the same controller.
-#ifndef PLATFORM_SPI_BUS_HPP_
-#define PLATFORM_SPI_BUS_HPP_
+#ifndef PLATFORM_SPI_I2S_BUS_HPP_
+#define PLATFORM_SPI_I2S_BUS_HPP_
 
 #include <stm32_device.hpp>
 
@@ -982,4 +982,4 @@ bool spi_i2s_bus<dev>::is_circular_mode()
 
 } // namespace ecl
 
-#endif // PLATFORM_SPI_BUS_HPP_
+#endif // PLATFORM_SPI_I2S_BUS_HPP_

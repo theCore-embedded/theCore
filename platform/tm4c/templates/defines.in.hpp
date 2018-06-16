@@ -42,7 +42,7 @@ if 'config-console' in cfg:
             freq_hz = systmr_cfg['config-freq']
 
         cog.outl('#define THECORE_ENABLE_SYSTMR_API 1')
-        cog.outl('#define THECORE_CONFIG_SYSTMR_FREQ %d' % freq_hz)
+        cog.outl('#define THECORE_CONFIG_SYSTMR_FREQ %d' % int(freq_hz))
 
         if systmr_cfg['config-owner'] == 'thecore':
             cog.outl('#define THECORE_OWNS_SYSTMR 1')

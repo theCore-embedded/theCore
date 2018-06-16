@@ -45,8 +45,6 @@ if 'i2c' in cfg:
     else:
         clk_stretch = 'false'
 
-    cog.msg('I2C speed: {} clock stretch: {}'.format(speed, clk_stretch))
-
     cog.outl(i2c_cfg_template % (speed, clk_stretch))
     cog.outl("using i2c_dev = i2c_bus<i2c_device::wire0>;")
 ]]]*/

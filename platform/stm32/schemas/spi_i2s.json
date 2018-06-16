@@ -1,0 +1,155 @@
+{
+    "table-spi": {
+        "description": "SPI configuration table",
+        "key": "config-spi-channel",
+        "items": {
+            "config-spi-channel": {
+                "description": "SPI channel",
+                "long-description": [
+                    "Beware of collisions - SPI2 and SPI3 are multiplexed",
+                    "with I2S2 and I2S3. Use only one of these."
+                ],
+                "type": "enum",
+                "values": [ "SPI1", "SPI2", "SPI3" ],
+                "config-class": "spi-channel",
+                "single": false
+            },
+            "config-spi-type": {
+                "description": "SPI bus type",
+                "type": "enum",
+                "default": "master",
+                "values": [ "master" ]
+            },
+            "config-cpol": {
+                "description": "CPOL: SPI clock polarity",
+                "type": "enum",
+                "default": 0,
+                "values": [ 0, 1 ]
+            },
+            "config-cpha": {
+                "description": "CPHA: SPI clock phase",
+                "type": "enum",
+                "default": 0,
+                "values": [ 0, 1 ]
+            },
+            "config-alias": {
+                "description": "Driver C++ alias",
+                "type": "string"
+            },
+            "config-comment": {
+                "description": "Driver C++ comment",
+                "type": "string"
+            }
+        }
+    },
+    "table-i2s": {
+        "description": "I2S configuration table",
+        "key": "config-i2s-channel",
+        "items": {
+            "config-i2s-channel": {
+                "description": "I2S channel",
+                "type": "enum",
+                "values": [ "I2S2", "I2S3" ],
+                "config-class": "i2s-channel",
+                "single": false
+            },
+            "config-standard": {
+                "description": "I2S standard",
+                "type": "enum",
+                "default": "phillips",
+                "values": [ "phillips", "MSB", "LSB", "PCMShort", "PCMLong" ]
+            },
+            "config-master-clk": {
+                "description": "I2S master clock",
+                "type": "enum",
+                "default": true,
+                "values": [ false, true ]
+            },
+            "config-data-bits": {
+                "description": "I2S data bits",
+                "type": "enum",
+                "default": 16,
+                "values": [ 16, 24, 32, "16ext" ]
+            },
+            "config-audio-freq": {
+                "description": "I2S frequency, kHz",
+                "type": "enum",
+                "default": 22,
+                "values": [ 8, 11, 16, 22, 32, 44, 48, 96, 192 ]
+            },
+            "config-cpol": {
+                "description": "I2S clock polarity",
+                "type": "enum",
+                "default": 0,
+                "values": [ 0, 1 ]
+            },
+            "config-alias": {
+                "description": "Driver C++ alias",
+                "type": "string"
+            },
+            "config-comment": {
+                "description": "Driver C++ comment",
+                "type": "string"
+            }
+        },
+        "items-I2S2": {
+            "config-tx-dma-descriptor": {
+                "description": "DMA config of I2S2 TX",
+                "long-description": [
+                    "For I2S modules, no other DMA is allowed",
+                    "except DMA1"
+                ],
+                "type": "enum",
+                "default": "DMA1 Stream4 Channel0",
+                "values": [
+                    "DMA1 Stream4 Channel0",
+                    "DMA1 Stream4 Channel2 (I2S2_EXT_TX)"
+                ]
+            },
+            "config-rx-dma-descriptor": {
+                "description": "DMA config of I2S2 RX",
+                "long-description": [
+                    "For I2S modules, no other DMA is allowed",
+                    "except DMA1"
+                ],
+                "type": "enum",
+                "default": "DMA1 Stream3 Channel0",
+                "values": [
+                    "DMA1 Stream3 Channel0",
+                    "DMA1 Stream3 Channel3 (I2S2_EXT_RX)"
+                ]
+            }
+        },
+        "items-I2S3": {
+            "config-tx-dma-descriptor": {
+                "description": "DMA config of I2S3 TX",
+                "long-description": [
+                    "For I2S modules, no other DMA is allowed",
+                    "except DMA1"
+                ],
+                "type": "enum",
+                "default": "DMA1 Stream5 Channel0",
+                "values": [
+                    "DMA1 Stream5 Channel0",
+                    "DMA1 Stream7 Channel0",
+                    "DMA1 Stream5 Channel2 (I2S3_EXT_TX)"
+                ]
+            },
+            "config-rx-dma-descriptor": {
+                "description": "DMA config of I2S3 RX",
+                "long-description": [
+                    "For I2S modules, no other DMA is allowed",
+                    "except DMA1"
+                ],
+                "type": "enum",
+                "default": "DMA1 Stream0 Channel0",
+                "values": [
+                    "DMA1 Stream0 Channel0",
+                    "DMA1 Stream2 Channel0",
+                    "DMA1 Stream2 Channel2 (I2S3_EXT_RX)",
+                    "DMA1 Stream0 Channel3 (I2S3_EXT_RX)"
+                ]
+            }
+        }
+    }
+}

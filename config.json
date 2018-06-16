@@ -2,21 +2,15 @@
     "menu-platform": {
         "description": "Platform menu",
         "long-description": [
-            "Menu allows to select",
-            "desired platform",
-            "for which application",
-            "will be compiled.",
-            "Platform in theCore",
-            "usually represents ",
-            "a MCU or family of MCUs"
+            "Menu allows to select desired platform for which application",
+            "will be compiled. Platform in theCore represents a MCU or",
+            "a family of MCUs"
         ],
 
         "config-name": {
             "description": "Platform",
             "long-description": [
-                "List of platform types",
-                "(or microcontrollers",
-                "in other words)",
+                "List of platform types or microcontrollers in other words)",
                 "supported by theCore"
             ],
 

@@ -1,3 +1,5 @@
+.. _theCore_stm32f4_htu21d:
+
 STM32F4 discovery and HTU21D temperature and humidity sensor
 ------------------------------------------------------------
 

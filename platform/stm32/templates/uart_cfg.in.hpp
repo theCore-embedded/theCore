@@ -25,7 +25,7 @@ import json
 import os
 
 cfg = json.load(open(JSON_CFG))
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-stm32']
 
 # Some default UART configuration.
 uart_defaults = {
@@ -45,19 +45,19 @@ def get_baud(uart_cfg):
         return uart_defaults["baud"]
 
 # Gets string representation of UART theCore enum.
-def get_uart_enum(uart_cfg):
-    num = uart_cfg['id'][-1]
+def get_uart_enum(uart_id):
+    num = uart_id[-1]
     return "usart_device::dev" + str(num)
 
 # Gets UART theCore driver instance name
 # I.e. "USART3" -> "USART3_driver"
-def get_inst_name(uart_cfg):
-    return uart_cfg['id'] + '_driver'
+def get_inst_name(uart_id):
+    return uart_id + '_driver'
 
 # Gets UART theCore config instance name
 # I.e. "USART3" -> "USART3_cfg"
-def get_cfg_inst_name(uart_cfg):
-    return uart_cfg['id'] + '_cfg'
+def get_cfg_inst_name(uart_id):
+    return uart_id + '_cfg'
 
 # UART configuration struct.
 template_uart_cfg = '''
@@ -106,37 +106,35 @@ console_str = ''
 # Will store bypass console output lines (if needed)
 bypass_console_str = ''
 
-uart_cfgs = {}
+uart_names = []
 
-if 'uart' in cfg:
-    uart_cfgs = cfg['uart']
+if 'menu-uart' in cfg:
+    uart_names = cfg['menu-uart']['table-uart']
 
-for uart_cfg in uart_cfgs:
+for uart_id in uart_names:
+    uart_cfg = cfg['menu-uart']['menu-' + uart_id]
     # Place comment line if needed
-    if 'comment' in uart_cfg:
+    if 'config-comment' in uart_cfg:
         # Avoid using begin and end comment section tokens
-        cog.outl(('\n%s* ' + uart_cfg['comment'] + ' *%s') % ('/', '/'))
+        cog.outl(('\n%s* ' + uart_cfg['config-comment'] + ' *%s') % ('/', '/'))
 
     # Config
     cog.outl(template_uart_cfg % (
-        get_uart_enum(uart_cfg), get_baud(uart_cfg),
-        get_cfg_inst_name(uart_cfg), get_uart_enum(uart_cfg)
+        get_uart_enum(uart_id), get_baud(uart_cfg),
+        get_cfg_inst_name(uart_id), get_uart_enum(uart_id)
         ))
 
     # Driver instance
-    cog.outl(template_uart_instance % (get_inst_name(uart_cfg), get_uart_enum(uart_cfg)))
+    cog.outl(template_uart_instance % (get_inst_name(uart_id), get_uart_enum(uart_id)))
     # User-supplied alias
     if 'alias' in uart_cfg:
-        cog.outl(template_uart_alias % (uart_cfg['alias'], get_inst_name(uart_cfg)))
+        cog.outl(template_uart_alias % (uart_cfg['alias'], get_inst_name(uart_id)))
 
     # Check if console need to be enabled for this device.
-    if ('console' in cfg) and (cfg['console'] == uart_cfg['id']):
-        console_str = template_console % get_inst_name(uart_cfg)
-
-    if 'bypass_console' in cfg and cfg['bypass_console'] == uart_cfg['id']:
-        bypass_console_str = template_bypass % (get_inst_name(uart_cfg),
-                                                get_cfg_inst_name(uart_cfg))
-
+    if ('config-console' in cfg) and (cfg['config-console'] == uart_id):
+        console_str = template_console % get_inst_name(uart_id)
+        bypass_console_str = template_bypass % (get_inst_name(uart_id),
+                                                get_cfg_inst_name(uart_id))
 
 ]]]*/
 //[[[end]]]
