@@ -108,7 +108,7 @@ static constexpr pin_info pins[] = {
         if 'config-comment' in pin_cfg:
             cog.outl('/' + '* ' + pin_cfg['config-comment'] + ' *' + '/')
 
-        r = parse('P{:1w}{:d}', pin_id)
+        r = parse('P{:1D}{:d}', pin_id)
         port = 'GPIO' + r[0]
         rcc_ports.append('RCC_AHB1Periph_GPIO' + r[0])
         pin_num = str(r[1])

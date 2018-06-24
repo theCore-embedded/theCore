@@ -57,8 +57,8 @@ for pin_id in pin_ids:
 
     cog.outl(template_gpio % (drv_name, pin_port, pin_num))
 
-    if 'config-alias' in pin_cfg:
-        cog.outl('using %s = %s;' % (pin_cfg['config-alias'], drv_name))
+    if 'config-gpio-alias' in pin_cfg:
+        cog.outl('using %s = %s;' % (pin_cfg['config-gpio-alias'], drv_name))
 
 ]]]*/
 //[[[end]]]
