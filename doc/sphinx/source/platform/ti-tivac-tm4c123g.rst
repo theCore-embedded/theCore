@@ -220,8 +220,8 @@ Available options
 
 :alias:
 
-  Driver C++ alias that will be created. Alias can be used in the user code
-  to access given pin.
+  Comma-separated driver C++ aliases that will be created.
+  Each alias can be used in the user code to access given pin.
 
 :comment:
 
