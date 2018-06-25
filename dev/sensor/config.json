@@ -1,0 +1,9 @@
+{
+    "menu-sensors": {
+        "description": "Sensors",
+
+        "include-htu21d": {
+            "ref": "./htu21d/config.json"
+        }
+    }
+}

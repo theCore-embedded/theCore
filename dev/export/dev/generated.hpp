@@ -12,5 +12,7 @@
 #include <dev/sdspi_cfg.hpp>
 // CS43L22 driver
 #include <dev/cs43l22_cfg.hpp>
+// HTU32D sensor
+#include <dev/sensor/htu21d_cfg.hpp>
 
 #endif // THECORE_DEV_GENERATED_

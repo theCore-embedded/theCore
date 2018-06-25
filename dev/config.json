@@ -4,6 +4,10 @@
 
         "include-cs43l22": {
             "ref": "./cs43l22/config.json"
+        },
+
+        "include-sensors": {
+            "ref": "./sensor/config.json"
         }
     }
 }

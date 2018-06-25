@@ -4,6 +4,7 @@
 
 # Create directory for auto-generated device files
 file(MAKE_DIRECTORY ${CORE_GEN_DIR}/export/dev)
+file(MAKE_DIRECTORY ${CORE_GEN_DIR}/export/dev/sensor)
 
 add_subdirectory(pcd8544)
 add_subdirectory(bus)
@@ -16,4 +17,4 @@ add_subdirectory(sdspi)
 # TODO: aggregate ALL devices
 add_library(thecore_dev INTERFACE)
 target_include_directories(thecore_dev INTERFACE export)
-target_link_libraries(thecore_dev INTERFACE sdspi)
+target_link_libraries(thecore_dev INTERFACE sdspi cs43l22 htu21d)
