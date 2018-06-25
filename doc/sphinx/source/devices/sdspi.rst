@@ -32,7 +32,7 @@ Driver documentation
 SDSPI usage example
 ~~~~~~~~~~~~~~~~~~~
 
-.. note:: This section is under construction.
+See :ref:`theCore_TM4C_FATFS_SDSPI`.
 
 Known limitations
 ~~~~~~~~~~~~~~~~~

@@ -1,0 +1,9 @@
+{
+    "menu-dev": {
+        "description": "Device drivers",
+
+        "include-cs43l22": {
+            "ref": "./cs43l22/config.json"
+        }
+    }
+}

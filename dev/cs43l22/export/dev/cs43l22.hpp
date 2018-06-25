@@ -27,6 +27,13 @@
 namespace ecl
 {
 
+
+//! \addtogroup dev External device drivers
+//! @{
+
+//! \defgroup cs43l22 CS43L22 driver module
+//! @{
+
 //! The CS43L22 codec driver implementation.
 //! \tparam I2c I2C generic bus driver.
 //! \tparam I2s I2S generic bus driver.
@@ -829,6 +836,10 @@ err cs43l22< I2c, I2s, Rst_gpio >::set_sampling_frequency()
 
     return I2s::platform_handle::template i2s_set_audio_frequency<frequency>();
 }
+
+//! @}
+
+//! @}
 
 } // namespace ecl
 
