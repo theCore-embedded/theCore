@@ -1,5 +1,5 @@
-Frequently Asked Questions
-==========================
+FAQ
+===
 
 How to fix ``libusb_open() failed with LIBUSB_ERROR_ACCESS`` when running OpenOCD?
 ----------------------------------------------------------------------------------
@@ -113,6 +113,3 @@ For old Discovery board with ST-LINK/V2, you should see::
 For new Discovery board with ST-LINK/V2-A (labeled as STM32F407G-DISC1)::
 
     Bus 001 Device 002: ID 0483:374b STMicroelectronics ST-LINK/V2.1 (Nucleo-F103RB)
-
-
-
