@@ -39,3 +39,4 @@ Driver documentation
 :doxy_url:`Click here to open CS43L22 Doxygen docs<group__cs43l22.html>`.
 
 .. _`Mouser website`: https://www.mouser.com/ds/2/76/CS43L22_F2-1142121.pdf
+.. _`STM32F4 Discovery`: https://www.st.com/en/evaluation-tools/stm32f4discovery.html

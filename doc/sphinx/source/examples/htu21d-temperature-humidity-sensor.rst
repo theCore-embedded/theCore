@@ -1,4 +1,4 @@
-.. _theCore_htu21d:
+.. _theCore_htu21d_example:
 
 HTU21D temperature and humidity sensor example
 ----------------------------------------------
@@ -8,6 +8,7 @@ HTU21D temperature and humidity sensor example
 :External HW:       UART-to-USB converter attached to the USART2, HTU21D sensor
 
 HTU21D example shows how to read humidity and temperature samples using theCore.
+For more information about what this sensor does see the :ref:`theCore_HTU21D` page.
 
 .. STARTOF COMMON SECTION MARKER
 
