@@ -42,7 +42,7 @@ Available examples
 * :ref:`theCore_hello_world`
 * :ref:`theCore_stm32f4_cs43l22`
 * :ref:`theCore_STM32F4_HM-10_example`
-* :ref:`theCore_stm32f4_htu21d`
+* :ref:`theCore_htu21d`
 
 Periphery overview
 ~~~~~~~~~~~~~~~~~~

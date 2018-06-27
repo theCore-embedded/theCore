@@ -1,16 +1,21 @@
-.. _theCore_stm32f4_cs43l22:
+.. _theCore_htu21d:
 
-STM32F4 discovery audio example with CS43L22 audio DAC
-------------------------------------------------------
+HTU21D temperature and humidity sensor example
+----------------------------------------------
 
-:Location:          https://github.com/theCore-embedded/example_cs43l22_audio
-:External HW:       UART-to-USB converter attached to the USART3, headphones
+:Location:          https://github.com/theCore-embedded/example_sensor_htu21d
+:Target:            STM32F4 Discovery board
+:External HW:       UART-to-USB converter attached to the USART2, HTU21D sensor
+
+HTU21D example shows how to read humidity and temperature samples using theCore.
+
+.. STARTOF COMMON SECTION MARKER
 
 Supported targets (boards)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 +---------------------+--------------------------+-----------------------------------+
-|     Target name     |    Configuration file    |            Description            |
+| Target name         | Configuration file       | Description                       |
 +=====================+==========================+===================================+
 | stm32f4_disc        | stm32f4_discovery.json   | STM32F4 discovery board           |
 +---------------------+--------------------------+-----------------------------------+
@@ -18,8 +23,23 @@ Supported targets (boards)
 Wiring
 ~~~~~~
 
-.. image:: https://i.imgur.com/fhWxQ4Z.jpg
-   :alt: CS43L22 stm32f4discovery wiring
+STM32F4 Discovery board
+++++++++++++++++++++++++
+
+.. image:: https://i.imgur.com/vX2uOb5.jpg
+   :alt: UART and HTU21D example wiring for stm32f4discovery board
+
+#. Connect HTU21D_ to I2C1 on the Discovery board using following pins:
+
+   +-------------------+-----------------+
+   | PB6 (I2C1 SCL)    | sensor's SCL    |
+   +-------------------+-----------------+
+   | PB9 (I2C1 SDA)    | sensor's SDA    |
+   +-------------------+-----------------+
+   | +3.3V             | sensor's VDD    |
+   +-------------------+-----------------+
+   | GND               | sensor's GND    |
+   +-------------------+-----------------+
 
 #. Attach any preferable UART-to-USB converter `such as this`_ module according to following pinout:
 
@@ -43,8 +63,8 @@ Preparing
 
 #. Download the example::
 
-      tcore init --remote https://github.com/theCore-embedded/example_cs43l22_audio
-      cd example_cs43l22_audio
+      tcore init --remote https://github.com/theCore-embedded/example_sensor_htu21d
+      cd example_sensor_htu21d
 
 Building
 ~~~~~~~~
@@ -74,7 +94,7 @@ Firmware will be flashed via ``openocd`` debugger and ``flash`` command.
 #. Determine stm32f4discovery board revision.
 
    If you don't remember your board revision, check FAQ section
-   :ref:`theCore_STM32F4_Discovery_rev`.
+   |GET_DISCOVERY_REVISION|
 
 #. Launch ``flash`` command in separate terminal, as shown below.
 
@@ -91,18 +111,24 @@ Firmware will be flashed via ``openocd`` debugger and ``flash`` command.
 
      tcore flash --sudo --debugger-config stlink-v2.1
 
-#. Attach headphones to the audio jack on Discovery board.
-
-#. Wear your headphones and enjoy.
-
 Expected output
 ~~~~~~~~~~~~~~~
 
-In ``minicom`` you should be able to see::
+Observe console output in the minicom::
 
-  Welcome to theCore
-  Playing audio sample...
-
-In headphones you should hear cool 8-bit sound.
+        Welcome to theCore
+        the_core v0.3.0.321 90f4894-dirty
+        Starting HTU21D sensor...
+        Reset done
+        Temperature: 25.362 Celsius   Humidity: 45.162%
+        Temperature: 25.362 Celsius   Humidity: 45.170%
+        Temperature: 25.362 Celsius   Humidity: 45.155%
+        Temperature: 25.362 Celsius   Humidity: 45.147%
+        Temperature: 25.351 Celsius   Humidity: 45.155%
 
 .. _such as this: http://www.geekfactory.mx/wp-content/uploads/2013/06/converdidor_usb_ttl_rs232_pl_2303hx_01.jpg
+.. _HTU21D: https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf
+
+.. ENDOF COMMON SECTION MARKER
+
+.. |GET_DISCOVERY_REVISION| replace:: :ref:`theCore_STM32F4_Discovery_rev`.

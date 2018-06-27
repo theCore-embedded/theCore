@@ -107,7 +107,7 @@ Expected output
 ~~~~~~~~~~~~~~~
 
 Observe console output (either in current shell if running on host, or using
-   minicom if running on the embedded device)::
+minicom if running on the embedded device)::
 
         Welcome to theCore
         the_core v0.3.0.307 9ff344b-dirty
