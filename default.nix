@@ -10,7 +10,7 @@ let
   cmake-version4git = pkgs.callPackage ./nix/cmake-version4git {};
   # Additionall documentation dependencies take enourmous time to download
   # and build. They are not needed by default.
-  docs_deps = with pkgs; with python35Packages; if docs then
+  docs_deps = with pkgs; with python36Packages; if docs then
                 [ sphinx
                   sphinx_rtd_theme
                   recommonmark
@@ -21,7 +21,7 @@ let
                   cmake-doxygen ]
               else
                   [ ];
-in with pkgs; with python35Packages; {
+in with pkgs; with python36Packages; {
   coreEnv = stdenv.mkDerivation {
     name = "thecore";
     hardeningDisable = [ "all" ];

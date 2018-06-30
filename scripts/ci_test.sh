@@ -16,21 +16,14 @@ make
 ctest . --output-on-failure
 cd ..
 
-# Examples
+# System test cases
 
-mkdir -p build_examples
-cd build_examples
-cmake ../../examples
-make
-cd ..
-
-# Test cases
-
-mkdir -p build_test_cases
-cd build_test_cases
-cmake ../../tests
-make
-cd ..
+# TODO: test it and make sure that it supports new configurator
+# mkdir -p build_test_cases
+# cd build_test_cases
+# cmake ../../tests
+# make
+# cd ..
 
 # Documentation build
 
