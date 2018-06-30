@@ -17,4 +17,4 @@ add_subdirectory(sdspi)
 # TODO: aggregate ALL devices
 add_library(thecore_dev INTERFACE)
 target_include_directories(thecore_dev INTERFACE export)
-target_link_libraries(thecore_dev INTERFACE sdspi cs43l22 htu21d)
+target_link_libraries(thecore_dev INTERFACE sdspi cs43l22 htu21d hm10)

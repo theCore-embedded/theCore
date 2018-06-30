@@ -1,0 +1,31 @@
+{
+    "menu-hm10": {
+        "description": "HM-10 module",
+        "long-description": [
+            "HM-10 BTLE module configuration"
+        ],
+
+        "table-hm10-dev": {
+            "description": "HM-10 driver table",
+            "key": "config-alias",
+            "items": {
+                "config-alias": {
+                    "description": "HM10 drivers",
+                    "long-description": [
+                        "An array with user-defined names for the HM10 driver(s)"
+                    ],
+                    "type": "array"
+                },
+                "config-uart": {
+                    "description": "UART",
+                    "long-description": [
+                        "UART channel to use to HM10 communication with MCU.",
+                        "Defined in the platform."
+                    ],
+                    "type": "enum",
+                    "values-from": "uart-channel"
+                }
+            }
+        }
+    }
+}
