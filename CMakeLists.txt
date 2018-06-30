@@ -55,7 +55,7 @@ if(NOT DEFINED THECORE_TARGET_CONFIG_FILE AND NOT CMAKE_CROSSCOMPILING)
 
     ## TODO: change it to work with new configurator
     file(WRITE ${CORE_GEN_DIR}/test.json
-        "{\"platform\":{\"name\":\"host\",\"console\":true}}"
+        "{\"menu-platform\": {\"config-name\": \"Host\", \"menu-host\": {\"config-console\": 1}}}"
     )
     set(THECORE_TARGET_CONFIG_FILE "${CORE_GEN_DIR}/test.json"
         CACHE PATH "Test JSON file")
