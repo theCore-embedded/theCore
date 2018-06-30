@@ -1,0 +1,80 @@
+{
+    "menu-filesystem": {
+        "description": "Filesystems",
+        "long-description": [
+            "Menu for selecting and configuring filesystems"
+        ],
+
+        "menu-fatfs": {
+            "description": "FAT",
+            "long-description": [
+                "FAT (File Allocation Table) configuration.",
+                "In theCore, FAT implementation is based on Petite FAT",
+                "driver."
+            ],
+
+            "config-readonly": {
+                "description": "Read only",
+                "long-description": [
+                    "FAT read only flag.",
+                    "If your application will not perform a write operation",
+                    "set this to true, it will help reduce a binary size"
+                ],
+                "type": "enum",
+                "default": true,
+                "values": [ true, false ]
+            },
+
+            "config-lowercase": {
+                "description": "Enable lowercase",
+                "long-description": [
+                    "FAT support for lowercase file names.",
+                    "If this set to false, FILE.TXT and file.txt will be",
+                    "treated as a same file"
+                ],
+                "type": "enum",
+                "default": true,
+                "values": [ true, false ]
+            },
+
+            "config-enable_seek": {
+                "description": "Enable seek",
+                "long-description": [
+                    "FAT support for seek.",
+                    "If your application will not perform a seek operation",
+                    "set this to false, it will help reduce a binary size"
+                ],
+                "type": "enum",
+                "default": false,
+                "values": [ true, false ]
+            },
+
+            "table-fatfs": {
+                "description": "FAT instances table",
+                "key": "config-alias",
+                "items": {
+                    "config-alias": {
+                        "description": "FAT drivers",
+                        "long-description": [
+                            "FATFS driver name array. Each one must be",
+                            "valid C++ identifier"
+                        ],
+                        "type": "array"
+                    },
+                    "config-mountpoint": {
+                        "description": "FAT mountpoint",
+                        "type": "string"
+                    },
+                    "config-block": {
+                        "description": "Block device",
+                        "long-description": [
+                            "Block device to operate on"
+                        ],
+                        "type": "enum",
+                        "values-from": "block-device"
+                    }
+                }
+            }
+        }
+    }
+}

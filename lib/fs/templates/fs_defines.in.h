@@ -18,17 +18,17 @@ import common
 
 initial_config = {
     'fat': {
-        'readonly': False,
-        'enable_seek': True,
-        'enable_lowercase': False
+        'config-readonly':      False,
+        'config-enable_seek':   True,
+        'config-lowercase':     False
     }
 }
 
 defines_map = {
     'fat': {
-        'readonly': 'THECORE_FATFS_READONLY',
-        'enable_seek': 'THECORE_FATFS_USE_SEEK',
-        'enable_lowercase': 'THECORE_FATFS_USE_LCC'
+        'config-readonly':      'THECORE_FATFS_READONLY',
+        'config-enable_seek':   'THECORE_FATFS_USE_SEEK',
+        'config-lowercase':     'THECORE_FATFS_USE_LCC'
     }
 }
 
@@ -41,14 +41,16 @@ def fat_generator(fat_cfg):
             + str(int(initial_config['fat'][k])))
 
 cfg = json.load(open(JSON_CFG))
-fs_cfg = []
 
-if 'lib' in cfg and 'fs' in cfg['lib']:
-    fs_cfg = cfg['lib']['fs']
+fatfs_cfg = None
 
-for fs in fs_cfg:
-    if fs['type'] == 'fat':
-        fat_generator(fs)
+try:
+    fatfs_cfg = cfg['menu-lib']['menu-filesystem']['menu-fatfs']
+except:
+    pass
+
+if fatfs_cfg:
+    fat_generator(fatfs_cfg)
 
 ]]]*/
 //[[[end]]]

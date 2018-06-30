@@ -24,14 +24,19 @@ import json
 import common
 
 cfg = json.load(open(JSON_CFG))
-fs_cfg = []
+fs_cfg = {}
+fatfs_menu = {}
+fatfs_ids = []
 
-if 'lib' in cfg and 'fs' in cfg['lib']:
-    fs_cfg = cfg['lib']['fs']
+try:
+    fs_cfg = cfg['menu-lib']['menu-filesystem']
+except:
+    pass
 
-for fs in fs_cfg:
-    if fs['type'] == 'fat':
-        cog.outl('#include <ecl/fat/fs.hpp>')
+if 'menu-fatfs' in fs_cfg:
+    cog.outl('#include <ecl/fat/fs.hpp>')
+    fatfs_menu = fs_cfg['menu-fatfs']
+    fatfs_ids = fatfs_menu['table-fatfs']
 
 ]]]*/
 //[[[end]]]
@@ -46,28 +51,27 @@ namespace ecl
 
 fs_descriptors = []
 
-def fat_generator(fat_cfg):
-    i = 0
-    for dev in fat_cfg['dev']:
-        fat_name = 'fatfs' + str(i)
-        fat_mount_name = 'fatfs_mount' + str(i)
-        fat_descr_name = 'fatfs_descr' + str(i)
+def fat_generator(fat_id, fat_cfg):
+    fat_mount_name = fat_id + '_mount'
+    fat_descr_name = fat_id + '_descriptor'
 
-        cog.outl('')
+    mountpoint = fat_cfg['config-mountpoint']
+    block = fat_cfg['config-block']
 
-        cog.outl('ECL_FS_MOUNT_POINT(%s, "%s");'
-            % (fat_mount_name, dev['mountpoint']))
-        cog.outl('using %s = ecl::fat::petit<%s>;'
-            % (fat_name, dev['id']))
-        cog.outl('using %s = ecl::fs::fs_descriptor<%s, %s>;'
-            % (fat_descr_name, fat_mount_name, fat_name))
+    cog.outl('')
 
-        i += 1
-        fs_descriptors.append(fat_descr_name)
+    cog.outl('ECL_FS_MOUNT_POINT(%s, "%s");'
+        % (fat_mount_name, mountpoint))
+    cog.outl('using %s = ecl::fat::petit<%s>;'
+        % (fat_id, block))
+    cog.outl('using %s = ecl::fs::fs_descriptor<%s, %s>;'
+        % (fat_descr_name, fat_mount_name, fat_id))
 
-for fs in fs_cfg:
-    if fs['type'] == 'fat':
-        fat_generator(fs)
+    fs_descriptors.append(fat_descr_name)
+
+for fatfs_id in fatfs_ids:
+    fat_generator(fatfs_id, fatfs_menu['menu-' + fatfs_id])
+
 ]]]*/
 //[[[end]]]
 

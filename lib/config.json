@@ -1,0 +1,9 @@
+{
+    "menu-lib": {
+        "description": "Libraries",
+
+        "include-fs": {
+            "ref": "./fs/config.json"
+        }
+    }
+}
