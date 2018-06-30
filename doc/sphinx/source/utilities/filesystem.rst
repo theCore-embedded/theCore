@@ -3,6 +3,8 @@ Filesystem support
 
 .. image:: http://www.xs-labs.com/uploads/image/filesystem/icon-circle.png
     :alt: Filesystem interface
+    :width: 400
+    :align: center
 
 (image by `xs-labs`_)
 
@@ -59,41 +61,6 @@ Known limitations
 * FATFS module must be configured similarly for every underlying device:
   i.e. there is no way to have 2 SD cards with 2 FAT, configured one as readonly,
   an one as read-write. Both of them must be the same type.
-
-Filesystem example configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. literalinclude:: ./fs/fatfs_example.json
-    :language: cpp
-    :linenos:
-
-Example output
-~~~~~~~~~~~~~~
-
-Filesystem configuration header:
-
-.. literalinclude:: ../_static/generated/fs/fs_cfg_example.hpp
-    :lines: 23-41
-    :language: cpp
-    :linenos:
-
-`Full filesystem configuration header <../_static/generated/fs/fs_cfg_example.hpp>`_
-
-Filesystem definitions header:
-
-.. literalinclude:: ../_static/generated/fs/fs_defines_example.h
-    :lines: 13-15
-    :language: cpp
-    :linenos:
-
-`Full filesystem definitions header <../_static/generated/fs/fs_defines_example.h>`_
-
-Filesystem configuration schema
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. literalinclude:: ../../../../lib/fs/fs.schema.json
-    :language: json
-    :linenos:
 
 Additional references
 ~~~~~~~~~~~~~~~~~~~~~

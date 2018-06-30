@@ -5,8 +5,7 @@ Cirrus Logic CS43L22 audio DAC
 
 .. image:: https://componentsearchengine.com/Images/3/CS43L22-CNZ.jpg
   :alt: CS43L22 audio DAC
-  :height: 450
-  :width: 450
+  :width: 700
 
 The CS43L22 is a highly integrated, low power stereo DAC with headphone and
 Class D speaker amplifiers.

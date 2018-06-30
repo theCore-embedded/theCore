@@ -5,6 +5,7 @@ HTU21D humidity and temperature sensor
 
 .. image:: https://s3-ap-southeast-1.amazonaws.com/a2.datacaciques.com/16/09/13/73w9keijt2gvm68c/20dbf19893bf73b1.jpg
   :alt: HTU21D humidity and temperature sensor module
+  :width: 700
 
 The HTU21D is a low-cost and highly accurate digital humidity and temperature sensor.
 It can be shipped within different boards, like shown in the picture above.

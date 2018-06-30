@@ -5,6 +5,7 @@ HM-10 Bluetooth BTLE module
 
 .. image:: https://cdn.itead.cc/media/catalog/product/h/m/hm_10_03.jpg
   :alt: HM-10 Bluetooth Module BTLE
+  :width: 700
 
 HM-10 is a BLE module for embedded system to get BLE wireless communication
 with BLE capable devices (e.g. iPhone and iPad).

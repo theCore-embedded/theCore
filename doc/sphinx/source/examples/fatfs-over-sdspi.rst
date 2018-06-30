@@ -1,19 +1,26 @@
-.. _theCore_TM4C_FATFS_SDSPI:
+.. _theCore_FATFS_SDSPI:
 
-TI TM4C123G SD-card demo using FATFS and SDSPI
-----------------------------------------------
+SD-card demo using FATFS and SDSPI
+----------------------------------
 
-:Location:          ``examples/tm4c_fatfs``
-:Target:            Tiva C Series TM4C123G LaunchPadEvaluation Board
+:Location:          https://github.com/theCore-embedded/example_fatfs
 :External HW:       `Catalex micro-SD card adapter/module`_
-:Toolchain:         GNU arm-none-eabi v.5.2 or newer
-:Additional SW:     UniFlash, minicom, OpenOCD
 
 The example shows how to use :ref:`theCore_FAT_filesystem` over
-:ref:`theCore_SDSPI` on :ref:`TM4C123G microcontroller<theCore_TIVAC_TM4C123G>`.
+:ref:`theCore_SDSPI` in theCore framework.
 
-Hardware in question is `a regular SD card`_ connected to
-`the Catalex micro-SD adapter`_ and `TM4C123G LaunchPad™ Evaluation Kit`_.
+Hardware in question is `a regular SD card`_ connected to `the Catalex micro-SD adapter`_.
+
+.. STARTOF COMMON SECTION MARKER
+
+Supported targets (boards)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++---------------------+--------------------------+-----------------------------------+
+| Target name         | Configuration file       | Description                       |
++=====================+==========================+===================================+
+| tiva_tm4c_launchpad | tiva_tm4c_launchpad.json | TM4C123G LaunchPad Evaluation Kit |
++---------------------+--------------------------+-----------------------------------+
 
 Wiring
 ~~~~~~
@@ -43,35 +50,46 @@ on the LaunchPad board using following pins:
 | GND               | module's GND        |
 +-------------------+---------------------+
 
+Preparing
+~~~~~~~~~
+
+#. Install and initialize theCore (if not done previously)::
+
+    pip3 install tcore
+    tcore bootstrap
+
+#. Download the example::
+
+    tcore init --remote https://github.com/theCore-embedded/example_fatfs
+
+#. Step into the project directory::
+
+    cd example_fatfs
+
 Building
 ~~~~~~~~
 
-#. Execute build commands.
-   The CMake Toolchain file is required to build this application.
-   theCore already has one suitable for this target.
+::
 
-   ::
+  tcore compile --target tiva_tm4c_launchpad
 
-       mkdir build
-       cd build
-       cmake -DCMAKE_TOOLCHAIN_FILE=../../toolchains/arm-cm4-gnu.cmake ..
-       make
 
 Running
 ~~~~~~~
 
-#. Flash firmware either by using UniFlash_ or OpenOCD.
-   The UniFlash interface is straightforward.
+#. Launch `minicom` (``/dev/ttyACM0`` used here as an example)::
 
-   For OpenOCD, execute::
+        # From new terminal
+        tcore runenv "minicom -D /dev/ttyACM0"
 
-     sudo $(which openocd) -f board/ek-lm4f120xl.cfg -c 'init; reset halt; flash write_image erase tm4c_fatfs.bin 0x0; reset run; exit'
+   Or the same, but with superuser permissions::
 
-#. Launch ``minicom`` with device associated with the board.
-   (``/dev/ttyACM0`` here used as an example)::
+        # From new terminal
+        tcore runenv --sudo "minicom -D /dev/ttyACM0"
 
-     # From new terminal
-     minicom -D /dev/ttyACM0
+#. Flash to the board::
+
+    tcore flash --sudo
 
 Expected output
 ~~~~~~~~~~~~~~~
@@ -91,17 +109,9 @@ Expected output
 #. Select a file to print into the console. File contents then will appear
    on the screen.
 
-Target JSON config for the TM4C FATFS example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For your reference, the JSON configuration for this example is displayed below:
-
-.. literalinclude:: ../../../../examples/tm4c_fatfs/target.json
-
-.. _UniFlash: http://processors.wiki.ti.com/index.php/Category:CCS_UniFlash
-
 .. _`Catalex`: http://www.aessmart.com/product/673/a531-micro-sd-card-module-adaptercatalex
 .. _`Catalex micro-SD card adapter/module`: Catalex_
 .. _`the Catalex micro-SD adapter`: Catalex_
 .. _`a regular SD card`: http://bit.ly/2HU5yr7
-.. _`TM4C123G LaunchPad™ Evaluation Kit`: http://www.ti.com/tool/EK-TM4C123GXL
+
+.. ENDOF COMMON SECTION MARKER

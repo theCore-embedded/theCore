@@ -123,26 +123,6 @@ generate_source(${PARTICLE_DOC_DIR}/i2c_example.json
     ${PARTICLE_OUT_DIR}/i2c_example.hpp
 )
 
-################################################################################
-# Filesystem examples
-################################################################################
-
-set(FS_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/utilities/fs)
-set(FS_TEMPLATE_DIR ${CORE_DIR}/lib/fs/templates)
-set(FS_OUT_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/_static/generated/fs)
-
-# FATFS configuration example
-generate_source(${FS_DOC_DIR}/fatfs_example.json
-    ${FS_TEMPLATE_DIR}/fs_cfg.in.hpp
-    ${FS_OUT_DIR}/fs_cfg_example.hpp
-)
-
-# FATFS definintions configuration example
-generate_source(${FS_DOC_DIR}/fatfs_example.json
-    ${FS_TEMPLATE_DIR}/fs_defines.in.h
-    ${FS_OUT_DIR}/fs_defines_example.h
-)
-
 if(Sphinx_FOUND)
     # configured documentation tools and intermediate build results
     set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/sphinx/theCore")

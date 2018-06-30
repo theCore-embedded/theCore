@@ -13,7 +13,7 @@ Examples
   htu21d-temperature-humidity-sensor
   stm32f4-discovery-cs43l22
   stm32f4-discovery-bluetooth-hm10
-  ti-tm4c123g-sdcard-fatfs-sdspi
+  fatfs-over-sdspi
 
 theCore examples are organized in a form of separate projects that can be
 extracted and used as a base for custom application.
