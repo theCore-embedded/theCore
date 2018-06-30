@@ -64,3 +64,9 @@ def resolve_i2s_driver(json_cfg, i2s_id):
 def resolve_i2c_driver(json_cfg, i2c_id):
     # TODO: support alias
     return i2c_id + '_driver'
+
+# Resolves I2C driver typedef based on given ID.
+# Given ID can be either platform-related ID or user alias
+def resolve_uart_driver(json_cfg, uart_id):
+    # TODO: support alias
+    return uart_id + '_driver'

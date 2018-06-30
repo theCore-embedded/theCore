@@ -5,6 +5,16 @@
             "Menu for selecting and configuring filesystems"
         ],
 
+        "config-enable": {
+            "description": "Enable filesystem",
+            "long-description": [
+                "Set this to 'true' if you want enable filesystem support"
+            ],
+            "type": "enum",
+            "default": "false",
+            "values": [ true, false ]
+        },
+
         "menu-fatfs": {
             "description": "FAT",
             "long-description": [
@@ -12,6 +22,8 @@
                 "In theCore, FAT implementation is based on Petite FAT",
                 "driver."
             ],
+
+            "depends_on": "/menu-lib/menu-filesystem/config-enable == True",
 
             "config-readonly": {
                 "description": "Read only",
