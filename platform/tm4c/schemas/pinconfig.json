@@ -7,6 +7,7 @@
                 "type": "enum",
                 "description": "Pin channel selection",
                 "values": "P[A-D][0-7]|PE[0-5]|PF[0-4]",
+                "config-class": "pin-channel",
                 "single": false
             },
             "config-direction": {

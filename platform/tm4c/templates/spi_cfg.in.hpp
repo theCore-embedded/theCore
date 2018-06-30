@@ -86,6 +86,7 @@ for spi_id in spi_ids:
 
     spi_num =  int(spi_id[-1])
     spi_drv_name = 'SPI' + str(spi_num) + '_driver'
+    spi_ssi_name = 'SSI' + str(spi_num) + '_driver'
 
     # Directly included values
     values = {
@@ -104,9 +105,11 @@ for spi_id in spi_ids:
 
     cog.outl(spi_cfg_struct % values)
     cog.outl(spi_typedef % (spi_drv_name, spi_num))
+    # Alternative name
+    cog.outl(spi_typedef % (spi_ssi_name, spi_num))
 
     if 'config-alias' in spi_cfg:
-        cog.outl(spi_alias % (spi_cfg['config-alias'], spi_drv_name))
+        cog.outl(spi_alias % (spi_cfg['config-alias'], spi_ssi_name))
 
 ]]]*/
 //[[[end]]]

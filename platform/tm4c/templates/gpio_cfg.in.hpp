@@ -71,9 +71,11 @@ for pin_id in pincfg_ids:
         cog.outl('{}{}{}'.format('/', '* ' + pincfg['config-comment'] + ' *', '/'))
 
     if 'config-gpio-alias' in pincfg:
-        aliases = pincfg['config-gpio-alias'].split(',')
+        aliases = pincfg['config-gpio-alias'].strip().split(',')
         for alias in aliases:
-            cog.outl('using %s = %s_driver;' % (alias, pin_id))
+            # Silently ignore empty aliases
+            if alias:
+                cog.outl('using %s = %s_driver;' % (alias, pin_id))
 
 ]]]*/
 //[[[end]]]
