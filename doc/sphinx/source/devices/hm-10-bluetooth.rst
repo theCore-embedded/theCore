@@ -31,7 +31,7 @@ Driver documentation
 HM-10 usage example
 ~~~~~~~~~~~~~~~~~~~
 
-Refer to :ref:`theCore_STM32F4_HM-10_example` page for usage example.
+Refer to :ref:`theCore_HM-10_example` page for usage example.
 
 Known limitations
 ~~~~~~~~~~~~~~~~~
