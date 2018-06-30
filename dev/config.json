@@ -6,6 +6,10 @@
             "ref": "./cs43l22/config.json"
         },
 
+        "include-sdspi": {
+            "ref": "./sdspi/config.json"
+        },
+
         "include-sensors": {
             "ref": "./sensor/config.json"
         }
