@@ -5,6 +5,8 @@
 #ifndef DEFAULT_CONSOLE_DRIVER_HPP_
 #define DEFAULT_CONSOLE_DRIVER_HPP_
 
+#include <aux/platform_defines.hpp>
+
 #if THECORE_CONFIG_USE_CONSOLE
 
 #include <platform/console.hpp>

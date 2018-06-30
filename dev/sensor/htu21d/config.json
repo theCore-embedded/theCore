@@ -1,0 +1,20 @@
+{
+    "menu-htu21d": {
+        "description": "HTU21D configuration",
+        "table-htu21d-dev": {
+            "description": "HTU21D sensors table",
+            "key": "config-alias",
+            "items": {
+                "config-alias": {
+                    "description": "HTU21D sensors",
+                    "type": "array"
+                },
+                "config-i2c": {
+                    "description": "I2C channel",
+                    "type": "enum",
+                    "values-from": "i2c-channel"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "menu-sdspi": {
+        "description": "SDSPI driver",
+        "long-description": [
+            "Configuration fo the SDSPI driver. An SDSPI driver",
+            "provides block acces to the SD card and it is required by",
+            "FATFS to allow it operate on SD card storage."
+        ],
+
+        "table-sdspi-dev": {
+            "description": "SDSPI driver table",
+            "key": "config-alias",
+            "items": {
+                "config-alias": {
+                    "description": "SDSPI drivers",
+                    "long-description": [
+                        "An array with user-defined names for the SDSPI driver(s)"
+                    ],
+                    "type": "array",
+                    "config-class": "block-device"
+                },
+
+                "config-spi": {
+                    "description": "SPI",
+                    "long-description": [
+                        "SPI channel, used by this driver. SPI can be configured",
+                        "inside a platform."
+                    ],
+                    "type": "enum",
+                    "values-from": "spi-channel"
+                },
+
+                "config-cs": {
+                    "description": "SPI CS pin",
+                    "long-description": [
+                        "SPI CS (chip select) pin, used by this driver"
+                    ],
+                    "type": "enum",
+                    "values-from": "pin-channel"
+                }
+            }
+        }
+    }
+}

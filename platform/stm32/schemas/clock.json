@@ -1,0 +1,19 @@
+{
+    "config-source": {
+        "description": "Sysclock source",
+        "long-description": [
+            "System clock source selection.",
+            "Available clock types are:\n",
+            "- HSE: High Speed External. Clock speed must",
+            "be explicitly provided for such type of clock source.\n"
+        ],
+        "type": "enum",
+        "default": "HSE",
+        "values": [ "HSE" ]
+    },
+
+    "config-speed": {
+        "description": "Clock speed in Hz",
+        "type": "integer"
+    }
+}

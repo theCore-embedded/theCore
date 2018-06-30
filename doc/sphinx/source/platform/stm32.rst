@@ -10,33 +10,7 @@ ARM Cortex-M processor. theCore supports two families of STM32: STM32F4 and STM3
     To make sure you are familiar with it, check the :ref:`theCore_Configurator`
     section before going any further.
 
-Minimal configuration JSON file for the STM32 MCU must contain the platform
-object with following fields:
-
-  * ``name`` - platform name (simply ``stm32``)
-  * ``device`` - desired device ID. Depends on MCU.
-  * ``clock`` - the clock configuration:
-
-    * ``source`` - the clock source. Depends on board capabilities and MCU.
-    * ``speed`` - the clock speed in Hz.
-
-.. important:: Currently, only ``HSE`` clock source is supported.
-
-For example, STM32F4 Discovery board the basic configuration can look like that:
-
-.. code-block:: json
-   :linenos:
-
-   {
-        "platform": {
-            "name": "stm32",
-            "device": "STM32F407VG",
-            "clock": {
-                "source": "HSE",
-                "speed": 8000000
-            }
-        }
-    }
+.. important:: Currently, only ``STM32F407VG`` device is supported for STM32 platform.
 
 To import all generated definitions into the application code, simply add following
 line to your source:
@@ -59,58 +33,70 @@ Arm yourself with the Reference Manual from ST before going any further.
     Below are links to RMs for each supported family.
 
     * `STM32F4 RM`_
-    * `STM32L1 RM`_
+..    * `STM32L1 RM`_
+
+Available examples
+~~~~~~~~~~~~~~~~~~
+
+* :ref:`theCore_blinky`
+* :ref:`theCore_hello_world`
+* :ref:`theCore_stm32f4_cs43l22`
+* :ref:`theCore_HM-10_example`
+* :ref:`theCore_htu21d_example`
 
 Periphery overview
 ~~~~~~~~~~~~~~~~~~
 
-STM32 MCU peripheries, can be configured within the same JSON file.
-Layout of the platform configuration object is described by JSON schema,
-placed under ``platform/stm32/schemas/stm32.schema.json``:
-
-.. literalinclude:: ../../../../platform/stm32/schemas/stm32.schema.json
-    :language: json
-    :linenos:
-
-Each periphery configuration placed under a property with a relevant name.
-The example below illustrates UART periphery being added to JSON config:
-
-.. code-block:: json
-   :emphasize-lines: 9-15
-   :linenos:
-
-    {
-        "platform": {
-            "name": "stm32",
-            "device": "STM32F407VG",
-            "clock": {
-                "source": "HSE",
-                "speed": 8000000
-            },
-            "uart": [
-                {
-                    "id": "USART3",
-                    "baud": 115200,
-                    "alias": "test_uart"
-                }
-            ]
-        }
-    }
+STM32 MCU peripheries, can be configured trough theCore configurator.
 
 Note that to use any of periphery, corresponding pins must be configured too.
 **Do not forget to include pin multiplexing configuration for each desired periphery.**
-Proceed to the `STM32 Multiplexing`_ for more details.
+Proceed to the `STM32 Multiplexing`_ section for more details.
 
 Timer allocation
 ~~~~~~~~~~~~~~~~
 
-.. note:: This section is under construction
+:Driver sources:    ``platform/stm32/export/aux/execution.hpp``
+
+The system timer is a periphery that can provide fixed frequency ticks for
+whole application. The system timer can be configured from the
+"Systimer" submenu.
+
+Available options
++++++++++++++++++
+
+:frequency:
+
+  Timer frequency in Hz.
+
+:source:
+
+  Timer source. Only ``systick`` is available for now.
+
+:owner:
+
+  Timer owner. If ``user`` is selected, then theCore will configure the timer,
+  but will not use it inside its internal machinery. In such case, the user can
+  decide when to stop or start the system timer.
+
+  If `thecore` is selected, then the systimer will be both configured and
+  managed by internal modules of theCore. For example, timer can be started
+  or stopped in delay routines inside theCore. Trying to start or stop the timer
+  directly by user will lead to undefined behaviour.
+
+Known limitations
++++++++++++++++++
+
+* Only SysTick can be used as a timer source.
+* No dynamic change in frequency is allowed. This is by design.
 
 U(S)ART
 ~~~~~~~
 
 :Driver source:     ``platform/stm32/export/aux/usart_bus.hpp``
 :Template file:     ``platform/stm32/templates/uart_cfg.in.hpp``
+
+The UART configuration resides in the "U(S)ART" submenu.
 
 The instance of the driver, generated during the configuration step, can
 be used directly by its API or indirectly, as underlying device for theCore
@@ -119,53 +105,39 @@ console.
 Check :ref:`the console configuration section<STM32 Console>` to get
 information about selecting particular UART as a console output.
 
-STM32 theCore UART supports only IRQ mode, where interrupt is generated after
-each byte transmission. DMA mode is not yet implemented.
+Available options
++++++++++++++++++
 
-JSON schema
-+++++++++++
+:channel:
 
-.. literalinclude:: ../../../../platform/stm32/schemas/uart.schema.json
-    :language: json
-    :linenos:
+  Placed under "Enabled UART channel" selector. UART periphery to use.
 
-Properties
-++++++++++
+:baud:
 
-* ``id`` - UART periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
-  Examples are: ``UART1`` or ``USART4``. Depends on MCU family.
+  Baud rate of UART.
 
-* ``baud`` - desired baud rate of the selected UART.
+:alias:
 
-* ``alias`` - user-defined typename, which can be used as a reference to an
-  concrete UART driver instance, both in configuration JSON and C++.
-  Must be valid C++ identifier. See :ref:`the UART example<STM32 UART example>`
-  below for more details.
+  Driver C++ alias that will be created. Alias can be used in the user code
+  to access given UART.
 
-* ``comment`` - user-defined string, describes driver purpose. Must be valid
-  string, suitable for C/C++ comments.
+:comment:
 
-.. _STM32 UART example:
+  C++ comment string that will be placed next to the driver alias in
+  auto-generated code.
 
-Example configuration
-+++++++++++++++++++++
+Known limitations
++++++++++++++++++
 
-.. literalinclude:: stm32/uart_example.json
-    :language: json
-    :linenos:
+* Only 1150200 and 9600 bauds are supported.
+* Following configuration is hard-coded and cannot be changed (yet):
 
-Example output for STM32F4 family
-+++++++++++++++++++++++++++++++++
+  * Stop bits: 1
+  * Data length: 8 bits
+  * Parity: none
 
-User-defined aliases are highlighted.
-
-.. literalinclude:: ../_static/generated/stm32/uart_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 23-65,70
-    :emphasize-lines: 22,39
-
-`Full STM32 UART example header <../_static/generated/stm32/uart_example.hpp>`_
+* STM32 theCore UART supports only IRQ mode, where interrupt is generated after
+  each byte transmission. DMA mode is not yet implemented.
 
 Usage
 +++++
@@ -175,7 +147,7 @@ Usage
 ADC and channels
 ~~~~~~~~~~~~~~~~
 
-.. warning:: ADC was tested only with STM32F4 family.
+.. .. warning:: ADC was tested only with STM32F4 family.
 
 :Driver sources:    ``platform/stm32/export/aux/adc.hpp``
                     ``platform/stm32/family/f4xx/export/stm32f4xx_adc_wrap.hpp``
@@ -185,70 +157,82 @@ ADC configuration split onto two entities. First is configuration of the ADC
 itself, second is the configuration for particular channels. In such way,
 it is possible to have different set of ADC channels used with the same ADC.
 
-ADC schema
-++++++++++
+ADC options are available from "ADC" menu. ADC channel options can be found in
+"ADC channels" menu.
 
-.. literalinclude:: ../../../../platform/stm32/schemas/adc.schema.json
-    :language: json
-    :linenos:
+Available ADC options
++++++++++++++++++++++
 
-Properties
-++++++++++
+:module:
 
-* ``id`` - ADC periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
-  Examples are: ``ADC1`` or ``ADC2``.
-  Depends on MCU family. See :ref:`RM <STM32 RM>` to get valid ID.
+  ADC module to use.
 
-* ``mode`` - desired mode of operation. Can be either ``DMA`` or ``IRQ``.
-  Mode affects how conversions are managed. In DMA mode, conversions are
-  handled by DMA and interrupt is generated when conversion is finished
-  or when half of channels are converted.
-  In IRQ mode, each channel conversion produces interrupt.
+:mode:
 
-* ``alias`` - user-defined typename, which can be used as a reference to an
-  concrete UART driver instance, both in configuration JSON and C++.
-  Must be valid C++ identifier. See :ref:`the configuration example<STM32 UART example>`
-  below for more details.
+  ADC mode of operation. Can be set to ``IRQ`` or ``DMA``. In IRQ mode, each
+  ADC conversion will result in IRQ event generated. In DMA mode, all conversions
+  are held by DMA and only last event is generated.
 
-* ``comment`` - user-defined string, describes driver purpose. Must be valid
-  string, suitable for C/C++ comments.
+  IRQ is easier to use. DMA is faster, but requires deeper configuration.
 
-Channels schema
-+++++++++++++++
+:DMA module:
 
-.. literalinclude:: ../../../../platform/stm32/schemas/adc_channels.schema.json
-    :language: json
-    :linenos:
+  The DMA module used for getting ADC data. Available only if mode is set to DMA.
+  See section 10.3.3 Channel selection of `STM32 RM`_ to get insights of DMA
+  module mapping.
 
-* ``trigger`` - trigger to start conversion on selected channels:
+:DMA stream:
 
-  * ``SW`` - software trigger. Only trigger supported at this moment.
+  The DMA stream used for getting ADC data. Available only if mode is set to DMA.
+  See section 10.3.3 Channel selection of `STM32 RM`_ to get insights of DMA
+  stream mapping.
 
-* ``nums`` - array with channel numbers. Refer to :ref:`RM <STM32 RM>` to get
-  possible channels and their mapping.
+:DMA channel:
 
-* ``alias`` - user-defined typename, which can be used as a reference to an
-  channel set in C++. Must be valid C++ identifier.
+  The DMA stream used for getting ADC data. Available only if mode is set to DMA.
+  See section 10.3.3 Channel selection of `STM32 RM`_ to get insights of DMA
+  channel mapping.
 
-* ``comment`` - user-defined string, describes driver purpose. Must be valid
-  string, suitable for C/C++ comments.
+:alias:
 
-Example configuration (IRQ mode)
-++++++++++++++++++++++++++++++++
+  Driver C++ alias that will be created. Alias can be used in the user code
+  to access given ADC.
 
-.. literalinclude:: stm32/adc_example.json
-    :language: json
-    :linenos:
+:comment:
 
-Example output for STM32F4 family
-+++++++++++++++++++++++++++++++++
+  C++ comment string that will be placed next to the driver alias in
+  auto-generated code.
 
-.. literalinclude:: ../_static/generated/stm32/adc_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 14-57
+Known limitations
++++++++++++++++++
 
-`Full STM32 ADC example header <../_static/generated/stm32/adc_example.hpp>`_
+* Continuous mode is not implemented. See `#200`_.
+
+Available ADC channel options
++++++++++++++++++++++++++++++
+
+:channel group name:
+
+  The ADC channel group is a named array of channels. theCore configurator
+  allows to add or delete a group of channels. To configure a new group, first
+  create an empty group.
+
+:channels:
+
+  Selection of channels, included in the group. All 16 available channels
+  can be grouped in user-defined way. See `STM32 RM`_ for a mapping between
+  channels and pins.
+
+:trigger:
+
+  Trigger for ADC conversion:
+
+  * ``software`` - ADC conversion started only when software request it.
+
+Known limitations
++++++++++++++++++
+
+* Only software trigger is implemented. For other triggers, see `#199`_.
 
 Usage
 +++++
@@ -261,223 +245,151 @@ I2C
 :Driver source:     ``platform/stm32/export/aux/i2c_bus.hpp``
 :Template file:     ``platform/stm32/templates/i2c_cfg.in.hpp``
 
-JSON schema
-+++++++++++
+Available options
++++++++++++++++++
 
-.. literalinclude:: ../../../../platform/stm32/schemas/i2c.schema.json
-    :language: json
-    :linenos:
+:channel:
 
-Properties
-++++++++++
+  Placed under "Enabled I2C channel" selector. I2C periphery to use.
 
-* ``id`` - I2C periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
-  Examples are: ``I2C1`` or ``I2C2``.
-  Depends on MCU family. See :ref:`RM <STM32 RM>` to get valid ID.
+:mode:
 
-* ``mode`` - data transfer mode. Only ``IRQ`` is supported. In IRQ mode, each
-  byte transfer results in interrupt generation. The software driver responds
-  to such interrupt with requesting next byte transmission.
+  Mode of operation. IRQ is only mode that is supported.
 
-* ``speed`` - specifies the clock frequency in Hz. Refer to the :ref:`RM <STM32 RM>`
-  to check clock speed limitations.
+:speed:
 
-* ``duty_cycle`` - duty cycle of selected I2C bus
-  (ratio of T\ :sub:`low` \/T\ :sub:`high` \ ). Can be either ``2/1`` or ``16/9``.
+  I2C clock speed, in Hz.
 
-* ``ack`` - enables or disables the acknowledgement.
+:duty cycle:
 
-* ``ack_addr_bit`` - specifies if 7-bit or 10-bit address is acknowledged.
+  I2C duty cycle.
 
-* ``own_addr`` - specifies the first device own address.
+:ack:
 
-* ``alias`` - user-defined typename, which can be used as a reference to I2C
-  driver instance in C++. Must be valid C++ identifier.
+  Enables or disables the I2C acknowledgement.
 
-* ``comment`` - user-defined string, describes a driver purpose. Must be valid
-  string, suitable for C/C++ comments.
+:ack address bits:
 
-Example configuration
-+++++++++++++++++++++
+  Specifies if 7-bit or 10-bit address is acknowledged.
 
-.. literalinclude:: stm32/i2c_example.json
-    :language: json
-    :linenos:
+:own address:
 
-Example output
-+++++++++++++++++++++
+  Specifies the first device own address. This parameter can be a 7-bit or 10-bit address.
 
-.. literalinclude:: ../_static/generated/stm32/i2c_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 14-50
+:alias:
 
-`Full STM32 I2C example header <../_static/generated/stm32/i2c_example.hpp>`_
+  Driver C++ alias that will be created. Alias can be used in the user code
+  to access given I2C.
+
+:comment:
+
+  C++ comment string that will be placed next to the driver alias in
+  auto-generated code.
 
 Usage
 +++++
 
 .. note:: This section is under construction
 
-I2S
-~~~
+I2S and SPI
+~~~~~~~~~~~
 
-JSON schema
-+++++++++++
+:Driver source:     ``platform/stm32/export/aux/spi_i2s_bus.hpp``
+:Template file:     ``platform/stm32/templates/spi_i2s_cfg.in.hpp``
 
-.. literalinclude:: ../../../../platform/stm32/schemas/i2s.schema.json
-    :language: json
-    :linenos:
+In STM32F4 the I2S is multiplexed with SPI. Pay attention to not use
+the same periphery for both SPI and I2S. The configuration is located
+under "SPI and I2S" menu.
 
-Properties
-++++++++++
+Available options for I2S
++++++++++++++++++++++++++
 
-* ``id`` - I2S periphery ID, named after identifier found in :ref:`RM <STM32 RM>`.
-  Examples are: ``I2S`` or ``I2S``.
-  Depends on MCU family. See :ref:`RM <STM32 RM>` to get valid ID.
+:channel:
 
-* ``dma_tx`` - DMA id to use for TX transactions. See :ref:`the configuration example <STM32 I2S example>`
-  and the :ref:`DMA<STM32 DMA>` section for more details.
+  I2S periphery to use.
 
-* ``dma_rx`` - DMA id to use for RX transactions. See :ref:`the configuration example <STM32 I2S example>`
-  and the :ref:`DMA<STM32 DMA>` section for more details.
+:standard:
 
-* ``standart`` - specifies the standard used for the I2S communication. Allowed values are:
-  ``phillips``, ``MSB``, ``LSB``, ``PCMShort``, ``PCMLong``. Refer to :ref:`Reference Manual <STM32 RM>`
-  to get explanation about each.
+  Specifies the standard used for the I2S communication. Refer to
+  :ref:`Reference Manual <STM32 RM>` to get explanation about each. Values are:
 
-* ``data_bits`` - specifies the data format for the I2S communication.
+  * ``phillips``
+  * ``MSB``
+  * ``LSB``
+  * ``PCMShort``
+  * ``PCMLong``
 
-* ``master_clk`` - specifies whether the I2S MCLK output is enabled or not.
+:master clock:
 
-* ``audio_freq`` - specifies the frequency selected for the I2S communication.
+  Specifies whether the I2S MCLK output is enabled or not.
 
-* ``CPOL`` - specifies the idle state of the I2S clock.
+:data bits:
 
-* ``alias`` - user-defined typename, which can be used as a reference to I2S
-  driver instance in C++. Must be valid C++ identifier.
+  Specifies the data format for the I2S communication.
 
-* ``comment`` - user-defined string, describes a driver purpose. Must be valid
-  string, suitable for C/C++ comments.
+:audio frequency:
 
-.. _STM32 I2S example:
+  Specifies the frequency selected for the I2S communication, in kHz.
 
-Example configuration
-+++++++++++++++++++++
+:clock polarity:
 
-.. literalinclude:: stm32/i2s_example.json
-    :language: json
-    :linenos:
-    :emphasize-lines: 8,14,20,21
+  Specifies the idle state of the I2S clock.
 
-DMA aliases and their usage in I2S config are highlighted.
+:DMA module:
 
-Example output (**DMA configuration header is omitted for clarity**):
+  The DMA module used for transferring I2S data.
+  See section 10.3.3 Channel selection of `STM32 RM`_ to get insights of DMA
+  module mapping.
 
-.. literalinclude:: ../_static/generated/stm32/i2s_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 22-55
+:DMA stream:
 
-`Full STM32 I2S example header <../_static/generated/stm32/i2s_example.hpp>`_
+  The DMA stream used for transferring I2S data.
+  See section 10.3.3 Channel selection of `STM32 RM`_ to get insights of DMA
+  stream mapping.
+
+:DMA channel:
+
+  The DMA stream used for transferring I2S data.
+  See section 10.3.3 Channel selection of `STM32 RM`_ to get insights of DMA
+  channel mapping.
+
+:alias:
+
+  Driver C++ alias that will be created. Alias can be used in the user code
+  to access given I2S.
+
+:comment:
+
+  C++ comment string that will be placed next to the driver alias in
+  auto-generated code.
+
+Available options for SPI
++++++++++++++++++++++++++
+
+:channel:
+
+  The SPI channel to enable.
+
+:type:
+
+  SPI type. Only ``master`` is supported.
+
+:CPOL:
+
+  SPI clock polarity.
+
+:CPHA:
+
+  SPI clock phase.
+
+Known limitations
++++++++++++++++++
+
+* theCore SPI driver for STM32 can work only in master mode.
+* theCore generator is not yet supports SPI, see `#284`_.
 
 Usage
 +++++
-
-.. note:: This section is under construction
-
-Related references
-++++++++++++++++++
-
-* :ref:`theCore_stm32f4_cs43l22`
-* :ref:`DMA documentation <STM32 DMA>`
-* :ref:`theCore_CS43L22`
-
-SPI
-~~~
-
-.. note:: This section is under construction
-
-.. _STM32 DMA:
-
-DMA overview
-~~~~~~~~~~~~
-
-:Driver sources:    ``platform/stm32/family/export/stm32_dma_wrap_interface.hpp``
-                    ``platform/stm32/family/f4xx/export/stm32_dma_wrap.hpp``
-:Template file:     ``platform/stm32/family/f4xx/templates/dma_cfg.in.hpp``
-
-Direct memory access (DMA) is used in order to provide high-speed data transfer between
-peripherals and memory and between memory and memory. Data can be quickly moved by
-DMA without any CPU action. This keeps CPU resources free for other operations.
-
-.. warning:: DMA configuration via JSON is supported only for STM32F4 family.
-
-In most cases, DMA is used internally by the platform-level drivers.
-Platform drivers, like I2C or I2S can be linked with particular DMA by using
-its alias.
-
-Each driver with DMA support will include corresponding DMA example.
-
-Configuration parameters (stream, channel, etc.) heavily depends on MCU model.
-Refer to the :ref:`RM <STM32 RM>` for allowed DMA configuration for selected periphery.
-
-DMA in STM32F4 MCU family
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Schema
-++++++
-
-.. literalinclude:: ../../../../platform/stm32/family/f4xx/schemas/dma.schema.json
-    :language: json
-    :linenos:
-
-Properties
-++++++++++
-
-* ``num`` - DMA number. There are 2 DMAs on STM32F4. There are two DMA controllers in STM32F4.
-  Refer to the section *10. DMA controller (DMA)* of the :ref:`RM <STM32 RM>`
-  to get more information.
-
-* ``stream`` - DMA stream number. There are 8 streams for each DMA controller,
-  numbered from 0 to 7. See section *10.3.5 DMA streams* in the :ref:`RM <STM32 RM>`
-  for more details.
-
-* ``channel`` - DMA channel number. There are up to 8 channels (requests) per
-  each DMA stream, numbered from 0 to 7.
-  See section *10.3.3 Channel selection* in the :ref:`RM <STM32 RM>` for more details.
-
-* ``alias`` - user-defined typename, which can be used as a reference to an
-  concrete DMA driver instance in configuration JSON.
-  Must be valid C++ identifier. Refer to individual periphery documentation
-  for examples.
-
-* ``comment`` - user-defined string, describes DMA purpose. Must be valid
-  string, suitable for C/C++ comments.
-
-Example configuration
-+++++++++++++++++++++
-
-.. literalinclude:: stm32/f4xx/dma_example.json
-    :language: json
-    :linenos:
-
-Example output
-++++++++++++++
-
-.. literalinclude:: ../_static/generated/stm32/f4xx/dma_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 12-23
-
-`Full STM32F4 DMA example header <../_static/generated/stm32/f4xx/dma_example.hpp>`_
-
-DMA in STM32L1 MCU family
-~~~~~~~~~~~~~~~~~~~~~~~~~
-  .. note:: This section is under construction
-
-DMA Usage
-~~~~~~~~~
 
 .. note:: This section is under construction
 
@@ -486,7 +398,62 @@ DMA Usage
 Pin multiplexing
 ~~~~~~~~~~~~~~~~
 
-.. note:: This section is under construction
+:Driver sources:    ``platform/stm32/export/platform/gpio_device.hpp``
+
+Pins can be configured from the "I/O pin configuration" submenu.
+
+Available options
++++++++++++++++++
+
+:channel:
+
+  Channel is an actual pin that should be configured.
+
+:mode:
+
+  Pin modes:
+
+  * ``output``
+  * ``input``
+  * ``af`` - AF stands for Alternate Function. Selecting AF allows to use the pin
+    for desired periphery. List of supported peripheries is different for each
+    pin. See below.
+  * ``analog`` - in analog mode, pin can be used as input for ADC.
+
+:push/pull:
+
+  Possible push/pull options are:
+
+  * ``no`` - no push/pull resistor.
+  * ``push down`` - push to VCC resistor.
+  * ``pull up`` - pull to GND resistor.
+  * ``open drain`` - open drain configuration.
+  * ``analog`` - analog input.
+  * ``wake high`` and ``wake low`` - pin configuration for wakeup MCU functionality.
+
+:type:
+
+  * ``push-pull`` - push/pull configuration enabled.
+  * ``open drain`` - open drain configuration.
+
+:speed:
+
+  Pin clock in MHz.
+
+:GPIO alias:
+
+  Driver C++ alias that will be created for accessing pin trough GPIO interface.
+  Such alias can be used in the user code for controlling pin states.
+
+:comment:
+
+  C++ comment string that will be placed next to the driver alias in
+  auto-generated code.
+
+:alternate function:
+
+  The alternate function, used for this pin. Available if the pin mode is set to
+  ``af``.
 
 EXTI
 ~~~~
@@ -507,3 +474,6 @@ Console
 
 .. _STM32F4 RM: https://goo.gl/Xn1DRB
 .. _STM32L1 RM: https://goo.gl/sML2mi
+.. _`#199`: https://github.com/forGGe/theCore/issues/199
+.. _`#200`: https://github.com/forGGe/theCore/issues/200
+.. _`#284`: https://github.com/forGGe/theCore/issues/284

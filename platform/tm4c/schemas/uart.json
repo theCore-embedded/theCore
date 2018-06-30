@@ -1,0 +1,29 @@
+{
+    "table-uart": {
+        "description": "UART configuration table",
+        "key": "config-channel",
+        "items": {
+            "config-channel": {
+                "description": "Enabled UART channel",
+                "type": "enum",
+                "values": [ "UART0", "UART1", "UART2", "UART3", "UART4", "UART5", "UART6", "UART7" ],
+                "config-class": "uart-channel",
+                "single": false
+            },
+            "config-baud": {
+                "description": "UART baud rate",
+                "type": "enum",
+                "default": 115200,
+                "values": [ 115200 ]
+            },
+            "config-alias": {
+                "description": "Driver C++ alias",
+                "type": "string"
+            },
+            "config-comment": {
+                "description": "Driver C++ comment",
+                "type": "string"
+            }
+        }
+    }
+}

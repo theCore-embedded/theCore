@@ -1,5 +1,5 @@
 { stdenv
-, python35Packages
+, python36Packages
 , fetchurl
 , autoconf
 , automake
@@ -7,10 +7,10 @@
 
 let
   version = "1.2.0";
-in python35Packages.buildPythonPackage rec {
+in python36Packages.buildPythonPackage rec {
   name = "sphinxcontrib-fulltoc-${version}";
 
-  buildInputs = [ python35Packages.sphinx ];
+  buildInputs = [ python36Packages.sphinx ];
 
   src = fetchurl {
     url = "mirror://pypi/s/sphinxcontrib-fulltoc/${name}.tar.gz";
@@ -24,4 +24,3 @@ in python35Packages.buildPythonPackage rec {
     platforms = stdenv.lib.platforms.unix;
   };
 }
-

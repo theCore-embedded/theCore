@@ -17,7 +17,7 @@ import cog
 import json
 
 cfg = json.load(open(JSON_CFG))
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-tm4c']
 
 # UART device alias, used internally by bypass console driver
 template_uart_dev = '''
@@ -27,7 +27,7 @@ using UART{CHANNEL_INDEX}_driver = uart<UART{CHANNEL_INDEX}_channel>;
 
 # Gets string representation of UART theCore enum.
 def get_uart_enum(uart_cfg):
-    return int(uart_cfg['id'][-1])
+    return int(uart_name[-1])
 
 ]]]*/
 //[[[end]]]
@@ -35,36 +35,51 @@ def get_uart_enum(uart_cfg):
 namespace ecl
 {
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_templates Auto-generated code, Python COG and CMake templates.
+//! @{
+
 // UART configuration ---------------------------------------------------------
 
 /*[[[cog
 
-uart_cfgs = {}
+uart_names = []
 
-if 'uart' in cfg:
-    uart_cfgs = cfg['uart']
+if 'menu-uart' in cfg:
+    uart_names = cfg['menu-uart']['table-uart']
 
-for uart_cfg in uart_cfgs:
+for uart_name in uart_names:
     # Place comment line if needed
-    if 'comment' in uart_cfg:
+    uart_cfg = cfg['menu-uart']['menu-' + uart_name]
+    if 'config-comment' in uart_cfg:
         # Avoid using begin and end comment section tokens
-        cog.outl(('\n%s* ' + uart_cfg['comment'] + ' *%s') % ('/', '/'))
+        cog.outl(('\n%s* ' + uart_cfg['config-comment'] + ' *%s') % ('/', '/'))
 
-    cog.outl(template_uart_dev.format(CHANNEL_INDEX = get_uart_enum(uart_cfg)))
+    cog.outl(template_uart_dev.format(CHANNEL_INDEX = get_uart_enum(uart_name)))
 
-    if 'alias' in uart_cfg:
-        cog.outl('using {ALIAS_NAME} = UART{CHANNEL_INDEX}_driver;'.format(ALIAS_NAME = uart_cfg['alias'],
-                                                                           CHANNEL_INDEX = get_uart_enum(uart_cfg)))
+    if 'config-alias' in uart_cfg:
+        cog.outl('using {ALIAS_NAME} = UART{CHANNEL_INDEX}_driver;'.format(ALIAS_NAME = uart_cfg['config-alias'],
+                                                                           CHANNEL_INDEX = get_uart_enum(uart_name)))
 
-    if 'console' in cfg and cfg['console'] == uart_cfg['id']:
+    if 'config-console' in cfg and cfg['config-console'] == uart_name:
         cog.outl('\n/' + '* Console configuration *' + '/\n')
-        cog.outl('static constexpr auto console_channel = UART{CHANNEL_INDEX}_channel;'.format(CHANNEL_INDEX = get_uart_enum(uart_cfg)))
-        cog.outl('using platform_console = {DRIVER_ID}_driver;'.format(DRIVER_ID = cfg['console']))
+        cog.outl('static constexpr auto console_channel = UART{CHANNEL_INDEX}_channel;'.format(CHANNEL_INDEX = get_uart_enum(uart_name)))
+        cog.outl('using platform_console = {DRIVER_ID}_driver;'.format(DRIVER_ID = cfg['config-console']))
 
 
 ]]]*/
 //[[[end]]]
 
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
 

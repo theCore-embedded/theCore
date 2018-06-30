@@ -104,49 +104,6 @@ theCore_create_cog_runner(
 endfunction()
 
 ################################################################################
-# STM32 examples
-################################################################################
-
-set(STM32_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/platform/stm32)
-set(STM32F4_DOC_DIR ${STM32_DOC_DIR}/f4xx)
-
-set(STM32_TEMPLATE_DIR ${CORE_DIR}/platform/stm32/templates)
-set(STM32F4_TEMPLATE_DIR ${CORE_DIR}/platform/stm32/family/f4xx/templates)
-
-set(STM32_OUT_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/_static/generated/stm32)
-set(STM32F4_OUT_DIR ${STM32_OUT_DIR}/f4xx)
-
-# UART basic example.
-generate_source(${STM32_DOC_DIR}/uart_example.json
-    ${STM32_TEMPLATE_DIR}/uart_cfg.in.hpp
-    ${STM32_OUT_DIR}/uart_example.hpp
-)
-
-# ADC example.
-generate_source(${STM32_DOC_DIR}/adc_example.json
-    ${STM32_TEMPLATE_DIR}/adc_cfg.in.hpp
-    ${STM32_OUT_DIR}/adc_example.hpp
-)
-
-# I2C example.
-generate_source(${STM32_DOC_DIR}/i2c_example.json
-    ${STM32_TEMPLATE_DIR}/i2c_cfg.in.hpp
-    ${STM32_OUT_DIR}/i2c_example.hpp
-)
-
-# I2S example.
-generate_source(${STM32_DOC_DIR}/i2s_example.json
-    ${STM32_TEMPLATE_DIR}/spi_i2s_cfg.in.hpp
-    ${STM32_OUT_DIR}/i2s_example.hpp
-)
-
-# DMA for STM32F4 example.
-generate_source(${STM32F4_DOC_DIR}/dma_example.json
-    ${STM32F4_TEMPLATE_DIR}/dma_cfg.in.hpp
-    ${STM32F4_OUT_DIR}/dma_example.hpp
-)
-
-################################################################################
 # Particle electron examples
 ################################################################################
 
@@ -164,58 +121,6 @@ generate_source(${PARTICLE_DOC_DIR}/serial_example.json
 generate_source(${PARTICLE_DOC_DIR}/i2c_example.json
     ${PARTICLE_TEMPLATE_DIR}/i2c_wire_cfgs.in.hpp
     ${PARTICLE_OUT_DIR}/i2c_example.hpp
-)
-
-################################################################################
-# TM4C examples
-################################################################################
-
-set(TM4C_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/platform/tm4c)
-set(TM4C_TEMPLATE_DIR ${CORE_DIR}/platform/tm4c/templates)
-set(TM4C_OUT_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/_static/generated/tm4c)
-
-# UART basic example.
-generate_source(${TM4C_DOC_DIR}/uart_example.json
-    ${TM4C_TEMPLATE_DIR}/uart_cfg.in.hpp
-    ${TM4C_OUT_DIR}/uart_example.hpp
-)
-
-# SPI basic example.
-generate_source(${TM4C_DOC_DIR}/spi_example.json
-    ${TM4C_TEMPLATE_DIR}/spi_cfg.in.hpp
-    ${TM4C_OUT_DIR}/spi_example.hpp
-)
-
-# GPIO alias example.
-generate_source(${TM4C_DOC_DIR}/gpio_alias_example.json
-    ${TM4C_TEMPLATE_DIR}/gpio_cfg.in.hpp
-    ${TM4C_OUT_DIR}/gpio_alias_example.hpp
-)
-
-# Pin multiplexing example
-generate_source(${TM4C_DOC_DIR}/pin_mux_example.json
-    ${TM4C_TEMPLATE_DIR}/pin_mux.in.cpp
-    ${TM4C_OUT_DIR}/pin_mux_example.cpp
-)
-
-################################################################################
-# Filesystem examples
-################################################################################
-
-set(FS_DOC_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/utilities/fs)
-set(FS_TEMPLATE_DIR ${CORE_DIR}/lib/fs/templates)
-set(FS_OUT_DIR ${CMAKE_CURRENT_LIST_DIR}/sphinx/source/_static/generated/fs)
-
-# FATFS configuration example
-generate_source(${FS_DOC_DIR}/fatfs_example.json
-    ${FS_TEMPLATE_DIR}/fs_cfg.in.hpp
-    ${FS_OUT_DIR}/fs_cfg_example.hpp
-)
-
-# FATFS definintions configuration example
-generate_source(${FS_DOC_DIR}/fatfs_example.json
-    ${FS_TEMPLATE_DIR}/fs_defines.in.h
-    ${FS_OUT_DIR}/fs_defines_example.h
 )
 
 if(Sphinx_FOUND)

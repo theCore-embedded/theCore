@@ -27,7 +27,7 @@ import cog
 import json
 
 cfg = json.load(open(JSON_CFG))
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-tm4c']
 
 ]]]*/
 //[[[end]]]
@@ -38,18 +38,18 @@ cfg = cfg['platform']
 
 # Maps SPI config values to correct definitions
 spi_mapping = {
-    'type' : {
+    'config-type' : {
         'master'        : 'ecl::spi_type::master',
         # TODO: slave mode is not implemented
         # 'slave'       : 'ecl::spi_type::slave'
     },
-    'cpol': {
-        'high'          : 'ecl::spi_cpol::high',
-        'low'           : 'ecl::spi_cpol::low'
+    'config-cpol': {
+        1               : 'ecl::spi_cpol::high',
+        0               : 'ecl::spi_cpol::low'
     },
-    'cpha': {
-        'high'          : 'ecl::spi_cpha::high',
-        'low'           : 'ecl::spi_cpha::low'
+    'config-cpha': {
+        1               : 'ecl::spi_cpha::high',
+        0               : 'ecl::spi_cpha::low'
     },
 }
 
@@ -58,9 +58,9 @@ spi_cfg_struct = '''
 template<>
 struct spi_cfg<spi_channel::ch%(spi_ch)d>
 {
-    static constexpr auto type    = %(type)s;
-    static constexpr auto cpol    = %(cpol)s;
-    static constexpr auto cpha    = %(cpha)s;
+    static constexpr auto type    = %(config-type)s;
+    static constexpr auto cpol    = %(config-cpol)s;
+    static constexpr auto cpha    = %(config-cpha)s;
     static constexpr auto clk_div = %(clk_div)s;
 };
 
@@ -71,36 +71,45 @@ spi_typedef = 'using %s = spi<spi_channel::ch%d>;'
 # Alias template (optional)
 spi_alias = 'using %s = %s;'
 
-spi_cfgs = {}
-if 'spi' in cfg:
-    spi_cfgs = cfg['spi']
+spi_ids = []
+try:
+    spi_ids = cfg['menu-spi']['table-spi']
+except:
+    pass
 
-for spi in spi_cfgs:
-    id = int(spi['id'][-1])
-    spi_name = 'SPI' + str(id) + '_driver'
+for spi_id in spi_ids:
+    # Missing configuration?
+    try:
+        spi_cfg = cfg['menu-spi']['menu-' + spi_id]
+    except:
+        continue
+
+    spi_num =  int(spi_id[-1])
+    spi_drv_name = 'SPI' + str(spi_num) + '_driver'
+    spi_ssi_name = 'SSI' + str(spi_num) + '_driver'
 
     # Directly included values
     values = {
-        'spi_ch' : id,
+        'spi_ch' : spi_num,
     }
 
     # Values that require mapping
     for k, v in spi_mapping.items():
-        json_value = spi[k]
+        json_value = spi_cfg[k]
         values[k] = v[json_value]
 
-    values['clk_div'] = 2
-    if 'clk_div' in spi:
-        values['clk_div'] = spi['clk_div']
+    values['clk_div'] = spi_cfg['config-clk-div']
 
-    if 'comment' in spi:
-        cog.outl('/' + '* ' + spi['comment'] + ' *' + '/')
+    if 'config-comment' in spi_cfg:
+        cog.outl('/' + '* ' + spi_cfg['config-comment'] + ' *' + '/')
 
     cog.outl(spi_cfg_struct % values)
-    cog.outl(spi_typedef % (spi_name, id))
+    cog.outl(spi_typedef % (spi_drv_name, spi_num))
+    # Alternative name
+    cog.outl(spi_typedef % (spi_ssi_name, spi_num))
 
-    if 'alias' in spi:
-        cog.outl(spi_alias % (spi['alias'], spi_name))
+    if 'config-alias' in spi_cfg:
+        cog.outl(spi_alias % (spi_cfg['config-alias'], spi_ssi_name))
 
 ]]]*/
 //[[[end]]]

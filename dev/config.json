@@ -1,0 +1,21 @@
+{
+    "menu-dev": {
+        "description": "Device drivers",
+
+        "include-cs43l22": {
+            "ref": "./cs43l22/config.json"
+        },
+
+        "include-sdspi": {
+            "ref": "./sdspi/config.json"
+        },
+
+        "include-hm10": {
+            "ref": "./hm10/config.json"
+        },
+
+        "include-sensors": {
+            "ref": "./sensor/config.json"
+        }
+    }
+}

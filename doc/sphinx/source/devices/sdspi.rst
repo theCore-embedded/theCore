@@ -5,8 +5,8 @@ SDSPI driver
 
 .. image:: https://pre00.deviantart.net/39c5/th/pre/f/2010/225/8/5/micro_sd_card_up_by_tash78.png
   :alt: SD card with SD SPI driver
-  :height: 450
-  :width: 450
+  :width: 400
+  :align: center
 
 (`Image by tash78 @ devianart`_)
 
@@ -32,7 +32,7 @@ Driver documentation
 SDSPI usage example
 ~~~~~~~~~~~~~~~~~~~
 
-.. note:: This section is under construction.
+See :ref:`theCore_FATFS_SDSPI`.
 
 Known limitations
 ~~~~~~~~~~~~~~~~~

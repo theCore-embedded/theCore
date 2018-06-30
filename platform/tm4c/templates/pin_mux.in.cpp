@@ -16,40 +16,43 @@ import re
 
 f = open(JSON_CFG)
 cfg = json.load(f)
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-tm4c']
 
-pincfgs = []
-if 'pinmux' in cfg:
-    pincfgs = cfg['pinmux']
+pin_ids = []
+
+try:
+    pin_ids = cfg['menu-pinconfig']['table-pins']
+except:
+    pass
 
 def extract_dir(pincfg):
     dirs = {
-        'in':   'in',
-        'out':  'out',
-        'hw':   'hw'
+        'input':   'in',
+        'output':  'out',
+        'af':      'hw'
     }
 
-    if 'dir' in pincfg:
-        return dirs[pincfg['dir']]
+    if 'config-direction' in pincfg:
+        return dirs[pincfg['config-direction']]
     else:
-        return dirs['out']
+        return dirs['output']
 
 
 def extract_pintype(pingcfg):
     pintypes = {
-        'std':          'push_pull',
+        'standard':     'push_pull',
         'pull':         'pull',
         'push':         'push',
-        'od':           'open_drain',
+        'open drain':   'open_drain',
         'analog':       'analog',
-        'wake_high':    'wake_high',
-        'wake_low':     'wake_low'
+        'wake high':    'wake_high',
+        'wake low':     'wake_low'
     }
 
-    if 'pin_type' in pincfg:
-        return pintypes[pincfg['pin_type']]
+    if 'config-type' in pincfg:
+        return pintypes[pincfg['config-type']]
     else:
-        return pintypes['std']
+        return pintypes['standard']
 
 def extract_strength(pincfg):
     strengths = {
@@ -62,23 +65,14 @@ def extract_strength(pincfg):
         '12mA':         'i12ma'
     }
 
-    if 'strength' in pincfg:
-        return strengths[pincfg['strength']]
+    if 'config-strength' in pincfg:
+        return strengths[pincfg['config-strength']]
     else:
         return strengths['2mA']
 
 def extract_hw(pin, hw):
-    periph_map = {
-        'UART':     'U',
-        'SPI':      'SSI',
-    }
-
-    m = re.search('(\w+)(\d)_(\w+)', hw)
-    periph_id = periph_map[m.group(1)]
-    periph_num = m.group(2)
-    pin_purpose = m.group(3)
-
-    return 'GPIO_' + pin + '_' + periph_id + str(periph_num) + pin_purpose
+    hw = hw.upper()
+    return 'GPIO_' + pin + '_' + hw
 
 ]]]*/
 //[[[end]]]
@@ -99,12 +93,12 @@ extern "C" void gpio_init_generated()
     # Collect all ports required to enable periphery via sysctl.
     # Should be done before any pin is configured to avoid usage fault.
 
+    # Set to preserve an order
     ports = set([])
 
-    for pincfg in pincfgs:
-        for pin in pincfg['ids']:
-            port = pin[1:-1].lower()
-            ports |= set([ port ])
+    for pin_id in pin_ids:
+        port = pin_id[1:-1].lower()
+        ports |= set([ port ])
 
     for port in ports:
         cog.outl('ecl::gpio_hw::enable_periph<ecl::gpio_hw::port::%s>();' % port)
@@ -115,26 +109,32 @@ extern "C" void gpio_init_generated()
     /*[[[cog
     # Configure individual pins.
 
-    for pincfg in pincfgs:
+    for pin_id in pin_ids:
+        pincfg = {}
+
+        # Missing configuration?
+        try:
+            pincfg = cfg['menu-pinconfig']['menu-' + pin_id]
+        except:
+            continue
+
         dir = extract_dir(pincfg)
         pin_type = extract_pintype(pincfg)
         strength = extract_strength(pincfg)
 
         cog.outl('')
 
-        if 'comment' in pincfg:
-            cog.outl('/' + '* ' + pincfg['comment'] + ' *' + '/')
+        if 'config-comment' in pincfg:
+            cog.outl('/' + '* ' + pincfg['config-comment'] + ' *' + '/')
 
-        for pin in pincfg['ids']:
-            port = pin[1:-1].lower()
-            num = int(pin[-1:])
-            cog.outl(pincfg_template % (port, num, dir, pin_type, strength))
+        port = pin_id[1:-1].lower()
+        num = int(pin_id[-1:])
+        cog.outl(pincfg_template % (port, num, dir, pin_type, strength))
 
         # Extract alternate function (if any)
         if dir == 'hw':
-            for pin_key, pin_hw in pincfg['hws'].items():
-                hw = extract_hw(pin_key, pin_hw)
-                cog.outl('GPIOPinConfigure(%s);' % hw)
+            hw = extract_hw(pin_id, pincfg['config-afsel'])
+            cog.outl('GPIOPinConfigure(%s);' % hw)
 
     ]]]*/
     //[[[end]]]

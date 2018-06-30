@@ -1,0 +1,46 @@
+{
+    "table-spi": {
+        "description": "SSI (SPI) table",
+        "key": "config-channel",
+        "items": {
+            "config-channel": {
+                "type": "enum",
+                "description": "Enabled SPI channel",
+                "values": [ "SSI0", "SSI1", "SSI2", "SSI3" ],
+                "config-class": "spi-channel",
+                "single": false
+            },
+            "config-type": {
+                "type": "enum",
+                "description": "SPI/SSI type",
+                "values": [ "master" ],
+                "default": "master"
+            },
+            "config-cpol": {
+                "type": "enum",
+                "description": "CPOL: SPI clock polarity",
+                "default": 0,
+                "values": [ 0, 1 ]
+            },
+            "config-cpha": {
+                "type": "enum",
+                "description": "CPHA: SPI clock phase",
+                "default": 0,
+                "values": [ 0, 1 ]
+            },
+            "config-clk-div": {
+                "type": "integer",
+                "description": "Sysclock divider for SPI",
+                "default": 2
+            },
+            "config-alias": {
+                "type": "string",
+                "description": "SPI/SSI driver alias"
+            },
+            "config-comment": {
+                "type": "string",
+                "description": "SPI/SSI driver comment"
+            }
+        }
+    }
+}

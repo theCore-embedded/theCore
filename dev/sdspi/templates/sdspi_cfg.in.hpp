@@ -34,18 +34,25 @@ using %s = %s;
 '''
 
 cfg = json.load(open(JSON_CFG))
-sdspi_cfg = []
 
-if 'device' in cfg and 'sdspi' in cfg['device']:
-    sdspi_cfg = cfg['device']['sdspi']
+sdspi_ids = []
+sdspi_menu = {}
 
-for sdspi in sdspi_cfg:
-    sdspi_name = dev.resolve_sdspi_driver(cfg, sdspi['spi'], sdspi['cs_gpio'])
-    cs_gpio = common.resolve_gpio_driver(cfg, sdspi['cs_gpio'])
-    spi_drv = common.resolve_spi_driver(cfg, sdspi['spi'])
+try:
+    sdspi_menu = cfg['menu-dev']['menu-sdspi']
+    sdspi_ids = sdspi_menu['table-sdspi-dev']
+except:
+    pass
+
+for sdspi_id in sdspi_ids:
+    sdspi_cfg = sdspi_menu['menu-' + sdspi_id]
+
+    sdspi_name = dev.resolve_sdspi_driver(cfg, sdspi_cfg['config-spi'], sdspi_cfg['config-cs'])
+    cs_gpio = common.resolve_gpio_driver(cfg, sdspi_cfg['config-cs'])
+    spi_drv = common.resolve_spi_driver(cfg, sdspi_cfg['config-spi'])
     cog.outl(bus_typedef % (spi_drv, spi_drv))
     cog.outl(sdspi_typedef % (sdspi_name, spi_drv, cs_gpio))
-    cog.outl(sdspi_alias % (sdspi['id'], sdspi_name))
+    cog.outl(sdspi_alias % (sdspi_id, sdspi_name))
 
 ]]]*/
 //[[[end]]]

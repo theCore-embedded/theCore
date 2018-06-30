@@ -26,9 +26,10 @@ namespace ecl
 /*[[[cog
 import cog
 import json
+from parse import *
 
 cfg = json.load(open(JSON_CFG))
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-stm32']
 
 ]]]*/
 //[[[end]]]
@@ -47,7 +48,7 @@ struct adc_cfg<adc_dev::dev%d>
 {
     static constexpr adc_mgmt_mode mgtm_mode = adc_mgmt_mode::dma;
 
-    using dma = %s;
+    using dma = dma%s_stream%s_channel%s;
 };
 '''
 
@@ -57,30 +58,34 @@ template<>
 struct adc_cfg<adc_dev::dev%d>
 {
     static constexpr adc_mgmt_mode mgtm_mode = adc_mgmt_mode::irq;
-}
+};
 '''
 
-adc_cfgs = {}
+adc_ids = []
 
-if 'adc' in cfg:
-    adc_cfgs = cfg['adc']
+if 'menu-adc' in cfg:
+    adc_ids = cfg['menu-adc']['table-adc']
 
-for adc_cfg in adc_cfgs:
-    if 'comment' in adc_cfg:
-        cog.outl('/' + '* ' + adc_cfg['comment'] + ' *' + '/\n')
+for adc_id in adc_ids:
+    adc_cfg = cfg['menu-adc']['menu-' + adc_id]
+    if 'config-comment' in adc_cfg:
+        cog.outl('/' + '* ' + adc_cfg['config-comment'] + ' *' + '/\n')
 
-    mode = adc_cfg['mode']
-    adc_num = int(adc_cfg['id'][-1])
+    mode = adc_cfg['config-mode']
+    adc_num = int(adc_id[-1])
 
     if mode == 'DMA':
-        cog.msg(str(adc_cfg))
-        cog.outl(template_adc_cfg_dma % (adc_num, adc_cfg['dma_id']))
+        dma_descr = adc_cfg['config-dma-descriptor']
+        r = parse('DMA{dma_module:d} Stream{dma_stream:d} Channel{dma_channel:d}', dma_descr)
+
+        cog.outl(template_adc_cfg_dma % (adc_num,
+            r['dma_module'], r['dma_stream'], r['dma_channel']))
     elif mode == 'IRQ':
         cog.outl(template_adc_cfg_irq % adc_num)
 
-    cog.outl(template_adc_inst % (adc_cfg['id'], adc_num))
-    if 'alias' in adc_cfg:
-        cog.outl('using %s = ADC%d_driver;' % (adc_cfg['alias'], adc_num))
+    cog.outl(template_adc_inst % (adc_id, adc_num))
+    if 'config-alias' in adc_cfg:
+        cog.outl('using %s = ADC%d_driver;' % (adc_cfg['config-alias'], adc_num))
 
 ]]]*/
 //[[[end]]]
@@ -104,27 +109,28 @@ template_adc_chs_exti = '''
 using %s = channel_group_exti_trigger<%s, %s>;
 '''
 
-channels_cfgs = {}
+chan_group_ids = []
 
-if 'adc_channels' in cfg:
-    channels_cfgs = cfg['adc_channels']
+if 'menu-adc-channels' in cfg:
+    chan_group_ids = cfg['menu-adc-channels']['table-adc-channels']
 
-for channels_cfg in channels_cfgs:
-    channels_str = ', '.join([('adc_channel::ch%d' % ch) for ch in channels_cfg['nums']])
-    trigger = channels_cfg['trigger']
+for chan_group_id in chan_group_ids:
+    chan_group_cfg = cfg['menu-adc-channels']['menu-' + chan_group_id]
+    channels_str = ', '.join([('adc_channel::ch%d' % int(ch[-2:])) \
+        for ch in chan_group_cfg['config-channels']])
+    trigger = chan_group_cfg['config-trigger']
 
     # Alias here is mandatory. Imagine what name should be picked for random channel
     # combination? Better to force user to specify a name.
-    alias = channels_cfg['alias']
+    alias = chan_group_id
 
-    if 'comment' in channels_cfg:
-        cog.outl('/' + '* ' + channels_cfg['comment'] + ' *' + '/\n')
+    if 'comment' in chan_group_cfg:
+        cog.outl('/' + '* ' + chan_group_cfg['comment'] + ' *' + '/\n')
 
-    if trigger == 'SW': # Software trigger
+    if trigger == 'software': # Software trigger
         cog.outl(template_adc_chs_sw % (alias, channels_str))
     else:
         cog.error('ADC channel config is not implemented for trigger: ' + trigger)
-
 
 ]]]*/
 //[[[end]]]
@@ -138,4 +144,3 @@ for channels_cfg in channels_cfgs:
 } // namespace ecl
 
 #endif // STM32XX_ADC_CFGS_HPP_
-

@@ -1,0 +1,93 @@
+{
+    "table-adc": {
+        "description": "ADC table",
+        "key": "config-module",
+        "items": {
+            "config-module": {
+                "description": "ADC module",
+                "type": "enum",
+                "values": [ "ADC1", "ADC2", "ADC3" ],
+                "single": false
+            },
+            "config-mode": {
+                "description": "ADC mode",
+                "type": "enum",
+                "default": "IRQ",
+                "values": [ "IRQ", "DMA" ]
+            },
+            "config-alias": {
+                "description": "C++ alias",
+                "type": "string"
+            },
+            "config-comment": {
+                "description": "C++ comment",
+                "type": "string"
+            }
+        },
+        "items-ADC1": {
+            "config-dma-module": {
+                "description": "DMA module of ADC1",
+                "long-description": [
+                    "For ADC modules, no other DMA is allowed",
+                    "except DMA2"
+                ],
+                "type": "enum",
+                "default": "DMA2",
+                "values": [ "DMA2" ],
+                "depends_on": "config-mode == 'DMA'"
+            },
+            "config-dma-stream": {
+                "description": "DMA stream of ADC1",
+                "type": "enum",
+                "default": "Stream0",
+                "values": [ "Stream0", "Stream4" ],
+                "depends_on": "config-mode == 'DMA'"
+            },
+            "config-dma-channel": {
+                "description": "DMA channel of ADC1",
+                "long-description": [
+                    "For ADC1, no other DMA channel is allowed",
+                    "except channel 0"
+                ],
+                "type": "enum",
+                "default": "Channel0",
+                "values": [ "Channel0" ],
+                "depends_on": "config-mode == 'DMA'"
+            }
+        },
+        "items-ADC2": {
+            "config-dma-descriptor": {
+                "description": "DMA config of ADC2",
+                "long-description": [
+                    "For ADC modules, no other DMA is allowed",
+                    "except DMA2. For ADC2, no other DMA channel is allowed",
+                    "except channel 1."
+                ],
+                "type": "enum",
+                "default": "DMA2 Stream2 Channel1",
+                "values": [
+                    "DMA2 Stream2 Channel1",
+                    "DMA2 Stream3 Channel1"
+                ],
+                "depends_on": "config-mode == 'DMA'"
+            }
+        },
+        "items-ADC3": {
+            "config-dma-module": {
+                "description": "DMA module of ADC3",
+                "long-description": [
+                    "For ADC modules, no other DMA is allowed",
+                    "except DMA2. For ADC1, no other DMA channel is allowed",
+                    "except channel 2"
+                ],
+                "type": "enum",
+                "default": "DMA2 Stream0 Channel2",
+                "values": [
+                    "DMA2 Stream0 Channel2",
+                    "DMA2 Stream1 Channel2"
+                ],
+                "depends_on": "config-mode == 'DMA'"
+            }
+        }
+    }
+}

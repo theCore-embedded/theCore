@@ -1,0 +1,107 @@
+{
+    "menu-stm32": {
+        "description": "STM32 menu",
+        "long-description": [
+            "The STM32 is a family of 32-bit MCUs based on various",
+            "ARM Cortex-M MCUs"
+        ],
+
+        "config-device": {
+            "description": "STM32 MCU model",
+            "long-description": [
+                "Only STM32F407VG is supported for now"
+            ],
+            "default": "STM32F407VG",
+            "type": "enum",
+            "values": [ "STM32F407VG" ]
+        },
+
+        "config-console": {
+            "description": "UART console",
+            "long-description": [
+                "Configure UART in the UART configuration menu,",
+                "before it can be displayed and selected here."
+            ],
+            "type": "enum",
+            "values-from": "uart-channel"
+        },
+
+        "menu-clock": {
+            "description": "Clock",
+            "long-description": [
+                "Select system clock source and system clock speed",
+                "under this menu"
+            ],
+            "include-clock": {
+                "ref": "./schemas/clock.json"
+            }
+        },
+
+        "menu-timer" : {
+            "description": "Systimer",
+            "include-timer": {
+                "ref": "./schemas/timer.json"
+            }
+        },
+
+        "menu-uart": {
+            "description": "U(S)ART",
+            "long-description": [
+                "Select and configure desired UART periphery"
+            ],
+            "include-uart": {
+                "ref": "./schemas/uart.json"
+            }
+        },
+
+        "menu-adc-channels": {
+            "description": "ADC channels",
+            "long-description": [
+                "Analog-Digital Converter channel configuration"
+            ],
+            "include-adc": {
+                "ref": "./schemas/adc_channels.json"
+            }
+        },
+
+        "menu-adc": {
+            "description": "ADC",
+            "long-description": [
+                "Analog-Digital Converter module configuration"
+            ],
+            "include-adc": {
+                "ref": "./schemas/adc.json"
+            }
+        },
+
+        "menu-i2c": {
+            "description": "I2C",
+            "long-description": [
+                "I2C bus configuration"
+            ],
+            "include-adc": {
+                "ref": "./schemas/i2c.json"
+            }
+        },
+
+        "menu-spi-i2s": {
+            "description": "SPI and I2S",
+            "long-description": [
+                "SPI and I2S bus configuration"
+            ],
+            "include-adc": {
+                "ref": "./schemas/spi_i2s.json"
+            }
+        },
+
+        "menu-pins": {
+            "description": "Pins and GPIO",
+            "long-description": [
+                "Pin multiplexing, GPIO configuration, alternative functions"
+            ],
+            "include-adc": {
+                "ref": "./schemas/pinconfig.json"
+            }
+        }
+    }
+}

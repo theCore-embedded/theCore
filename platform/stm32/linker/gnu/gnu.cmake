@@ -4,7 +4,7 @@
 
 # Linker flags.
 
-set(STM32_DEVICE "${thecore_cfg.platform.device}")
+set(STM32_DEVICE "${thecore_cfg.menu-platform.menu-stm32.config-device}")
 
 if(STM32_DEVICE MATCHES "STM32F4")
     set(FAMILY_CORE "-mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16")

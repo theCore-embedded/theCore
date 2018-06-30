@@ -20,6 +20,16 @@ namespace ecl
 namespace sensor
 {
 
+//! \addtogroup dev External device drivers
+//! @{
+
+//! \defgroup sensors Sensors modules
+//! @{
+
+//! \defgroup htu21d HTU21D humidity and temperature sensor
+//! @{
+
+
 //! \brief Defines resolution modes for HTU21D sensor.
 //! \details Possible modes are (RM here - relative humidity):
 //!  rm12_t14 - 12 bits for RM, 14 bits for temperature
@@ -438,6 +448,12 @@ err htu21d<i2c_dev>::disable_heater()
 
     return rc;
 }
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace sensor
 

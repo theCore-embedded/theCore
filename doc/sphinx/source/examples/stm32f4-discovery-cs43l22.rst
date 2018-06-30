@@ -91,14 +91,6 @@ Firmware will be flashed via ``openocd`` debugger and ``flash`` command.
 
      tcore flash --sudo --debugger-config stlink-v2.1
 
-   See :ref:`theCore_SudoOpenOCD_Nix` section to get insight why ``which openocd``
-   is important.
-
-   .. note::
-
-     Optionally, complete the :ref:`theCore_OpenOCD_NoRoot` guide, to be able
-     run OpenOCD without superuser permissions.
-
 #. Attach headphones to the audio jack on Discovery board.
 
 #. Wear your headphones and enjoy.

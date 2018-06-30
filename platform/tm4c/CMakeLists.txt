@@ -15,15 +15,6 @@ target_link_libraries(tm4c PUBLIC
 
 target_include_directories(tm4c PUBLIC export)
 
-# Validate incoming JSON
-theCore_create_json_validator_runner(
-    NAME tm4c_validate
-    JSON ${THECORE_TARGET_CONFIG_FILE}
-    SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/tm4c.schema.json
-    SUBOBJECT "platform"
-    WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
-)
-
 #-------------------------------------------------------------------------------
 
 # Convenient function to generate tm4c platform files.
@@ -72,7 +63,7 @@ generate_source(irq.in.cpp irq.cpp)
 # Enable console driver.
 
 msg_trace("TM4C: Checking console configuration")
-if(DEFINED thecore_cfg.platform.console)
+if(DEFINED thecore_cfg.menu-platform.menu-tm4c.config-console)
     msg_info("Console driver will be used")
     # Bypass console must be enabled automatically.
     set(THECORE_CONFIG_USE_CONSOLE 1 CACHE FORCE "Console enable flag")
@@ -90,6 +81,6 @@ endif()
 
 # Tie all generated code together.
 
-add_custom_target(platform_generated DEPENDS tm4c_validate ${GENERATED_FILES})
+add_custom_target(platform_generated DEPENDS ${GENERATED_FILES})
 add_dependencies(tm4c platform_generated)
 target_include_directories(tm4c PUBLIC ${CORE_GEN_DIR}/export/)

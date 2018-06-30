@@ -19,7 +19,7 @@ import json
 
 f = open(JSON_CFG)
 cfg = json.load(f)
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-tm4c']
 
 def_isr  = 'ecl::abort();'
 
@@ -28,33 +28,41 @@ irqs = {
         'ids': {
             'UART0': def_isr,
             'UART1': def_isr,
+            'UART2': def_isr,
+            'UART3': def_isr,
+            'UART4': def_isr,
+            'UART5': def_isr,
+            'UART6': def_isr,
+            'UART7': def_isr,
         },
-        'isr_builder': (lambda id: 'ecl::uart_irq_proxy<ecl::uart_channel::ch%s>::deliver_irq();' % id[-1])
+        'isr_builder': (lambda u_id: 'ecl::uart_irq_proxy<ecl::uart_channel::ch%s>::deliver_irq();' % u_id[-1])
     },
     'spi': {
         'ids': {
-            0: def_isr,
-            1: def_isr,
-            2: def_isr,
-            3: def_isr,
+            'SSI0': def_isr,
+            'SSI1': def_isr,
+            'SSI2': def_isr,
+            'SSI3': def_isr,
         },
-        'isr_builder': (lambda id: 'ecl::spi_irq_proxy<ecl::spi_channel::ch%d>::deliver_irq();' % id)
+        'isr_builder': (lambda s_id: 'ecl::spi_irq_proxy<ecl::spi_channel::ch%s>::deliver_irq();' % s_id[-1])
     },
 }
 
 # Extract exact periphery for which IRQs must be generated
 
-if 'uart' in cfg:
-    for uart in cfg['uart']:
-        id = uart['id']
-        if id in irqs['uart']['ids']:
-            irqs['uart']['ids'][id] = irqs['uart']['isr_builder'](id)
+try:
+    for uart in cfg['menu-uart']['table-uart']:
+        if uart in irqs['uart']['ids']:
+            irqs['uart']['ids'][uart] = irqs['uart']['isr_builder'](uart)
+except:
+    pass
 
-if 'spi' in cfg:
-    for spi in cfg['spi']:
-        id = int(spi['id'][-1])
-        if id in irqs['spi']['ids']:
-            irqs['spi']['ids'][id] = irqs['spi']['isr_builder'](id)
+try:
+    for spi in cfg['menu-spi']['table-spi']:
+        if spi in irqs['spi']['ids']:
+            irqs['spi']['ids'][spi] = irqs['spi']['isr_builder'](spi)
+except:
+    pass
 
 ]]]*/
 //[[[end]]]
@@ -159,7 +167,7 @@ void SSI0_Handler()
 {
     /*[[[cog
 
-    cog.outl(irqs['spi']['ids'][0])
+    cog.outl(irqs['spi']['ids']['SSI0'])
 
     ]]]*/
     //[[[end]]]
@@ -323,7 +331,12 @@ void GPIOF_Handler()
 extern "C"
 void UART2_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART2'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 50 SSI1 */
@@ -332,7 +345,7 @@ void SSI1_Handler()
 {
     /*[[[cog
 
-    cog.outl(irqs['spi']['ids'][1])
+    cog.outl(irqs['spi']['ids']['SSI1'])
 
     ]]]*/
     //[[[end]]]
@@ -449,7 +462,7 @@ void SSI2_Handler()
 {
     /*[[[cog
 
-    cog.outl(irqs['spi']['ids'][2])
+    cog.outl(irqs['spi']['ids']['SSI2'])
 
     ]]]*/
     //[[[end]]]
@@ -461,7 +474,7 @@ void SSI3_Handler()
 {
     /*[[[cog
 
-    cog.outl(irqs['spi']['ids'][3])
+    cog.outl(irqs['spi']['ids']['SSI3'])
 
     ]]]*/
     //[[[end]]]
@@ -471,35 +484,60 @@ void SSI3_Handler()
 extern "C"
 void UART3_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART3'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 76 UART4 */
 extern "C"
 void UART4_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART4'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 77 UART5 */
 extern "C"
 void UART5_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART5'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 78 UART6 */
 extern "C"
 void UART6_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART6'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 79 UART7 */
 extern "C"
 void UART7_Handler()
 {
-    ecl::abort();
+    /*[[[cog
+
+    cog.outl(irqs['uart']['ids']['UART7'])
+
+    ]]]*/
+    //[[[end]]]
 }
 
 /* 84 I2C2 */

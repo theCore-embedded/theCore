@@ -3,6 +3,10 @@
 Texas Instruments Tiva C TM4C123G
 ---------------------------------
 
+.. image:: https://uge-one.com/image/cache/catalog/catalog/0-TM4C123G-500x375.jpg
+   :align: center
+   :width: 700px
+
 Tiva C TM4C123G is a Cortex-M4 based microcontroller from Texas Instruments.
 
 :Module location:
@@ -16,25 +20,7 @@ Tiva C TM4C123G is a Cortex-M4 based microcontroller from Texas Instruments.
     To make sure you are familiar with it, check the :ref:`theCore_Configurator`
     section before going any further.
 
-Minimal configuration JSON file for the TM4C MCU must contain the platform
-object with following fields:
-
-  * ``name`` - platform name (simply ``tm4c``)
-  * ``device`` - desired device ID. Depends on MCU.
-
 .. important:: Currently, only ``TM4C123GH6PM`` device is supported.
-
-For example, the basic configuration can look like that:
-
-.. code-block:: json
-   :linenos:
-
-    {
-        "platform": {
-            "name": "tm4c",
-            "device": "TM4C123GH6PM"
-        }
-    }
 
 To import all generated definitions into the application code, simply add following
 line to your source:
@@ -43,46 +29,17 @@ line to your source:
 
     #include <aux/generated.hpp>
 
-For more JSON configuration examples for TM4C platform, refer to the
-:ref:`theCore_Examples` page.
-
 Available examples
 ~~~~~~~~~~~~~~~~~~
 
-* :ref:`theCore_TM4C_FATFS_SDSPI`
+* :ref:`theCore_FATFS_SDSPI`
 * :ref:`theCore_blinky`
 * :ref:`theCore_hello_world`
 
 Periphery overview
 ~~~~~~~~~~~~~~~~~~
 
-TM4C MCU peripheries can be configured within the same JSON file.
-Layout of the platform configuration object is described by JSON schema,
-placed under ``platform/tm4c/schemas/tm4c.schema.json``:
-
-.. literalinclude:: ../../../../platform/tm4c/schemas/tm4c.schema.json
-    :language: json
-    :linenos:
-
-Each periphery configuration placed under a property with a relevant name.
-The example below illustrates UART periphery being added to JSON config:
-
-.. code-block:: json
-   :linenos:
-
-    {
-        "platform": {
-            "name": "tm4c",
-            "device": "TM4C123GH6PM",
-            "uart": [
-                {
-                    "id": "UART0",
-                    "comment": "UART-over-USB output",
-                    "alias": "my_uart"
-                }
-            ]
-        }
-    }
+TM4C MCU peripheries can be configured through theCore configurator.
 
 Note that to use any of periphery, corresponding pins must be configured too.
 **Do not forget to include pin multiplexing configuration for each desired periphery.**
@@ -93,32 +50,37 @@ System timer
 
 :Driver sources:    ``platform/tm4c/export/aux/execution.hpp``
 
-JSON schema
-+++++++++++
+The system timer is a periphery that can provide fixed frequency ticks for
+whole application. The system timer can be configured from the
+"Systimer configuration" submenu.
 
-.. literalinclude:: ../../../../platform/tm4c/schemas/systmr.schema.json
-    :language: json
-    :linenos:
+Available options
++++++++++++++++++
 
-Example configuration
-+++++++++++++++++++++
+:frequency:
 
-.. code-block:: json
-   :linenos:
+  Timer frequency in Hz.
 
-    {
-        "platform": {
-            "name": "tm4c",
-            "systmr_cfg": {
-                "source": "systick",
-                "freq_hz": 50,
-                "owner": "user"
-            }
-        }
-    }
+:source:
 
-Properties:
-.. note:: This section is under construction
+  Timer source. Only ``systick`` is available for now.
+
+:owner:
+
+  Timer owner. If ``user`` is selected, then theCore will configure the timer,
+  but will not use it inside its internal machinery. In such case, the user can
+  decide when to stop or start the system timer.
+
+  If `thecore` is selected, then the systimer will be both configured and
+  managed by internal modules of theCore. For example, timer can be started
+  or stopped in delay routines inside theCore. Trying to start or stop the timer
+  directly by user will lead to undefined behaviour.
+
+Known limitations
++++++++++++++++++
+
+* Only SysTick can be used as a timer source.
+* No dynamic change in frequency is allowed. This is by design.
 
 Usage
 +++++
@@ -129,53 +91,45 @@ UART
 ~~~~
 
 :Driver sources:    ``platform/tm4c/export/aux/uart.hpp``
-:Template file:     ``platform/tm4c/templates/uart_cfg.in.hpp``
 
-JSON schema
-+++++++++++
+The UART configuration resides in the "UART configuration" submenu.
 
-.. literalinclude:: ../../../../platform/tm4c/schemas/uart.schema.json
-    :language: json
-    :linenos:
+Available options
++++++++++++++++++
 
-Example configuration
-+++++++++++++++++++++
+:channel:
 
-.. literalinclude:: tm4c/uart_example.json
-    :language: json
-    :linenos:
+  UART periphery to use. In TM4C, 7 UARTs are available.
 
-Example output
-++++++++++++++
+:baud:
 
-.. literalinclude:: ../_static/generated/tm4c/uart_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 16-31
+  Baud rate of UART.
 
-`Full TM4C UART example header <../_static/generated/tm4c/uart_example.hpp>`_
+:alias:
+
+  Driver C++ alias that will be created. Alias can be used in the user code
+  to access given UART.
+
+:comment:
+
+  C++ comment string that will be placed next to the driver alias in
+  auto-generated code.
+
+Known limitations
++++++++++++++++++
+
+* Only 115200 baud is supported.
+* Following configuration is hard-coded and cannot be changed (yet):
+
+  * Stop bits: 1
+  * Data length: 8 bits
+  * Parity: none
 
 Console
 +++++++
 
-To enable console in theCore, set ``console`` field to desired UART instance
-and enable that instance, all via JSON:
-
-.. code-block:: json
-    :linenos:
-
-    {
-        "platform": {
-            "name": "tm4c",
-            "console": "UART0",
-            "uart": [
-                {
-                    "id": "UART0",
-                    "comment": "UART-over-USB console output"
-                }
-            ]
-        }
-    }
+To enable console in TM4C platform, change the ``console`` option field to
+desired UART channel. The channel must be first enabled via UART menu.
 
 Check the :ref:`theCore_Console` section for more details about theCore console
 library.
@@ -189,7 +143,34 @@ SSI / SPI
 ~~~~~~~~~
 
 :Driver sources:    ``platform/tm4c/export/aux/spi.hpp``
-:Template file:     ``platform/tm4c/templates/spi.in.hpp``
+
+The SSI stands for Serial Synchronous Interface. In TM4C MCUs it is analogous
+to SPI. The SSI/SPI configuration is placed under the "SSI (SPI) config" submenu.
+
+Available options
++++++++++++++++++
+
+:channel:
+
+  The SPI channel to enable.
+
+:type:
+
+  SPI type. Only ``master`` is supported.
+
+:CPOL:
+
+  SPI clock polarity.
+
+:CPHA:
+
+  SPI clock phase.
+
+:System clock divider for SPI:
+
+  The SPI clock is configured trough divider of the system clock.
+  Say, the system clock is 100000 Hz. Setting divider to 4 will configure
+  SPI clock to value of 25000 Hz.
 
 Known limitations
 +++++++++++++++++
@@ -202,102 +183,55 @@ Known limitations
 * Only Motorola SPI modes are supported, though datasheet lists more than that.
   See `issue #362`_.
 
-JSON schema
-+++++++++++
-
-.. literalinclude:: ../../../../platform/tm4c/schemas/spi.schema.json
-    :language: json
-    :linenos:
-
-Example configuration
-+++++++++++++++++++++
-
-.. literalinclude:: tm4c/spi_example.json
-    :language: json
-    :linenos:
-
-Example output
-++++++++++++++
-
-.. literalinclude:: ../_static/generated/tm4c/spi_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 13-60
-
-`Full TM4C SPI example header <../_static/generated/tm4c/spi_example.hpp>`_
-
 .. _TM4C Multiplexing:
 
 Pin multiplexing
 ~~~~~~~~~~~~~~~~
 
 :Driver sources:    ``platform/tm4c/export/platform/pin_cfg.hpp``
-:Template file:     ``platform/tm4c/templates/pin_mux.in.hpp``
+                    ``platform/tm4c/export/platform/gpio_device.hpp``
 
-JSON schema
-+++++++++++
+Pins can be configured from the "I/O pin configuration" submenu.
 
-.. literalinclude:: ../../../../platform/tm4c/schemas/pinmux.schema.json
-    :language: json
-    :linenos:
+Available options
++++++++++++++++++
 
-Example configuration
-+++++++++++++++++++++
+:channel:
 
-.. literalinclude:: tm4c/pin_mux_example.json
-    :language: json
-    :linenos:
+  Channel is an actual pin that should be configured.
 
-Example output
-++++++++++++++
+:direction:
 
-.. literalinclude:: ../_static/generated/tm4c/pin_mux_example.cpp
-    :language: cpp
-    :linenos:
-    :lines: 13-54
+  Direction of pin - ``output``, ``input`` or ``af``.
+  ``af`` stands for Alternate Function. Selecting AF allows to use the pin
+  for desired periphery. List of supported peripheries is different for each
+  pin. See below.
 
-`Full TM4C GPIO pin multiplexing source file <../_static/generated/tm4c/pin_mux_example.cpp>`_
+:type:
 
-Usage
-+++++
+  Possible pin types are:
 
-.. note:: This section is under construction
+  * ``standard`` - no push/pull resistor.
+  * ``push`` - push to VCC resistor.
+  * ``pull`` - pull to GND resistor.
+  * ``open drain`` - open drain configuration.
+  * ``analog`` - analog input.
+  * ``wake high`` and ``wake low`` - pin configuration for wakeup MCU functionality.
 
-GPIO aliases
-~~~~~~~~~~~~
+:alias:
 
-:Driver sources:    ``platform/tm4c/export/platform/gpio_device.hpp``
-:Template file:     ``platform/tm4c/templates/gpio_cfg.in.hpp``
+  Comma-separated driver C++ aliases that will be created.
+  Each alias can be used in the user code to access given pin.
 
-JSON schema
-+++++++++++
+:comment:
 
-.. literalinclude:: ../../../../platform/tm4c/schemas/gpio_alias.schema.json
-    :language: json
-    :linenos:
-
-Example configuration
-+++++++++++++++++++++
-
-.. literalinclude:: tm4c/gpio_alias_example.json
-    :language: json
-    :linenos:
-
-Example output
-++++++++++++++
-
-.. literalinclude:: ../_static/generated/tm4c/gpio_alias_example.hpp
-    :language: cpp
-    :linenos:
-    :lines: 14-26
-
-`Full TM4C GPIO alias example header <../_static/generated/tm4c/gpio_alias_example.hpp>`_
+  C++ comment string that will be placed next to the driver alias in
+  auto-generated code.
 
 Usage
 +++++
 
 .. note:: This section is under construction
-
 
 External interrupts
 ~~~~~~~~~~~~~~~~~~~

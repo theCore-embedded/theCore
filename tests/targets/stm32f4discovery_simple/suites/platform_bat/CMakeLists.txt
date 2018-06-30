@@ -26,7 +26,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/export)
 # Suite additional configuration
 
 # Explicitly enable systick and use it as system timer.
-set(CONFIG_USE_SYSTMR_SYSTICK 1)
+set(THECORE_CONFIG_USE_SYSTMR_SYSTICK 1)
 
 # Suite tests
 include(${AUTOGEN_DIR}/suite_tests.cmake)

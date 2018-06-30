@@ -16,7 +16,7 @@ import json
 
 f = open(JSON_CFG)
 cfg = json.load(f)
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-tm4c']
 
 ]]]*/
 //[[[end]]]
@@ -24,55 +24,67 @@ cfg = cfg['platform']
 namespace ecl
 {
 
+//! \addtogroup platform Platform defintions and drivers
+//! @{
+
+//! \addtogroup tm4c Texas Instruments Tiva C TM4C123G platform
+//! @{
+
+//! \defgroup tm4c_templates Auto-generated code, Python COG and CMake templates.
+//! @{
+
 // GPIO drivers ----------------------------------------------------------------
 
 /*[[[cog
 
-gpio_aliases = []
-pincfgs = []
-
 # Extracts pin directions
 def extract_dir(pincfg):
     dirs = {
-        'in':   'in',
-        'out':  'out',
-        'hw':   'hw'
+        'input':   'in',
+        'output':  'out',
+        'af':      'hw'    # Alternate Function called Hard Ware in TI terms
     }
 
-    if 'dir' in pincfg:
-        return dirs[pincfg['dir']]
+    if 'config-direction' in pincfg:
+        return dirs[pincfg['config-direction']]
     else:
-        return dirs['out']
+        return dirs['output']
 
-if 'gpio_alias' in cfg:
-    gpio_aliases = cfg['gpio_alias']
+pincfg_ids = []
 
-if 'pinmux' in cfg:
-    pincfgs = cfg['pinmux']
+try:
+    pincfg_ids = cfg['menu-pinconfig']['table-pins']
+except:
+    pass
 
-for pincfg in pincfgs:
+for pin_id in pincfg_ids:
+    pincfg = cfg['menu-pinconfig']['menu-' + pin_id]
     dir = extract_dir(pincfg)
-    # Generate GPIO drivers only for GPIO pins
-    if dir in [ 'out', 'in' ]:
-        for pin in pincfg['ids']:
-            port = pin[1:-1].lower()
-            num = int(pin[-1:])
+    port = pin_id[1:-1].lower()
+    num = int(pin_id[-1:])
 
-            cog.outl('using %s_driver = gpio<gpio_hw::port::%s, gpio_hw::num::pin%d>;'
-                % (pin, port, num))
+    # Generate GPIO drivers for every pin, even in HW mode. Just in case.
+    cog.outl('using %s_driver = gpio<gpio_hw::port::%s, gpio_hw::num::pin%d>;'
+        % (pin_id, port, num))
 
-for gpio_alias in gpio_aliases:
-    if 'comment' in gpio_alias:
-        cog.outl('/' + '* ' + gpio_alias['comment'] + ' *' + '/')
+    if 'config-comment' in pincfg:
+        cog.outl('{}{}{}'.format('/', '* ' + pincfg['config-comment'] + ' *', '/'))
 
-    alias = gpio_alias['alias']
-    port = gpio_alias['id'][1:-1].lower()
-    pin = int(gpio_alias['id'][-1:])
-    cog.outl('using %s = gpio<gpio_hw::port::%s, gpio_hw::num::pin%d>;'
-        % (alias, port, pin))
+    if 'config-gpio-alias' in pincfg:
+        aliases = pincfg['config-gpio-alias'].strip().split(',')
+        for alias in aliases:
+            # Silently ignore empty aliases
+            if alias:
+                cog.outl('using %s = %s_driver;' % (alias, pin_id))
 
 ]]]*/
 //[[[end]]]
+
+//! @}
+
+//! @}
+
+//! @}
 
 } // namespace ecl
 

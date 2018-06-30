@@ -15,24 +15,23 @@ namespace ecl
 /*[[[cog
 import cog
 import json
+from parse import *
 
 cfg = json.load(open(JSON_CFG))
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-stm32']
 
-dma = {}
-if 'dma' in cfg:
-    dma = cfg['dma']
+template_dma = 'using dma%(dma_module)d_stream%(dma_stream)d_channel%(dma_channel)d = ' \
+    'ecl::dma_wrap<ecl::dma_stream::dma%(dma_module)d_%(dma_stream)d, ecl::dma_channel::ch%(dma_channel)d>;'
 
-template_dma = 'using %s = ' \
-    'ecl::dma_wrap<ecl::dma_stream::dma%d_%d, ecl::dma_channel::ch%d>;'
+def generate_dma(root):
+    for k, v in root.items():
+        if k.endswith('-dma-descriptor'):
+            r = parse('DMA{dma_module:d} Stream{dma_stream:d} Channel{dma_channel:d}', v)
+            cog.outl(template_dma % r)
+        elif isinstance(v, dict):
+            generate_dma(v)
 
-for d in dma:
-    # Place comment line if needed
-    if 'comment' in d:
-        # Avoid using begin and end comment section tokens
-        cog.outl(('\n%s* ' + d['comment'] + ' *%s') % ('/', '/'))
-
-    cog.outl(template_dma % (d['alias'], d['num'], d['stream'], d['channel']))
+generate_dma(cfg)
 
 ]]]*/
 //[[[end]]]

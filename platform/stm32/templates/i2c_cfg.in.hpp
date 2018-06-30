@@ -30,23 +30,23 @@ import cog
 import json
 
 cfg = json.load(open(JSON_CFG))
-cfg = cfg['platform']
+cfg = cfg['menu-platform']['menu-stm32']
 
 # Mapping between json-friendly and SPL/theCore definitions
 i2c_cfg_map = {
-    'mode' : {
+    'config-mode' : {
         'IRQ'   : 'i2c_mode::IRQ',
         'POLL'  : 'i2c_mode::POLL'
     },
-    'duty_cycle' : {
+    'config-duty-cycle' : {
         '2/1'   : 'I2C_DutyCycle_2',
         '16/9'  : 'I2C_DutyCycle_16_9'
     },
-    'ack' : {
+    'config-ack' : {
         True    : 'I2C_Ack_Enable',
         False   : 'I2C_Ack_Disable'
     },
-    'ack_addr_bit' : {
+    'config-ack-addr-bit' : {
         7       : 'I2C_AcknowledgedAddress_7bit',
         10      : 'I2C_AcknowledgedAddress_10bit'
     }
@@ -54,27 +54,24 @@ i2c_cfg_map = {
 
 # I2C defaults expressed in JSON-related format
 i2c_defaults = {
-    'mode'          : 'IRQ',
-    'speed'         : 1000,
-    'duty_cycle'    : '2/1',
-    'ack'           : True,
-    'own_addr'      : 51,
-    'ack_addr_bit'  : 7,
+    'config-mode'          : 'IRQ',
+    'config-speed'         : 1000,
+    'config-duty-cycle'    : '2/1',
+    'config-ack'           : True,
+    'config-own-addr'      : 51,
+    'config-ack-addr-bit'  : 7,
 }
 
 # Extracts configuration parameter from config or return default
 def extract_or_default(i2c_cfg, property):
-    cog.msg('Extracting I2C property: ' + str(property))
     if property in i2c_cfg:
         value = i2c_cfg[property]
     elif property in i2c_defaults:
-        cog.msg('Using default value')
         value = i2c_defaults[property]
     else:
         cog.error('No default or defined in config value for i2c property: '
             + str(property))
 
-    cog.msg('Value extracted: ' + str(value))
     if property in i2c_cfg_map:
         if value in i2c_cfg_map[property]:
             return i2c_cfg_map[property][value]
@@ -101,29 +98,28 @@ using %s_driver_cfg = i2c_config<
 template_i2c_drv = 'using %s_driver = i2c_bus<%s_driver_cfg>;'
 template_i2c_alias = 'using %s = %s_driver;'
 
-i2c = {}
-if 'i2c' in cfg:
-    i2c = cfg['i2c']
+i2c_ids = cfg['menu-i2c']['table-i2c'] if 'menu-i2c' in cfg else []
 
-for config in i2c:
-    if 'comment' in config:
-        cog.outl('/' + '* ' + config['comment'] + ' *' + '/')
+for i2c_id in i2c_ids:
+    i2c_cfg = cfg['menu-i2c']['menu-' + i2c_id]
 
-    id              = config['id']
-    bus_num         = int(id[-1])
-    mode            = extract_or_default(config, 'mode')
-    speed           = extract_or_default(config, 'speed')
-    duty_cycle      = extract_or_default(config, 'duty_cycle')
-    ack             = extract_or_default(config, 'ack')
-    own_addr        = extract_or_default(config, 'own_addr')
-    ack_addr_bit    = extract_or_default(config, 'ack_addr_bit')
+    if 'config-comment' in i2c_cfg:
+        cog.outl('/' + '* ' + i2c_cfg['config-comment'] + ' *' + '/')
 
-    cog.outl(template_i2c_cfg % (id, bus_num, mode, speed,
-        duty_cycle, own_addr, ack, ack_addr_bit))
+    bus_num         = int(i2c_id[-1])
+    mode            = extract_or_default(i2c_cfg, 'config-mode')
+    speed           = extract_or_default(i2c_cfg, 'config-speed')
+    duty_cycle      = extract_or_default(i2c_cfg, 'config-duty-cycle')
+    ack             = extract_or_default(i2c_cfg, 'config-ack')
+    own_addr        = extract_or_default(i2c_cfg, 'config-own-addr')
+    ack_addr_bit    = extract_or_default(i2c_cfg, 'config-ack-addr-bit')
 
-    cog.outl(template_i2c_drv % (id, id))
-    if 'alias' in config:
-        cog.outl(template_i2c_alias % (config['alias'], id))
+    cog.outl(template_i2c_cfg % (i2c_id, bus_num, mode, int(speed),
+        duty_cycle, int(own_addr), ack, ack_addr_bit))
+
+    cog.outl(template_i2c_drv % (i2c_id, i2c_id))
+    if 'alias' in i2c_cfg:
+        cog.outl(template_i2c_alias % (i2c_cfg['alias'], i2c_id))
 
 ]]]*/
 //[[[end]]]

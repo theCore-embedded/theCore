@@ -4,17 +4,33 @@
 
 # New-to-old API bridges
 
-set(CONFIG_PLATFORM_DEVICE  "${thecore_cfg.platform.device}"
-    CACHE STRING "stm32 device id" FORCE
+set(CONFIG_PLATFORM_DEVICE  "${thecore_cfg.menu-platform.menu-stm32.config-device}"
+    CACHE STRING "STM32 device ID" FORCE
 )
 
-# TODO: what if clock is not HSE?
-set(CONFIG_PLATFORM_HSE_VAL "${thecore_cfg.platform.clock.speed}"
-    CACHE STRING "HSE speed" FORCE
-)
+# TODO: implement more clock configurations
+
+set(CLOCK_SOURCE "${thecore_cfg.menu-platform.menu-stm32.menu-clock.config-source}")
+set(CLOCK_SPEED "${thecore_cfg.menu-platform.menu-stm32.menu-clock.config-speed}")
+
+if(NOT CLOCK_SOURCE STREQUAL "HSE")
+    msg_fatal("Clock source is not supported: ${CLOCK_SOURCE}")
+endif()
+
+if(NOT CLOCK_SPEED)
+    msg_fatal("Clock speed is not defined. Check STM32 Menu -> Clock")
+endif()
+
+set(CONFIG_PLATFORM_HSE_VAL "${CLOCK_SPEED}" CACHE STRING "HSE speed" FORCE)
+
+# Set the timer configuration
+set(THECORE_CONFIG_USE_SYSTMR_SYSTICK 1 CACHE STRING "System enable flag" FORCE)
+set(THECORE_CONFIG_SYSTMR_FREQ
+    "${thecore_cfg.menu-platform.menu-stm32.menu-timer.config-freq}"
+    CACHE STRING "Timer frequency" FORCE)
 
 # Check if console must be enabled.
-if(thecore_cfg.platform.console)
+if(thecore_cfg.menu-platform.menu-stm32.config-console)
     set(THECORE_CONFIG_USE_CONSOLE 1 CACHE STRING "stm32 console" FORCE)
 endif()
 
@@ -22,15 +38,6 @@ endif()
 file(MAKE_DIRECTORY ${CORE_GEN_DIR}/export/aux)
 
 add_library(stm32 platform.cpp exti_manager.cpp console.cpp ${CORE_GEN_DIR}/pin_mux.cpp)
-
-# Validate incoming JSON
-theCore_create_json_validator_runner(
-    NAME stm32_validate
-    JSON ${THECORE_TARGET_CONFIG_FILE}
-    SCHEMA ${CMAKE_CURRENT_LIST_DIR}/schemas/stm32.schema.json
-    SUBOBJECT "platform"
-    WORKDIR ${CMAKE_CURRENT_LIST_DIR}/schemas
-)
 
 target_include_directories(stm32 PUBLIC export)
 
@@ -101,6 +108,6 @@ generate_source(pin_mux.in.cpp pin_mux.cpp)
 
 # Tie all generated code together.
 
-add_custom_target(platform_generated DEPENDS stm32_validate ${GENERATED_FILES})
+add_custom_target(platform_generated DEPENDS ${GENERATED_FILES})
 add_dependencies(stm32 platform_generated)
 target_include_directories(stm32 PUBLIC ${CORE_GEN_DIR}/export/)

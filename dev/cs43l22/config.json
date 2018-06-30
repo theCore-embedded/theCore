@@ -1,0 +1,30 @@
+{
+    "menu-cs43l22": {
+        "description": "CS43L22 configuration",
+        "table-cs43l22-dev": {
+            "description": "CS32L22 drivers table",
+            "key": "config-alias",
+            "items": {
+                "config-alias": {
+                    "description": "CS43L22 drivers",
+                    "type": "array"
+                },
+                "config-i2s": {
+                    "description": "I2S channel",
+                    "type": "enum",
+                    "values-from": "i2s-channel"
+                },
+                "config-i2c": {
+                    "description": "I2C channel",
+                    "type": "enum",
+                    "values-from": "i2c-channel"
+                },
+                "config-rst": {
+                    "description": "RST GPIO",
+                    "type": "enum",
+                    "values-from": "pin-channel"
+                }
+            }
+        }
+    }
+}
