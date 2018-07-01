@@ -61,13 +61,13 @@ if(NOT DEFINED THECORE_TARGET_CONFIG_FILE AND NOT CMAKE_CROSSCOMPILING)
         CACHE PATH "Test JSON file")
 endif()
 
-if(NOT EXISTS ${THECORE_TARGET_CONFIG_FILE})
+if(NOT EXISTS "${THECORE_TARGET_CONFIG_FILE}")
     msg_warn("Invalid JSON config file: ${THECORE_TARGET_CONFIG_FILE}")
 else()
-    file(READ ${THECORE_TARGET_CONFIG_FILE} THECORE_JSON_BODY)
+    file(READ "${THECORE_TARGET_CONFIG_FILE}" THECORE_JSON_BODY)
     # Lower case for better readability.
     sbeParseJson(thecore_cfg THECORE_JSON_BODY)
-    string(TOLOWER ${thecore_cfg.menu-platform.config-name} CONFIG_PLATFORM)
+    string(TOLOWER "${thecore_cfg.menu-platform.config-name}" CONFIG_PLATFORM)
 endif()
 
 msg_trace("Checking [CONFIG_PLATFORM]: ${CONFIG_PLATFORM}")

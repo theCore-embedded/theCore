@@ -22,7 +22,12 @@ before_install:
   - sudo apt-get install python3 python3-pip
   - sudo pip3 install tcore
   - tcore bootstrap -n
-  - mkdir ~/.theCore && ln -s "$(pwd)" ~/.theCore/theCore
+  # Trick tcore scripts into thinking that theCore is already installed
+  - |
+    mkdir ~/.theCore
+    ln -s "$(pwd)" ~/.theCore/theCore
+    touch ~/.theCore/installfile.json
+    ls -l ~/.theCore/theCore
   - |
     if [ "$TRAVIS_BRANCH" == "develop" -a "$TRAVIS_EVENT_TYPE" == "cron" ]; then
       nix-env --delete-generations old
@@ -33,10 +38,13 @@ before_install:
 install:
   - . ~/.nix-profile/etc/profile.d/nix.sh
   - nix-shell -Q --arg docs true --run true
+  # Essentially the same as previous line. This will make sure that everything works fine
   - tcore runenv -a "docs true" -- echo "Dependencies installed"
 
 script:
   - tcore runenv -a "docs true" -- ./scripts/ci_test.sh
+  # tore script will be executed *inside* ci_examples.sh
+  - ./scripts/ci_examples.sh
 
 after_success:
   - tcore runenv -a "docs true" -- ./scripts/doc_deploy.sh
